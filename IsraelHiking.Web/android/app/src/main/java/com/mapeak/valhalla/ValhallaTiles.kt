@@ -2,6 +2,7 @@ package com.mapeak.valhalla
 
 import android.content.Context
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -61,9 +62,12 @@ class ValhallaTiles(private val context: Context) {
         ?: emptyList()
 
     /**
-     * Extracts the given tar, which is expected to be in the app's files directory, into the tiles
-     * directory, and records the tiles it holds under [tileKey]. The tar is deleted afterwards - it
-     * is large and is of no use once extracted.
+     * Extracts the given archive, a gzipped tar which is expected to be in the app's files directory,
+     * into the tiles directory, and records the tiles it holds under [tileKey]. The archive is deleted
+     * afterwards - it is large and is of no use once extracted.
+     * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
+     * within a directory names that directory itself first, which is the one entry that is allowed to be
+     * the tiles directory rather than something under it.
      */
     fun extract(tarFileName: String, tileKey: String): ExtractResult {
         val tar = File(context.filesDir, tarFileName)
@@ -76,12 +80,12 @@ class ValhallaTiles(private val context: Context) {
         val extractedPaths = mutableListOf<String>()
 
         try {
-            TarArchiveInputStream(BufferedInputStream(FileInputStream(tar))).use { tarIn ->
+            TarArchiveInputStream(GzipCompressorInputStream(BufferedInputStream(FileInputStream(tar)))).use { tarIn ->
                 var entry = tarIn.nextEntry
                 while (entry != null) {
                     val outFile = File(tilesDir, entry.name)
-                    // Do not let an entry name escape the tiles directory
-                    if (!outFile.canonicalPath.startsWith(tilesDirPath + File.separator)) {
+                    val outPath = outFile.canonicalPath
+                    if (outPath != tilesDirPath && !outPath.startsWith(tilesDirPath + File.separator)) {
                         throw IOException("Tar entry is outside of the tiles directory: ${entry.name}")
                     }
                     if (entry.isDirectory) {

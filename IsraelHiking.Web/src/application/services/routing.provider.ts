@@ -37,10 +37,9 @@ export class RoutingProvider {
     private static readonly SLICE_TILE_ZOOM = 7;
 
     private static readonly ROUTING_TILES_PREFIX = "valhalla";
-    private static readonly ROUTING_TILES_EXTENSION = ".tar";
+    private static readonly ROUTING_TILES_EXTENSION = ".tgz";
 
-    /** The files the offline routing engine is set up with, as the server names them */
-    private static readonly CONFIGURATION_FILE_NAME = "valhalla-config.json";
+    /** The file the offline routing engine is set up with, as the server names it */
     private static readonly PROFILES_FILE_NAME = "valhalla-profiles.json";
 
     private readonly httpClient = inject(HttpClient);
@@ -77,7 +76,7 @@ export class RoutingProvider {
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
                 this.toastService.warning(this.getRoutingFailedMessage(hasTiles));
-                const lngLat = [latlngStart, latlngEnd];
+                const lngLat = [{ ...latlngStart }, { ...latlngEnd }];
                 this.elevationProvider.updateHeights(lngLat);
                 return lngLat;
             }
@@ -127,24 +126,20 @@ export class RoutingProvider {
     }
 
     /**
-     * Whether the given offline file is one the offline routing engine is set up with, rather than
-     * one the app itself reads.
+     * Whether the given offline file is the one the offline routing engine is set up with, rather
+     * than one the app itself reads.
      */
-    public static isRoutingSetupFile(fileName: string): boolean {
-        return fileName === RoutingProvider.CONFIGURATION_FILE_NAME || fileName === RoutingProvider.PROFILES_FILE_NAME;
+    public static isRoutingProfilesFile(fileName: string): boolean {
+        return fileName === RoutingProvider.PROFILES_FILE_NAME;
     }
 
     /**
-     * Hands a downloaded setup file to the routing plugin, which keeps it from now on - where it is
-     * kept is the plugin's to decide, the app only knows which file it is.
+     * Hands the downloaded profiles to the routing plugin, which keeps them from now on - where they
+     * are kept is the plugin's to decide, the app only knows which file it is.
      */
-    public async storeRoutingSetupFile(fileName: string, content: string): Promise<void> {
-        if (fileName === RoutingProvider.CONFIGURATION_FILE_NAME) {
-            await Valhalla.storeConfiguration({ configuration: content });
-        } else {
-            await Valhalla.storeProfiles({ profiles: content });
-        }
-        this.loggingService.info(`[Routing] Handed ${fileName} to the offline routing engine`);
+    public async storeRoutingProfiles(content: string): Promise<void> {
+        await Valhalla.storeProfiles({ profiles: content });
+        this.loggingService.info(`[Routing] Handed ${RoutingProvider.PROFILES_FILE_NAME} to the offline routing engine`);
     }
 
     /**

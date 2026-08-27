@@ -30,7 +30,8 @@ export class CoordinatesComponent implements OnInit {
         if (coordinates.east > 100_000 && coordinates.north > 100_000 && coordinates.east < 300_000 && coordinates.north < 800_000) {
             this.itmCoordinates.set(coordinates);
         }
-        await this.elevationProvider.updateHeights([this.latlng()]);
-        this.alt.set(this.latlng().alt);
+        const latlng = { ...this.latlng() };
+        await this.elevationProvider.updateHeights([latlng]);
+        this.alt.set(latlng.alt);
     }
 }

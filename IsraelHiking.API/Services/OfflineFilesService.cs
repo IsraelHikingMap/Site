@@ -67,19 +67,15 @@ public class OfflineFilesService : IOfflineFilesService
     private const string DEM_ALIAS_FILE_NAME = "raster-dem";
 
     /// <summary>
-    /// The offline routing (valhalla) tiles of a slice, a tar file that is sliced on the fly like the other
-    /// non-DEM files. It is not a part of the style, and it is only listed for clients that ask for it since
+    /// The offline routing (valhalla) tiles of a slice, a gzipped tar that is sliced on the fly like the
+    /// other non-DEM files - the client unpacks it, so it is served compressed rather than as a plain tar. It is not a part of the style, and it is only listed for clients that ask for it since
     /// older clients do not know how to handle it.
+    /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
     private const string VALHALLA_FILE_NAME = "valhalla";
 
     /// <inheritdoc cref="VALHALLA_FILE_NAME"/>
-    private const string VALHALLA_FILE_EXTENSION = ".tar";
-
-    /// <summary>
-    /// The setup configuration the client initializes its offline routing (valhalla) engine with.
-    /// </summary>
-    private const string VALHALLA_CONFIGURATION_FILE_NAME = "valhalla-config.json";
+    private const string VALHALLA_FILE_EXTENSION = ".tgz";
 
     /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes
@@ -93,13 +89,13 @@ public class OfflineFilesService : IOfflineFilesService
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
 
     /// <summary>
-    /// The files that are needed for offline usage but are not sliced per tile - the two files the offline
+    /// The files that are needed for offline usage but are not sliced per tile - the profiles the offline
     /// routing engine needs. They are only relevant to the root, and like the routing tiles they are only
     /// listed for clients that ask for them, since older clients do not know how to handle them.
     /// </summary>
     private static readonly string[] ROOT_ONLY_FILE_NAMES =
     [
-        VALHALLA_CONFIGURATION_FILE_NAME, VALHALLA_PROFILES_FILE_NAME
+        VALHALLA_PROFILES_FILE_NAME
     ];
 
     private readonly IFileProvider _fileProvider;
@@ -138,11 +134,17 @@ public class OfflineFilesService : IOfflineFilesService
     /// <remarks>
     /// The on-the-fly files are generated on demand, so they are always reported with today's date,
     /// while the DEM file has a fixed date and only exists at the tile level.
+    /// The routing tiles are by far the largest and the slowest file of a tile, which is why they are
+    /// listed before everything else.
     /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile)
     {
         var filesDictionary = new Dictionary<string, DateTime>();
         var today = DateTime.UtcNow.Date;
+        if (routingTile && tileX.HasValue && tileY.HasValue)
+        {
+            AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
+        }
         foreach (var name in await GetSourceNames())
         {
             if (!IsDem(name))
@@ -155,10 +157,6 @@ public class OfflineFilesService : IOfflineFilesService
             {
                 AddIfUpdated(filesDictionary, SourceNameToFileName(name, tileX, tileY), DEM_MODIFIED_DATE, lastModifiedDate);
             }
-        }
-        if (routingTile && tileX.HasValue && tileY.HasValue)
-        {
-            AddIfUpdated(filesDictionary, SourceNameToFileName(VALHALLA_FILE_NAME, tileX, tileY, VALHALLA_FILE_EXTENSION), today, lastModifiedDate);
         }
         if (routingTile && !tileX.HasValue && !tileY.HasValue)
         {
@@ -173,16 +171,12 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
-    /// The valhalla configuration files are read from this server's own files, the routing tiles are served
-    /// by their own service, and everything else by the on-the-fly one.
+    /// The valhalla profiles are read from this server's own files, the routing tiles are served by their
+    /// own service, and everything else by the on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
         // The files that are not per tile are named by themselves and not by a source, so they are matched first.
-        if (fileName == VALHALLA_CONFIGURATION_FILE_NAME)
-        {
-            return OpenLocalFile(_options.ValhallaConfigurationFilePath);
-        }
         if (fileName == VALHALLA_PROFILES_FILE_NAME)
         {
             return OpenLocalFile(_options.ValhallaProfilesFilePath);

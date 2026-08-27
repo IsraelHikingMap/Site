@@ -12,7 +12,7 @@ import type { LatLngAltTime } from "../models";
 export class ElevationProvider {
 
     static readonly MAX_ELEVATION_ZOOM = 11;
-    static readonly ELEVATION_SCHEMA = "jaxa_terrarium0-11_v2";
+    static readonly ELEVATION_SCHEMA = "raster-dem";
 
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";

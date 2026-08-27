@@ -52,6 +52,22 @@ export type HTMLElementInputChangeEvent = {
     preventDefault(): void;
 };
 
+/**
+ * The bytes a download gathered and did not write to its file yet, see DOWNLOAD_WRITE_BUFFER_SIZE.
+ * Whether anything was written already tells the write that creates the file from the ones that add to it.
+ */
+type PendingChunks = {
+    chunks: Uint8Array[];
+    length: number;
+    wroteAnything: boolean;
+};
+
+/**
+ * Reports how much of a file was downloaded, from 0 to 1. A file whose length the server did not report
+ * has nothing to report until it is whole, since there is nothing to measure what it got against.
+ */
+export type FileDownloadProgressCallback = (progress: number) => void;
+
 /** A file in the app's data directory, the time it was last written to and its size in bytes */
 export type DataDirectoryFile = {
     fileName: string;
@@ -73,6 +89,15 @@ export class FileService {
      * downloadFileToCacheAuthenticated.
      */
     private static partialFileCounter = 0;
+
+    /**
+     * How many bytes a download gathers before it writes them to the file. Every write crosses the bridge
+     * as base64 text, which costs far more than the write itself, so the chunks the network hands over -
+     * tens of kilobytes each - are gathered into one write instead of being written one by one.
+     * Most of what a larger buffer saves is saved by the first megabyte, while the memory it takes is paid
+     * by every download that is going on at the same time, along with the base64 text of its own buffer.
+     */
+    private static readonly DOWNLOAD_WRITE_BUFFER_SIZE = 2 * 1024 * 1024;
 
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
@@ -347,8 +372,13 @@ export class FileService {
      * in the cache, and so that a download that is still unwinding after it was aborted can not write over
      * the file of the download that took its place - they never share a path.
      * A file that was not downloaded to its end, because the download was aborted or failed, is deleted.
+     * The bytes are gathered into large writes rather than written as they arrive, see
+     * DOWNLOAD_WRITE_BUFFER_SIZE.
+     * A download that failed is logged with the file it died on and how far it got, neither of which is in
+     * the error itself - without them a log only says that the download of the tile failed, and every file
+     * of it is a suspect.
      */
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void, abortController: AbortController): Promise<void> {
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         await this.ensureOfflineCacheDirectory();
         const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
@@ -367,6 +397,7 @@ export class FileService {
         const reader = response.body.getReader();
         const contentLength = Number(response.headers.get("Content-Length"));
         let receivedLength = 0;
+        const pending: PendingChunks = { chunks: [], length: 0, wroteAnything: false };
         let done: boolean;
         try {
             do {
@@ -382,20 +413,12 @@ export class FileService {
                     return;
                 }
 
-                if (receivedLength === 0) {
-                    await Filesystem.writeFile({
-                        path,
-                        directory: Directory.Cache,
-                        data: encode(value.buffer)
-                    });
-                } else {
-                    await Filesystem.appendFile({
-                        path,
-                        directory: Directory.Cache,
-                        data: encode(value.buffer)
-                    });
-                }
+                pending.chunks.push(value);
+                pending.length += value.length;
                 receivedLength += value.length;
+                if (pending.length >= FileService.DOWNLOAD_WRITE_BUFFER_SIZE) {
+                    await this.writePendingChunks(path, pending);
+                }
                 if (contentLength > 0) {
                     const currentPercentage = receivedLength / contentLength;
                     if (currentPercentage - previousPercentage > 0.001) {
@@ -404,16 +427,64 @@ export class FileService {
                     }
                 }
             } while (!done);
+            await this.writePendingChunks(path, pending);
         } catch (ex) {
+            this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
+                `${(receivedLength / 1024 / 1024).toFixed(1)} of ${(contentLength / 1024 / 1024).toFixed(1)} MB: ` +
+                `${(ex as Error).message}`);
             await this.deleteFileInOfflineCache(partialFileName);
             throw ex;
         }
+        progressCallback(1);
         await Filesystem.rename({
             from: path,
             to: FileService.offlineCachePath(fileName),
             directory: Directory.Cache
         });
-        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
+        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}, ` +
+            `${(receivedLength / 1024 / 1024).toFixed(1)} MB`);
+    }
+
+    /**
+     * Writes the bytes a download gathered so far into its file and empties them, so that the ones that
+     * come next are gathered on their own. The first write creates the file and the rest add to it, which
+     * also means that a file that holds no bytes at all is still created.
+     */
+    private async writePendingChunks(path: string, pending: PendingChunks): Promise<void> {
+        if (pending.length === 0 && pending.wroteAnything) {
+            return;
+        }
+        const data = encode(FileService.concatenateChunks(pending.chunks, pending.length));
+        pending.chunks = [];
+        pending.length = 0;
+        if (pending.wroteAnything) {
+            await Filesystem.appendFile({
+                path,
+                directory: Directory.Cache,
+                data
+            });
+            return;
+        }
+        await Filesystem.writeFile({
+            path,
+            directory: Directory.Cache,
+            data
+        });
+        pending.wroteAnything = true;
+    }
+
+    /**
+     * Gathers the chunks the network handed over into one buffer of exactly their bytes, since a chunk
+     * might be a view into a larger buffer, which holds bytes that are not a part of it.
+     */
+    private static concatenateChunks(chunks: Uint8Array[], totalLength: number): ArrayBuffer {
+        const buffer = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+            buffer.set(chunk, offset);
+            offset += chunk.length;
+        }
+        return buffer.buffer;
     }
 
     public async readFileInDataDirectory(fileName: string): Promise<string> {

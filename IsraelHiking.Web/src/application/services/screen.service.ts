@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+import { computed, effect, inject, Injector, Service } from "@angular/core";
 import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
@@ -8,6 +8,7 @@ import { Store } from "@ngxs/store";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { IdleService } from "./idle.service";
+import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState } from "../models";
 
@@ -19,6 +20,17 @@ export class ScreenService {
     private readonly store = inject(Store);
     private readonly userIdleService = inject(IdleService);
     private readonly logger = inject(LoggingService);
+    private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
+    private readonly injector = inject(Injector);
+
+    /**
+     * Whether offline files are being downloaded right now. The download only goes on while the app is
+     * awake, so a screen that goes off in the middle of one stops it, which is why it holds the screen on
+     * for as long as it takes no matter what the battery optimization is set to.
+     * It is a boolean of its own rather than the download itself, so that it only reacts to a download
+     * starting and ending and not to every step it makes.
+     */
+    private readonly isDownloadingOfflineFiles = computed(() => this.offlineFilesDownloadService.currentDownloadedTile() != null);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {
@@ -61,12 +73,19 @@ export class ScreenService {
         this.userIdleService.watch();
 
         this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType).subscribe(() => this.setKeepScreenOn());
+        effect(() => this.setKeepScreenOn(), { injector: this.injector });
     }
 
+    /**
+     * Sets whether the screen is allowed to go off, which it is only when the user asked for it and there
+     * is nothing going on that the screen going off would stop, see isDownloadingOfflineFiles.
+     */
     private setKeepScreenOn() {
         const configuration = this.store.selectSnapshot((s: ApplicationState) => s.configuration);
-        this.logger.info(`[Screen] Setting mode: ${configuration.batteryOptimizationType}`);
-        if (configuration.batteryOptimizationType !== "screen-off") {
+        const isDownloading = this.isDownloadingOfflineFiles();
+        this.logger.info(`[Screen] Setting mode: ${configuration.batteryOptimizationType}` +
+            `${isDownloading ? ", keeping the screen on while offline files are downloaded" : ""}`);
+        if (isDownloading || configuration.batteryOptimizationType !== "screen-off") {
             KeepAwake.keepAwake();
         } else {
             KeepAwake.allowSleep();

@@ -1,4 +1,6 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
+import { Directory, Filesystem } from "@capacitor/filesystem";
+import { decode } from "base64-arraybuffer";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -32,6 +34,7 @@ describe("FileService", () => {
         } as unknown as MapService;
         const loggingServiceMock = {
             info: () => { },
+            debug: () => { },
             error: () => { }
         };
         TestBed.configureTestingModule({
@@ -164,7 +167,7 @@ describe("FileService", () => {
         }
     ));
 
-    it("Should download a file to cache without interruptions but without progress", inject([FileService],
+    it("Should report a file as whole when the server did not report its length", inject([FileService],
         async (service: FileService) => {
             const progressSpy = vi.fn();
             const url = "http://123.pmtiles";
@@ -195,7 +198,40 @@ describe("FileService", () => {
 
             expect(fetchSpy).toHaveBeenCalledTimes(1);
             expect(mockReader.read).toHaveBeenCalledTimes(3);
-            expect(progressSpy).not.toHaveBeenCalled();
+            expect(progressSpy).toHaveBeenLastCalledWith(1);
+            fetchSpy.mockRestore();
+        }
+    ));
+
+    it("Should write every byte of the chunks it gathered", inject([FileService],
+        async (service: FileService) => {
+            const url = "http://123.pmtiles";
+            // A chunk that is a view into a larger buffer, only its own bytes should be written
+            const chunkWithinALargerBuffer = new Uint8Array(new Uint8Array([1, 2, 3, 4, 5, 6]).buffer, 2, 2);
+            const mockReader = {
+                read: vi
+                    .fn()
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: chunkWithinALargerBuffer }))
+                    .mockReturnValueOnce(Promise.resolve({ done: true }))
+            };
+
+            const mockResponse = {
+                ok: true,
+                body: {
+                    getReader: vi.fn().mockReturnValue(mockReader)
+                },
+                headers: {
+                    get: vi.fn().mockReturnValue("4")
+                }
+            };
+
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
+
+            await service.downloadFileToCacheAuthenticated(url, "gathered.pmtiles", null, vi.fn(), new AbortController());
+
+            const written = await Filesystem.readFile({ path: "offline-files/gathered.pmtiles", directory: Directory.Cache });
+            expect(new Uint8Array(decode(written.data as string))).toEqual(new Uint8Array([1, 2, 3, 4]));
             fetchSpy.mockRestore();
         }
     ));

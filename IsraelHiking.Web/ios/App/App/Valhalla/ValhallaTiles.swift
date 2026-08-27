@@ -67,9 +67,9 @@ final class ValhallaTiles {
     }
 
     /**
-     * Extracts the given tar, which is expected to be in the data directory, into the tiles
-     * directory, and records the tiles it holds under `tileKey`. The tar is deleted afterwards - it
-     * is large and is of no use once extracted.
+     * Extracts the given archive, a gzipped tar which is expected to be in the data directory, into
+     * the tiles directory, and records the tiles it holds under `tileKey`. The archive is deleted
+     * afterwards - it is large and is of no use once extracted.
      */
     func extract(tarFileName: String, tileKey: String) throws -> ExtractResult {
         let tarURL = dataURL.appendingPathComponent(tarFileName)
@@ -78,7 +78,7 @@ final class ValhallaTiles {
         }
         defer { try? fileManager.removeItem(at: tarURL) }
 
-        let extractedPaths = try ValhallaTarExtractor.extract(tarAt: tarURL, into: tilesURL)
+        let extractedPaths = try ValhallaTarExtractor.extract(archiveAt: tarURL, into: tilesURL)
         excludeTilesFromBackup()
 
         // When an area is downloaded again it might no longer hold tiles it used to

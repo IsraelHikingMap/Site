@@ -14,7 +14,6 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "Valhalla"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "extractFile", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "storeConfiguration", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "storeProfiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "listTiles", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "deleteTile", returnType: CAPPluginReturnPromise),
@@ -68,23 +67,6 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         tiles.delete(tileKey: tileKey)
         router.invalidate()
         call.resolve()
-    }
-
-    /**
-     * Stores the routing profiles next to the tiles, so that a route uses the same costing options
-     * the server would have used.
-     */
-    @objc func storeConfiguration(_ call: CAPPluginCall) {
-        guard let content = call.getString("configuration"), !content.isEmpty else {
-            call.reject("configuration is required")
-            return
-        }
-        do {
-            try router.storeConfiguration(content)
-            call.resolve()
-        } catch {
-            call.reject("Failed to store the routing configuration: \(error.localizedDescription)", nil, error)
-        }
     }
 
     /**
@@ -158,7 +140,17 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
             )
             call.resolve(["raw": raw])
         } catch {
-            call.reject("Valhalla route failed: \(error.localizedDescription)", nil, error)
+            call.reject("Valhalla route failed: \(ValhallaPlugin.describe(error))", nil, error)
         }
+    }
+
+    /**
+     * What went wrong, in a way that can be read. The errors of the routing engine and of this plugin are
+     * swift enums, and localizedDescription says nothing about those beyond which case it was - as in
+     * "(Valhalla.ValhallaError error 1.)" - while the code and the message valhalla answered with, which
+     * is the only thing that says why a route was not found, are in the case itself.
+     */
+    private static func describe(_ error: Error) -> String {
+        String(describing: error)
     }
 }
