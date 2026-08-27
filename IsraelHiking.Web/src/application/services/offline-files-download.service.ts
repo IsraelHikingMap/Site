@@ -176,7 +176,7 @@ export class OfflineFilesDownloadService {
     private async downloadStyleAndUpdateMetadata(): Promise<{ fileName: string, content: string }[]> {
         const styles: { fileName: string, content: string }[] = [];
         for (const baseLayerUrl of [Urls.HIKING_STYLE_ADDRESS, Urls.MTB_STYLE_ADDRESS]) {
-            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, { responseType: "text" }).pipe(timeout(5000)));
+            const style = await firstValueFrom(this.httpClient.get(baseLayerUrl, { responseType: "text" }).pipe(timeout(10000)));
             styles.push({ fileName: last(baseLayerUrl.split("/")), content: style });
         }
         this.onlineStyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
