@@ -166,7 +166,7 @@ export const initialState =
             isAutomaticRecordingUpload: true,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
-            isShowIntro: true,
+            isShowOnboarding: true,
             isShowKmMarker: false,
             isShowSlope: false,
             version: 10,

@@ -12,7 +12,6 @@ import { AnalyticsService } from "../services/analytics.service";
 @Directive({
     selector: "[analyticsOn]"
 })
-// HM TODO: rename this!
 export class AnalyticsDirective implements AfterViewInit {
     readonly analyticsOn = input<string>()
     readonly analyticsLabel = input.required<string>()

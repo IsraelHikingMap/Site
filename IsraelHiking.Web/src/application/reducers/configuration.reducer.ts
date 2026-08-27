@@ -36,8 +36,8 @@ export class StopShowingBatteryConfirmationAction {
     public static readonly type = "[Configuration] StopShowingBatteryConfirmationAction";
 }
 
-export class StopShowingIntroAction {
-    public static readonly type = "[Configuration] StopShowingIntroAction";
+export class StopShowingOnboardingAction {
+    public static readonly type = "[Configuration] StopShowingOnboardingAction";
 }
 
 export class SetUnitsAction {
@@ -110,10 +110,10 @@ export class ConfigurationReducer {
         }));
     }
 
-    @Action(StopShowingIntroAction)
-    public stopShowingIntro(ctx: StateContext<ConfigurationState>) {
+    @Action(StopShowingOnboardingAction)
+    public stopShowingOnboarding(ctx: StateContext<ConfigurationState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.isShowIntro = false;
+            lastState.isShowOnboarding = false;
             return lastState;
         }));
     }

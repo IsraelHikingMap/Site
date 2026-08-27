@@ -5,6 +5,7 @@ import { Store } from "@ngxs/store";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
+import { PrivacyDialogComponent } from "../components/dialogs/privacy-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { ThemeService } from "./theme.service";
@@ -59,6 +60,33 @@ export class ApplicationInitializeService {
     private readonly carService = inject(CarService);
     private readonly store = inject(Store);
 
+    /**
+     * Opens whichever dialog the user is due, at most one of them.
+     * The use app and privacy dialogs are both anchored to the bottom of the screen without a
+     * backdrop, so opening two of them would leave one covering the other.
+     */
+    private openStartupDialog() {
+        if (typeof window === "undefined" || this.runningContextService.isIFrame) {
+            return;
+        }
+        const isShowOnboarding = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowOnboarding;
+        if (this.runningContextService.isCapacitor) {
+            if (isShowOnboarding) {
+                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
+            }
+            return;
+        }
+        if (isShowOnboarding) {
+            PrivacyDialogComponent.openDialog(this.dialog, this.runningContextService, this.resources);
+        } else if (this.runningContextService.isMobile) {
+            if (this.runningContextService.isFacebook) {
+                FacebookWarningDialogComponent.openDialog(this.dialog);
+            } else {
+                UseAppDialogComponent.openDialog(this.dialog);
+            }
+        }
+    }
+
     public async initialize() {
         try {
             const timeToBootstrap = Math.round(performance.now());
@@ -77,18 +105,7 @@ export class ApplicationInitializeService {
             this.hashService.initialize();
             this.dragAndDropService.initialize();
             this.carService.initialize();
-            if (this.runningContextService.isMobile
-                && !this.runningContextService.isCapacitor
-                && !this.runningContextService.isIFrame) {
-                if (this.runningContextService.isFacebook) {
-                    FacebookWarningDialogComponent.openDialog(this.dialog);
-                } else {
-                    UseAppDialogComponent.openDialog(this.dialog);
-                }
-            } else if (this.runningContextService.isCapacitor
-                && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
-                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
-            }
+            this.openStartupDialog();
             this.selectedRouteService.initialize();
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

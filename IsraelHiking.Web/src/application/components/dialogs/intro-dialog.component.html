@@ -10,8 +10,7 @@
                 <mat-radio-group (change)=resources.setLanguage($event.value) [value]="languageCode()">
                     @for (language of availableLanguages; track language) {
                     <div>
-                        <mat-radio-button [value]="language.code" analyticsOn="click"
-                            analyticsCategory="Intro"
+                        <mat-radio-button [value]="language.code" analyticsOn="click" analyticsCategory="Intro"
                             analyticsLabel="Select language {{language.code}}">{{language.label}}</mat-radio-button>
                     </div>
                     }
@@ -49,15 +48,21 @@
             <ng-lottie class="max-w-full" [options]="lottiePlan"></ng-lottie>
         </div>
         }
-        <!-- HM TODO: bring this back
-    @case (3) {
-      <h2>{{resources.andSoMuchMore}}</h2>
-      <p>{{resources.introAndSoMuchMoreDescription}}</p>
-      <div class="square-container">
-        <ng-lottie class="max-w-full" [options]="lottieMore"></ng-lottie>
-      </div>
-    }
-    -->
+        @case (3) {
+        <h2>{{resources.privacyNotice}}</h2>
+        <p>{{resources.privacyNoticeDescription}}</p>
+        <p>
+            <a href="https://mapeak.com/privacy-policy" target="_blank" analyticsOn="click" analyticsCategory="Intro"
+                analyticsLabel="Privacy policy from intro">{{resources.privacyPolicyTermsOfService}}</a>
+        </p>
+        }
+        @case (4) {
+        <h2>{{resources.andSoMuchMore}}</h2>
+        <p>{{resources.introAndSoMuchMoreDescription}}</p>
+        <div class="square-container">
+            <ng-lottie class="max-w-full" [options]="lottieMore"></ng-lottie>
+        </div>
+        }
         }
     </div>
     <div mat-dialog-actions>
@@ -68,15 +73,15 @@
                     analyticsCategory="Intro" analyticsLabel="Intro back">{{resources.back}}</button>
                 }
             </div>
-            @if (step() !== 2) {
+            @if (step() !== 4) {
             <div class="flex-1">
                 <button mat-flat-button class="w-full" (click)="step.set(step() + 1)" analyticsOn="click"
                     analyticsCategory="Intro" analyticsLabel="Intro next">{{resources.next}}</button>
             </div>
             } @else {
             <div class="flex-1">
-                <button mat-flat-button class="w-full" (click)="close()" analyticsOn="click"
-                    analyticsCategory="Intro" analyticsLabel="Intro close">{{resources.close}}</button>
+                <button mat-flat-button class="w-full" (click)="close()" analyticsOn="click" analyticsCategory="Intro"
+                    analyticsLabel="Intro close">{{resources.close}}</button>
             </div>
             }
         </div>

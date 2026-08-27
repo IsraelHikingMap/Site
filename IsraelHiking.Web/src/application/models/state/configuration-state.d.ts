@@ -18,7 +18,7 @@ export type ConfigurationState = {
     isShowBatteryConfirmation: boolean;
     isShowSlope: boolean;
     isShowKmMarker: boolean;
-    isShowIntro: boolean;
+    isShowOnboarding: boolean;
     version: number;
     language: Language;
     units: "metric" | "imperial";

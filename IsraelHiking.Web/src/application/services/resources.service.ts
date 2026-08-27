@@ -262,6 +262,8 @@ export class ResourcesService {
     public FAQ: string;
     public downloadMapForOfflineViewing: string;
     public privacyPolicyTermsOfService: string;
+    public privacyNotice: string;
+    public privacyNoticeDescription: string;
     public editThisMap: string;
     public list: string;
     public searchCloudSavesPlaceHolder: string;
@@ -697,6 +699,9 @@ export class ResourcesService {
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineViewing = this.gettextCatalog.getString("Download Map for Offline viewing");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
+        this.privacyNotice = this.gettextCatalog.getString("Privacy Notice");
+        this.privacyNoticeDescription = this.gettextCatalog.getString("We collect some data to run and improve Mapeak. " +
+            "Our privacy policy explains what is collected, how it is used and the choices you have.");
         this.editThisMap = this.gettextCatalog.getString("Edit this map");
         this.list = this.gettextCatalog.getString("List");
         this.searchCloudSavesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");

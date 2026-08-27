@@ -10,7 +10,7 @@ import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { SetDateFormatAction, SetUnitsAction, StopShowingIntroAction } from "../../reducers/configuration.reducer";
+import { SetDateFormatAction, SetUnitsAction, StopShowingOnboardingAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import { RunningContextService } from "../../services/running-context.service";
 import { SetActivityTypeAction } from "../../reducers/user.reducer";
@@ -70,7 +70,7 @@ export class IntroDialogComponent {
             this.store.dispatch(new SetDateFormatAction("dd/MM/yyyy"));
             this.store.dispatch(new SetUnitsAction("metric"));
         }
-        this.store.dispatch(new StopShowingIntroAction());
+        this.store.dispatch(new StopShowingOnboardingAction());
         this.dialogRef.close();
     }
 
