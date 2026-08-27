@@ -21,7 +21,6 @@ dependencies {
     implementation project(':capawesome-capacitor-app-update')
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')
-    implementation project(':capgo-capacitor-downloader')
     implementation project(':capgo-capacitor-inappbrowser')
     implementation project(':capgo-capacitor-share-target')
     implementation project(':revenuecat-purchases-capacitor')

@@ -1,7 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
-import { CapacitorDownloader } from "@capgo/capacitor-downloader";
 import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
@@ -384,10 +383,6 @@ export class FileService {
         await this.ensureOfflineCacheDirectory();
         const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
         const path = FileService.offlineCachePath(partialFileName);
-        if (this.runningContextService.isIos) {
-            await this.downloadFileToCacheNatively(url, fileName, partialFileName, token, progressCallback, abortController);
-            return;
-        }
         let previousPercentage = 0;
         const response = await fetch(url, {
             headers: {
@@ -439,90 +434,6 @@ export class FileService {
                 `${(ex as Error).message}`);
             await this.deleteFileInOfflineCache(partialFileName);
             throw ex;
-        }
-        progressCallback(1);
-        await Filesystem.rename({
-            from: path,
-            to: FileService.offlineCachePath(fileName),
-            directory: Directory.Cache
-        });
-        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}, ` +
-            `${(receivedLength / 1024 / 1024).toFixed(1)} MB`);
-    }
-
-    /**
-     * Downloads a file using the native downloader, which writes it to the device by itself instead of
-     * handing its bytes to the web layer: a file of hundreds of megabytes is more than a fetch in the
-     * webview survives on ios, where the download fails partway through with "Load failed" however
-     * quickly the bytes are written. It also keeps downloading while the app is in the background.
-     * It writes into the same partial file a download that streams into the cache writes, and that file is
-     * renamed to the name of the file it holds once it is whole, so that both ways of downloading leave
-     * the cache in the same state and neither of them puts a file there before it is whole.
-     * The partial file an earlier download left behind is deleted before this one starts, since the counter
-     * it is named after starts over whenever the app does and the plugin fails rather than write over a
-     * file that is already there. A download that failed is deleted for the same reason: what it wrote is
-     * of no use to anyone, and the plugin only removes what it wrote when it is stopped.
-     */
-    private async downloadFileToCacheNatively(url: string, fileName: string, partialFileName: string, token: string,
-        progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
-        const path = FileService.offlineCachePath(partialFileName);
-        await Filesystem.deleteFile({ path, directory: Directory.Cache }).catch(() => { });
-        const destination = (await Filesystem.getUri({ path, directory: Directory.Cache })).uri;
-        let receivedLength = 0;
-        let resolveDownload: () => void;
-        let rejectDownload: (reason: Error) => void;
-        const downloadPromise = new Promise<void>((resolve, reject) => {
-            resolveDownload = resolve;
-            rejectDownload = reject;
-        });
-        const listeners = await Promise.all([
-            CapacitorDownloader.addListener("downloadProgress", event => {
-                if (event.id !== partialFileName) {
-                    return;
-                }
-                receivedLength = event.bytesWritten ?? 0;
-                const totalLength = event.bytesTotal ?? 0;
-                if (totalLength > 0) {
-                    progressCallback(receivedLength / totalLength);
-                }
-            }),
-            CapacitorDownloader.addListener("downloadCompleted", event => {
-                if (event.id === partialFileName) {
-                    resolveDownload();
-                }
-            }),
-            CapacitorDownloader.addListener("downloadFailed", event => {
-                if (event.id === partialFileName) {
-                    rejectDownload(new Error(event.error));
-                }
-            })
-        ]);
-        const abort = () => {
-            CapacitorDownloader.stop({ id: partialFileName });
-            rejectDownload(new Error(`The download of ${fileName} was aborted`));
-        };
-        abortController.signal.addEventListener("abort", abort, { once: true });
-        try {
-            await CapacitorDownloader.download({
-                id: partialFileName,
-                url,
-                destination,
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            await downloadPromise;
-        } catch (ex) {
-            this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
-                `${(receivedLength / 1024 / 1024).toFixed(1)} MB: ${(ex as Error).message}`);
-            await this.deleteFileInOfflineCache(partialFileName);
-            throw ex;
-        } finally {
-            abortController.signal.removeEventListener("abort", abort);
-            await Promise.all(listeners.map(listener => listener.remove()));
-        }
-        if (abortController.signal.aborted) {
-            this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-            await this.deleteFileInOfflineCache(partialFileName);
-            return;
         }
         progressCallback(1);
         await Filesystem.rename({

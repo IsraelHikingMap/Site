@@ -26,7 +26,6 @@
 		"AppUpdatePlugin",
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
-		"CapacitorDownloaderPlugin",
 		"CapgoInAppBrowserPlugin",
 		"CapacitorShareTargetPlugin",
 		"PurchasesPlugin",

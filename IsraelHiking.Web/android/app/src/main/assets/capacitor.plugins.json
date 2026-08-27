@@ -48,10 +48,6 @@
 		"classpath": "app.capgo.capacitor.compass.CapgoCompassPlugin"
 	},
 	{
-		"pkg": "@capgo/capacitor-downloader",
-		"classpath": "ee.forgr.capacitor.plugin.downloader.CapacitorDownloaderPlugin"
-	},
-	{
 		"pkg": "@capgo/capacitor-inappbrowser",
 		"classpath": "ee.forgr.capacitor_inappbrowser.CapgoInAppBrowserPlugin"
 	},

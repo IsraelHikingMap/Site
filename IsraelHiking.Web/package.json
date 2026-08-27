@@ -25,7 +25,6 @@
     "@capawesome/capacitor-app-update": "^8.0.4",
     "@capgo/background-geolocation": "^8.4.2",
     "@capgo/capacitor-compass": "^8.1.18",
-    "@capgo/capacitor-downloader": "^8.1.32",
     "@capgo/capacitor-inappbrowser": "^8.15.2",
     "@capgo/capacitor-share-target": "^8.0.48",
     "@mapbox/mapbox-gl-rtl-text": "^0.4.0",
