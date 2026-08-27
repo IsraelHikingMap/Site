@@ -1,2 +1,3 @@
-- Improve perfromance and update dependencies
+- Allow auto dark mode
+- Improve offline routing capabilities
 - Various bug fixes and performance improvements
