@@ -1,5 +1,5 @@
 ﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
-  <i matPrefix class="fa icon-search me-3 opacity-60"></i>
+  <i matPrefix class="fa icon-search ms-3 me-3 opacity-60"></i>
   @if (!isPoisSearch()) {
   <input type="text" matInput #searchInput class="control-container-item" [placeholder]="placeholder()"
     [dir]="resources.getDirection(searchInput.value)" (input)="updateSearchTerm($event.target.value)">
