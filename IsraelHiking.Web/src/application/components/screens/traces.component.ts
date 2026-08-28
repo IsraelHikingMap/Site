@@ -22,6 +22,7 @@ import { RoutesPathComponent } from "../map/routes-path.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
 import { EditTraceDialogComponent } from "../dialogs/edit-trace-dialog.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
+import { HighlightedTextComponent } from "../highlighted-text.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -44,7 +45,7 @@ import { ZoomComponent } from "../zoom.component";
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, AnalyticsDirective, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass]
+    imports: [Dir, MatButton, MatAnchor, AnalyticsDirective, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent]
 })
 export class TracesComponent implements OnInit {
 
@@ -53,6 +54,7 @@ export class TracesComponent implements OnInit {
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
     public readonly filteredTraces = signal<Immutable<Trace[]>>([]);
+    public readonly searchTerm = signal("");
     public readonly loadingTraces = signal(false);
     public readonly selectedTrace = signal<Immutable<Trace> | undefined>(undefined);
     public readonly tracesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>({
@@ -200,6 +202,7 @@ export class TracesComponent implements OnInit {
 
     private runFilter() {
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm).trim();
+        this.searchTerm.set(searchTerm);
         const traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
         this.filteredTraces.set(orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), [this.sortBy()], [this.sortDirection()]));
         this.tracesGeoJson.set({

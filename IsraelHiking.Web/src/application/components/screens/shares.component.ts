@@ -49,6 +49,7 @@ export class SharesComponent implements OnInit {
     public readonly mapStyle: StyleSpecification;
     public readonly selectedShareUrl = signal<Immutable<ShareUrl>>(null);
     public readonly filteredShareUrls = signal<Immutable<ShareUrl[]>>([]);
+    public readonly searchTerm = signal("");
     public readonly routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
     private readonly sortDirection = signal<"asc" | "desc">("desc");
@@ -120,6 +121,7 @@ export class SharesComponent implements OnInit {
     private async runFilter() {
         const shareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState.shareUrls);
         const searchTerm = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.searchTerm);
+        this.searchTerm.set(searchTerm.trim());
         const filteredShareUrls = shareUrls.filter((share: Immutable<ShareUrl>) => {
             for (const key in this.filter) {
                 const propValue = share[key as keyof ShareUrl] as string;

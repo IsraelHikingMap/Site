@@ -34,7 +34,7 @@
             </button>
         </mat-menu>
         }
-        {{shareUrl().title}}
+        <highlighted-text [text]="shareUrl().title" [searchTerm]="searchTerm()"></highlighted-text>
     </h4>
     <div class="m-2">
         @switch (shareUrl().difficulty) {
@@ -65,7 +65,7 @@
         }
     </div>
     <div class="mx-2 whitespace-pre-line" [ngClass]="resources.getTextAlignment(shareUrl().description)">
-        {{shareUrl().description}}
+        <highlighted-text [text]="shareUrl().description" [searchTerm]="searchTerm()"></highlighted-text>
     </div>
     @if (shareUrl().length > 0) {
     <div class="inline-flex flex-row gap-1 text-sm mx-2">

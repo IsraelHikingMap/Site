@@ -1,0 +1,8 @@
+<!-- Each part is wrapped in an element so that no whitespace is added between the parts. -->
+@for (part of parts(); track $index) {
+@if (part.isMatch) {
+<mark>{{part.text}}</mark>
+} @else {
+<span>{{part.text}}</span>
+}
+}

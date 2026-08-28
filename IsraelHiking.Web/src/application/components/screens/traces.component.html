@@ -91,7 +91,7 @@
                         {{resources.findUnmappedRoutes}}
                     </button>
                 </mat-menu>
-                {{getTraceDisplayName(trace)}}
+                <highlighted-text [text]="getTraceDisplayName(trace)" [searchTerm]="searchTerm()"></highlighted-text>
             </h4>
             <div class="ms-2">
                 {{trace.timeStamp | date:resources.getDateFormat()}}
@@ -100,10 +100,10 @@
                 {{getVisibilityTranslation(trace.visibility)}}
             </div>
             <div class="ms-2">
-                {{trace.tagsString}}
+                <highlighted-text [text]="trace.tagsString" [searchTerm]="searchTerm()"></highlighted-text>
             </div>
         </div>
-        <div class="clear-left"></div>
+        <div class="clear-both"></div>
         } @empty {
         <p>{{resources.noTraces}}</p>
         }

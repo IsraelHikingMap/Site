@@ -120,9 +120,10 @@
         </div>
         @for (shareUrl of filteredShareUrls(); track shareUrl.id) {
         <div [id]="'share-url-' + shareUrl.id">
-            <share-item [shareUrl]="shareUrl" [showMenu]="true" (delete)="deleteShareUrl(shareUrl)"
-                (editProperties)="openEditShareUrlDialog(shareUrl)" (open)="openShareUrl(shareUrl)"
-                (addToRoutes)="addShareUrlToRoutes(shareUrl)" (moveToRoute)="moveToShare(shareUrl)"></share-item>
+            <share-item [shareUrl]="shareUrl" [showMenu]="true" [searchTerm]="searchTerm()"
+                (delete)="deleteShareUrl(shareUrl)" (editProperties)="openEditShareUrlDialog(shareUrl)"
+                (open)="openShareUrl(shareUrl)" (addToRoutes)="addShareUrlToRoutes(shareUrl)"
+                (moveToRoute)="moveToShare(shareUrl)"></share-item>
         </div>
         } @empty {
         <p class="mx-2">{{resources.noCloudSaves}}</p>
