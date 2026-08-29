@@ -21,7 +21,6 @@ import { LayersService } from "../services/layers.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
-import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { AnalyticsDirective } from "../directives/analytics.directive";
@@ -172,10 +171,6 @@ export class MainMenuComponent {
 
     public openLanguage() {
         LanguageDialogComponent.openDialog(this.dialog);
-    }
-
-    public openConfigurationDialog() {
-        this.dialog.open(ConfigurationDialogComponent, { width: "480px" });
     }
 
     public isOfflineDownloadAvailable() {

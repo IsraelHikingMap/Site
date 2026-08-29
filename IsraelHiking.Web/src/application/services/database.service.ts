@@ -167,6 +167,19 @@ export class DatabaseService {
         await this.updateState(finalState);
     }
 
+    public async deleteAllData(): Promise<void> {
+        this.loggingService.info("[Database] Deleting all the databases");
+        this.store.reset(initialState);
+        const databases = [this.stateDatabase, this.uploadQueueDatabase, this.imagesDatabase,
+            this.shareUrlsDatabase, this.tracesDatabase];
+        for (const database of databases) {
+            database?.close({ disableAutoOpen: false });
+        }
+        const databaseNames = [DatabaseService.STATE_DB_NAME, DatabaseService.POIS_UPLOAD_QUEUE_DB_NAME,
+            DatabaseService.IMAGES_DB_NAME, DatabaseService.SHARE_URLS_DB_NAME, DatabaseService.TRACES_DB_NAME];
+        await Promise.all(databaseNames.map(databaseName => Dexie.delete(databaseName)));
+    }
+
     private async updateState(state: ApplicationState) {
         if (this.updating) {
             return;

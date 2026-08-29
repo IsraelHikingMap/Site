@@ -1,22 +1,22 @@
-import { Component, inject } from "@angular/core";
+import { afterNextRender, Component, inject, signal } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
-import { CdkScrollable } from "@angular/cdk/scrolling";
+import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatFormField, MatLabel } from "@angular/material/input";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { FormsModule } from "@angular/forms";
 import { MatOption, MatSelect } from "@angular/material/select";
-import { MatDialogRef, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
+import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { DatabaseService } from "../../services/database.service";
-import { initialState } from "../../reducers/initial-state";
+import { RouteStrings } from "../../services/hash.service";
 import {
     SetBatteryOptimizationTypeAction,
     SetDateFormatAction,
@@ -28,22 +28,26 @@ import {
 import type { ApplicationState, BatteryOptimizationType, ThemeSetting } from "../../models";
 
 @Component({
-    selector: "configuration-dialog",
-    templateUrl: "./configuration-dialog.component.html",
-    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatDialogActions, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
+    selector: "settings",
+    templateUrl: "./settings.component.html",
+    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
 })
-export class ConfigurationDialogComponent {
+export class SettingsComponent {
+
+    public readonly clearDataElementId = "clear-data";
 
     public readonly manageSubscriptions: string;
     public readonly username: string;
+    public readonly isClearDataHighlighted = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
-    private readonly dialogRef = inject(MatDialogRef);
     private readonly runningContextService = inject(RunningContextService);
     private readonly toastService = inject(ToastService);
-    private readonly logginService = inject(LoggingService);
+    private readonly loggingService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
+    private readonly activatedRoute = inject(ActivatedRoute);
+    private readonly router = inject(Router);
     private readonly store = inject(Store);
 
     public isLoggedIn = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo !== null);
@@ -60,6 +64,20 @@ export class ConfigurationDialogComponent {
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
         this.username = this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo)?.displayName;
+        this.isClearDataHighlighted.set(
+            this.activatedRoute.snapshot.queryParamMap.get(RouteStrings.HIGHLIGHT) === "clear-data");
+        afterNextRender(() => this.scrollToClearDataIfHighlighted());
+    }
+
+    /**
+     * Brings the highlighted button into view, since it sits at the bottom of the screen and a
+     * highlight is of no use to a user who does not see it.
+     */
+    private scrollToClearDataIfHighlighted() {
+        if (!this.isClearDataHighlighted()) {
+            return;
+        }
+        ScrollToDirective.scrollTo(this.clearDataElementId);
     }
 
     public isApp() {
@@ -91,12 +109,12 @@ export class ConfigurationDialogComponent {
             type: "YesNo",
             message: this.resources.areYouSure,
             confirmAction: async () => {
-                this.logginService.info("************** RESET DATA WAS PRESSED **************");
-                this.store.reset(initialState);
-                this.dialogRef.close();
-                if (!this.runningContextService.isCapacitor) {
-                    await this.databaseService.uninitialize();
-                    window.location.reload();
+                this.loggingService.info("************** RESET DATA WAS PRESSED **************");
+                await this.databaseService.deleteAllData();
+                if (this.runningContextService.isCapacitor) {
+                    this.router.navigate([RouteStrings.ROUTE_MAP]);
+                } else {
+                    window.location.assign(RouteStrings.ROUTE_MAP);
                 }
             }
         });

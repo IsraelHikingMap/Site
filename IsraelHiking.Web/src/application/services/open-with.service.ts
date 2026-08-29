@@ -281,6 +281,11 @@ export class OpenWithService {
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
             });
+        } else if (pathname.startsWith(RouteStrings.ROUTE_SETTINGS)) {
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_SETTINGS],
+                    { queryParams: Object.fromEntries(url.searchParams.entries()) });
+            });
         } else if (pathname.startsWith(RouteStrings.ROUTE_LAYER)) {
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries()) });

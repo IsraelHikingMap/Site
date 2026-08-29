@@ -33,6 +33,14 @@ export class AppRootComponent {
         this.currentUrl() === RouteStrings.ROUTE_LANDING ||
         this.currentUrl() === RouteStrings.ROUTE_ABOUT);
 
+    /**
+     * The search is shown on the screens that are about the map. The settings, which are about the app
+     * itself, show the logo instead, since searching for a place is not what a user who got there is
+     * after - and the search does not leave the menu room to breathe on a narrow screen.
+     */
+    public readonly isSearchShown = computed(() =>
+        !this.isHome() && !(this.currentUrl() ?? "").startsWith(RouteStrings.ROUTE_SETTINGS));
+
     constructor() {
         afterNextRender(() => {
             const element = this.toolbar().nativeElement as HTMLElement;

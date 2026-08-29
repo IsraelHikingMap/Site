@@ -19,6 +19,9 @@ export class ScrollToDirective {
     /**
      * This allows scrolling to the relevant element without using the directive.
      * This is helpfull when there's a spcific event that happens that requires scrolling.
+     * When no scrollable parent is found - the body of this app is positioned rather than scrollable,
+     * so a target that is not inside a scrolling container of its own has none - the element is asked
+     * to bring itself into view instead, which ignores the offset.
      * @param targetId - the ID of the element to scroll to
      * @param offset - the scroll offset, positive makes the scrolling move the "screen" lower.
      */
@@ -29,6 +32,10 @@ export class ScrollToDirective {
             return;
         }
         const container = ScrollToDirective.getFirstScrollableParent(targetElement);
+        if (container == null) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
         const containerRect = container.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
 
