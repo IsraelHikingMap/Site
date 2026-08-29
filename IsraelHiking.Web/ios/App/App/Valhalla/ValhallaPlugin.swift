@@ -145,10 +145,10 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     /**
-     * What went wrong, in a way that can be read. The errors of the routing engine and of this plugin are
-     * swift enums, and localizedDescription says nothing about those beyond which case it was - as in
-     * "(Valhalla.ValhallaError error 1.)" - while the code and the message valhalla answered with, which
-     * is the only thing that says why a route was not found, are in the case itself.
+     * What went wrong, in a way that can be read. This plugin's errors are swift enums with no
+     * descriptions of their own, and localizedDescription says nothing about such an error beyond which
+     * case it was - as in "(App.ValhallaRouterError error 1.)" - while what actually went wrong, such as
+     * the profile that was not found, is in the case itself.
      */
     private static func describe(_ error: Error) -> String {
         String(describing: error)
