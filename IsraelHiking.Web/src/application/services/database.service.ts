@@ -56,6 +56,7 @@ export class DatabaseService {
     private shareUrlsDatabase: Dexie;
     private tracesDatabase: Dexie;
     private updating = false;
+    private stateSubscriptionTimeout: ReturnType<typeof setTimeout>;
 
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
@@ -108,7 +109,7 @@ export class DatabaseService {
 
         this.store.reset(storedState);
         this.ngZone.runOutsideAngular(() => {
-            setTimeout(() => {
+            this.stateSubscriptionTimeout = setTimeout(() => {
                 // Do this only inside the setTimeout to avoid causing angular hydration to delay
                 this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
                     this.updateState(state);
@@ -160,6 +161,7 @@ export class DatabaseService {
     }
 
     public async uninitialize() {
+        clearTimeout(this.stateSubscriptionTimeout);
         // reduce database size and memory footprint
         this.store.dispatch(new ClearHistoryAction());
         this.store.dispatch(new SetSelectedPoiAction(null));
@@ -170,13 +172,17 @@ export class DatabaseService {
     public async deleteAllData(): Promise<void> {
         this.loggingService.info("[Database] Deleting all the databases");
         this.store.reset(initialState);
-        const databases = [this.stateDatabase, this.uploadQueueDatabase, this.imagesDatabase,
-            this.shareUrlsDatabase, this.tracesDatabase];
+        const databases = [
+            this.stateDatabase, this.uploadQueueDatabase, this.imagesDatabase,
+            this.shareUrlsDatabase, this.tracesDatabase
+        ];
         for (const database of databases) {
             database?.close({ disableAutoOpen: false });
         }
-        const databaseNames = [DatabaseService.STATE_DB_NAME, DatabaseService.POIS_UPLOAD_QUEUE_DB_NAME,
-            DatabaseService.IMAGES_DB_NAME, DatabaseService.SHARE_URLS_DB_NAME, DatabaseService.TRACES_DB_NAME];
+        const databaseNames = [
+            DatabaseService.STATE_DB_NAME, DatabaseService.POIS_UPLOAD_QUEUE_DB_NAME,
+            DatabaseService.IMAGES_DB_NAME, DatabaseService.SHARE_URLS_DB_NAME, DatabaseService.TRACES_DB_NAME
+        ];
         await Promise.all(databaseNames.map(databaseName => Dexie.delete(databaseName)));
     }
 
