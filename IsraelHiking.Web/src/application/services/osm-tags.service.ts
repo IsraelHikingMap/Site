@@ -267,6 +267,13 @@ export class OsmTagsService {
             }
         }
 
+        if (feature.properties.amenity === "cafe") {
+            poi.properties.poiIconColor = "#734a08";
+            poi.properties.poiIcon = "icon-cafe";
+            poi.properties.poiCategory = "Other";
+            return;
+        }
+
         if ((feature.properties.landuse === "recreation_ground" && feature.properties.sport === "mtb")) {
             poi.properties.poiIcon = "icon-bike";
             poi.properties.poiIconColor = "green";

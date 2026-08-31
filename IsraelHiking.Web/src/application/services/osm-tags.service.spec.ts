@@ -562,6 +562,18 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiIconColor).toBe("#734a08");
     });
 
+    it("Should set icon color category for cafe", () => {
+        // Arrange
+        const feature = createFeature({ amenity: "cafe" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiCategory).toBe("Other");
+        expect(poi.properties.poiIcon).toBe("icon-cafe");
+        expect(poi.properties.poiIconColor).toBe("#734a08");
+    });
+
     it("Should set icon color category for wikipedia", () => {
         // Arrange
         const feature = createFeature({ wikipedia: "page" });
