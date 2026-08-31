@@ -981,7 +981,7 @@ export class ResourcesService {
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
         }
         if (imageUrl.startsWith("File:")) {
-            return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
+            return `${Urls.wikimediaCommons}w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
         }
         return imageUrl;
     }

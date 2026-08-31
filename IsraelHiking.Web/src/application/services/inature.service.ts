@@ -3,6 +3,7 @@ import { inject, Service } from "@angular/core";
 import { firstValueFrom, timeout } from "rxjs";
 
 import { GeoJSONUtils } from "./geojson-utils";
+import type { ImageAttribution, ImageAttributionProvider } from "./image-attribution.service";
 import { Urls } from "../urls";
 
 type INatureRsponse = {
@@ -19,8 +20,8 @@ type INatureRsponse = {
 }
 
 @Service()
-export class INatureService {
-    private readonly API_URL = "https://inature.info/w/api.php";
+export class INatureService implements ImageAttributionProvider {
+
     private readonly TIMEOUT = 3000;
 
     private readonly httpClient: HttpClient = inject(HttpClient);
@@ -77,15 +78,15 @@ export class INatureService {
 
     private setImageWebsiteAndExternalDescription(content: string, feature: GeoJSON.Feature, title: string) {
         feature.properties["poiExternalDescription:he"] = content.match(/סקירה=(.*)/)[1];
-        const indexString = GeoJSONUtils.setProperty(feature, "website", `https://inature.info/wiki/${title}`);
+        const indexString = GeoJSONUtils.setProperty(feature, "website", `${Urls.inature}/wiki/${title}`);
         feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
         const image = content.match(/תמונה=(.*)/)[1];
-        const imageSrc = `https://inature.info/w/index.php?title=Special:Redirect/file/${image}`;
+        const imageSrc = `${Urls.inature}/w/index.php?title=Special:Redirect/file/${image}`;
         GeoJSONUtils.setProperty(feature, "image", imageSrc);
     }
 
     private getContnetRetrivalAddress(key: string, isPageId: boolean): string {
-        const baseAddress = `${this.API_URL}?action=query&prop=revisions&rvprop=content&format=json&origin=*`
+        const baseAddress = `${Urls.inatureApi}?action=query&prop=revisions&rvprop=content&format=json&origin=*`
         if (isPageId) {
             return baseAddress + `&pageids=${key}`;
         }
@@ -111,5 +112,19 @@ export class INatureService {
         const url = Urls.urls + shareId + "?format=geojson";
         const geojson = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection>(url));
         return geojson.features.find(f => f.geometry.type !== "Point")?.geometry;
+    }
+
+    public isImageUrl(imageUrl: string): boolean {
+        return imageUrl.includes("inature.info");
+    }
+
+    public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
+        if (!this.isImageUrl(imageUrl)) {
+            return null;
+        }
+        return {
+            author: Urls.inature,
+            url: Urls.inature
+        };
     }
 }

@@ -127,4 +127,19 @@ describe("INatureService", () => {
             expect(result.properties.image).toBe("https://inature.info/w/index.php?title=Special:Redirect/file/image");
         }
     ));
+
+    it("should only claim iNature images", inject([INatureService], (service: INatureService) => {
+        expect(service.isImageUrl("https://inature.info/w/index.php?title=Special:Redirect/file/image.jpg")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/image.jpeg")).toBeFalsy();
+    }));
+
+    it("should credit iNature for its images", inject([INatureService], async (service: INatureService) => {
+        const attribution = await service.getAttributionForImage("https://inature.info/w/index.php?title=Special:Redirect/file/image.jpg");
+        expect(attribution.author).toBe("https://inature.info");
+        expect(attribution.url).toBe("https://inature.info");
+    }));
+
+    it("should return null attribution for an image that is not from iNature", inject([INatureService], async (service: INatureService) => {
+        expect(await service.getAttributionForImage("https://upload.wikimedia.org/image.jpeg")).toBeNull();
+    }));
 });

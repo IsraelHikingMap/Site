@@ -50,48 +50,6 @@ describe("GeoJsonUtils", () => {
         const results = GeoJSONUtils.getTitle({ properties: { "name:en": "name-en" } } as unknown as GeoJSON.Feature, "he");
         expect(results).toBe("name-en");
     });
-    it("should return has extra data for feature with description", () => {
-        expect(GeoJSONUtils.hasExtraData({ properties: { "description:he": "desc" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
-    });
-
-    it("should return has extra data for feature with image", () => {
-        expect(GeoJSONUtils.hasExtraData({ properties: { image: "File:valid-image.png" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
-    });
-
-    it("should return has extra data for feature with mtb:name", () => {
-        expect(GeoJSONUtils.hasExtraData({ properties: { "mtb:name": "mtb:name" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
-    });
-
-    it("should return only valid image urls", () => {
-        const feature = {
-            properties: {
-                image: "File:123.jpg",
-                image1: "www.wikimedia.org/Building_no_free_image_yet",
-                image2: "www.wikimedia.org/svg.png",
-                image3: "www.wikimedia.org/svg",
-                image4: "www.wikimedia.org/good-image.png",
-                image5: "inature.info/image.jpg",
-                image6: "nakeb.co.il/image.jpg",
-                image7: "jeepolog.com/image.jpg",
-                image8: "invalid-url",
-                image9: "https://example.com/image4.gif",
-                image10: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
-                image11: "israelhiking.osm.org.il/inmage.jpg",
-                image12: "mapeak.com/image.jpg"
-            }
-        } as unknown as GeoJSON.Feature;
-        const validUrls = GeoJSONUtils.getValidImageUrls(feature);
-        expect(validUrls).toEqual([
-            "File:123.jpg",
-            "www.wikimedia.org/good-image.png",
-            "inature.info/image.jpg",
-            "nakeb.co.il/image.jpg",
-            "jeepolog.com/image.jpg",
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
-            "israelhiking.osm.org.il/inmage.jpg",
-            "mapeak.com/image.jpg"
-        ]);
-    });
 
     it("should return color when colour property exists", () => {
         const feature = { properties: { colour: "red" } } as unknown as GeoJSON.Feature;

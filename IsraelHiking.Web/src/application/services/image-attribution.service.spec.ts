@@ -1,10 +1,13 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
+import { provideRouter } from "@angular/router";
+import { provideStore } from "@ngxs/store";
 
-import { ImageAttributionService } from "./image-attribution.service";
+import { ImageAttributionService, type ImageAttribution } from "./image-attribution.service";
 import { Urls } from "../urls";
+import { ResourcesService } from "./resources.service";
 
 describe("ImageAttributionService", () => {
 
@@ -12,6 +15,13 @@ describe("ImageAttributionService", () => {
         TestBed.configureTestingModule({
             providers: [
                 ImageAttributionService,
+                provideStore([]),
+                provideRouter([]),
+                {
+                    provide: ResourcesService, useValue: {
+                        getCurrentLanguageCodeSimplified: () => "he"
+                    }
+                },
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ]
@@ -35,324 +45,131 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://www.example.com");
     }));
 
-    it("should return nakeb when getting it", inject([ImageAttributionService], async (service: ImageAttributionService) => {
-        const response = await service.getAttributionForImage("https://www.nakeb.co.il/image.png");
-        expect(response).not.toBeNull();
-        expect(response.author).toBe("נָאקֶבּ");
-        expect(response.url).toBe("https://www.nakeb.co.il");
-    }));
-
-    it("should return a OSM user display name when getting a share url", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        const promise = service.getAttributionForImage("https://www.mapeak.com/api/urls/12345/thumbnail");
-        mockBackend.match(r => r.url.startsWith("https://www.mapeak.com/api/urls/"))[0].flush({
-            osmUserId: 12,
-            website: "https://website.com/"
-        });
-        await new Promise(resolve => setTimeout(resolve, 0));
-        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
-            user: {
-                display_name: "Osm User Name"
+    it("should return only valid image urls", inject([ImageAttributionService], (service: ImageAttributionService) => {
+        const feature = {
+            properties: {
+                image: "File:123.jpg",
+                image1: "www.wikimedia.org/Building_no_free_image_yet",
+                image2: "www.wikimedia.org/svg.png",
+                image3: "www.wikimedia.org/svg",
+                image4: "www.wikimedia.org/good-image.png",
+                image5: "inature.info/image.jpg",
+                image6: "nakeb.co.il/image.jpg",
+                image7: "jeepolog.com/image.jpg",
+                image8: "invalid-url",
+                image9: "https://example.com/image4.gif",
+                image10: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
+                image11: "israelhiking.osm.org.il/inmage.jpg",
+                image12: "mapeak.com/image.jpg"
             }
-        });
-
-        const response = await promise;
-        expect(response).not.toBeNull();
-        expect(response.author).toBe("Osm User Name");
-        expect(response.url).toBe("https://website.com/");
+        } as unknown as GeoJSON.Feature;
+        const validUrls = service.getValidImageUrls(feature);
+        expect(validUrls).toEqual([
+            "File:123.jpg",
+            "www.wikimedia.org/good-image.png",
+            "inature.info/image.jpg",
+            "nakeb.co.il/image.jpg",
+            "jeepolog.com/image.jpg",
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
+            "israelhiking.osm.org.il/inmage.jpg",
+            "mapeak.com/image.jpg"
+        ]);
     }));
 
-
-    it("should fetch data from wikimedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Artist: {
-                                        value: "hello"
-                                    }
-                                }
-                            }]
-                        }
-                    }
+    it("should return the images of the feature followed by the images of the different sources", inject([ImageAttributionService],
+        async (service: ImageAttributionService) => {
+            const feature = {
+                properties: {
+                    image: "File:123.jpg",
+                    panoramax: "93a6d34d-14b4-4be3-bc92-1ae93b51260e",
+                    wikimedia_commons: "File:From_commons.jpg;Category:Some_Category"
                 }
-            });
+            } as unknown as GeoJSON.Feature;
+            vi.spyOn(service, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>);
 
-            const response = await promise;
+            expect(await service.getImagesThatHaveAttribution(feature)).toEqual([
+                "File:123.jpg",
+                "https://api.panoramax.xyz/api/pictures/93a6d34d-14b4-4be3-bc92-1ae93b51260e/sd.jpg",
+                "File:From_commons.jpg"
+            ]);
+        }
+    ));
+    it("should filter out images that have no attribution", inject([ImageAttributionService],
+        async (service: ImageAttributionService) => {
+            const feature = {
+                type: "Feature",
+                properties: {
+                    poiSource: "OSM",
+                    poiId: "poiId",
+                    identifier: "id",
+                    image: "wikimedia.org/image-url",
+                    image1: "wikimedia.org/image-url1",
+                    image2: "wikimedia.org/image-url2"
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [1, 2]
+                }
+            } as GeoJSON.Feature;
+            vi.spyOn(service, "getAttributionForImage")
+                .mockReturnValueOnce(Promise.resolve(null))
+                .mockReturnValueOnce(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>)
+                .mockReturnValueOnce(Promise.resolve(null));
 
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("hello");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+            const imagesUrls = await service.getImagesThatHaveAttribution(feature);
+            expect(imagesUrls.length).toBe(1);
+            expect(imagesUrls[0]).toBe("wikimedia.org/image-url1");
         }
     ));
 
-    it("should fetch attribution from wikimedia when getting wikimedia image with attribution and no author", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Attribution: {
-                                        value: "hello"
-                                    }
-                                }
-                            }]
-                        }
-                    }
+    it("should deduplicate images with the same url", inject([ImageAttributionService],
+        async (service: ImageAttributionService) => {
+            const feature = {
+                type: "Feature",
+                properties: {
+                    poiSource: "OSM",
+                    poiId: "poiId",
+                    identifier: "id",
+                    image: "wikimedia.org/image-url()",
+                    image1: encodeURIComponent("wikimedia.org/image-url()")
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [1, 2]
                 }
-            });
+            } as GeoJSON.Feature;
+            vi.spyOn(service, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>);
 
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("hello");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+            const imagesUrls = await service.getImagesThatHaveAttribution(feature);
+            expect(imagesUrls.length).toBe(1);
+            expect(imagesUrls[0]).toBe("wikimedia.org/image-url()");
         }
     ));
 
-    it("should fetch attribution from wikimedia when getting wikimedia image with permissive license and no author or attribution", inject([ImageAttributionService, HttpTestingController],
+    it("should delegate to the source that claims the image and only ask it once", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Some_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "14686480": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    LicenseShortName: {
-                                        value: "Cc-by-sa-3.0"
-                                    }
-                                }
-                            }]
-                        }
-                    }
-                }
+            const pictureId = "93a6d34d-14b4-4be3-bc92-1ae93b51260e";
+            const imageUrl = `https://api.panoramax.xyz/api/pictures/${pictureId}/sd.jpg`;
+            const promise = service.getAttributionForImage(imageUrl);
+            mockBackend.match(r => r.url.startsWith(Urls.panoramaxSearch))[0].flush({
+                features: [{ id: pictureId, providers: [{ name: "Some Uploader", roles: ["producer"] }] }]
             });
+            await promise;
 
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("Unknown");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:Some_Image.jpeg");
+            const response = await service.getAttributionForImage(imageUrl);
+            mockBackend.expectNone(r => r.url.startsWith(Urls.panoramaxSearch));
+            expect(response.author).toBe("Some Uploader");
+            expect(response.url).toBe(`https://api.panoramax.xyz/#focus=pic&pic=${pictureId}`);
         }
     ));
 
-    it("should fetch data from wikimedia when getting wikimedia file", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("File:123.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Artist: {
-                                        value: "hello"
-                                    }
-                                }
-                            }]
-                        }
-                    }
-                }
-            });
+    it("should keep an image url that can not be decoded as it is", inject([ImageAttributionService],
+        async (service: ImageAttributionService) => {
+            const feature = {
+                properties: { image: "https://www.nakeb.co.il/100%-image.jpg" }
+            } as unknown as GeoJSON.Feature;
 
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("hello");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:123.jpeg");
+            expect(await service.getImagesThatHaveAttribution(feature)).toEqual(["https://www.nakeb.co.il/100%-image.jpg"]);
         }
     ));
-
-    it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/he/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://he.wikipedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Artist: {
-                                        value: "<span>hello</span>"
-                                    }
-                                }
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("hello");
-            expect(response.url).toBe("https://he.wikipedia.org/wiki/File:IHM_Image.jpeg");
-        }
-    ));
-
-    it("should remove html tags, tabs and get the value inside", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Artist: {
-                                        value: "<span>\thello\tworld</span>"
-                                    }
-                                }
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("hello world");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
-        }
-    ));
-
-    // Based on https://upload.wikimedia.org/wikipedia/commons/b/b5/Historical_map_series_for_the_area_of_Al-Manara%2C_Palestine_%281870s%29.jpg
-    it("should remove html tags and get the value inside for multiple html tags", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    Artist: {
-                                        value: "<p>Sources for historical series of maps as follows:\n</p>\n<ul><li>" +
-                                            "<a href=\"https://en.wikipedia.org/wiki/PEF_Survey_of_Palestine\"" +
-                                            " class=\"extiw\" title=\"w:PEF Survey of Palestine\">PEF Survey of Palestine" +
-                                            "</a></li>\n<li><a href=\"https://en.wikipedia.org/wiki/Survey_of_Palestine\" " +
-                                            "class=\"extiw\" title=\"w:Survey of Palestine\">Survey of Palestine</a></li></ul>" +
-                                            "<p>Overlay from <a rel=\"nofollow\" class=\"external text\" href=\"https://palopenmaps.org\">" +
-                                            "Palestine Open Maps</a>\n</p>\n<ul><li><a href=\"https://en.wikipedia.org/wiki/OpenStreetMap\" " +
-                                            "class=\"extiw\" title=\"w:OpenStreetMap\">OpenStreetMap</a></li></ul>"
-                                    }
-                                }
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("Sources for historical series of maps as follows:\n" +
-                "PEF Survey of Palestine\n" +
-                "Survey of PalestineOverlay from Palestine Open Maps\n" +
-                "OpenStreetMap");
-            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
-        }
-    ));
-
-    it("should return null when getting wikimedia image without artist and license", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/something_else.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    somthing: {}
-                                }
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).toBeNull();
-        }
-    ));
-
-    it("should return the author from page content", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    somthing: {}
-                                }
-                            }],
-                            revisions: [{
-                                "*": "|author=John Doe\n|date=2023-01-01"
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).toBeDefined();
-            expect(response.author).toBe("John Doe");
-        }
-    ));
-
-    it("should return the author from page content that has a link", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
-            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
-                query: {
-                    pages: {
-                        "-1": {
-                            imageinfo: [{
-                                extmetadata: {
-                                    somthing: {}
-                                }
-                            }],
-                            revisions: [{
-                                "*": "|author=[//www.openstreetmap.org/user/osm-user OSM User]"
-                            }]
-                        }
-                    }
-                }
-            });
-
-            const response = await promise;
-
-            expect(response).toBeDefined();
-            expect(response.author).toBe("OSM User");
-        }
-    ));
-
-    it("should return a OSM user display name when sending a osm id and cache it", inject([ImageAttributionService, HttpTestingController], async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getUserName("12");
-        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
-            user: {
-                display_name: "Osm User Name"
-            }
-        });
-
-        const response = await promise;
-        expect(response).toBe("Osm User Name");
-
-        promise = service.getUserName("12");
-        mockBackend.expectNone(r => r.url.startsWith(`${Urls.osmApi}user`));
-        const response2 = await promise;
-        expect(response2).toBe("Osm User Name");
-    }));
 });

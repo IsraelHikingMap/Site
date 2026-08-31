@@ -19,7 +19,7 @@ import { MapService } from "./map.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { INatureService } from "./inature.service";
 import { WikidataService } from "./wikidata.service";
-import { ImageAttributionService, type ImageAttribution } from "./image-attribution.service";
+import { ImageAttributionService } from "./image-attribution.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
@@ -108,7 +108,10 @@ describe("Poi Service", () => {
                 },
                 {
                     provide: ImageAttributionService,
-                    useValue: { getAttributionForImage: () => "aaa" }
+                    useValue: {
+                        getValidImageUrls: (f: GeoJSON.Feature) => Object.keys(f.properties)
+                            .filter(k => k.startsWith("image")).map(k => f.properties[k])
+                    }
                 },
                 GeoJsonParser,
                 RunningContextService,
@@ -1192,112 +1195,6 @@ describe("Poi Service", () => {
         }
     ));
 
-    it("Should filter out incompatible images", inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            const feature = {
-                type: "Feature",
-                properties: {
-                    poiSource: "OSM",
-                    poiId: "poiId",
-                    identifier: "id",
-                    image: "invalid-image-url"
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [1, 2]
-                }
-            } as GeoJSON.Feature;
-            store.reset({
-                poiState: {
-                    uploadMarkerData: null
-                }
-            });
-            const info = await poiService.createEditableDataAndMerge(feature);
-            expect(info.imagesUrls.length).toBe(0);
-        }
-    ));
-
-    it("Should filter out invalid wikipedia images", inject([PoiService, Store],
-        async (poiService: PoiService, store: Store) => {
-            const feature = {
-                type: "Feature",
-                properties: {
-                    poiSource: "OSM",
-                    poiId: "poiId",
-                    identifier: "id",
-                    image:
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.png",
-                    image1: "https://upload.wikimedia.org/wikipedia/commons/b/b6/1.svg",
-                    image2:
-                        "https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png"
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [1, 2]
-                }
-            } as GeoJSON.Feature;
-            store.reset({
-                poiState: {
-                    uploadMarkerData: null
-                }
-            });
-            const info = await poiService.createEditableDataAndMerge(feature);
-            expect(info.imagesUrls.length).toBe(0);
-        }
-    ));
-
-    it("Should filter out images with no attribution", inject([PoiService, ImageAttributionService],
-        async (poiService: PoiService, attributionService: ImageAttributionService) => {
-            const feature = {
-                type: "Feature",
-                properties: {
-                    poiSource: "OSM",
-                    poiId: "poiId",
-                    identifier: "id",
-                    image: "wikimedia.org/image-url",
-                    image1: "wikimedia.org/image-url1",
-                    image2: "wikimedia.org/image-url2"
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [1, 2]
-                }
-            } as GeoJSON.Feature;
-            vi.spyOn(attributionService, "getAttributionForImage")
-                .mockReturnValueOnce(Promise.resolve(null))
-                .mockReturnValueOnce(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>)
-                .mockReturnValueOnce(Promise.resolve(null));
-
-            const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
-            expect(imagesUrls.length).toBe(1);
-            expect(imagesUrls[0]).toBe("wikimedia.org/image-url1");
-        }
-    ));
-
-    it("Should deduplicate images with same url", inject([PoiService, ImageAttributionService],
-        async (poiService: PoiService, attributionService: ImageAttributionService) => {
-            const feature = {
-                type: "Feature",
-                properties: {
-                    poiSource: "OSM",
-                    poiId: "poiId",
-                    identifier: "id",
-                    image: "wikimedia.org/image-url()",
-                    image1: encodeURIComponent("wikimedia.org/image-url()")
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [1, 2]
-                }
-            } as GeoJSON.Feature;
-            vi.spyOn(attributionService, "getAttributionForImage").mockReturnValue(Promise.resolve("aaa") as unknown as Promise<ImageAttribution>);
-
-            const imagesUrls = await poiService.getImagesThatHaveAttribution(feature);
-            expect(imagesUrls.length).toBe(1);
-            expect(imagesUrls[0]).toBe("wikimedia.org/image-url()");
-        }
-    ));
-
     it("should get closest point from overpass", inject([PoiService, OverpassTurboService],
         async (poiService: PoiService, overpass: OverpassTurboService) => {
             overpass.getPointsInArea = () => {
@@ -1379,4 +1276,16 @@ describe("Poi Service", () => {
             expect(results.whatsapp).toContain("OSM");
         }
     ));
+
+    it("should return has extra data for feature with description", inject([PoiService], (poiService: PoiService) => {
+        expect(poiService.hasExtraData({ properties: { "description:he": "desc" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
+    }));
+
+    it("should return has extra data for feature with image", inject([PoiService], (poiService: PoiService) => {
+        expect(poiService.hasExtraData({ properties: { image: "File:valid-image.png" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
+    }));
+
+    it("should return has extra data for feature with mtb:name", inject([PoiService], (poiService: PoiService) => {
+        expect(poiService.hasExtraData({ properties: { "mtb:name": "mtb:name" } } as unknown as GeoJSON.Feature, "he")).toBeTruthy();
+    }));
 });

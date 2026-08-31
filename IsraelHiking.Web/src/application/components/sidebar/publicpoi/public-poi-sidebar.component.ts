@@ -21,6 +21,7 @@ import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
+import { ImageAttributionService } from "../../../services/image-attribution.service";
 import { MapeakTitleService } from "../../../services/mapeak-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
@@ -73,6 +74,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     private readonly titleService = inject(MapeakTitleService);
     private readonly router = inject(Router);
     private readonly poiService = inject(PoiService);
+    private readonly imageAttributionService = inject(ImageAttributionService);
     private readonly osmAddressesService = inject(OsmAddressesService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly toastService = inject(ToastService);
@@ -193,7 +195,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
         this.fullFeature.set(feature as GeoJSON.Feature);
         this.sourceImageUrls.set(this.getSourceImageUrls(feature));
         this.shareLinks.set(this.poiService.getPoiSocialLinks(feature));
-        this.imagesUrls.set(await this.poiService.getImagesThatHaveAttribution(feature));
+        this.imagesUrls.set(await this.imageAttributionService.getImagesThatHaveAttribution(feature));
         this.urls.set(GeoJSONUtils.getUrls(feature));
         this.length.set(this.poiService.getLengthInMeters(feature));
         const language = this.resources.getCurrentLanguageCodeSimplified();
