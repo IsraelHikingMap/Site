@@ -8,7 +8,7 @@ import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
-import { EmailComposer } from "capacitor-email-composer"
+import { MailComposer } from "@capawesome/capacitor-mail-composer"
 import Bowser from "bowser";
 
 import { ResourcesService } from "../services/resources.service";
@@ -143,22 +143,20 @@ export class MainMenuComponent {
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
                 `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
             ].join("\n");
-            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
+            const logFileBase64 = encode(await new Response(logs).arrayBuffer());
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
 
-            EmailComposer.open({
+            MailComposer.composeMail({
                 to: ["support@mapeak.com"],
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
-                    type: "absolute",
                     name: "log.txt",
-                    path: logFileUri.replace("file://", "")
+                    data: logFileBase64
                 }, {
-                    type: "base64",
                     name: `info-${userInfo.id}.txt`,
-                    path: infoBase64
+                    data: infoBase64
                 }]
             });
         } catch (ex) {
