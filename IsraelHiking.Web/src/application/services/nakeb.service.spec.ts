@@ -62,4 +62,11 @@ describe("NakebService", () => {
         expect(properties.description).toBe("A lovely walk.\nEasy, Family.");
         expect(properties["description:he"]).toBe("A lovely walk.\nEasy, Family.");
     }));
+
+    it("should return nakeb when getting it", inject([NakebService], async (service: NakebService) => {
+        const response = await service.getAttributionForImage("https://www.nakeb.co.il/image.png");
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("נָאקֶבּ");
+        expect(response.url).toBe("https://www.nakeb.co.il");
+    }));
 });

@@ -6,9 +6,10 @@ import { InAppBrowser } from "@capgo/capacitor-inappbrowser";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { OsmUserService } from "./osm-user.service";
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState, OsmUserDetails } from "../models";
+import type { ApplicationState } from "../models";
 
 @Service()
 export class AuthorizationService {
@@ -18,6 +19,7 @@ export class AuthorizationService {
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
+    private readonly osmUserService = inject(OsmUserService);
     private readonly store = inject(Store);
     private readonly redirectUrl = this.runningContextService.isCapacitor ? Urls.mapeakAuthUrl : Urls.emptyAuthHtml;
 
@@ -68,14 +70,8 @@ export class AuthorizationService {
         return response.access_token;
     }
 
-    private readonly updateUserDetails = async () => {
-        const detailJson = await firstValueFrom(this.httpClient.get<OsmUserDetails>(Urls.osmUser));
-        const userInfo = {
-            displayName: detailJson.user.display_name,
-            id: detailJson.user.id.toString(),
-            changeSets: detailJson.user.changesets.count,
-            imageUrl: detailJson.user.img?.href
-        };
+    private async updateUserDetails() {
+        const userInfo = await this.osmUserService.getLoggedInUserInfo();
         this.store.dispatch(new SetUserInfoAction(userInfo));
         this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);
     };

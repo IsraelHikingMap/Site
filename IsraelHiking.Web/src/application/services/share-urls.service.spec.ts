@@ -415,4 +415,23 @@ describe("Share Urls Service", () => {
     it("Should get unknown icon from unknown type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
         expect(shareUrlsService.getIconFromType("Unknown")).toBe("icon-question");
     }));
+
+    it("should return a OSM user display name when getting a share url", inject([ShareUrlsService, HttpTestingController], async (service: ShareUrlsService, mockBackend: HttpTestingController) => {
+        const promise = service.getAttributionForImage("https://www.mapeak.com/api/urls/12345/thumbnail");
+        mockBackend.match(r => r.url.startsWith("https://www.mapeak.com/api/urls/"))[0].flush({
+            osmUserId: 12,
+            website: "https://website.com/"
+        });
+        await new Promise(resolve => setTimeout(resolve, 0));
+        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
+            user: {
+                display_name: "Osm User Name"
+            }
+        });
+
+        const response = await promise;
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("Osm User Name");
+        expect(response.url).toBe("https://website.com/");
+    }));
 });

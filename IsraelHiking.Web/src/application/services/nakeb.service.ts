@@ -2,6 +2,9 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 
+import type { ImageAttribution, ImageAttributionProvider } from "./image-attribution.service";
+import { Urls } from "../urls";
+
 export type NakebMarker = {
     lat: number;
     lng: number;
@@ -29,14 +32,17 @@ export type NakebItem = {
 }
 
 @Service()
-export class NakebService {
-    private readonly NAKEB_BASE_ADDRESS = "https://www.nakeb.co.il/api/hikes";
-    private readonly NAKEB_LOGO = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";
+export class NakebService implements ImageAttributionProvider {
+    /** All the images of this source are credited to nakeb itself and not to the user that uploaded them */
+    public static readonly USER_ID = "Nakeb";
+    public static readonly USER_NAME = "נָאקֶבּ";
+
+    private readonly NAKEB_LOGO = `${Urls.nakeb}/static/images/hikes/logo_1000x667.jpg`;
 
     private readonly httpClient = inject(HttpClient);
 
     public async getRoute(id: string): Promise<GeoJSON.Feature> {
-        const response = await firstValueFrom(this.httpClient.get<NakebItem>(`${this.NAKEB_BASE_ADDRESS}/${id}`));
+        const response = await firstValueFrom(this.httpClient.get<NakebItem>(`${Urls.nakebHikes}/${id}`));
         let description = (response.prolog ?? "").trim();
         if (!description.endsWith(".")) {
             description += ".";
@@ -71,5 +77,20 @@ export class NakebService {
             }
         };
         return feature;
+    }
+
+    public isImageUrl(imageUrl: string): boolean {
+        return imageUrl.includes("nakeb.co.il");
+    }
+
+    public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
+        if (!this.isImageUrl(imageUrl)) {
+            return null;
+        }
+        return {
+            author: NakebService.USER_NAME,
+            url: Urls.nakeb,
+            userId: NakebService.USER_ID
+        };
     }
 }

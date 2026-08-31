@@ -1,9 +1,12 @@
-import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
-import { firstValueFrom, timeout } from "rxjs";
-import { Urls } from "../urls";
-import type { WikiMetadata, WikiPage } from "./wikidata.service";
-import type { OsmUserDetails, ShareUrl } from "../models";
+import type { Immutable } from "immer";
+
+import { GeoJSONUtils } from "./geojson-utils";
+import { INatureService } from "./inature.service";
+import { NakebService } from "./nakeb.service";
+import { PanoramaxService } from "./panoramax.service";
+import { ShareUrlsService } from "./share-urls.service";
+import { WikidataService } from "./wikidata.service";
 
 export type ImageAttribution = {
     author: string;
@@ -11,40 +14,73 @@ export type ImageAttribution = {
     userId?: string;
 };
 
+/**
+ * A service of a specific images source, it knows which images are its own and who should be credited for them
+ */
+export type ImageAttributionProvider = {
+    /** Tells whether an image url belongs to this source and whether it can be shown by the app */
+    isImageUrl(imageUrl: string): boolean;
+    /** Gets the images this source holds for a feature, based on the tags of this source. Sources that only use the "image" tags don't need this */
+    getImageUrls?(feature: Immutable<GeoJSON.Feature>): string[];
+    getAttributionForImage(imageUrl: string): Promise<ImageAttribution>;
+};
+
+/**
+ * Decides which of a feature's images can be shown and who should be credited for them,
+ * the knowledge of every specific source lives in that source's service.
+ */
 @Service()
 export class ImageAttributionService {
+    /** Hosts of images that can be shown but have no service of their own, they are credited by their origin */
+    private static readonly HOSTS_WITHOUT_A_SERVICE = ["jeepolog.com", "israelhiking.osm.org.il"];
+
     private readonly attributionImageCache = new Map<string, Promise<ImageAttribution>>();
-    private readonly userIdToNameCache = new Map<string, string>();
 
-    private readonly httpClient = inject(HttpClient);
+    private readonly attributionProviders: ImageAttributionProvider[] = [
+        inject(INatureService),
+        inject(NakebService),
+        inject(PanoramaxService),
+        inject(ShareUrlsService),
+        inject(WikidataService)
+    ];
 
-    private extractAuthorFromMetadata(extmetadata: WikiMetadata): string {
-        const attribution = extmetadata?.Artist?.value || extmetadata?.Attribution?.value;
-        if (attribution) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(attribution, "text/html");
-            return doc.documentElement.textContent.replace(/([ \t]*\n[ \t]*)+/g, "\n").replace(/[ \t]+/g, " ").trim();
-        }
-        return null;
+    /**
+     * Gets the images a feature holds in its "image" tags, these are also the images that can be edited in OSM
+     */
+    public getValidImageUrls(feature: Immutable<GeoJSON.Feature>): string[] {
+        return GeoJSONUtils.getImageUrls(feature).filter(u => this.isValidImageUrl(u));
     }
 
-    private extractAuthorFromRevisions(revisions: Record<string, string>): string {
-        if (revisions == null || revisions["*"] == null) {
-            return null;
+    /**
+     * Gets the images that can be shown for a feature - the ones in its "image" tags followed by the ones the
+     * different sources hold for it. Images that can't be credited are left out since they can't be shown.
+     */
+    public async getImagesThatHaveAttribution(feature: Immutable<GeoJSON.Feature>): Promise<string[]> {
+        let imagesUrls = [...this.getValidImageUrls(feature), ...this.getImageUrlsFromSources(feature)];
+        const imageAttributions = await Promise.all(imagesUrls.map(u => this.getAttributionForImage(u)));
+        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
+        return [...new Set(imagesUrls.map(url => {
+            try {
+                return decodeURIComponent(url);
+            } catch {
+                return url;
+            }
+        }))];
+    }
+
+    private getImageUrlsFromSources(feature: Immutable<GeoJSON.Feature>): string[] {
+        return this.attributionProviders.flatMap(p => p.getImageUrls?.(feature) ?? []);
+    }
+
+    private isValidImageUrl(imageUrl: string): boolean {
+        // an image that was captured or picked in the app and was not uploaded yet
+        if (imageUrl.startsWith("data:image")) {
+            return true;
         }
-        const rawContent = revisions["*"];
-        const authorMatch = rawContent.match(/\|author=(.*?)(?:\n|\||$)/);
-
-        if (authorMatch) {
-            const authorRaw = authorMatch[1].trim();
-
-            // Remove surrounding brackets if it’s a link
-            const linkMatch = authorRaw.match(/\[.*?\s+([^\]]+)\]/);
-            const author = linkMatch ? linkMatch[1] : authorRaw;
-
-            return author;
+        if (ImageAttributionService.HOSTS_WITHOUT_A_SERVICE.some(h => imageUrl.includes(h))) {
+            return true;
         }
-        return null;
+        return this.attributionProviders.some(p => p.isImageUrl(imageUrl));
     }
 
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
@@ -54,91 +90,22 @@ export class ImageAttributionService {
         if (this.attributionImageCache.has(imageUrl)) {
             return this.attributionImageCache.get(imageUrl);
         }
+        const provider = this.attributionProviders.find(p => p.isImageUrl(imageUrl));
+        if (provider != null) {
+            const imageAttribution = provider.getAttributionForImage(imageUrl);
+            this.attributionImageCache.set(imageUrl, imageAttribution);
+            return imageAttribution;
+        }
         const url = new URL(imageUrl);
-        const wikidataFileUrl = imageUrl.startsWith("File:");
-        if (!url.hostname && !wikidataFileUrl) {
+        if (!url.hostname) {
+            // this is the case of a base64 image for example
             return null;
         }
-        if (url.hostname.includes("nakeb")) {
-            const userId = "Nakeb";
-            const imageAttribution = {
-                author: await this.getUserName(userId),
-                url: "https://www.nakeb.co.il",
-                userId
-            };
-            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
-            return imageAttribution;
-        }
-        if (url.hostname.includes("mapeak.com")) {
-            const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(imageUrl.replace("/thumbnail", "")));
-            const imageAttribution = {
-                author: await this.getUserName(shareUrl.osmUserId),
-                url: shareUrl.website,
-                userId: shareUrl.osmUserId
-            };
-            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
-            return imageAttribution;
-        }
-        if (!url.hostname.includes("upload.wikimedia") && !wikidataFileUrl) {
-            const imageAttribution = {
-                author: url.origin,
-                url: url.origin
-            };
-            this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
-            return imageAttribution;
-        }
-
-        const imageAttribution = this.getAttributionForImageInternal(imageUrl);
-        this.attributionImageCache.set(imageUrl, imageAttribution);
+        const imageAttribution = {
+            author: url.origin,
+            url: url.origin
+        };
+        this.attributionImageCache.set(imageUrl, Promise.resolve(imageAttribution));
         return imageAttribution;
-    }
-
-    private async getAttributionForImageInternal(imageUrl: string): Promise<ImageAttribution> {
-        const imageName = imageUrl.split("/").pop().replace(/^File:/, "");
-        let wikiPrefix = "https://commons.wikimedia.org/";
-        const languageMatch = imageUrl.match(/https:\/\/upload\.wikimedia\.org\/wikipedia\/(.*?)\//);
-        if (languageMatch && languageMatch[1] !== "commons") {
-            wikiPrefix = `https://${languageMatch[1]}.wikipedia.org/`;
-        }
-        const address = `${wikiPrefix}w/api.php?action=query&prop=imageinfo|revisions&iiprop=extmetadata&rvprop=content&format=json&origin=*&titles=File:${imageName}`;
-        try {
-            const response = await firstValueFrom(this.httpClient.get<WikiPage>(address).pipe(timeout(3000)));
-            const pagesIds = Object.keys(response.query.pages);
-            if (pagesIds.length === 0) {
-                return null;
-            }
-            const extmetadata = response.query.pages[pagesIds[0]].imageinfo[0].extmetadata;
-            let author = this.extractAuthorFromMetadata(extmetadata);
-            if (!author) {
-                author = this.extractAuthorFromRevisions(response.query.pages[pagesIds[0]].revisions?.[0]);
-            }
-            if (author) {
-                const imageAttribution = {
-                    author,
-                    url: `${wikiPrefix}wiki/File:${imageName}`
-                };
-                return imageAttribution;
-            }
-            const licenseLower = extmetadata?.LicenseShortName?.value.toLowerCase() || "";
-            if ((licenseLower.includes("cc") && !licenseLower.includes("nc")) || licenseLower.includes("public domain")) {
-                return {
-                    author: "Unknown",
-                    url: `${wikiPrefix}wiki/File:${imageName}`
-                };
-            }
-        } catch { } // eslint-disable-line
-        return null;
-    }
-
-    public async getUserName(userId: string): Promise<string> {
-        if (this.userIdToNameCache.has(userId)) {
-            return this.userIdToNameCache.get(userId);
-        }
-        if (userId === "Nakeb") {
-            return "נָאקֶבּ";
-        }
-        const osmUser = await firstValueFrom(this.httpClient.get<OsmUserDetails>(`${Urls.osmApi}user/${userId}`));
-        this.userIdToNameCache.set(userId, osmUser.user.display_name);
-        return osmUser.user.display_name;
     }
 }

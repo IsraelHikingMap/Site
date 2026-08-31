@@ -250,7 +250,7 @@ export class PoiService {
             if (categories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
-            if (GeoJSONUtils.getTitle(feature, language) || GeoJSONUtils.hasExtraData(feature, language)) {
+            if (GeoJSONUtils.getTitle(feature, language) || this.hasExtraData(feature, language)) {
                 visibleFeatures.push(feature);
             }
         }
@@ -663,24 +663,17 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
+    public hasExtraData(feature: Immutable<GeoJSON.Feature>, language: string): boolean {
+        return GeoJSONUtils.getDescription(feature, language) != null ||
+            this.imageAttributinoService.getValidImageUrls(feature).length > 0 ||
+            feature.properties["mtb:name"] != null;
+    }
+
     public getLengthInMeters(feature: Immutable<GeoJSON.Feature>): number | null {
         if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
             return SpatialService.getLengthInMetersForGeometry(feature.geometry);
         }
         return null;
-    }
-
-    public async getImagesThatHaveAttribution(feature: Immutable<GeoJSON.Feature>) {
-        let imagesUrls = GeoJSONUtils.getValidImageUrls(feature);
-        const imageAttributions = await Promise.all(imagesUrls.map(u => this.imageAttributinoService.getAttributionForImage(u)));
-        imagesUrls = imagesUrls.filter((_, i) => imageAttributions[i] != null);
-        return [...new Set(imagesUrls.map(url => {
-            try {
-                return decodeURIComponent(url);
-            } catch {
-                return url;
-            }
-        }))];
     }
 
     public async createEditableDataAndMerge(feature: GeoJSON.Feature): Promise<EditablePublicPointData> {
@@ -713,7 +706,7 @@ export class PoiService {
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,
-            imagesUrls: GeoJSONUtils.getValidImageUrls(feature),
+            imagesUrls: this.imageAttributinoService.getValidImageUrls(feature),
             urls: GeoJSONUtils.getUrls(feature)
         };
     }

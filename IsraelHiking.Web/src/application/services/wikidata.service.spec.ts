@@ -253,4 +253,304 @@ describe("WikidataService", () => {
         expect(feature.properties.image).toBeUndefined();
         expect(feature.properties["description:" + language]).toBeUndefined();
     }));
+
+    it("should fetch data from wikimedia when getting wikimedia image", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Artist: {
+                                        value: "hello"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("hello");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+        }
+    ));
+
+    it("should fetch attribution from wikimedia when getting wikimedia image with attribution and no author", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Attribution: {
+                                        value: "hello"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("hello");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+        }
+    ));
+
+    it("should fetch attribution from wikimedia when getting wikimedia image with permissive license and no author or attribution", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Some_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "14686480": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    LicenseShortName: {
+                                        value: "Cc-by-sa-3.0"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("Unknown");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:Some_Image.jpeg");
+        }
+    ));
+
+    it("should fetch data from wikimedia when getting wikimedia file", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("File:123.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Artist: {
+                                        value: "hello"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("hello");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:123.jpeg");
+        }
+    ));
+
+    it("should remove html tags and get the value inside", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/he/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://he.wikipedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Artist: {
+                                        value: "<span>hello</span>"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("hello");
+            expect(response.url).toBe("https://he.wikipedia.org/wiki/File:IHM_Image.jpeg");
+        }
+    ));
+
+    it("should remove html tags, tabs and get the value inside", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Artist: {
+                                        value: "<span>\thello\tworld</span>"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("hello world");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+        }
+    ));
+
+    // Based on https://upload.wikimedia.org/wikipedia/commons/b/b5/Historical_map_series_for_the_area_of_Al-Manara%2C_Palestine_%281870s%29.jpg
+    it("should remove html tags and get the value inside for multiple html tags", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    Artist: {
+                                        value: "<p>Sources for historical series of maps as follows:\n</p>\n<ul><li>" +
+                                            "<a href=\"https://en.wikipedia.org/wiki/PEF_Survey_of_Palestine\"" +
+                                            " class=\"extiw\" title=\"w:PEF Survey of Palestine\">PEF Survey of Palestine" +
+                                            "</a></li>\n<li><a href=\"https://en.wikipedia.org/wiki/Survey_of_Palestine\" " +
+                                            "class=\"extiw\" title=\"w:Survey of Palestine\">Survey of Palestine</a></li></ul>" +
+                                            "<p>Overlay from <a rel=\"nofollow\" class=\"external text\" href=\"https://palopenmaps.org\">" +
+                                            "Palestine Open Maps</a>\n</p>\n<ul><li><a href=\"https://en.wikipedia.org/wiki/OpenStreetMap\" " +
+                                            "class=\"extiw\" title=\"w:OpenStreetMap\">OpenStreetMap</a></li></ul>"
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).not.toBeNull();
+            expect(response.author).toBe("Sources for historical series of maps as follows:\n" +
+                "PEF Survey of Palestine\n" +
+                "Survey of PalestineOverlay from Palestine Open Maps\n" +
+                "OpenStreetMap");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
+        }
+    ));
+
+    it("should return null when getting wikimedia image without artist and license", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/something_else.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    somthing: {}
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).toBeNull();
+        }
+    ));
+
+    it("should return the author from page content", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    somthing: {}
+                                }
+                            }],
+                            revisions: [{
+                                "*": "|author=John Doe\n|date=2023-01-01"
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).toBeDefined();
+            expect(response.author).toBe("John Doe");
+        }
+    ));
+
+    it("should return the author from page content that has a link", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+            mockBackend.match(r => r.url.startsWith("https://commons.wikimedia.org/"))[0].flush({
+                query: {
+                    pages: {
+                        "-1": {
+                            imageinfo: [{
+                                extmetadata: {
+                                    somthing: {}
+                                }
+                            }],
+                            revisions: [{
+                                "*": "|author=[//www.openstreetmap.org/user/osm-user OSM User]"
+                            }]
+                        }
+                    }
+                }
+            });
+
+            const response = await promise;
+
+            expect(response).toBeDefined();
+            expect(response.author).toBe("OSM User");
+        }
+    ));
+
+    it("should get the images of a feature from its wikimedia_commons tag and ignore categories", inject([WikidataService], (service: WikidataService) => {
+        const feature = {
+            properties: {
+                wikimedia_commons: "File:First.jpg; Category:Some_Category ;File:Second.jpg"
+            }
+        } as unknown as GeoJSON.Feature;
+
+        expect(service.getImageUrls(feature)).toEqual(["File:First.jpg", "File:Second.jpg"]);
+    }));
+
+    it("should not get images from a feature without a wikimedia_commons tag", inject([WikidataService], (service: WikidataService) => {
+        expect(service.getImageUrls({ properties: { name: "some name" } } as unknown as GeoJSON.Feature)).toEqual([]);
+    }));
+
+    it("should claim wikimedia images but not placeholders and svg files", inject([WikidataService], (service: WikidataService) => {
+        expect(service.isImageUrl("File:Some_Image.jpg")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/wikipedia/commons/a/a1/Image.jpeg")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/wikipedia/commons/b/b6/Building_no_free_image_yet-he.png")).toBeFalsy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/wikipedia/commons/b/b6/1.svg")).toBeFalsy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/wikipedia/commons/b/b6/2.svg.png")).toBeFalsy();
+        expect(service.isImageUrl("https://www.example.com/image.png")).toBeFalsy();
+    }));
 })
