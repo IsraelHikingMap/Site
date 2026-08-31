@@ -125,8 +125,8 @@ export class PublicPoisComponent implements OnInit {
             PublicPoisComponent.MAX_MENU_POINTS_IN_CLUSTER, 0) as GeoJSON.Feature<GeoJSON.Point>[];
         const language = this.resources.getCurrentLanguageCodeSimplified();
         features.sort((a, b) => {
-            if (GeoJSONUtils.hasExtraData(a, language) !== GeoJSONUtils.hasExtraData(b, language)) {
-                return GeoJSONUtils.hasExtraData(a, language) ? -1 : 1;
+            if (this.hasExtraData(a) !== this.hasExtraData(b)) {
+                return this.hasExtraData(a) ? -1 : 1;
             }
             return GeoJSONUtils.getTitle(a, language).localeCompare(GeoJSONUtils.getTitle(b, language));
         });
@@ -158,7 +158,7 @@ export class PublicPoisComponent implements OnInit {
     }
 
     public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
-        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public isCoordinatesFeature(feature: Immutable<GeoJSON.Feature>) {

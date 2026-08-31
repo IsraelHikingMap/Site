@@ -28,13 +28,29 @@ export class Urls {
     public static readonly permissions = Urls.apiBase + "user/permissions";
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
-    public static readonly osmUser = Urls.osmApi + "user/details.json";
+    public static readonly osmUser = Urls.osmApi + "user/";
+    public static readonly osmUserDetails = Urls.osmUser + "details.json";
     public static readonly osmGpx = Urls.osmApi + "gpx";
-    public static readonly osmGpxFiles = Urls.osmApi + "user/gpx_files.json";
+    public static readonly osmGpxFiles = Urls.osmUser + "gpx_files.json";
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
     public static readonly overpassApi = "https://mapeak.com/api/interpreter";
+
+    public static readonly panoramaxApi = "https://api.panoramax.xyz/api/";
+    public static readonly panoramaxPictures = Urls.panoramaxApi + "pictures/";
+    public static readonly panoramaxSearch = Urls.panoramaxApi + "search";
+    public static readonly panoramaxViewer = "https://api.panoramax.xyz/";
+
+    public static readonly nakeb = "https://www.nakeb.co.il";
+    public static readonly nakebHikes = Urls.nakeb + "/api/hikes";
+
+    public static readonly inature = "https://inature.info";
+    public static readonly inatureApi = Urls.inature + "/w/api.php";
+
+    public static readonly wikidata = "https://www.wikidata.org";
+    public static readonly wikidataEntities = Urls.wikidata + "/w/rest.php/wikibase/v1/entities/items/";
+    public static readonly wikimediaCommons = "https://commons.wikimedia.org/";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

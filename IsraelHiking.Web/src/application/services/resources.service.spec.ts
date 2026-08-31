@@ -94,6 +94,11 @@ describe("ResourcesService", () => {
         expect(service.getResizedImageUrl("File:456.png", 123)).toContain("Redirect/file/");
     }));
 
+    it("Should keep a url that can not be resized as it is", inject([ResourcesService], (service: ResourcesService) => {
+        const url = "https://api.panoramax.xyz/api/pictures/93a6d34d-14b4-4be3-bc92-1ae93b51260e/sd.jpg";
+        expect(service.getResizedImageUrl(url, 123)).toBe(url);
+    }));
+
     it("should get long distance unit when language is Hebrew", inject([ResourcesService, Store], (service: ResourcesService, store: Store) => {
         store.reset({
             configuration: {

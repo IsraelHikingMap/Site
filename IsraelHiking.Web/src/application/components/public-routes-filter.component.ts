@@ -7,7 +7,7 @@ import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
 import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../services/resources.service";
-import { ImageAttributionService } from "../services/image-attribution.service";
+import { OsmUserService } from "../services/osm-user.service";
 import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import { initialState } from "../reducers/initial-state";
 import type { ApplicationState, CategoryType, Difficulty, PublicRoutesFilter } from "../models";
@@ -22,7 +22,7 @@ export class PublicRoutesFilterComponent {
 
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
-    private readonly imageAttributionService = inject(ImageAttributionService);
+    private readonly osmUserService = inject(OsmUserService);
 
     public readonly unitString = signal("km");
     public readonly filterLengthStart = signal<number>(0);
@@ -44,7 +44,7 @@ export class PublicRoutesFilterComponent {
         this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (filters) => {
             this.filterLengthStart.set(filters.lengthRange[0]);
             this.filterLengthEnd.set(filters.lengthRange[1]);
-            this.filterUserName.set(filters.userId ? await this.imageAttributionService.getUserName(filters.userId) : null);
+            this.filterUserName.set(filters.userId ? await this.osmUserService.getUserName(filters.userId) : null);
         });
     }
 
