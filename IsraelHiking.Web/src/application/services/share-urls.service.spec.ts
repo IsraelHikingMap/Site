@@ -434,4 +434,15 @@ describe("Share Urls Service", () => {
         expect(response.author).toBe("Osm User Name");
         expect(response.url).toBe("https://website.com/");
     }));
+
+    it("should only claim share url thumbnails", inject([ShareUrlsService], (service: ShareUrlsService) => {
+        expect(service.isImageUrl("https://www.mapeak.com/api/urls/12345/thumbnail")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/image.jpeg")).toBeFalsy();
+    }));
+
+    it("should return null attribution for an image that is not a share url thumbnail", inject([ShareUrlsService],
+        async (service: ShareUrlsService) => {
+            expect(await service.getAttributionForImage("https://upload.wikimedia.org/image.jpeg")).toBeNull();
+        }
+    ));
 });

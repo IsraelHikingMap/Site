@@ -4,6 +4,7 @@ import { provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 
 import { NakebMarker, NakebService } from "./nakeb.service";
+import { Urls } from "../urls";
 
 describe("NakebService", () => {
     beforeEach(() => {
@@ -68,5 +69,35 @@ describe("NakebService", () => {
         expect(response).not.toBeNull();
         expect(response.author).toBe("נָאקֶבּ");
         expect(response.url).toBe("https://www.nakeb.co.il");
+    }));
+
+    it("should build the description from the prolog whether or not it ends with a dot", inject([NakebService, HttpTestingController],
+        async (service: NakebService, httpMock: HttpTestingController) => {
+            const getDescriptionOf = async (prolog: string) => {
+                const promise = service.getRoute("7");
+                httpMock.expectOne(`${Urls.nakebHikes}/7`).flush({
+                    id: "7",
+                    start: { lat: 1, lng: 2 },
+                    latlngs: [{ lat: 1, lng: 2 }],
+                    attributes: ["Easy"],
+                    prolog,
+                    markers: [] as NakebMarker[]
+                });
+                return (await promise).properties.description;
+            };
+
+            expect(await getDescriptionOf("A lovely walk")).toBe("A lovely walk.\nEasy.");
+            expect(await getDescriptionOf("A lovely walk.")).toBe("A lovely walk.\nEasy.");
+            expect(await getDescriptionOf(undefined)).toBe(".\nEasy.");
+        }
+    ));
+
+    it("should only claim nakeb images", inject([NakebService], (service: NakebService) => {
+        expect(service.isImageUrl("https://www.nakeb.co.il/image.png")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/image.jpeg")).toBeFalsy();
+    }));
+
+    it("should return null attribution for an image that is not from nakeb", inject([NakebService], async (service: NakebService) => {
+        expect(await service.getAttributionForImage("https://upload.wikimedia.org/image.jpeg")).toBeNull();
     }));
 });

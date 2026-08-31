@@ -45,21 +45,6 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://www.example.com");
     }));
 
-    it("should get the attribution from panoramax when getting a panoramax image", inject([ImageAttributionService, HttpTestingController],
-        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-            const pictureId = "93a6d34d-14b4-4be3-bc92-1ae93b51260e";
-            const promise = service.getAttributionForImage(`https://api.panoramax.xyz/api/pictures/${pictureId}/sd.jpg`);
-            mockBackend.match(r => r.url.startsWith(Urls.panoramaxSearch))[0].flush({
-                features: [{ id: pictureId, providers: [{ name: "Some Uploader", roles: ["producer"] }] }]
-            });
-
-            const response = await promise;
-            expect(response).not.toBeNull();
-            expect(response.author).toBe("Some Uploader");
-            expect(response.url).toBe(`https://api.panoramax.xyz/#focus=pic&pic=${pictureId}`);
-        }
-    ));
-
     it("should return only valid image urls", inject([ImageAttributionService], (service: ImageAttributionService) => {
         const feature = {
             properties: {
@@ -161,7 +146,7 @@ describe("ImageAttributionService", () => {
         }
     ));
 
-    it("should only ask a source once for the same image", inject([ImageAttributionService, HttpTestingController],
+    it("should delegate to the source that claims the image and only ask it once", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
             const pictureId = "93a6d34d-14b4-4be3-bc92-1ae93b51260e";
             const imageUrl = `https://api.panoramax.xyz/api/pictures/${pictureId}/sd.jpg`;
@@ -174,6 +159,17 @@ describe("ImageAttributionService", () => {
             const response = await service.getAttributionForImage(imageUrl);
             mockBackend.expectNone(r => r.url.startsWith(Urls.panoramaxSearch));
             expect(response.author).toBe("Some Uploader");
+            expect(response.url).toBe(`https://api.panoramax.xyz/#focus=pic&pic=${pictureId}`);
+        }
+    ));
+
+    it("should keep an image url that can not be decoded as it is", inject([ImageAttributionService],
+        async (service: ImageAttributionService) => {
+            const feature = {
+                properties: { image: "https://www.nakeb.co.il/100%-image.jpg" }
+            } as unknown as GeoJSON.Feature;
+
+            expect(await service.getImagesThatHaveAttribution(feature)).toEqual(["https://www.nakeb.co.il/100%-image.jpg"]);
         }
     ));
 });
