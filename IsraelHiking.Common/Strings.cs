@@ -25,6 +25,7 @@ public static class FeatureAttributes
     public const string MTB_NAME = "mtb:name";
     public const string DESCRIPTION = "description";
     public const string IMAGE_URL = "image";
+    public const string PANORAMAX = "panoramax";
     public const string WEBSITE = "website";
     public const string WIKIPEDIA = "wikipedia";
     public const string WIKIDATA = "wikidata";

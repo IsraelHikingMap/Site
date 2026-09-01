@@ -17,7 +17,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess;
 
-public class WikimediaCommonGateway : IWikimediaCommonGateway
+public class WikimediaCommonGateway : IImageUploadGateway
 {
     private const string BASE_API_ADDRESS = "https://commons.wikimedia.org/w/api.php";
 
@@ -49,7 +49,8 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
         return site;
     }
 
-    public async Task<string> UploadImage(string fileName, string description, string author, Stream contentStream, Coordinate location)
+    /// <inheritdoc/>
+    public async Task<UploadedImage> UploadImage(string fileName, string description, string author, Stream contentStream, Coordinate location)
     {
         _logger.LogInformation($"Upload an image to wikimedia common. File name: {fileName}, Location: {location.Y}, {location.X}");
         var site = await CreateClient();
@@ -70,7 +71,7 @@ public class WikimediaCommonGateway : IWikimediaCommonGateway
         }
         _logger.LogInformation($"Finished uploading image successfully. FileName: {fileName}, wikipage: {wikiFileName}");
         var imageUrl = await GetImageUrl(wikiFileName, site);
-        return imageUrl;
+        return new UploadedImage(null, imageUrl);
     }
 
     private string CreateWikipediaComment(Coordinate location, string description, string author)
