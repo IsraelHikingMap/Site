@@ -47,6 +47,7 @@ public class TagsHelperTests
     [DataRow("icon-holy-place")]
     [DataRow("icon-bed")]
     [DataRow("icon-cafe")]
+    [DataRow("icon-food")]
     [DataRow("icon-map-signs")]
     public void SymmetricalTagsCheck_ShouldPass(string icon)
     {
