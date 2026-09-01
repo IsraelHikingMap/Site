@@ -42,7 +42,7 @@ export class ScreenService {
         this.originalBrightness = (await ScreenBrightness.getBrightness()).brightness;
         this.logger.info(`[Screen] Original brightness is: ${this.originalBrightness}`);
         App.addListener("appStateChange", (state) => {
-            ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
+            ScreenBrightness.setBrightness({ brightness: this.originalBrightness }); // this is just to be on the safe side...
             if (state.isActive) {
                 this.logger.info("[Screen] App is active, watching idle and setting screen mode");
                 this.setKeepScreenOn();
@@ -61,13 +61,13 @@ export class ScreenService {
             }
             if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).batteryOptimizationType === "dark") {
                 this.logger.info("[Screen] User is idle, setting brightness to 0.01");
-                ScreenBrightness.setBrightness({ brightness: 0.01});
+                ScreenBrightness.setBrightness({ brightness: 0.01 });
             }
         });
         this.userIdleService.onIdleEnd.subscribe(() => {
             if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).batteryOptimizationType === "dark") {
                 this.logger.info(`[Screen] User is active, setting brightness to original: ${this.originalBrightness}`);
-                ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
+                ScreenBrightness.setBrightness({ brightness: this.originalBrightness }); // this is just to be on the safe side...
             }
         });
         this.userIdleService.watch();
@@ -83,7 +83,7 @@ export class ScreenService {
     private setKeepScreenOn() {
         const configuration = this.store.selectSnapshot((s: ApplicationState) => s.configuration);
         const isDownloading = this.isDownloadingOfflineFiles();
-        this.logger.info(`[Screen] Setting mode: ${configuration.batteryOptimizationType}` +
+        this.logger.info(`[Screen] Battery optimization type: ${configuration.batteryOptimizationType}` +
             `${isDownloading ? ", keeping the screen on while offline files are downloaded" : ""}`);
         if (isDownloading || configuration.batteryOptimizationType !== "screen-off") {
             KeepAwake.keepAwake();

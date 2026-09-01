@@ -136,6 +136,9 @@ public class TagsHelper : ITagsHelper
             case "icon-cafe":
                 tagCombinations.Add([new("amenity", "cafe")]);
                 return tagCombinations;
+            case "icon-food":
+                tagCombinations.Add([new("amenity", "restaurant")]);
+                return tagCombinations;
             case "icon-map-signs":
                 tagCombinations.Add([new("highway", "*")]);
                 return tagCombinations;
@@ -504,6 +507,16 @@ public class TagsHelper : ITagsHelper
             {
                 Color = "#734a08",
                 Icon = "icon-cafe",
+                Category = Categories.OTHER
+            };
+        }
+
+        if ("restaurant".Equals(GetString(attributes, "amenity")))
+        {
+            return new IconColorCategory
+            {
+                Color = "#734a08",
+                Icon = "icon-food",
                 Category = Categories.OTHER
             };
         }
