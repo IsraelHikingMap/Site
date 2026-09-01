@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, afterEach } from "vitest";
+import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed } from "@angular/core/testing";
 import Dexie from "dexie";
 
@@ -6,11 +6,25 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { HttpErrorResponse } from "@angular/common/http";
 
+/**
+ * Empties the log database instead of deleting it, deleting it is blocked for as long as the
+ * service of the previous test still holds a connection to it, which prints a warning.
+ */
+async function clearLogs() {
+    const database = new Dexie("Logging");
+    database.version(1).stores({
+        logging: "++, date"
+    });
+    await database.table("logging").clear();
+    database.close();
+}
+
 describe("LoggingService", () => {
 
     let service: LoggingService;
 
     beforeEach(async () => {
+        await clearLogs();
         TestBed.configureTestingModule({
             imports: [],
             providers: [
@@ -22,11 +36,6 @@ describe("LoggingService", () => {
         service = TestBed.inject(LoggingService);
         await service.initialize(false);
     });
-
-    afterEach(async () => {
-        service.uninitialize();
-        await Dexie.delete("Logging");
-    })
 
     it("Should log info and returned logged data", async () => {
         await service.info("Hello!");

@@ -35,9 +35,9 @@ describe("DatabaseService", () => {
     });
 
     afterEach(async () => {
-        for (const databaseName of DATABASE_NAMES) {
-            await Dexie.delete(databaseName);
-        }
+        const database = TestBed.inject(DatabaseService);
+        await database.uninitialize();
+        await database.deleteAllData();
     });
 
     it("Should delete every database it stores data in", inject([DatabaseService], async (service: DatabaseService) => {

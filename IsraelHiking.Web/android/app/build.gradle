@@ -59,9 +59,9 @@ dependencies {
     implementation "com.github.mapeak-com:maplibre-contour-rs:v$maplibreContourVersion"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
-    implementation "io.github.rallista:valhalla-mobile:0.6.0"
-    implementation "io.github.rallista:valhalla-models:0.4.0"
-    implementation "io.github.rallista:valhalla-models-config:0.4.0"
+    implementation "io.github.rallista:valhalla-mobile:0.6.3"
+    implementation "io.github.rallista:valhalla-models:0.5.2"
+    implementation "io.github.rallista:valhalla-models-config:0.5.2"
     implementation "com.squareup.moshi:moshi-kotlin:1.15.1"
     implementation "org.apache.commons:commons-compress:1.27.1"
 }

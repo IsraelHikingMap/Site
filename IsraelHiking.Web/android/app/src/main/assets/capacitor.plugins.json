@@ -40,6 +40,10 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
 	},
 	{
+		"pkg": "@capawesome/capacitor-mail-composer",
+		"classpath": "io.capawesome.capacitorjs.plugins.mailcomposer.MailComposerPlugin"
+	},
+	{
 		"pkg": "@capgo/background-geolocation",
 		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
 	},
@@ -66,9 +70,5 @@
 	{
 		"pkg": "@revenuecat/purchases-capacitor-ui",
 		"classpath": "com.revenuecat.purchases.capacitor.ui.RevenueCatUIPlugin"
-	},
-	{
-		"pkg": "capacitor-email-composer",
-		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
 	}
 ]

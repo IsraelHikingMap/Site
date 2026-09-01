@@ -18,33 +18,10 @@ import com.valhalla.api.models.RouteRequest
 import com.valhalla.api.models.RouteResponse
 import com.valhalla.api.models.RoutingWaypoint
 import com.valhalla.api.models.ValhallaLanguages
-import com.valhalla.config.models.Httpd
-import com.valhalla.config.models.HttpdService
-import com.valhalla.config.models.Loki
-import com.valhalla.config.models.LokiService
-import com.valhalla.config.models.LokiServiceDefaults
-import com.valhalla.config.models.Meili
-import com.valhalla.config.models.MeiliDefault
-import com.valhalla.config.models.MeiliGrid
-import com.valhalla.config.models.Mjolnir
-import com.valhalla.config.models.Odin
-import com.valhalla.config.models.OdinService
-import com.valhalla.config.models.ServiceLimits
-import com.valhalla.config.models.ServiceLimitsAuto
-import com.valhalla.config.models.ServiceLimitsBicycle
-import com.valhalla.config.models.ServiceLimitsBus
-import com.valhalla.config.models.ServiceLimitsCentroid
-import com.valhalla.config.models.ServiceLimitsIsochrone
-import com.valhalla.config.models.ServiceLimitsMultimodal
-import com.valhalla.config.models.ServiceLimitsPedestrian
-import com.valhalla.config.models.ServiceLimitsSkadi
-import com.valhalla.config.models.ServiceLimitsStatus
-import com.valhalla.config.models.ServiceLimitsTrace
-import com.valhalla.config.models.Thor
-import com.valhalla.config.models.ThorService
 import com.valhalla.config.models.ValhallaConfig
 import com.valhalla.valhalla.Valhalla
 import com.valhalla.valhalla.ValhallaResponse
+import com.valhalla.valhalla.config.ValhallaConfigFactory
 import java.io.File
 
 /** A point along a route, in the order the app uses. */
@@ -138,44 +115,16 @@ class ValhallaRouter(context: Context) {
         valhalla ?: Valhalla(context, engineConfig(tilesDir)).also { valhalla = it }
 
     /**
-     * The configuration the engine is opened with. It is the defaults of the configuration model,
-     * which ships with the engine it configures and therefore says what that engine expects, with
-     * the one thing the model can not know - where the tiles are on this device - filled in.
+     * The configuration the engine is opened with. It is the defaults the routing library ships
+     * alongside the engine itself - so they are always the ones that engine expects - with the one
+     * thing they can not know, where the tiles are on this device, filled in.
      *
-     * The sections are spelled out because the model leaves them empty, while the engine reads a long
-     * list of settings without a fallback of its own: it refuses to open rather than do without one.
-     * `ValhallaRouter.swift` says this in a single line since the routing library there ships a default
-     * configuration of its own, along with an initializer that takes the tiles directory - the library
-     * here has neither, so the same defaults are named one by one.
+     * `ValhallaRouter.swift` says this in the same single line, with `ValhallaConfig(tilesDir:)`:
+     * both platforms read the same generated defaults, so a route here and a route there are
+     * calculated with the same configuration.
      */
     private fun engineConfig(tilesDir: File): ValhallaConfig =
-        ValhallaConfig(
-            httpd = Httpd(service = HttpdService()),
-            loki = Loki(service = LokiService(), serviceDefaults = LokiServiceDefaults()),
-            meili = Meili(default = MeiliDefault(), grid = MeiliGrid()),
-            mjolnir = Mjolnir(tileDir = tilesDir.absolutePath),
-            odin = Odin(service = OdinService()),
-            serviceLimits =
-                ServiceLimits(
-                    auto = ServiceLimitsAuto(),
-                    bicycle = ServiceLimitsBicycle(),
-                    bikeshare = ServiceLimitsBicycle(),
-                    bus = ServiceLimitsBus(),
-                    centroid = ServiceLimitsCentroid(),
-                    isochrone = ServiceLimitsIsochrone(),
-                    motorScooter = ServiceLimitsBicycle(),
-                    motorcycle = ServiceLimitsBicycle(),
-                    multimodal = ServiceLimitsMultimodal(),
-                    pedestrian = ServiceLimitsPedestrian(),
-                    skadi = ServiceLimitsSkadi(),
-                    status = ServiceLimitsStatus(),
-                    taxi = ServiceLimitsAuto(),
-                    trace = ServiceLimitsTrace(),
-                    transit = ServiceLimitsBicycle(),
-                    truck = ServiceLimitsAuto(),
-                ),
-            thor = Thor(service = ThorService()),
-        )
+        ValhallaConfigFactory.usingTilesDir(tilesDir.absolutePath)
 
     private fun toRouteRequest(request: ValhallaRouteRequest): RouteRequest {
         val profile = profile(request.profile)
