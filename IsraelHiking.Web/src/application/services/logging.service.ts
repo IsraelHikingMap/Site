@@ -38,10 +38,6 @@ export class LoggingService {
         this.logToConsole = logToConsole;
     }
 
-    public uninitialize() {
-        this.loggingDatabase.close();
-    }
-
     private async reduceStoredLogLinesIfNeeded() {
         if (this.deletingLogsInProgress) {
             return;
@@ -63,15 +59,20 @@ export class LoggingService {
         }
     }
 
-    private writeToStorage(logLine: LogLine): void {
+    private async writeToStorage(logLine: LogLine): Promise<void> {
         if (!this.loggingDatabase) {
             return;
         }
-        this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
-            message: logLine.message,
-            date: logLine.date,
-            level: logLine.level
-        }).then(() => this.reduceStoredLogLinesIfNeeded());
+        try {
+            await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
+                message: logLine.message,
+                date: logLine.date,
+                level: logLine.level
+            });
+            await this.reduceStoredLogLinesIfNeeded();
+        } catch {
+            // a log line that could not be stored is not worth failing over
+        }
     }
 
     public info(message: string) {

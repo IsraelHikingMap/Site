@@ -3,6 +3,7 @@ import { resolve } from "path";
 
 export default defineConfig({
     test: {
+        isolate: true,
         browser: {
             screenshotFailures: false
         }

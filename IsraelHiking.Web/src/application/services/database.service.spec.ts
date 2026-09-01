@@ -36,8 +36,8 @@ describe("DatabaseService", () => {
 
     afterEach(async () => {
         const database = TestBed.inject(DatabaseService);
-        await database.deleteAllData();
         await database.uninitialize();
+        await database.deleteAllData();
     });
 
     it("Should delete every database it stores data in", inject([DatabaseService], async (service: DatabaseService) => {

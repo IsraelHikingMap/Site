@@ -104,7 +104,7 @@ export class DatabaseService {
                 initialState.locationState.zoom = 10;
                 initialState.gpsState.tracking = "tracking";
             }
-            this.updateState(initialState);
+            await this.updateState(initialState);
         }
 
         this.store.reset(storedState);
