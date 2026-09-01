@@ -323,6 +323,7 @@ export class ResourcesService {
     public allFilesAreUpToDate: string;
     public thisWillDeleteAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
+    public misconfiguredMailApp: string;
     public hiddenRoutesWillNotBeSaved: string;
     public noLocationPermissionOpenAppSettings: string;
     public noLocationPermission: string;
@@ -775,6 +776,8 @@ export class ResourcesService {
             .getString("This will delete all current routes. Are you sure?");
         this.pleaseFillReport = this.gettextCatalog
             .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
+        this.misconfiguredMailApp = this.gettextCatalog
+            .getString("No e-mail app was found on this device. Please install or set up an e-mail app and try again");
         this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
         this.noLocationPermissionOpenAppSettings = this.gettextCatalog.getString("There's no permission to use your location. " +
             "Would you like to open the app settings?");

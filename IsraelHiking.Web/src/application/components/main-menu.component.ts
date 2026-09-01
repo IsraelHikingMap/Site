@@ -132,6 +132,10 @@ export class MainMenuComponent {
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
+            if (!(await MailComposer.canComposeMail()).canCompose) {
+                this.toastService.warning(this.resources.misconfiguredMailApp);
+                return;
+            }
             const info = await Device.getInfo();
             const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
             infoString += [
