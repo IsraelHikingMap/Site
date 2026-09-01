@@ -23,7 +23,7 @@
     "@capacitor/text-zoom": "^8.0.1",
     "@capawesome-team/capacitor-android-battery-optimization": "^8.0.1",
     "@capawesome/capacitor-app-update": "^8.0.4",
-    "@capawesome/capacitor-mail-composer": "https://pkg.pr.new/capawesome-team/capacitor-plugins/@capawesome/capacitor-mail-composer@06209da",
+    "@capawesome/capacitor-mail-composer": "https://pkg.pr.new/capawesome-team/capacitor-plugins/@capawesome/capacitor-mail-composer@6513bb1",
     "@capgo/background-geolocation": "^8.4.3",
     "@capgo/capacitor-compass": "^8.1.19",
     "@capgo/capacitor-inappbrowser": "^8.15.4",
