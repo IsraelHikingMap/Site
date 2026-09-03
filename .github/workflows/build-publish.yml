@@ -175,7 +175,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version_string }}
 
   ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: version
     steps:
       - name: Checkout code

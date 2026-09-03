@@ -1,7 +1,8 @@
 name: CI
 
 # This workflow is triggered on every push.
-# It runs the backend and frontend tests and uploads the coverage to Codecov.
+# It runs the backend and frontend tests and uploads the coverage to Codecov,
+# and builds the website, the Android app and the iOS app.
 
 on:
   push:
@@ -16,15 +17,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: '9.0'
 
@@ -35,10 +36,13 @@ jobs:
           cd IsraelHiking.Web
           npm ci
           npm run test-ci
+      - name: Run lint
+        run: |
+          cd IsraelHiking.Web
           npx ng lint
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7.0.0
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
@@ -50,4 +54,89 @@ jobs:
           paths: |
             ./**/test-result.xml
             ./**/TESTS-*.xml
-          
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Setup Java
+        uses: actions/setup-java@v6.0.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build UI
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync android
+      - name: Build Android Release
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
+          cd IsraelHiking.Web/android
+          fastlane build_aab
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/IHM.jks
+      - name: Upload aab artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: IHM_signed.aab
+          path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Build Docker image
+        run: |
+          docker build . -t ghcr.io/israelhikingmap/website
+
+  build-ios:
+    # The image's default Xcode is used on purpose - App Store Connect rejects
+    # anything not built with Xcode 26 / the iOS 26 SDK since April 2026.
+    runs-on: macos-26
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Set up Git to use PAT for private match repo
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/IsraelHikingMap/fastlane-match".insteadOf "https://github.com/IsraelHikingMap/fastlane-match"
+
+      - name: Build UI
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync ios
+      - name: Build iOS with signing
+        if: ${{ github.secret_source == 'Actions' }}
+        run: |
+          cd IsraelHiking.Web/ios/App
+          fastlane build_ios
+        env:
+          MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+      - name: Upload ipa artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: IHM_signed.ipa
+          path: IsraelHiking.Web/ios/App/App.ipa
