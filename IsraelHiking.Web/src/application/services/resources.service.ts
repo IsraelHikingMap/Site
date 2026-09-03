@@ -484,7 +484,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1780051474852");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1788463599721");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -1005,6 +1005,9 @@ export class ResourcesService {
             const extenstion = split.pop();
             const prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
+        }
+        if (imageUrl.startsWith(Urls.userImages)) {
+            return `${imageUrl}?width=${size}`;
         }
         if (imageUrl.startsWith("File:")) {
             return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;

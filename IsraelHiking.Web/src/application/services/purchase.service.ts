@@ -118,9 +118,23 @@ export class PurchaseService {
             offlineState.lastModifiedDate != null;
     }
 
+    public isOrWasSubscribed(): boolean {
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        return offlineState.isOfflineAvailable || offlineState.lastModifiedDate != null;
+    }
+
     public async syncPurchases() {
-        this.loggingService.info("[Store] Initiating sync purchases");
-        await Purchases.syncPurchases();
-        await this.checkAndUpdateOfflineAvailability();
+        // The store connection is only configured once a user logs in, syncing before that throws.
+        if (!this.runningContextService.isCapacitor ||
+            this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo) == null) {
+            return;
+        }
+        try {
+            this.loggingService.info("[Store] Initiating sync purchases");
+            await Purchases.syncPurchases();
+            await this.checkAndUpdateOfflineAvailability();
+        } catch (error) {
+            this.loggingService.error("[Store] Failed to sync purchases: " + (error as Error).message);
+        }
     }
 }

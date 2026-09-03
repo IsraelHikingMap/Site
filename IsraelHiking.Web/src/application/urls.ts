@@ -36,6 +36,8 @@ export class Urls {
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
     public static readonly tranlation = "https://mapeak.com/api/translation/translate";
 
+    public static readonly userImages = "https://images.mapeak.com";
+
     public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
     public static readonly HEATMAP_TILES_ADDRESS =

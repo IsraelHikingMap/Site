@@ -1,5 +1,6 @@
 import { Immutable } from "immer";
 
+import { Urls } from "../urls";
 import { LatLngAlt } from "../models";
 
 export class GeoJSONUtils {
@@ -106,6 +107,9 @@ export class GeoJSONUtils {
             return true;
         }
         if (url.includes("jeepolog.com")) {
+            return true;
+        }
+        if (url.startsWith(Urls.userImages)) {
             return true;
         }
         return false;
