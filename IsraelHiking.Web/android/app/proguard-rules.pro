@@ -21,3 +21,13 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+
+# Capacitor asks a plugin class for its @CapacitorPlugin annotation at runtime to learn which
+# permissions the plugin declares. It does not check the answer, so a plugin whose annotation did
+# not survive takes the app down with a null pointer the first time it asks after a permission -
+# for background geolocation that is during startup. An annotation is only written into the dex if
+# something asks for it to be kept, and the annotation types themselves have to stay as well.
+-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,AnnotationDefault
+-keep @interface com.getcapacitor.**
+-keep @interface com.getcapacitor.annotation.**
+-keep,allowobfuscation @interface * { *; }
