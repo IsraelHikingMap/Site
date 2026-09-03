@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -28,18 +27,16 @@ namespace IsraelHiking.API.Services;
 /// Class constructor
 /// </remarks>
 /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-/// <param name="wikimediaCommonGateway"></param>
+/// <param name="imageUploadGateway"></param>
 /// <param name="base64ImageConverter"></param>
-/// <param name="imageUrlStoreExecutor"></param>
 /// <param name="tagsHelper"></param>
 /// <param name="clientsFactory"></param>
 /// <param name="wikidataGateway"></param>
 /// <param name="shareUrlGateway"></param>
 /// <param name="logger"></param>
 public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-    IWikimediaCommonGateway wikimediaCommonGateway,
+    IImageUploadGateway imageUploadGateway,
     IBase64ImageStringToFileConverter base64ImageConverter,
-    IImagesUrlsStorageExecutor imageUrlStoreExecutor,
     ITagsHelper tagsHelper,
     IClientsFactory clientsFactory,
     IWikidataGateway wikidataGateway,
@@ -51,9 +48,8 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     private readonly IClientsFactory _clientsFactory = clientsFactory;
     private readonly IWikidataGateway _wikidataGateway = wikidataGateway;
     private readonly IShareUrlGateway _shareUrlGateway = shareUrlGateway;
-    private readonly IWikimediaCommonGateway _wikimediaCommonGateway = wikimediaCommonGateway;
+    private readonly IImageUploadGateway _imageUploadGateway = imageUploadGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter = base64ImageConverter;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor = imageUrlStoreExecutor;
     private readonly ILogger _logger = logger;
 
     /// <summary>
@@ -482,18 +478,9 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         {
             return imageUrl;
         }
-        using var md5 = MD5.Create();
-        var imageUrlFromDatabase = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
-        if (imageUrlFromDatabase != null)
-        {
-            return imageUrlFromDatabase;
-        }
-
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
-        var wikiImageUrl = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
-        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, wikiImageUrl);
-        return wikiImageUrl;
+        return await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
     }
 
     private void AddFixMeToTouristAttraction(TagsCollectionBase tags)

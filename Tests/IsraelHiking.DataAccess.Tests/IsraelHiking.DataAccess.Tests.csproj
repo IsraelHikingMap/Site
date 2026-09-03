@@ -35,6 +35,7 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="SkiaSharp" />
     <PackageReference Include="JunitXml.TestLogger" />
   </ItemGroup>
 
