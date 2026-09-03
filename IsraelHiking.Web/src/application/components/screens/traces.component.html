@@ -1,5 +1,5 @@
 <div class="flex flex-row relative h-dvh" [dir]="resources.direction">
-    <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
+    <div class="hidden max-md:block absolute bottom-safe left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Traces"
                 analyticsLabel="Open list view">
@@ -35,9 +35,8 @@
                 <i class="fa icon-sort mx-2"></i>
             </button>
             <label class="flex-1 !h-[56px] ms-2">
-                <a class="w-full !h-full" mat-flat-button analyticsOn="click"
-                    analyticsCategory="Traces" analyticsLabel="Upload OSM trace"><i
-                        class="fa icon-folder-open fa-lg"></i>
+                <a class="w-full !h-full" mat-flat-button analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i>
                     {{resources.uploadTrace}}</a>
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
             </label>
@@ -154,8 +153,8 @@
             </mgl-layer>
             @if (missingCoordinates()) {
             <mgl-popup [lngLat]="missingCoordinates()" [offset]="[0, -30]" (popupClose)="clearSelection()">
-                <missing-part-overlay [feature]="selectedFeature()" (featureChange)="updateSelectedFeature($event)" [latlng]="missingCoordinates()"
-                    (removed)="removeMissingPart()"></missing-part-overlay>
+                <missing-part-overlay [feature]="selectedFeature()" (featureChange)="updateSelectedFeature($event)"
+                    [latlng]="missingCoordinates()" (removed)="removeMissingPart()"></missing-part-overlay>
             </mgl-popup>
             }
             @for (feature of missingParts().features; track feature) {
