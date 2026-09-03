@@ -4,6 +4,7 @@ using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IsraelHiking.API;
@@ -34,8 +35,9 @@ public static class RegisterApi
         services.AddTransient<ITagsHelper, TagsHelper>();
         services.AddTransient<IPointsOfInterestProvider, PointsOfInterestProvider>();
         services.AddTransient<IOfflineFilesService, OfflineFilesService>();
-        services.AddTransient<IImagesUrlsStorageExecutor, ImagesUrlsStorageExecutor>();
         services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
+        services.AddHttpContextAccessor();
+        services.AddTransient<IOsmAccessTokenProvider, HttpContextOsmAccessTokenProvider>();
 
         // registration here is what determines the order of which to merge points:
         // last one is the least important

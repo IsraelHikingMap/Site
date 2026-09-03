@@ -90,86 +90,16 @@
       - 11223:8080
     volumes:
       - ./tileserver-gl-config.json:/data/tileserver-gl-config.json:ro
-  # Panoramax is the image host the site uploads points of interest pictures to, see PanoramaxGateway.
-  # The API is at http://localhost:5555/api/ and the pictures can be browsed at http://localhost:3001
-  # Uploading needs no token here since API_FORCE_AUTH_ON_UPLOAD is off, on a real instance the token
-  # is taken from the PanoramaxToken setting.
-  panoramax-db:
-    image: postgis/postgis:16-3.4
-    container_name: panoramax-db
-    environment:
-      - POSTGRES_DB=geovisio
-      - POSTGRES_USER=gvs
-      - POSTGRES_PASSWORD=gvspwd
-    healthcheck:
-      test: pg_isready -h localhost -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 5
-      start_period: 5s
-    volumes:
-      - panoramaxdbdata:/var/lib/postgresql/data/
-    restart: always
-  panoramax-migrations:
-    image: panoramax/api:latest
-    container_name: panoramax-migrations
-    command: db-upgrade
-    environment:
-      - DB_URL=postgres://gvs:gvspwd@panoramax-db/geovisio
-    depends_on:
-      panoramax-db:
-        condition: service_healthy
-  panoramax-api:
-    image: panoramax/api:latest
-    container_name: panoramax-api
-    command: ssl-api
-    environment:
-      - DB_URL=postgres://gvs:gvspwd@panoramax-db/geovisio
-      - FS_URL=/data/geovisio
-      - API_FORCE_AUTH_ON_UPLOAD=False
-      - API_PICTURES_LICENSE_SPDX_ID=CC0-1.0
-      - API_PICTURES_LICENSE_URL=https://spdx.org/licenses/CC0-1.0.html
-      - API_ACCEPT_DUPLICATE=True
-      - PICTURE_PROCESS_DERIVATES_STRATEGY=PREPROCESS
-      - PICTURE_PROCESS_THREADS_LIMIT=0
-      - 'API_SUMMARY={"name":{"en":"Mapeak (local)"},"color":"#4c6c9c"}'
-    ports:
-      - 5555:5000
-    volumes:
-      - panoramaxdata:/data/geovisio
-    depends_on:
-      panoramax-db:
-        condition: service_healthy
-      panoramax-migrations:
-        condition: service_completed_successfully
-    restart: always
-  # Generates the thumbnail and the standard definition version of every uploaded picture.
-  # No blurring service is configured, so faces and plates are left as they are.
-  panoramax-worker:
-    image: panoramax/api:latest
-    container_name: panoramax-worker
-    command: picture-worker
-    environment:
-      - DB_URL=postgres://gvs:gvspwd@panoramax-db/geovisio
-      - FS_URL=/data/geovisio
-      - PICTURE_PROCESS_DERIVATES_STRATEGY=PREPROCESS
-    volumes:
-      - panoramaxdata:/data/geovisio
-    depends_on:
-      panoramax-db:
-        condition: service_healthy
-      panoramax-migrations:
-        condition: service_completed_successfully
-    restart: always
-  panoramax-website:
-    image: panoramax/website:latest
-    container_name: panoramax-website
-    environment:
-      - VITE_API_URL=http://localhost:5555/
-      - VITE_INSTANCE_NAME=Mapeak (local)
-      - VITE_TILES=https://panoramax.openstreetmap.fr/pmtiles/basic.json
+  user-images:
+    image: ghcr.io/mapeak-com/user-images
+    container_name: user-images
     ports:
       - 3001:3000
+    environment:
+      - PUBLIC_BASE_URL=http://localhost:3001
+      - STORAGE_DIR=/data/images
+    volumes:
+      - userimagesdata:/data/images
     restart: always
 volumes:
   esdata:
@@ -178,7 +108,5 @@ volumes:
     driver: local
   tldata:
     driver: local
-  panoramaxdata:
-    driver: local
-  panoramaxdbdata:
+  userimagesdata:
     driver: local

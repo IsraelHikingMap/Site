@@ -27,7 +27,6 @@ public class PointsOfInterestProviderTests
     private IClientsFactory _clientsFactory;
     private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
     private IImageUploadGateway _imageUploadGateway;
-    private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private ITagsHelper _tagsHelper;
     private IWikidataGateway _wikidataGateway;
     private IShareUrlGateway _shareUrlGateway;
@@ -39,17 +38,15 @@ public class PointsOfInterestProviderTests
         _tagsHelper = new TagsHelper();
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
-        _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
         _imageUploadGateway = Substitute.For<IImageUploadGateway>();
         _imageUploadGateway.UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>())
-            .Returns(new UploadedImage(null, "https://upload.wikimedia.org/image.jpeg"));
+            .Returns("https://images.mapeak.com/image.jpg");
         _wikidataGateway = Substitute.For<IWikidataGateway>();
         _wikidataGateway.GetContent(Arg.Any<string>()).Returns(new WikidataContent());
         _shareUrlGateway = Substitute.For<IShareUrlGateway>();
         _adapter = new PointsOfInterestProvider(_osmGeoJsonPreprocessorExecutor,
             _imageUploadGateway,
             new Base64ImageStringToFileConverter(),
-            _imagesUrlsStorageExecutor,
             _tagsHelper, _clientsFactory,
             _wikidataGateway, _shareUrlGateway,
             Substitute.For<ILogger>());
@@ -216,7 +213,6 @@ public class PointsOfInterestProviderTests
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
         var results = _adapter.AddFeature(feature, gateway, language).Result;
 
@@ -239,7 +235,6 @@ public class PointsOfInterestProviderTests
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
         feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
         var results = _adapter.AddFeature(feature, gateway, language).Result;
 
@@ -460,7 +455,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection {
@@ -475,7 +469,6 @@ public class PointsOfInterestProviderTests
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _imageUploadGateway.Received(1).UploadImage("name.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
     }
 
     [TestMethod]
@@ -492,7 +485,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection {
@@ -507,7 +499,6 @@ public class PointsOfInterestProviderTests
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _imageUploadGateway.Received(1).UploadImage("name.1.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
     }
 
     [TestMethod]
@@ -524,7 +515,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection()
@@ -539,90 +529,6 @@ public class PointsOfInterestProviderTests
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         _imageUploadGateway.Received(1).UploadImage("tint.png", "tint", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
-    }
-
-    [TestMethod]
-    public void UpdateFeature_WithImageInRepository_ShouldNotUploadImage()
-    {
-        var user = new User { DisplayName = "DisplayName" };
-        var gateway = SetupOsmAuthClient();
-        gateway.GetUserDetails().Returns(user);
-        var id = "Node_42";
-        var poi = new Feature(new Point(0, 0), new AttributesTable {
-            { FeatureAttributes.POI_SOURCE, Sources.OSM },
-            { FeatureAttributes.ID, id },
-            { FeatureAttributes.POI_ICON, "icon" },
-            { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                                          "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
-        });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
-        gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
-
-        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
-
-        _imageUploadGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t => t.Key == "image")));
-    }
-
-    [TestMethod]
-    public void UpdateFeature_WithAddedImage_ShouldPutThePanoramaxPictureIdInTheTags()
-    {
-        const string pictureId = "8781f27a-e4e5-4b76-9d3a-9d6d1a5c5f8a";
-        var user = new User { DisplayName = "DisplayName" };
-        var gateway = SetupOsmAuthClient();
-        gateway.GetUserDetails().Returns(user);
-        var poi = new Feature(new Point(0, 0), new AttributesTable {
-            { FeatureAttributes.POI_SOURCE, Sources.OSM },
-            { FeatureAttributes.ID, "Node_42" },
-            { FeatureAttributes.POI_ICON, "icon" },
-            { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                                          "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
-        });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-        _imageUploadGateway.UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>())
-            .Returns(new UploadedImage(pictureId, null));
-        gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
-
-        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
-
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), pictureId);
-        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
-            o.Tags.Contains(FeatureAttributes.PANORAMAX, pictureId) &&
-            !o.Tags.Any(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL))));
-    }
-
-    [TestMethod]
-    public void UpdateFeature_WithRemovedPanoramaxImage_ShouldRemoveItAndCloseTheHoleItLeft()
-    {
-        const string removedPictureId = "8781f27a-e4e5-4b76-9d3a-9d6d1a5c5f8a";
-        const string remainingPictureId = "1b4d0b95-1c6a-4e3a-9a5f-0a1c2d3e4f50";
-        var user = new User { DisplayName = "DisplayName" };
-        var gateway = SetupOsmAuthClient();
-        gateway.GetUserDetails().Returns(user);
-        var poi = new Feature(new Point(0, 0), new AttributesTable {
-            { FeatureAttributes.POI_SOURCE, Sources.OSM },
-            { FeatureAttributes.ID, "Node_42" },
-            { FeatureAttributes.POI_ICON, "icon" },
-            { FeatureAttributes.POI_REMOVED_IMAGES, new [] { $"https://panoramax.mapeak.com/api/pictures/{removedPictureId}/sd.jpg" } }
-        });
-        gateway.GetNode(42).Returns(new Node
-        {
-            Tags = new TagsCollection
-            {
-                { FeatureAttributes.PANORAMAX, removedPictureId },
-                { FeatureAttributes.PANORAMAX + ":1", remainingPictureId }
-            },
-            Latitude = 0,
-            Longitude = 0,
-            Id = 42
-        });
-
-        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
-
-        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
-            o.Tags.Contains(FeatureAttributes.PANORAMAX, remainingPictureId) &&
-            !o.Tags.ContainsKey(FeatureAttributes.PANORAMAX + ":1")));
     }
 
     [TestMethod]

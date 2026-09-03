@@ -17,8 +17,7 @@ public static class RegisterDataAccess
         services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
         services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IImagesRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IImageUploadGateway, WikimediaCommonGateway>();
+        services.AddTransient<IImageUploadGateway, UserImagesGateway>();
         services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
         services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();
         services.AddTransient<IWikidataGateway, WikidataGateway>();

@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -30,7 +29,6 @@ namespace IsraelHiking.API.Services;
 /// <param name="osmGeoJsonPreprocessorExecutor"></param>
 /// <param name="imageUploadGateway"></param>
 /// <param name="base64ImageConverter"></param>
-/// <param name="imageUrlStoreExecutor"></param>
 /// <param name="tagsHelper"></param>
 /// <param name="clientsFactory"></param>
 /// <param name="wikidataGateway"></param>
@@ -39,7 +37,6 @@ namespace IsraelHiking.API.Services;
 public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
     IImageUploadGateway imageUploadGateway,
     IBase64ImageStringToFileConverter base64ImageConverter,
-    IImagesUrlsStorageExecutor imageUrlStoreExecutor,
     ITagsHelper tagsHelper,
     IClientsFactory clientsFactory,
     IWikidataGateway wikidataGateway,
@@ -53,7 +50,6 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     private readonly IShareUrlGateway _shareUrlGateway = shareUrlGateway;
     private readonly IImageUploadGateway _imageUploadGateway = imageUploadGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter = base64ImageConverter;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor = imageUrlStoreExecutor;
     private readonly ILogger _logger = logger;
 
     /// <summary>
@@ -293,7 +289,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         var location = feature.GetLocation();
         var idString = feature.GetId();
         _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
-        var images = await UploadImages(feature, language, osmGateway);
+        var imagesList = await UploadImages(feature, language, osmGateway);
         var node = new Node
         {
             Latitude = location.Y,
@@ -304,7 +300,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
             .Select(p => feature.Attributes[p].ToString())
             .ToList());
-        SetImagesTags(node.Tags, images);
+        SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, imagesList);
         SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
         SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
         AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
@@ -421,7 +417,10 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         }
         SetWebsiteAndWikiTags(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
 
-        var existingImages = GetImages(featureAfterTagsUpdates).ToList();
+        var existingImages = featureAfterTagsUpdates.Attributes.GetNames()
+            .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+            .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
+            .ToList();
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_IMAGES))
         {
             var user = await osmGateway.GetUserDetails();
@@ -434,83 +433,25 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         {
             foreach (var imageUrlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_IMAGES] as IEnumerable<object>)
             {
-                existingImages.Remove(ToUploadedImage(imageUrlToRemove.ToString()));
+                existingImages.Remove(imageUrlToRemove.ToString());
             }
         }
-        SetImagesTags(completeOsmGeo.Tags, existingImages.Distinct().ToArray());
+        SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.Distinct().ToArray());
     }
 
-    /// <summary>
-    /// Reads the pictures of a point of interest from its "image" and "panoramax" tags
-    /// </summary>
-    private static UploadedImage[] GetImages(IFeature feature)
-    {
-        var urls = feature.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-            .Select(n => new UploadedImage(null, feature.Attributes[n].ToString()));
-        var pictureIds = feature.Attributes.GetNames()
-            .Where(IsPanoramaxTagName)
-            .SelectMany(n => feature.Attributes[n].ToString().Split(';'))
-            .Select(id => id.Trim())
-            .Where(id => Guid.TryParse(id, out _))
-            .Select(id => new UploadedImage(id, null));
-        return urls.Concat(pictureIds).ToArray();
-    }
-
-    /// <summary>
-    /// Writes the pictures of a point of interest back to its "image" and "panoramax" tags
-    /// </summary>
-    /// <remarks>
-    /// A panoramax picture is referenced by its id in a "panoramax", "panoramax:1", "panoramax:2"... list,
-    /// which is the convention the OSM wiki documents and the one other editors write.
-    /// The "panoramax:view" tag and the likes are left alone since they are not a part of this list.
-    /// </remarks>
-    private void SetImagesTags(TagsCollectionBase tags, UploadedImage[] images)
-    {
-        SetMultipleValuesForTag(tags, FeatureAttributes.IMAGE_URL, images.Where(i => i.Url != null).Select(i => i.Url).ToArray());
-        foreach (var tag in tags.Where(t => IsPanoramaxTagName(t.Key)).ToArray())
-        {
-            tags.RemoveKey(tag.Key);
-        }
-        var pictureIds = images.Where(i => i.PictureId != null).Select(i => i.PictureId).ToArray();
-        for (var index = 0; index < pictureIds.Length; index++)
-        {
-            var tagName = index == 0 ? FeatureAttributes.PANORAMAX : $"{FeatureAttributes.PANORAMAX}:{index}";
-            tags.AddOrReplace(tagName, pictureIds[index]);
-        }
-    }
-
-    private static bool IsPanoramaxTagName(string tagName)
-    {
-        return tagName == FeatureAttributes.PANORAMAX ||
-               Regex.IsMatch(tagName, $"^{FeatureAttributes.PANORAMAX}:[0-9]+$");
-    }
-
-    /// <summary>
-    /// Turns an image url the client sent back into the picture it points at, so that a picture that was
-    /// uploaded to panoramax is removed from the "panoramax" tags and not from the "image" ones
-    /// </summary>
-    private static UploadedImage ToUploadedImage(string imageUrl)
-    {
-        var match = Regex.Match(imageUrl, "/pictures/(?<id>[0-9a-fA-F-]{36})");
-        return match.Success
-            ? new UploadedImage(match.Groups["id"].Value, null)
-            : new UploadedImage(null, imageUrl);
-    }
-
-    private async Task<UploadedImage[]> UploadImages(IFeature feature, string language, IAuthClient osmGateway)
+    private async Task<string[]> UploadImages(IFeature feature, string language, IAuthClient osmGateway)
     {
         var user = await osmGateway.GetUserDetails();
         var imageUrls = feature.Attributes.GetNames()
             .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
             .Select(p => feature.Attributes[p].ToString())
             .ToArray();
-        var images = new List<UploadedImage>();
+        var updatedImageUrls = new List<string>();
         foreach (var imageUrl in imageUrls)
         {
-            images.Add(await UploadImageIfNeeded(imageUrl, feature, language, user.DisplayName));
+            updatedImageUrls.Add(await UploadImageIfNeeded(imageUrl, feature, language, user.DisplayName));
         }
-        return images.ToArray();
+        return updatedImageUrls.ToArray();
     }
 
     private string GetNonEmptyTitle(string title, string icon)
@@ -527,15 +468,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             : description;
     }
 
-    /// <summary>
-    /// Uploads an image the client sent as a base64 string to the image host, images that were already
-    /// uploaded - either in this call or by a previous one - are returned as they are
-    /// </summary>
-    /// <remarks>
-    /// The store of already uploaded images holds a picture id for the hosts that reference a picture by an
-    /// id and a url for the ones that reference it by a url, which is what tells the two of them apart here.
-    /// </remarks>
-    private async Task<UploadedImage> UploadImageIfNeeded(string imageUrl,
+    private async Task<string> UploadImageIfNeeded(string imageUrl,
         IFeature feature, string language, string userDisplayName)
     {
         var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
@@ -543,22 +476,11 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         var file = _base64ImageConverter.ConvertToFile(imageUrl, nonEmptyTitle);
         if (file == null)
         {
-            return ToUploadedImage(imageUrl);
+            return imageUrl;
         }
-        using var md5 = MD5.Create();
-        var storedImage = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
-        if (storedImage != null)
-        {
-            return Guid.TryParse(storedImage, out _)
-                ? new UploadedImage(storedImage, null)
-                : new UploadedImage(null, storedImage);
-        }
-
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
-        var uploadedImage = await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
-        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, uploadedImage.PictureId ?? uploadedImage.Url);
-        return uploadedImage;
+        return await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
     }
 
     private void AddFixMeToTouristAttraction(TagsCollectionBase tags)

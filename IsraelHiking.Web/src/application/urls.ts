@@ -37,6 +37,8 @@ export class Urls {
 
     public static readonly overpassApi = "https://mapeak.com/api/interpreter";
 
+    public static readonly userImages = "https://images.mapeak.com";
+
     public static readonly panoramaxApi = "https://api.panoramax.xyz/api/";
     public static readonly panoramaxPictures = Urls.panoramaxApi + "pictures/";
     public static readonly panoramaxSearch = Urls.panoramaxApi + "search";
