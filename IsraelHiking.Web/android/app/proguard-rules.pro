@@ -1,21 +1,21 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Stack traces from play console are only readable through the mapping file that is built
+# alongside the bundle, and only if the line numbers survive to be mapped back. The source file
+# names are renamed rather than kept, so they carry nothing but the line number.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# pmtiles-mobile and maplibre-contour-rs are uniffi generated bindings that reach their rust
+# libraries through JNA, and neither aar ships rules of its own. JNA lays out a native struct by
+# reflecting over the field names and declared order of the Structure that mirrors it, and finds a
+# Callback by its method name, so renaming either leaves it reading a buffer at the wrong offsets
+# or unable to dispatch a call back from rust - at runtime, with nothing said at build time. The
+# generated bindings are the whole of these two packages, so they are kept whole.
+-keep class com.mapeak.pmtiles.** { *; }
+-keep class com.mapeak.maplibrecontour.** { *; }
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.Structure { <fields>; }
+-keepclassmembers class * implements com.sun.jna.Callback { <methods>; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# JNA is written to run on the desktop as well, where it draws on awt to describe native windows.
+# None of that is reachable on android, but R8 still reads the references and asks about them.
+-dontwarn java.awt.**
