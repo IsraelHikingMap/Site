@@ -1,5 +1,5 @@
 <div class="flex flex-row relative h-dvh relative" [dir]="resources.direction">
-    <div class="hidden max-md:block fixed bottom-safe bg-surface left-1/2 -translate-x-1/2 z-20">
+    <div class="hidden max-md:block fixed bottom-safe left-1/2 -translate-x-1/2 z-20">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Public routes"
                 analyticsLabel="Open list view">
@@ -145,8 +145,8 @@
             </div>
             }
             <mat-menu #shareMenu="matMenu">
-                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).waze" [target]="'_blank'" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
+                <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).waze" [target]="'_blank'"
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
                     <i class="fa icon-waze"></i>
                     {{resources.navigateWithWaze}}
                 </a>

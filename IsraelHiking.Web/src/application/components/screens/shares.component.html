@@ -1,5 +1,5 @@
 <div class="flex flex-row h-dvh relative" [dir]="resources.direction">
-    <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
+    <div class="hidden max-md:block absolute bottom-safe left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Shares"
                 analyticsLabel="Open list view">
@@ -67,8 +67,8 @@
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox (change)="onFilterChange('difficulty', 'Moderate')"
-                        analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Filter by moderate difficulty"
+                    <mat-checkbox (change)="onFilterChange('difficulty', 'Moderate')" analyticsOn="click"
+                        analyticsCategory="Shares" analyticsLabel="Filter by moderate difficulty"
                         [checked]="filter.difficulty.includes('Moderate')">
                         {{resources.moderate}}
                     </mat-checkbox>
@@ -89,16 +89,14 @@
                 </div>
                 <mat-divider></mat-divider>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox (change)="onFilterChange('type', 'Hiking')"
-                        [checked]="filter.type.includes('Hiking')" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Filter by hiking">
+                    <mat-checkbox (change)="onFilterChange('type', 'Hiking')" [checked]="filter.type.includes('Hiking')"
+                        analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Filter by hiking">
                         <i class="fa icon-hike"></i>
                     </mat-checkbox>
                 </div>
                 <div mat-menu-item (click)="$event.stopPropagation()">
-                    <mat-checkbox (change)="onFilterChange('type', 'Biking')"
-                        [checked]="filter.type.includes('Biking')" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Filter by biking">
+                    <mat-checkbox (change)="onFilterChange('type', 'Biking')" [checked]="filter.type.includes('Biking')"
+                        analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Filter by biking">
                         <i class="fa icon-bike"></i>
                     </mat-checkbox>
                 </div>

@@ -56,7 +56,7 @@ export class TranslationService {
                 source: "auto",
                 target: language,
                 format: "text"
-            }).pipe(timeout(2000)));
+            }).pipe(timeout(10000)));
             this.translationCache.set(cacheKey, translatedResponse.translatedText);
             return translatedResponse.translatedText;
         }

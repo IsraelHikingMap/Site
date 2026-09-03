@@ -12,6 +12,10 @@ $low-emphasis-button-labels: (
     protected-label-text-color: var(--mat-sys-on-surface)
 );
 
+$opaque-button-toggle: (
+    background-color: var(--mat-sys-surface)
+);
+
 html {
     @include mat.theme((color: (primary: theme-colors.$primary-palette,
                 tertiary: theme-colors.$tertiary-palette,
@@ -24,6 +28,7 @@ html {
         ));
     color-scheme: light;
     @include mat.button-overrides($low-emphasis-button-labels);
+    @include mat.button-toggle-overrides($opaque-button-toggle);
 
     --brand-color: #32cd6d;
     --warning-color: #8a5a00;
@@ -38,6 +43,7 @@ html {
         ));
     color-scheme: dark;
     @include mat.button-overrides($low-emphasis-button-labels);
+    @include mat.button-toggle-overrides($opaque-button-toggle);
 
     --warning-color: #ffc107;
 }
@@ -394,6 +400,7 @@ mgl-map {
 // Strips the toolbar sizing and filled-field chrome off the search when the landing hero hosts it.
 // !important since search.component is ViewEncapsulation.None and injects its styles after this sheet.
 .landing-search {
+
     .search-input-container,
     .search-input-container.logged-in {
         width: 100% !important;
