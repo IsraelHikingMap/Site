@@ -186,19 +186,9 @@ jobs:
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
-      - name: Setup xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
-
-      - name: setup-cocoapods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
-
       - name: Set up Git to use PAT for private match repo
         run: |
-          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:${{ secrets.FASTLANE_MATCH_PAT }}@github.com/IsraelHikingMap/fastlane-match".insteadOf "https://github.com/IsraelHikingMap/fastlane-match"
 
       - name: Build UI
         run: |
