@@ -6,8 +6,8 @@ import { INatureService } from "./inature.service";
 import { NakebService } from "./nakeb.service";
 import { PanoramaxService } from "./panoramax.service";
 import { ShareUrlsService } from "./share-urls.service";
-import { UserImagesService } from "./user-images.service";
 import { WikidataService } from "./wikidata.service";
+import { UserImagesService } from "./user-images.service";
 
 export type ImageAttribution = {
     author: string;
@@ -42,8 +42,8 @@ export class ImageAttributionService {
         inject(NakebService),
         inject(PanoramaxService),
         inject(ShareUrlsService),
-        inject(UserImagesService),
-        inject(WikidataService)
+        inject(WikidataService),
+        inject(UserImagesService)
     ];
 
     /**
