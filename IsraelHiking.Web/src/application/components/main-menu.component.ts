@@ -147,7 +147,9 @@ export class MainMenuComponent {
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
                 `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
             ].join("\n");
-            const logFileBase64 = encode(await new Response(logs).arrayBuffer());
+            // The log goes over as a file - inline it takes the saved plugin call over android's
+            // binder limit and crashes the app when the mail app opens. The info is small enough.
+            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
 
@@ -156,8 +158,7 @@ export class MainMenuComponent {
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
-                    name: "log.txt",
-                    data: logFileBase64
+                    path: logFileUri
                 }, {
                     name: `info-${userInfo.id}.txt`,
                     data: infoBase64
