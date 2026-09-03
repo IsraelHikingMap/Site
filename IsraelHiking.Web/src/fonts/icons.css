@@ -506,6 +506,10 @@
   content: "\e977";
 }
 
+.icon-stop:before {
+  content: "\e98c";
+}
+
 .icon-synagogue:before {
   content: "\e978";
 }
