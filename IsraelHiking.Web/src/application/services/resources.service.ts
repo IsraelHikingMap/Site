@@ -983,6 +983,9 @@ export class ResourcesService {
             const prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
         }
+        if (imageUrl.startsWith(Urls.userImages)) {
+            return `${imageUrl}?width=${size}`;
+        }
         if (imageUrl.startsWith("File:")) {
             return `${Urls.wikimediaCommons}w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
         }

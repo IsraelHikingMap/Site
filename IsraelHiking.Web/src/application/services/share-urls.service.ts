@@ -240,7 +240,7 @@ export class ShareUrlsService implements ImageAttributionProvider {
     }
 
     public isImageUrl(imageUrl: string): boolean {
-        return imageUrl.includes("mapeak.com");
+        return imageUrl != null && imageUrl.includes("mapeak.com") && !imageUrl.startsWith(Urls.userImages);
     }
 
     /**
