@@ -19,7 +19,7 @@
   <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
     analyticsCategory="Location" analyticsLabel="Toggle recording">
     @if (isRecording()) {
-    <i class="fa fa-lg icon-square"></i>
+    <i class="fa fa-lg icon-stop"></i>
     } @else {
     <i class="fa fa-lg icon-circle recording-button"></i>
     }
