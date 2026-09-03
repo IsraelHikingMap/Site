@@ -64,6 +64,12 @@ export class PublicRoutesComponent {
     });
     public readonly selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
 
+    /**
+     * The routes the map holds, kept since a small screen shows either the map or the list, and a map
+     * that is not displayed holds nothing, which would empty the list the moment a filter changes.
+     */
+    private routesFromTiles: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] = [];
+
     public readonly resources = inject(ResourcesService);
 
     private readonly mapService = inject(MapService);
@@ -107,8 +113,11 @@ export class PublicRoutesComponent {
     }
 
     public runFilter() {
+        if (this.showMap()) {
+            this.routesFromTiles = this.poiService.getPoisFromTiles();
+        }
         const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
-        let features = this.poiService.getPublicRoutes(filters).features;
+        let features = this.poiService.getPublicRoutes(filters, this.routesFromTiles).features;
         const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
         features = orderBy(features, sortBy, ["desc"]);
         this.poiGeoJsonData.set({

@@ -184,7 +184,11 @@ export class PoiService {
         return this.mapService.getFeaturesFromTiles();
     }
 
-    private getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+    /**
+     * Gets the POIs the map holds for the part of the world it currently shows. A map that is not
+     * displayed renders nothing, so a caller that outlives the map on screen needs to keep the result.
+     */
+    public getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const features = this.getFeaturesFromTiles();
         const hashSet = new Set();
         let pois = features.map(feature => {
@@ -272,7 +276,12 @@ export class PoiService {
         };
     }
 
-    public getPublicRoutes(filters: Immutable<PublicRoutesFilter>): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
+    /**
+     * @param filters the filters to apply
+     * @param pois the POIs to filter, read from the map by {@link getPoisFromTiles}
+     */
+    public getPublicRoutes(filters: Immutable<PublicRoutesFilter>,
+        pois: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties> {
         if (filters.categories.length === 0) {
             return {
                 type: "FeatureCollection",
@@ -281,8 +290,7 @@ export class PoiService {
         }
         const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
         const factor = units === "metric" ? 1000.0 : 1609.344;
-        let features = this.getPoisFromTiles();
-        features = this.filterFeatures(features, filters.categories);
+        let features = this.filterFeatures(pois, filters.categories);
         features = features.filter(feature => {
             if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
                 return false;

@@ -23,7 +23,7 @@ if (environment.isCapacitor) {
  * the OSM changesets it creates. A request without these headers is from a client that predates them.
  */
 export function clientDetailsInterceptor(request: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
-    if (request.url.includes(Urls.apiBase)) {
+    if (Urls.isOwnApiAddress(request.url)) {
         const headers: Record<string, string> = { [CLIENT_PLATFORM_HEADER]: Capacitor.getPlatform() };
         if (appVersion) {
             headers[CLIENT_VERSION_HEADER] = appVersion;

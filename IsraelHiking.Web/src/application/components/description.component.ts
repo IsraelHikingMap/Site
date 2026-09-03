@@ -38,9 +38,12 @@ export class DescriptionComponent implements OnChanges {
         if (!this.feature()) {
             return "";
         }
-        const description = this.showingTranslated() && this.translationService.isTranslationPossibleAndNeeded(this.feature())
-            ? await this.translationService.getTranslatedDescription(this.feature())
-            : this.translationService.getBestDescription(this.feature());
+        const originalDescription = this.translationService.getBestDescription(this.feature());
+        const shouldTranslate = this.showingTranslated() && this.translationService.isTranslationPossibleAndNeeded(this.feature());
+        // A translation that could not be fetched falls back to the original text, it is better than no text at all
+        const description = shouldTranslate
+            ? await this.translationService.getTranslatedDescription(this.feature()) || originalDescription
+            : originalDescription;
 
         if (description) {
             return description;

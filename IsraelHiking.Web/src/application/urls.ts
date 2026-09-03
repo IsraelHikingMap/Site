@@ -65,4 +65,14 @@ export class Urls {
 
     public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
+
+    /**
+     * Tells whether an address belongs to our own API, as opposed to a third party service that is only
+     * proxied through our domain. Only our own API gets our token and client headers - a third party
+     * service answers the CORS preflight the app makes with the headers it knows alone, and the browser
+     * then blocks the request. It also has no business seeing the user's OSM token.
+     */
+    public static isOwnApiAddress(url: string): boolean {
+        return url.includes(Urls.apiBase) && !url.startsWith(Urls.tranlation);
+    }
 }
