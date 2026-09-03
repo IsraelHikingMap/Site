@@ -22,12 +22,10 @@
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
 
-# Capacitor asks a plugin class for its @CapacitorPlugin annotation at runtime to learn which
-# permissions the plugin declares. It does not check the answer, so a plugin whose annotation did
-# not survive takes the app down with a null pointer the first time it asks after a permission -
-# for background geolocation that is during startup. An annotation is only written into the dex if
-# something asks for it to be kept, and the annotation types themselves have to stay as well.
--keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,AnnotationDefault
+# Capacitor asks a plugin class for its @CapacitorPlugin annotation to learn which permissions the
+# plugin declares, and does not check the answer, so a plugin it cannot read the annotation off
+# takes the app down with a null pointer the first time anything asks after a permission - for
+# background geolocation that is during startup, and for the camera the moment a photo is taken.
+# Letting R8 rename the annotation types is what breaks the lookup; keeping them fixes it, verified
+# by building it both ways and watching the app come up or die on a device.
 -keep @interface com.getcapacitor.**
--keep @interface com.getcapacitor.annotation.**
--keep,allowobfuscation @interface * { *; }
