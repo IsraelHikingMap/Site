@@ -62,6 +62,7 @@ class CarNavigation(
     private val handler = Handler(Looper.getMainLooper())
     private val notification = CarNavigationNotification(carContext)
     private val backend = CarBackendService(carContext)
+    private val paceCalculator = CarPaceCalculator()
 
     private var routePoints: List<Point> = emptyList()
     private var maneuvers: List<CarManeuver> = emptyList()
@@ -203,8 +204,8 @@ class CarNavigation(
         val current = if (currentIndex >= 0) maneuvers[currentIndex] else maneuvers.last()
         val next = if (currentIndex >= 0) maneuvers.getOrNull(currentIndex + 1) else null
         val distanceToStep = (current.distanceAlongRouteM - traveled).coerceAtLeast(0.0)
-        val speed =
-                if (location.hasSpeed() && location.speed >= MIN_SPEED_MPS) location.speed else null
+        paceCalculator.updatePace(location)
+        val speed = paceCalculator.speed
 
         val currentStep = step(current)
         val nextStep = next?.let { step(it) }
@@ -305,11 +306,11 @@ class CarNavigation(
                     .setName(destinationName ?: translations().getString("Destination"))
                     .build()
 
-    private fun travelEstimate(meters: Double, speedMps: Float?): TravelEstimate {
+    private fun travelEstimate(meters: Double, speed: Float?): TravelEstimate {
         val remainingDistance = distance(meters)
         val now = System.currentTimeMillis()
-        return if (speedMps != null && speedMps > 0f) {
-            val seconds = (meters / speedMps).toLong()
+        return if (speed != null && speed > 0f) {
+            val seconds = (meters / speed).toLong()
             TravelEstimate.Builder(
                             remainingDistance,
                             DateTimeWithZone.create(now + seconds * 1000, TimeZone.getDefault())
@@ -425,7 +426,6 @@ class CarNavigation(
     companion object {
         private const val DEFAULT_ROUTING_TYPE = "4WD"
         private const val EPSILON_M = 1.0
-        private const val MIN_SPEED_MPS = 0.5f
         private const val METERS_PER_KILOMETER = 1000.0
         private const val METERS_PER_MILE = 1609.344
         private const val METERS_PER_FOOT = 0.3048

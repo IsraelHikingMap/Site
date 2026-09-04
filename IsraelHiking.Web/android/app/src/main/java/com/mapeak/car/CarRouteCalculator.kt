@@ -7,24 +7,24 @@ import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfMeasurement
 import org.maplibre.turf.TurfMisc
 
-/** Remaining distance/time for the route the driver is currently on. */
-data class CarStatistics(val remainingMeters: Double, val remainingSeconds: Long)
+/**
+ * Remaining distance/time for the route the driver is currently on. [remainingSeconds] is null
+ * before a speed was measured, when the distance is all there is to show.
+ */
+data class CarStatistics(val remainingMeters: Double, val remainingSeconds: Long?)
 
 /**
- * Route-relative calculations for the car experience, derived from the current GPS location: how far
- * along a route we are ([distanceAlongRoute], drives turn-by-turn in CarNavigation) and how far/long
- * is left ([computeStatistics], drives the cluster statistics in CarMapScreen).
+ * Route-relative calculations for the car experience, derived from the current GPS location: how
+ * far along a route we are ([distanceAlongRoute], drives turn-by-turn in CarNavigation) and how
+ * far/long is left ([computeStatistics], drives the cluster statistics in CarMapScreen).
  *
  * Both build on the same projection: a GPS position is matched to the route segment that minimizes
- * perpendicular distance plus, when a heading is known, how much that segment's bearing differs from
- * it. The heading term keeps the match on the correct leg where a route overlaps itself in the
+ * perpendicular distance plus, when a heading is known, how much that segment's bearing differs
+ * from it. The heading term keeps the match on the correct leg where a route overlaps itself in the
  * opposite direction (e.g. an out-and-back). Mirrors the weighting in route-statistics.service.ts
  * (findDistanceForLatLngInKMInternal / getClosestRouteToGPSInternal).
  */
 object CarRouteCalculator {
-    /** Below this speed (m/s) the GPS ETA would be meaningless, so we skip stats entirely. */
-    private const val MIN_SPEED_MPS_FOR_ETA = 0.5f
-
     /**
      * Mirrors MINIMAL_DISTANCE / MINIMAL_ANGLE from route-statistics.service.ts: a candidate route
      * must score below 50 m (or 50 m + 30° when heading is known) to be considered "the route the
@@ -47,11 +47,19 @@ object CarRouteCalculator {
     /**
      * Picks the route the driver is most likely on (perpendicular distance + heading penalty), then
      * derives remaining distance by subtracting the projection's along-line position from the total
-     * line length. Returns null when there is no usable speed, or no route scores below the
-     * MINIMAL_DISTANCE / MINIMAL_ANGLE threshold.
+     * line length. Returns null when no route scores below the MINIMAL_DISTANCE / MINIMAL_ANGLE
+     * threshold.
+     *
+     * @param speed the speed in meters per second the remaining time is derived from, measured by
+     * [CarPaceCalculator] rather than read off [location]. Null before the car has moved, which
+     * leaves the remaining time unknown.
      */
-    fun computeStatistics(routes: List<CarRouteData>, location: Location): CarStatistics? {
-        if (routes.isEmpty() || !location.hasSpeed() || location.speed < MIN_SPEED_MPS_FOR_ETA) {
+    fun computeStatistics(
+            routes: List<CarRouteData>,
+            location: Location,
+            speed: Float?
+    ): CarStatistics? {
+        if (routes.isEmpty()) {
             return null
         }
         val hit = findClosestRoute(routes, location) ?: return null
@@ -59,7 +67,7 @@ object CarRouteCalculator {
         val remainingM = (totalM - hit.distanceAlongLineM).coerceAtLeast(0.0)
         return CarStatistics(
                 remainingMeters = remainingM,
-                remainingSeconds = (remainingM / location.speed).toLong()
+                remainingSeconds = speed?.let { (remainingM / it).toLong() }
         )
     }
 
