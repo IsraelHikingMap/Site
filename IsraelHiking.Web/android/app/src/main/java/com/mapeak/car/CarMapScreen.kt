@@ -31,14 +31,15 @@ class CarMapScreen(
     private var routes: List<CarRouteData> = emptyList()
     private var statistics: CarStatistics? = null
     private var units: String = DEFAULT_UNITS
+    private val paceCalculator = CarPaceCalculator()
 
     init {
         lifecycle.addObserver(this)
     }
 
     /**
-     * On a "navigate to X" intent ([pendingNavigationQuery] set), search is opened on top of the map
-     * so the driver sees results/route for X while the map remains the root they return to.
+     * On a "navigate to X" intent ([pendingNavigationQuery] set), search is opened on top of the
+     * map so the driver sees results/route for X while the map remains the root they return to.
      */
     override fun onCreate(owner: LifecycleOwner) {
         store.addListener(this)
@@ -57,7 +58,12 @@ class CarMapScreen(
 
     override fun onCarStoreUpdated(key: String) {
         when (key) {
-            CarStoreKeys.LOCATION -> recomputeStatistics()
+            CarStoreKeys.LOCATION -> {
+                store.getTransient<Location>(CarStoreKeys.LOCATION)?.let {
+                    paceCalculator.updatePace(it)
+                }
+                recomputeStatistics()
+            }
             CarStoreKeys.ROUTE -> {
                 loadRoutes()
                 recomputeStatistics()
@@ -71,7 +77,9 @@ class CarMapScreen(
 
     private fun recomputeStatistics() {
         val location: Location? = store.getTransient(CarStoreKeys.LOCATION)
-        val next = if (location == null) null else CarRouteCalculator.computeStatistics(routes, location)
+        val next =
+                if (location == null) null
+                else CarRouteCalculator.computeStatistics(routes, location, paceCalculator.speed)
         if (next != statistics) {
             statistics = next
             invalidate()
@@ -112,13 +120,14 @@ class CarMapScreen(
                             Distance.UNIT_KILOMETERS
                     )
                 }
+        val remainingSeconds = stats.remainingSeconds
         val arrivalTime =
                 DateTimeWithZone.create(
-                        System.currentTimeMillis() + stats.remainingSeconds * 1000,
+                        System.currentTimeMillis() + (remainingSeconds ?: 0) * 1000,
                         TimeZone.getDefault()
                 )
         return TravelEstimate.Builder(remainingDistance, arrivalTime)
-                .setRemainingTimeSeconds(stats.remainingSeconds)
+                .setRemainingTimeSeconds(remainingSeconds ?: TravelEstimate.REMAINING_TIME_UNKNOWN)
                 .build()
     }
 

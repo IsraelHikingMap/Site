@@ -24,6 +24,7 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
+import { LocationService } from "../services/location.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../models";
 
@@ -119,6 +120,7 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
+    private readonly locationService = inject(LocationService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
@@ -182,20 +184,13 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private updateETAString() {
-        let speed = null;
-        if (this.statistics.averageSpeed) {
-            speed = this.statistics.averageSpeed;
-        } else if (this.currentSpeed()) {
-            speed = this.currentSpeed();
-        }
-        if (speed && this.statistics.remainingDistance) {
-            const timeLeftInMilliseconds = Math.floor(this.statistics.remainingDistance * 3600 / speed);
-            const finishDate = new Date(new Date().getTime() + timeLeftInMilliseconds);
-            this.ETA.set(finishDate.getHours().toString().padStart(2, "0") + ":" +
-                finishDate.getMinutes().toString().padStart(2, "0"));
-        } else {
+        const remainingTimeInSeconds = this.locationService.getRemainingTimeInSeconds(this.statistics.remainingDistance);
+        if (remainingTimeInSeconds == null) {
             this.ETA.set("--:--");
+            return;
         }
+        const finishDate = new Date(new Date().getTime() + remainingTimeInSeconds * 1000);
+        this.ETA.set(this.toTwoDigits(finishDate.getHours()) + ":" + this.toTwoDigits(finishDate.getMinutes()));
     }
 
     private toTwoDigits(value: number): string {

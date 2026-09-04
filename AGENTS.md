@@ -31,3 +31,16 @@ Test through the seams the app already has instead: a service that is injected c
 through the test bed, an object the app owns can be spied on, and the part of the method that does not
 need the plugin can be tested on its own. Whatever is left - the code that only runs against the real
 native plugin - is covered by running the app on a device, not by asserting against an imitation.
+
+Declare a helper shared by several tests as a function and not as a lambda assigned to a `const`. A
+function declaration is hoisted, so the helpers can sit below the tests that read them instead of
+pushing the first `it` down the file, and it carries its own name into a stack trace. This is about
+the helpers of the test file - the callbacks handed to `describe` and `it` stay arrow functions.
+
+## UI
+
+Build the UI with the tailwind utility classes that are already set up in `src/scss/import-tailwind.css`,
+and reach for a component `.scss` file only for what they cannot express - a keyframe animation, a
+selector into a third party component's internals, a value that has to be computed. A utility class in
+the template is visible next to the markup it styles and disappears with it, while a rule in a stylesheet
+outlives the element it was written for and no one dares delete it.
