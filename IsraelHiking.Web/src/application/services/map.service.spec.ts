@@ -34,14 +34,14 @@ describe("MapService", () => {
     });
 
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
-        service.setMap({ on: () => { } } as unknown as Map);
+        service.setMap({ on: () => { }, setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         expect(true).toBeTruthy();
     }));
 
     it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
         const spy = vi.fn();
-        service.setMap({ on: () => { }, off: spy } as unknown as Map);
+        service.setMap({ on: () => { }, off: spy, setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(spy).toHaveBeenCalled();
@@ -58,9 +58,8 @@ describe("MapService", () => {
             const spy = vi.fn();
             const mapMock = {
                 loadImage: spy,
-                on: (event: string, callback: (e: unknown) => void) => {
-                    if (event == "styleimagemissing") callback({ id: "123" });
-                }
+                on: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => void) => resolver("123")
             } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
@@ -75,11 +74,8 @@ describe("MapService", () => {
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: unknown) => void) => {
-                    if (event == "styleimagemissing") {
-                        callback({ id: "http://123.png" });
-                    }
-                }
+                on: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => Promise<void>) => resolver("http://123.png")
             } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
@@ -92,20 +88,19 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = vi.fn();
-            let storedCallback = (_e: unknown) => { };
+            let storedResolver = (_id: string): void | Promise<void> => { };
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: unknown) => void) => {
-                    if (event == "styleimagemissing") {
-                        storedCallback = callback;
-                        callback({ id: "http://123.png" });
-                    }
+                on: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => Promise<void>) => {
+                    storedResolver = resolver;
+                    return resolver("http://123.png");
                 }
             } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
-            storedCallback({ id: "http://123.png" });
+            await storedResolver("http://123.png");
             expect(spy).toHaveBeenCalledTimes(1);
             expect(addImageSpy).toHaveBeenCalledTimes(1);
         }
@@ -114,6 +109,7 @@ describe("MapService", () => {
     it("should not log 418 error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
         loggingService.error = vi.fn();
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("418") } as unknown as ErrorEvent);
@@ -126,6 +122,7 @@ describe("MapService", () => {
     it("should log error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
         loggingService.error = vi.fn();
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("other") } as unknown as ErrorEvent);
@@ -146,6 +143,7 @@ describe("MapService", () => {
             }
         });
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") callback({});
             },
@@ -168,6 +166,7 @@ describe("MapService", () => {
             }
         });
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") callback({});
             },
@@ -181,6 +180,7 @@ describe("MapService", () => {
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
         let moveendCallback: (e: unknown) => void;
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") moveendCallback = callback;
             },
@@ -193,6 +193,7 @@ describe("MapService", () => {
 
     it("should get bounds from map", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             getBounds: () => ({
                 getNorthEast: () => ({ lat: 1, lng: 1 }),
@@ -205,6 +206,7 @@ describe("MapService", () => {
 
     it("should project point", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             project: () => ({ x: 1, y: 2 })
         } as unknown as Map);
@@ -220,6 +222,7 @@ describe("MapService", () => {
 
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
             getLayer: () => true
@@ -230,6 +233,7 @@ describe("MapService", () => {
 
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             isMoving: () => true
         } as unknown as Map);
@@ -241,6 +245,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -254,6 +259,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -270,6 +276,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -289,6 +296,7 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -305,6 +313,7 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { }
             } as unknown as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
@@ -320,6 +329,7 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -334,6 +344,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 easeTo: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
@@ -348,6 +359,7 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 easeTo: spy,
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1,
                 off: () => { }
@@ -362,6 +374,7 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 addLayer: spy
             } as unknown as Map);
@@ -374,6 +387,7 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 addSource: spy
             } as unknown as Map);

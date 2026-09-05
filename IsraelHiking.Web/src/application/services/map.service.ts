@@ -96,7 +96,7 @@ export class MapService {
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);
-        this.currentMap.on("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(this.resolveMissingStyleImage);
         this.currentMap.on("error", this.onError);
         this.currentMap.on("moveend", this.onMoveEnd);
     }
@@ -107,7 +107,7 @@ export class MapService {
             return;
         }
         this.currentMap.off("dragstart", this.onDragstart);
-        this.currentMap.off("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(null);
         this.currentMap.off("error", this.onError);
         this.currentMap.off("moveend", this.onMoveEnd);
         this.initializationPromise = new Promise<void>((resolve) => {
@@ -135,16 +135,16 @@ export class MapService {
         this.store.dispatch(new SetPannedAction(new Date()));
     }
 
-    private readonly onStyleImageMissing = async (e: { id: string }) => {
-        if (!/^http/.test(e.id)) {
+    private readonly resolveMissingStyleImage = async (id: string) => {
+        if (!/^http/.test(id)) {
             return;
         }
-        if (this.missingImagesArray.includes(e.id)) {
+        if (this.missingImagesArray.includes(id)) {
             return;
         }
-        this.missingImagesArray.push(e.id);
-        const image = await this.currentMap.loadImage(e.id);
-        this.currentMap.addImage(e.id, image.data);
+        this.missingImagesArray.push(id);
+        const image = await this.currentMap.loadImage(id);
+        this.currentMap.addImage(id, image.data);
     }
 
     private readonly onError = (e: ErrorEvent) => {
