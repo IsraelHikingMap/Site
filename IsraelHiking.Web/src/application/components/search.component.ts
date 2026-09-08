@@ -167,6 +167,9 @@ export class SearchComponent {
 
     private selectResults(searchResult: SearchResultsPointOfInterest) {
         this.selectedSearchResults = searchResult;
+        // Material focuses the input right after a result is picked, which keeps the mobile keyboard
+        // open, so the blur needs to happen after that focus call.
+        setTimeout(() => this.searchFromInput()?.nativeElement.blur(), 0);
         this.moveToResults(searchResult);
     }
 
