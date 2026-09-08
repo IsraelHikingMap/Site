@@ -50,6 +50,10 @@
   content: "\e906";
 }
 
+.icon-arrow-left:before {
+  content: "\e98d";
+}
+
 .icon-arrow-right:before {
   content: "\e907";
 }
@@ -64,6 +68,10 @@
 
 .icon-artwork:before {
   content: "\e90a";
+}
+
+.icon-automobile:before {
+  content: "\e98e";
 }
 
 .icon-avg-speed:before {
@@ -242,8 +250,16 @@
   content: "\e935";
 }
 
+.icon-fire:before {
+  content: "\e98f";
+}
+
 .icon-first-aid:before {
   content: "\e936";
+}
+
+.icon-flag:before {
+  content: "\e990";
 }
 
 .icon-flower:before {

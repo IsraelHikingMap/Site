@@ -85,7 +85,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             "star", "arrow-left", "arrow-right", "tint",
             "automobile", "bike", "hike", "four-by-four",
             "bed", "viewpoint", "fire", "flag",
-            "coffee", "cutlery", "shopping-cart", "tree"
+            "cafe", "food", "shopping", "tree"
         ];
         const groups = icons.length / PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW;
         for (let iconTypeIndex = 0;
