@@ -84,26 +84,30 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         return features.Any() ? features.First() : null;
     }
 
+    /// <summary>
+    /// Sets the value of a tag for a specific language.
+    /// The language-less tag is updated too when it holds the value that was presented to the user,
+    /// i.e. when it was used as the fallback for the requested language, otherwise it is left as is.
+    /// </summary>
+    /// <param name="tags">The tags to update</param>
+    /// <param name="key">The tag key, without a language</param>
+    /// <param name="value">The new value, can be empty in order to remove the tag</param>
+    /// <param name="language">The language of the new value</param>
     private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
     {
         var keyWithLanguage = key + ":" + language;
-        var previousValue = string.Empty;
-        if (tags.ContainsKey(keyWithLanguage))
-        {
-            previousValue = tags[keyWithLanguage];
-            tags[keyWithLanguage] = value;
-        }
-        else
-        {
-            tags.Add(new Tag(keyWithLanguage, value));
-        }
-        if (tags.ContainsKey(key) && tags[key] == previousValue)
-        {
-            tags[key] = value;
-        }
-        else if (tags.ContainsKey(key) == false)
+        var previousValue = new[] { keyWithLanguage, key + ":" + Languages.ENGLISH, key }
+            .Where(tags.ContainsKey)
+            .Select(k => tags[k])
+            .FirstOrDefault(string.Empty);
+        tags.AddOrReplace(keyWithLanguage, value);
+        if (tags.ContainsKey(key) == false)
         {
             tags.Add(new Tag(key, value));
+        }
+        else if (tags[key] == previousValue)
+        {
+            tags[key] = value;
         }
     }
 

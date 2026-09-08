@@ -636,6 +636,62 @@ public class PointsOfInterestProviderTests
     }
 
     [TestMethod]
+    public void UpdateFeature_RemoveTitleWhenOnlyNameTagExists_ShouldRemoveNameTagInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        const string id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+        });
+        poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, string.Empty);
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection { { "historic", "ruins" }, { "name", "some name" } },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags.All(t => t.Key != "name") && o.Tags.All(t => t.Key != "name:he")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_RemoveTitleWhenNameByLanguageExists_ShouldRemoveNameTagsInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        const string id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+        });
+        poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, string.Empty);
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection { { "historic", "ruins" }, { "name", "some name" }, { "name:he", "some name" } },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags.All(t => t.Key != "name") && o.Tags.All(t => t.Key != "name:he")
+        ));
+    }
+
+    [TestMethod]
     public void UpdateFeature_RemoveUrl_ShouldUpdateInOSM()
     {
         var user = new User { DisplayName = "DisplayName" };
