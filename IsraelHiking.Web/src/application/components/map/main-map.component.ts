@@ -138,7 +138,7 @@ export class MainMapComponent {
     }
 
     public pitchChanged() {
-        if (this.runningContextService.isMobile || !this.map) {
+        if (!this.map) {
             return;
         }
         const pitch = this.map.getPitch();
