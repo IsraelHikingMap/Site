@@ -50,7 +50,6 @@ export class MapService {
         const maplibregl = await import("maplibre-gl");
         // This is needs to be specific since capacitor is not http protocol
         maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
-        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
         maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
