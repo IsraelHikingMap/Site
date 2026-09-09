@@ -17,7 +17,6 @@
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
-		"TextToSpeechPlugin",
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
@@ -30,6 +29,7 @@
 		"CapgoCompassPlugin",
 		"CapgoInAppBrowserPlugin",
 		"CapacitorShareTargetPlugin",
+		"SpeechSynthesisPlugin",
 		"PurchasesPlugin",
 		"RevenueCatUIPlugin"
 	]

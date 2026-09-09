@@ -8,10 +8,6 @@
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
 	{
-		"pkg": "@capacitor-community/text-to-speech",
-		"classpath": "com.getcapacitor.community.tts.TextToSpeechPlugin"
-	},
-	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
@@ -66,6 +62,10 @@
 	{
 		"pkg": "@capgo/capacitor-share-target",
 		"classpath": "app.capgo.sharetarget.CapacitorShareTargetPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-speech-synthesis",
+		"classpath": "ee.forgr.plugin.speechsynthesis.SpeechSynthesisPlugin"
 	},
 	{
 		"pkg": "@revenuecat/purchases-capacitor",
