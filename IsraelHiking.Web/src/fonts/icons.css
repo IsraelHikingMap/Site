@@ -570,6 +570,10 @@
   content: "\e982";
 }
 
+.icon-volume-up:before {
+  content: "\e991";
+}
+
 .icon-water-hole:before {
   content: "\e983";
 }

@@ -24,6 +24,7 @@ dependencies {
     implementation project(':capgo-capacitor-compass')
     implementation project(':capgo-capacitor-inappbrowser')
     implementation project(':capgo-capacitor-share-target')
+    implementation project(':capgo-capacitor-speech-synthesis')
     implementation project(':revenuecat-purchases-capacitor')
     implementation project(':revenuecat-purchases-capacitor-ui')
 
