@@ -1,5 +1,5 @@
 import { inject, signal, Service } from "@angular/core";
-import { TextToSpeech } from "@capacitor-community/text-to-speech";
+import { TextToSpeech, type TTSOptions } from "@capacitor-community/text-to-speech";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -50,13 +50,32 @@ export class TextToSpeechService {
             const supportedLanguages = (await TextToSpeech.getSupportedLanguages()).languages;
             const language = this.getBestSupportedLanguage(supportedLanguages, this.resources.getCurrentLanguageCode());
             this.loggingService.info(`[TextToSpeech] Reading ${text.length} characters out loud in ${language}`);
-            await TextToSpeech.speak({ text, lang: language, category: "playback" });
+            await this.speakEvenWhenTheEngineIsAsleep({ text, lang: language, category: "playback" }, utterance);
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToReadOutLoud);
+            if (utterance === this.currentUtterance) {
+                this.toastService.error(ex, this.resources.unableToReadOutLoud);
+            }
         } finally {
             if (utterance === this.currentUtterance) {
                 this.speakingText.set("");
             }
+        }
+    }
+
+    /**
+     * Reads the text out loud, and reads it once more when the request fails, since the speech engine
+     * of android fails the first request it gets after it wakes up, while it is still loading the
+     * voice it was asked for. A request that was stopped or replaced in the meantime is not repeated.
+     */
+    private async speakEvenWhenTheEngineIsAsleep(options: TTSOptions, utterance: number): Promise<void> {
+        try {
+            await TextToSpeech.speak(options);
+        } catch (ex) {
+            if (utterance !== this.currentUtterance) {
+                return;
+            }
+            this.loggingService.warning(`[TextToSpeech] Reading failed, reading again: ${(ex as Error).message}`);
+            await TextToSpeech.speak(options);
         }
     }
 
