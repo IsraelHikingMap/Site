@@ -1,4 +1,4 @@
-import { Component, inject, ViewEncapsulation } from "@angular/core";
+﻿import { Component, inject, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -17,7 +17,7 @@ import { LayersService } from "../../../services/layers.service";
 import { SidebarService } from "../../../services/sidebar.service";
 
 import { ExpandGroupAction, CollapseGroupAction } from "../../../reducers/layers.reducer";
-import { DEFAULT_BASE_LAYERS, DEFAULT_OVERLAYS } from "../../../reducers/initial-state";
+import { DEFAULT_OVERLAYS, HIKING_MAP, MTB_MAP } from "../../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../../models";
 
 @Component({
@@ -29,7 +29,6 @@ import type { ApplicationState, EditableLayer } from "../../../models";
 })
 export class LayersSidebarComponent {
 
-    public readonly defaultBaseLayers = DEFAULT_BASE_LAYERS;
     public readonly defaultOverlays = DEFAULT_OVERLAYS;
 
     public readonly resources = inject(ResourcesService);
@@ -41,6 +40,7 @@ export class LayersSidebarComponent {
 
     private readonly store = inject(Store);
 
+    public readonly defaultBaseLayers = this.layersService.defaultBaseLayers;
     public baseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
     public overlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
     private readonly expanded = this.store.selectSignal((state: ApplicationState) => state.layersState.expanded);
@@ -107,6 +107,10 @@ export class LayersSidebarComponent {
             return;
         }
         this.layersService.hideAllOverlays();
+    }
+
+    public hasLegend(layer: Immutable<EditableLayer>): boolean {
+        return layer.key === HIKING_MAP || layer.key === MTB_MAP;
     }
 
     public openLegend(layer: Immutable<EditableLayer>) {

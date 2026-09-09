@@ -1,4 +1,4 @@
-import { inject, computed, Service } from "@angular/core";
+﻿import { inject, computed, Service } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Params } from "@angular/router";
 import { firstValueFrom } from "rxjs";
@@ -9,7 +9,8 @@ import type { Immutable } from "immer";
 import { ResourcesService } from "./resources.service";
 import {
     DEFAULT_BASE_LAYERS,
-    DEFAULT_OVERLAYS
+    DEFAULT_OVERLAYS,
+    SUBSCRIBED_BASE_LAYERS
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
@@ -54,7 +55,14 @@ export class LayersService {
     private readonly userOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
     private readonly selectedBaseLayerKey = this.store.selectSignal((state: ApplicationState) => state.layersState.selectedBaseLayerKey);
     private readonly visibleOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.visibleOverlays);
-    private readonly allBaseLayers = computed<Immutable<EditableLayer[]>>(() => [...DEFAULT_BASE_LAYERS, ...this.userBaseLayers()]);
+    private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+    /**
+     * The base layers that come with the application, which are the built in ones and, for a subscribed
+     * user, the ones that are a part of the subscription.
+     */
+    public readonly defaultBaseLayers = computed<Immutable<EditableLayer[]>>(() =>
+        this.isSubscribed() ? [...DEFAULT_BASE_LAYERS, ...SUBSCRIBED_BASE_LAYERS] : DEFAULT_BASE_LAYERS);
+    private readonly allBaseLayers = computed<Immutable<EditableLayer[]>>(() => [...this.defaultBaseLayers(), ...this.userBaseLayers()]);
     // Reactive derived state exposed as signals (explicit reactive contract; parameterized predicates
     // isBaseLayerSelected()/isOverlayVisible() stay methods since a signal can't take an argument).
     public readonly allOverlays = computed<Immutable<EditableLayer[]>>(() => [...DEFAULT_OVERLAYS, ...this.userOverlays()]);

@@ -22,4 +22,8 @@ public class NonPublicConfigurationData
     /// RevenueCat API key for server side validation for Mapeak
     /// </summary>
     public string RevenueCatApiKey { get; set; }
+    /// <summary>
+    /// Mapbox access token used to fetch the satellite imagery tiles that are served to subscribed users
+    /// </summary>
+    public string MapboxAccessToken { get; set; }
 }

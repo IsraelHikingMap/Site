@@ -1,4 +1,4 @@
-import { computed, inject, Service } from "@angular/core";
+﻿import { computed, inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
@@ -35,18 +35,24 @@ export class PurchaseService {
     public readonly isRenewAvailable = computed(() =>
         this.runningContextService.isCapacitor && !this.isSubscribed() && this.hasDownloadedTiles());
 
+    /**
+     * A subscription is bought in the app store, but it belongs to the user and not to the device, so the
+     * browser asks the server about it too - the layers that come with the subscription are shown there
+     * as well. Only the parts that talk to the store itself are limited to the app.
+     */
     public async initialize() {
-        if (!this.runningContextService.isCapacitor) {
-            return;
+        if (this.runningContextService.isCapacitor) {
+            this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         }
-        this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
                 this.store.dispatch(new SetOfflineSubscribedAction(false));
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
-            await this.initializeStoreConnection(userInfo.id);
+            if (this.runningContextService.isCapacitor) {
+                await this.initializeStoreConnection(userInfo.id);
+            }
 
             await this.checkSubscription();
 
@@ -54,6 +60,9 @@ export class PurchaseService {
                 this.showPaywall();
             }
         });
+        if (!this.runningContextService.isCapacitor) {
+            return;
+        }
         this.store.select((state: ApplicationState) => state.configuration.language.code).subscribe(async (languageCode) => {
             if ((await Purchases.isConfigured()).isConfigured) {
                 await Purchases.overridePreferredUILocale({ locale: languageCode });

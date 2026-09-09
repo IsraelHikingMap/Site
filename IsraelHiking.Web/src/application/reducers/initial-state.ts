@@ -3,6 +3,7 @@ import type { Category, EditableLayer, Language, MutableApplicationState, RouteD
 
 export const HIKING_MAP = "Hiking Map";
 export const MTB_MAP = "MTB Map";
+export const SATELLITE_MAP = "Satellite Map";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const OPEN_HEATMAP = "Open Heatmap";
@@ -144,6 +145,20 @@ export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
     isEditable: false,
     minZoom: 1,
     maxZoom: 16,
+    opacity: 1,
+    id: null
+}];
+
+/**
+ * The base layers that are only available to a subscribed user - the imagery they show comes from a
+ * commercial provider and is proxied by our server, which only serves it to a subscribed user.
+ */
+export const SUBSCRIBED_BASE_LAYERS: EditableLayer[] = [{
+    key: SATELLITE_MAP,
+    address: "satellite://{z}/{x}/{y}",
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 19,
     opacity: 1,
     id: null
 }];

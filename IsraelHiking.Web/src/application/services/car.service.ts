@@ -2,12 +2,14 @@ import { inject, Service } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 import { skip } from "rxjs";
+import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
-import type { ApplicationState } from "../models";
+import { DEFAULT_BASE_LAYERS, SATELLITE_MAP } from "../reducers/initial-state";
+import type { ApplicationState, EditableLayer } from "../models";
 
 type CarStoreKey = "style" | "route" | "config" | "route_instructions";
 
@@ -61,9 +63,17 @@ export class CarService {
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
-        const layerData = this.layersService.selectedBaseLayer();
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
+        const styleLike = await this.defaultStyleService.getSourcesAndLayers(this.getBaseLayer(), true, "car");
         await ReactivePreferences.storeValue({ key: "style", value: styleLike });
+    }
+
+    /**
+     * The car app draws the map by itself, without the user's token, so a base layer whose tiles our
+     * server only serves to a subscribed user can not be drawn there and the default map is used instead.
+     */
+    private getBaseLayer(): Immutable<EditableLayer> {
+        const selectedBaseLayer = this.layersService.selectedBaseLayer();
+        return selectedBaseLayer.key === SATELLITE_MAP ? DEFAULT_BASE_LAYERS[0] : selectedBaseLayer;
     }
 
     private async setRoutes() {

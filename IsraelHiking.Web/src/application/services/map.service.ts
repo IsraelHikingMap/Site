@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
 import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification, MapMovementEvent } from "maplibre-gl";
@@ -10,6 +10,7 @@ import { SpatialService } from "./spatial.service";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { SatelliteImageryService } from "./satellite-imagery.service";
 import { SetLocationAction } from "../reducers/location.reducer";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
@@ -25,6 +26,7 @@ export class MapService {
     private readonly resourcesService = inject(ResourcesService)
     private readonly databaseService = inject(DatabaseService);
     private readonly overpassTurboService = inject(OverpassTurboService);
+    private readonly satelliteImageryService = inject(SatelliteImageryService);
     private readonly store = inject(Store);
     private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
@@ -54,6 +56,7 @@ export class MapService {
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
         maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
+        maplibregl.addProtocol("satellite", (params) => this.satelliteImageryService.getTile(params.url));
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
