@@ -238,6 +238,9 @@ export class ResourcesService {
     public download: string;
     public translatedBy: string;
     public clickToTranslate: string;
+    public readOutLoud: string;
+    public stopReadingOutLoud: string;
+    public unableToReadOutLoud: string;
     public minimize: string;
     public restore: string;
     public planAndExplore: string;
@@ -483,7 +486,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1787601713245");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1788940641556");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -676,6 +679,9 @@ export class ResourcesService {
         this.download = this.gettextCatalog.getString("Download");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
+        this.readOutLoud = this.gettextCatalog.getString("Read out loud");
+        this.stopReadingOutLoud = this.gettextCatalog.getString("Stop reading out loud");
+        this.unableToReadOutLoud = this.gettextCatalog.getString("Unable to read this text out loud");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
         this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");

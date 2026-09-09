@@ -17,6 +17,7 @@
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
+		"TextToSpeechPlugin",
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
