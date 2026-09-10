@@ -28,6 +28,7 @@
     "@capgo/capacitor-compass": "^8.1.19",
     "@capgo/capacitor-inappbrowser": "^8.16.6",
     "@capgo/capacitor-share-target": "^8.0.50",
+    "@capgo/capacitor-speech-synthesis": "^8.0.21",
     "@mapbox/polyline": "^1.2.1",
     "@mapbox/vector-tile": "^3.0.0",
     "@maplibre/ngx-maplibre-gl": "^22.1.0",
