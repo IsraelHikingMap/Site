@@ -5,7 +5,8 @@ import {
     ElementRef,
     inject,
     viewChild,
-    viewChildren, signal, computed } from "@angular/core";
+    viewChildren, signal, computed, DOCUMENT
+} from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -50,6 +51,7 @@ export class SearchComponent {
     private readonly router = inject(Router);
     private readonly store = inject(Store);
     private readonly mapService = inject(MapService);
+    private readonly document = inject(DOCUMENT);
 
     private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
     private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
@@ -107,19 +109,28 @@ export class SearchComponent {
         });
     }
 
+    /**
+     * Focuses the search input, selecting its text is left to the focus event handler
+     */
     public focusOnSearchInput() {
-        // ChangeDetectionRef doesn't work well for some reason...
+        setTimeout(() => this.searchFromInput()?.nativeElement.focus(), 100);
+    }
+
+    public selectSearchTermOnFocus() {
         const valueOnFocus = this.searchFromInput()?.nativeElement.value;
         setTimeout(() => {
-            const input = this.searchFromInput().nativeElement;
-            input.focus();
+            const input = this.searchFromInput()?.nativeElement;
+            // Selecting focuses the input back, and a focused input reopens the results panel -
+            // after picking a result the input is blurred on purpose, so leave it alone
+            if (input !== this.document.activeElement) {
+                return;
+            }
             // Selecting lets a new search replace the old term, but only when nothing was typed
             // while waiting - otherwise the next keystroke would replace the character just typed
             if (input.value === valueOnFocus) {
                 input.select();
             }
         }, 100);
-
     }
 
     public async search(isPrefix: boolean) {
@@ -167,9 +178,9 @@ export class SearchComponent {
 
     private selectResults(searchResult: SearchResultsPointOfInterest) {
         this.selectedSearchResults = searchResult;
-        // Material focuses the input right after a result is picked, which keeps the mobile keyboard
-        // open, so the blur needs to happen after that focus call.
-        setTimeout(() => this.searchFromInput()?.nativeElement.blur(), 0);
+        // Material focuses the input back right after a result is picked, blurring it once that is
+        // done hides the mobile keyboard
+        setTimeout(() => this.searchFromInput()?.nativeElement.blur());
         this.moveToResults(searchResult);
     }
 
