@@ -66,15 +66,6 @@ public class ElasticSearchGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetImageHash_ShouldGetIt()
-    {
-        var imageItem = _gateway.GetImageByHash("7F4E8F16362FD1E527FFBC516E0197C7").Result;
-
-        Assert.IsNotNull(imageItem);
-    }
-
-    [TestMethod]
-    [Ignore]
     public void SearchExact_ShouldSGetAnExactMatch()
     {
         var results = _gateway.SearchExact("חיפה", Languages.HEBREW).Result;

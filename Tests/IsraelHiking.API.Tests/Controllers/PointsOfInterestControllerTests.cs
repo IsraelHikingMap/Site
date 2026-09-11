@@ -36,7 +36,6 @@ public class PointsOfInterestControllerTests
         _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
         _tagHelper = Substitute.For<ITagsHelper>();
         _osmGateway = Substitute.For<IAuthClient>();
-        Substitute.For<IImagesUrlsStorageExecutor>();
         _persistentCache = Substitute.For<IDistributedCache>();
         _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();

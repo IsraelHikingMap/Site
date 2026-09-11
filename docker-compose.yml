@@ -90,10 +90,23 @@
       - 11223:8080
     volumes:
       - ./tileserver-gl-config.json:/data/tileserver-gl-config.json:ro
+  user-images:
+    image: ghcr.io/mapeak-com/user-images
+    container_name: user-images
+    ports:
+      - 3001:3000
+    environment:
+      - PUBLIC_BASE_URL=http://localhost:3001
+      - STORAGE_DIR=/data/images
+    volumes:
+      - userimagesdata:/data/images
+    restart: always
 volumes:
   esdata:
     driver: local
   valhalladata:
     driver: local
   tldata:
+    driver: local
+  userimagesdata:
     driver: local
