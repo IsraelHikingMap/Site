@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal, computed } from "@angular/core";
+import { Component, HostListener, DestroyRef, inject, OnInit, signal, computed } from "@angular/core";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
@@ -21,6 +21,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
+import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { GeoJSONUtils } from "../../services/geojson-utils";
@@ -61,8 +63,30 @@ export class PublicPoisComponent implements OnInit {
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
     private readonly mapComponent = inject(MapComponent);
+    private readonly analyticsService = inject(AnalyticsService);
 
     public readonly getSelectedFeatureLatlng = computed(() => SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]));
+
+    /** ESC is the keyboard's equivalent of the popup's "x" button, maplibre has no built in support for it */
+    @HostListener("window:keydown", ["$event"])
+    public onPopupShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.closePopupsOnEscape(e));
+    }
+
+    private closePopupsOnEscape(event: KeyboardEvent): string | null {
+        if (event.key !== "Escape") {
+            return null;
+        }
+        if (this.selectedCluster() != null) {
+            this.clearSelectedClusterPopup();
+            return "Close POIs cluster popup";
+        }
+        if (this.isShowCoordinatesPopup()) {
+            this.isShowCoordinatesPopup.set(false);
+            return "Close coordinates popup";
+        }
+        return null;
+    }
 
     public ngOnInit() {
         this.poiGeoJsonData.set(this.poiService.getPoisGeoJson());

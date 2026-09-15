@@ -1,4 +1,4 @@
-import { Component, ElementRef, AfterViewInit, HostListener, inject, viewChild, signal } from "@angular/core";
+import { Component, HostListener, ElementRef, AfterViewInit, inject, viewChild, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { NgStyle } from "@angular/common";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
@@ -25,6 +25,8 @@ import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
+import { handleShortcutKey, isCtrlOrMeta } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
@@ -76,6 +78,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly privatePoiUploaderService = inject(PrivatePoiUploaderService);
+    private readonly analyticsService = inject(AnalyticsService);
     private readonly data = inject<PrivatePoiEditDialogData>(MAT_DIALOG_DATA);
 
 
@@ -270,15 +273,57 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     @HostListener("window:keydown", ["$event"])
-    public onEnterPress($event: KeyboardEvent) {
-        if ($event.shiftKey) {
-            return true;
+    public onDialogShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.handleDialogShortcut(e));
+    }
+
+    private handleDialogShortcut(event: KeyboardEvent): string | null {
+        if (event.key === "Delete") {
+            this.remove();
+            // Deleting shifts the rest of the markers down, so the next point now sits at this index
+            this.editPointAtIndex(this.markerIndex);
+            return "Delete edited point";
         }
-        if ($event.key !== "Enter") {
-            return true;
+        if (event.key !== "Enter") {
+            return null;
+        }
+        if (isCtrlOrMeta(event)) {
+            // Editing the points of a route one by one is the common case, save and move on
+            this.save();
+            const markers = this.getRouteMarkers();
+            const offset = event.shiftKey ? -1 : 1;
+            this.editPointAtIndex(markers.length === 0 ? 0 : (this.markerIndex + offset + markers.length) % markers.length);
+            return offset === 1 ? "Edit next point" : "Edit previous point";
+        }
+        if (event.shiftKey) {
+            return null;
         }
         this.save();
         this.dialogRef.close();
-        return false;
+        return "Save and close point";
+    }
+
+    /**
+     * Closes this dialog and reopens it on another point of the same route, so that going through
+     * the points of a route with the keyboard does not mean reaching for the mouse between them.
+     * Closes without reopening when the route has no point at that index any more.
+     */
+    private editPointAtIndex(index: number) {
+        this.dialogRef.close();
+        const markers = this.getRouteMarkers();
+        if (markers.length === 0) {
+            return;
+        }
+        // Deleting the last point leaves nothing after it, keep editing the one before it instead
+        const indexToEdit = Math.min(index, markers.length - 1);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markers[indexToEdit], indexToEdit, this.routeId);
+    }
+
+    private getRouteMarkers(): Immutable<MarkerData[]> {
+        if (this.routeId) {
+            const route = this.store.selectSnapshot((s: ApplicationState) => s.routes.present).find(r => r.id === this.routeId);
+            return route?.markers ?? [];
+        }
+        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers;
     }
 }

@@ -1,9 +1,11 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, HostListener, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 
 
 import { ResourcesService } from "../../services/resources.service";
+import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 
 export type ConfirmType = "YesNo" | "OkCancel" | "Ok" | "Custom";
 
@@ -26,8 +28,28 @@ export class ConfirmDialogComponent {
 
     public readonly resources = inject(ResourcesService);
 
+    private readonly analyticsService = inject(AnalyticsService);
+
     public constructor() {
         this.confirmAction = () => { throw new Error("Confirm action method must be provided!"); };
         this.declineAction = () => { throw new Error("Decline action method must be provided!"); };
+    }
+
+    /** This is a snackbar and not a dialog, so it gets none of the keyboard handling for free */
+    @HostListener("window:keydown", ["$event"])
+    public onConfirmShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.confirmOrDecline(e));
+    }
+
+    private confirmOrDecline(event: KeyboardEvent): string | null {
+        if (event.key === "Enter") {
+            this.confirmAction();
+            return "Confirm";
+        }
+        if (event.key === "Escape") {
+            this.declineAction();
+            return "Decline";
+        }
+        return null;
     }
 }

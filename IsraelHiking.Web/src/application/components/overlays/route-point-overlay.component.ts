@@ -1,12 +1,15 @@
 import { Component, HostListener, OnChanges, inject, output, input, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
+import { MatDialog } from "@angular/material/dialog";
 import { MatTooltip } from "@angular/material/tooltip";
 
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import type { LatLngAltTime } from "../../models";
 
 @Component({
@@ -29,6 +32,22 @@ export class RoutePointOverlayComponent implements OnChanges {
     public readonly resources = inject(ResourcesService);
 
     private readonly selectedRouteService = inject(SelectedRouteService);
+    private readonly analyticsService = inject(AnalyticsService);
+    private readonly matDialog = inject(MatDialog);
+
+    @HostListener("window:keydown", ["$event"])
+    public onPopupShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.deleteOnDelete(e));
+    }
+
+    private deleteOnDelete(event: KeyboardEvent): string | null {
+        // An open dialog has its own DEL, and it is nearer to the user than this popup
+        if (event.key !== "Delete" || this.matDialog.openDialogs.length > 0) {
+            return null;
+        }
+        this.remove();
+        return "Delete route point";
+    }
 
     public ngOnChanges(): void {
         this.isMiddle.set(this.isFirst() === false && this.isLast() === false);
@@ -65,14 +84,5 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     private isLast(): boolean {
         return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex();
-    }
-
-    @HostListener("window:keydown", ["$event"])
-    public onEnterPress($event: KeyboardEvent) {
-        if ($event.key !== "Delete") {
-            return true;
-        }
-        this.remove();
-        return false;
     }
 }

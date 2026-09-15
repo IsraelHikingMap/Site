@@ -1,12 +1,4 @@
-import {
-    Component,
-    HostListener,
-    ViewEncapsulation,
-    ElementRef,
-    inject,
-    viewChild,
-    viewChildren, signal, computed, DOCUMENT
-} from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, signal, computed, DOCUMENT } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -23,6 +15,8 @@ import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { MapService } from "../services/map.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
+import { handleShortcutKey, isCtrlOrMeta } from "../services/keyboard-shortcuts";
+import { AnalyticsService } from "../services/analytics.service";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
@@ -52,6 +46,7 @@ export class SearchComponent {
     private readonly store = inject(Store);
     private readonly mapService = inject(MapService);
     private readonly document = inject(DOCUMENT);
+    private readonly analyticsService = inject(AnalyticsService);
 
     private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
     private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
@@ -185,45 +180,46 @@ export class SearchComponent {
     }
 
     @HostListener("window:keydown", ["$event"])
-    public onSearchShortcutKeys($event: KeyboardEvent) {
-        if ($event.key === "Enter") {
+    public onSearchShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.handleSearchShortcut(e));
+    }
+
+    private handleSearchShortcut(event: KeyboardEvent): string | null {
+        if (event.key === "Enter") {
             return this.handleEnterKeydown();
         }
-        if ($event.ctrlKey === false && $event.metaKey === false) {
-            return true;
+        if (isCtrlOrMeta(event) && event.code === "KeyF") {
+            this.focusOnSearchInput();
+            return "Focus search";
         }
-        if ($event.key == null) {
-            return true;
-        }
-        switch ($event.key.toLowerCase()) {
-            case "f":
-                this.focusOnSearchInput();
-                break;
-            default:
-                return true;
-        }
-        return false;
+        return null;
     }
+
     /**
      * This function should make sure the ENTER key is behaving as it should:
      * In case there are search results open and non is selected - select the first result.
      * In case a search is being made - when the search is finshed select the first result.
      *
-     * @returns true - if no operations was made, false otherwise
+     * @returns the shortcut's name if the key press was handled, null otherwise
      */
-    private handleEnterKeydown(): boolean {
+    private handleEnterKeydown(): string | null {
+        // ENTER belongs to whatever the user is actually looking at, the search box only claims it
+        // while it holds the focus - otherwise it fires over dialogs, confirmations and popups too
+        if (this.searchFromInput()?.nativeElement !== this.document.activeElement) {
+            return null;
+        }
         if (this.matAutocompleteTriggers()[0] == null) {
-            return true;
+            return null;
         }
         if (this.matAutocompleteTriggers()[0].activeOption != null) {
-            return true;
+            return null;
         }
         if (this.selectedSearchResults == null && this.searchResults().length > 0) {
             this.selectResults(this.searchResults()[0]);
-            return false;
+            return "Search enter";
         }
         this.selectFirstSearchResults = true;
-        return false;
+        return "Search enter";
     }
 
     /** 

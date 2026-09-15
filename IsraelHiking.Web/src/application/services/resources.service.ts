@@ -60,6 +60,16 @@ export class ResourcesService {
     public straightLines: string;
     public routeStatistics: string;
     public undo: string;
+    public redo: string;
+    public search: string;
+    public confirm: string;
+    public keyboardShortcuts: string;
+    public keyboardShortcutsHint: string;
+    public closePopupOrExitEditMode: string;
+    public deleteSelectedPoint: string;
+    public deleteEditedPoint: string;
+    public saveAndEditNextPoint: string;
+    public saveAndEditPreviousPoint: string;
     public editThisMapUsingOsm: string;
     public openAFile: string;
     public save: string;
@@ -488,7 +498,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789487191146");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789496577498");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -500,6 +510,16 @@ export class ResourcesService {
         this.straightLines = this.gettextCatalog.getString("Straight Lines");
         this.routeStatistics = this.gettextCatalog.getString("Route Statistics");
         this.undo = this.gettextCatalog.getString("Undo");
+        this.redo = this.gettextCatalog.getString("Redo");
+        this.search = this.gettextCatalog.getString("Search");
+        this.confirm = this.gettextCatalog.getString("Confirm");
+        this.keyboardShortcuts = this.gettextCatalog.getString("Keyboard Shortcuts");
+        this.keyboardShortcutsHint = this.gettextCatalog.getString("Most shortcuts are ignored while typing in a text field.");
+        this.closePopupOrExitEditMode = this.gettextCatalog.getString("Close a popup, close the sidebar or exit edit mode");
+        this.deleteSelectedPoint = this.gettextCatalog.getString("Delete the point the popup belongs to");
+        this.deleteEditedPoint = this.gettextCatalog.getString("Delete the point being edited and edit the next one");
+        this.saveAndEditNextPoint = this.gettextCatalog.getString("Save and edit the next point");
+        this.saveAndEditPreviousPoint = this.gettextCatalog.getString("Save and edit the previous point");
         this.editThisMapUsingOsm = this.gettextCatalog.getString("Edit This Map Using OSM");
         this.openAFile = this.gettextCatalog.getString("Open a File");
         this.save = this.gettextCatalog.getString("Save");

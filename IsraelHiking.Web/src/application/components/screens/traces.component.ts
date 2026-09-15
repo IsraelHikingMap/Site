@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
+import { Component, HostListener, DestroyRef, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
@@ -37,6 +37,8 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
 import { ZoomComponent } from "../zoom.component";
 
@@ -91,6 +93,7 @@ export class TracesComponent implements OnInit {
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
     private readonly dialog = inject(MatDialog);
+    private readonly analyticsService = inject(AnalyticsService);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -352,6 +355,26 @@ export class TracesComponent implements OnInit {
             features: this.missingParts().features.filter(f => f !== this.selectedFeature())
         });
         this.clearSelection();
+    }
+
+    @HostListener("window:keydown", ["$event"])
+    public onMissingPartShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.handleMissingPartShortcut(e));
+    }
+
+    private handleMissingPartShortcut(event: KeyboardEvent): string | null {
+        if (this.missingCoordinates() == null) {
+            return null;
+        }
+        if (event.key === "Escape") {
+            this.clearSelection();
+            return "Close missing part popup";
+        }
+        if (event.key === "Delete") {
+            this.removeMissingPart();
+            return "Delete missing part";
+        }
+        return null;
     }
 
     public clearSelection() {

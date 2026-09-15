@@ -1,4 +1,4 @@
-import { Component, inject, model, signal, OnInit, computed } from "@angular/core";
+import { Component, HostListener, inject, model, signal, OnInit, computed } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -18,6 +18,8 @@ import { PoiService, SelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
+import { handleShortcutKey, isCtrlOrMeta } from "../../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../../services/analytics.service";
 import { ScrollToDirective } from "../../../directives/scroll-to.directive";
 import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
@@ -41,8 +43,23 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     private readonly poiService: PoiService = inject(PoiService);
     private readonly sidebarService = inject(SidebarService);
     private readonly toastService = inject(ToastService);
+    private readonly analyticsService = inject(AnalyticsService);
 
     public readonly isPoint = computed(() => this.info != null && this.info().isPoint);
+
+    @HostListener("window:keydown", ["$event"])
+    public onEditShortcutKeys(event: KeyboardEvent): void {
+        handleShortcutKey(event, this.analyticsService, e => this.saveOnCtrlEnter(e));
+    }
+
+    /** A plain ENTER would submit this form from any of its many fields, too easy to do by mistake */
+    private saveOnCtrlEnter(event: KeyboardEvent): string | null {
+        if (event.key !== "Enter" || !isCtrlOrMeta(event) || this.isLoading()) {
+            return null;
+        }
+        this.save();
+        return "Save public POI";
+    }
 
     private initializeCategories() {
         this.categories.set(structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[]);
