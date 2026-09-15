@@ -239,6 +239,15 @@ export class PrivateRoutesSidebarComponent {
         });
     }
 
+    public duplicateRoute(routeData: Immutable<RouteData>) {
+        const duplicatedRoute = this.routesFactory.createDuplicateRouteData(routeData,
+            this.selectedRouteService.createRouteName(routeData.name),
+            this.selectedRouteService.getLeastUsedColor(routeData.color));
+        duplicatedRoute.state = routeData.state === "Hidden" ? "ReadOnly" : routeData.state;
+        this.store.dispatch(new AddRouteAction(duplicatedRoute));
+        this.selectedRouteService.setSelectedRoute(duplicatedRoute.id);
+    }
+
     public reverseRoute(routeData: Immutable<RouteData>) {
         this.selectedRouteService.reverseRoute(routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);

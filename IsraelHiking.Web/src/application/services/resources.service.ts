@@ -73,6 +73,7 @@ export class ResourcesService {
     public addRoute: string;
     public exportRoute: string;
     public reverseRoute: string;
+    public duplicateRoute: string;
     public deleteRoute: string;
     public share: string;
     public saveInCloudAndShare: string;
@@ -486,7 +487,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1788951274053");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789486843290");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -511,6 +512,7 @@ export class ResourcesService {
         this.addRoute = this.gettextCatalog.getString("Add Route");
         this.exportRoute = this.gettextCatalog.getString("Export Route");
         this.reverseRoute = this.gettextCatalog.getString("Reverse Route");
+        this.duplicateRoute = this.gettextCatalog.getString("Duplicate Route");
         this.deleteRoute = this.gettextCatalog.getString("Delete Route");
         this.share = this.gettextCatalog.getString("Share");
         this.saveInCloudAndShare = this.gettextCatalog.getString("Save in the Cloud and Share");

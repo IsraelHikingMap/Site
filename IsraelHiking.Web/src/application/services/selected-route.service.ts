@@ -173,10 +173,17 @@ export class SelectedRouteService {
         return availableRouteName;
     }
 
-    public getLeastUsedColor() {
+    /**
+     * @param colorToAvoid a color that must not be returned even when it is the least used one,
+     * used when the new route needs to be told apart from the route it was created from.
+     */
+    public getLeastUsedColor(colorToAvoid?: string) {
         let colorCount = Infinity;
         let selectedColor = this.routesFactory.colors[0];
         for (const color of this.routesFactory.colors) {
+            if (color === colorToAvoid) {
+                continue;
+            }
             const currentColorCount = this.routes.filter(r => r.color === color).length;
             if (currentColorCount < colorCount) {
                 selectedColor = color;

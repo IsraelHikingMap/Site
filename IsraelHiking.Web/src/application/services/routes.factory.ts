@@ -66,6 +66,21 @@ export class RoutesFactory {
         return route;
     }
 
+    /**
+     * Creates a copy of the given route that can live in the store next to the route it was copied from.
+     * The route and every one of its markers get a new id, since both are used to tell them apart.
+     */
+    public createDuplicateRouteData(routeData: Immutable<RouteData>, name: string, color: string): RouteData {
+        const route = structuredClone(routeData) as RouteData;
+        route.id = this.generateRandomId();
+        route.name = name;
+        route.color = color;
+        for (const marker of route.markers) {
+            marker.id = uuidv4();
+        }
+        return route;
+    }
+
     private generateRandomId() {
         return Math.random().toString(36).substring(2, 9);
     }

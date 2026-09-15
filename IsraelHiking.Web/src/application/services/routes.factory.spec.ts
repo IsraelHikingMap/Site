@@ -57,6 +57,32 @@ describe("RoutesFactory", () => {
         expect(route.state).toBe("ReadOnly");
     }));
 
+    it("Should duplicate a route with a new id, a new id for every marker, the given name and color",
+        inject([RoutesFactory], (factory: RoutesFactory) => {
+            const route = {
+                id: "1",
+                name: "route",
+                color: "blue",
+                opacity: 1,
+                weight: 2,
+                state: "Route",
+                markers: [{ id: "marker-1", title: "marker" }],
+                segments: [{ routingType: "Hike" }]
+            } as RouteData;
+
+            const duplicated = factory.createDuplicateRouteData(route, "route 1", "red");
+
+            expect(duplicated.id).not.toBe(route.id);
+            expect(duplicated.name).toBe("route 1");
+            expect(duplicated.color).toBe("red");
+            expect(duplicated.opacity).toBe(route.opacity);
+            expect(duplicated.weight).toBe(route.weight);
+            expect(duplicated.markers[0].id).not.toBe(route.markers[0].id);
+            expect(duplicated.markers[0].title).toBe(route.markers[0].title);
+            expect(duplicated.segments).toEqual(route.segments);
+            expect(route.markers[0].id).toBe("marker-1");
+        }));
+
     it("Should do nothing if the list is empty", inject([RoutesFactory], (factory: RoutesFactory) => {
         const routes = [] as RouteData[];
         factory.regenerateDuplicateIds(routes);
