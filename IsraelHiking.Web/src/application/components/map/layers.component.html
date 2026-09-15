@@ -1,9 +1,8 @@
-﻿<auto-layer [layerData]="getBaseLayer()" [visible]="true" [before]="resources.endOfBaseLayer"
-  [beforeDraped]="resources.endOfBaseDrapedLayers" [isBaselayer]="true"
+﻿<auto-layer [layerData]="getBaseLayer()" [visible]="true" [before]="resources.endOfBaseLayer" [isBaselayer]="true"
   [allowOffline]="allowOffline()">
 </auto-layer>
 @for (overlay of getAllOverlays(); track overlay.key) {
 <auto-layer [layerData]="overlay" [visible]="isOverlayVisible(overlay)" [before]="resources.endOfOverlays"
-  [beforeDraped]="resources.endOfOverlaysDrapedLayers" [isBaselayer]="false" [allowOffline]="allowOffline()">
+  [isBaselayer]="false" [allowOffline]="allowOffline()">
 </auto-layer>
 }
