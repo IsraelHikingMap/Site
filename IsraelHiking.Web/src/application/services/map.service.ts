@@ -1,7 +1,7 @@
 ﻿import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification, MapMovementEvent } from "maplibre-gl";
+import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
@@ -10,8 +10,8 @@ import { SpatialService } from "./spatial.service";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
-import { SatelliteImageryService } from "./satellite-imagery.service";
 import { SetLocationAction } from "../reducers/location.reducer";
+import { Urls } from "../urls";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
 @Service()
@@ -26,11 +26,24 @@ export class MapService {
     private readonly resourcesService = inject(ResourcesService)
     private readonly databaseService = inject(DatabaseService);
     private readonly overpassTurboService = inject(OverpassTurboService);
-    private readonly satelliteImageryService = inject(SatelliteImageryService);
     private readonly store = inject(Store);
     private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
+
+    /**
+     * Adds the user's token to the requests the map makes to our own API, since the tiles of a base layer
+     * that comes with the subscription are only served to a subscribed user. Every map that shows a base
+     * layer binds it, so it is a field with a stable identity rather than a method, which the map would
+     * see as a new transform on every change detection.
+     */
+    public readonly transformRequest = (url: string): RequestParameters => {
+        if (!Urls.isOwnApiAddress(url)) {
+            return { url };
+        }
+        const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
+        return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
+    };
 
     private initializeOncePromise: Promise<void> | null = null;
 
@@ -55,7 +68,6 @@ export class MapService {
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
         maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
-        maplibregl.addProtocol("satellite", (params) => this.satelliteImageryService.getTile(params.url));
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
