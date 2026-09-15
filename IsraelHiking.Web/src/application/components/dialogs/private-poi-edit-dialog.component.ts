@@ -25,7 +25,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import { handleShortcutKey, isCtrlOrMeta } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
@@ -274,13 +274,20 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
 
     @HostListener("window:keydown", ["$event"])
     public onDialogShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.handleDialogShortcut(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleDialogShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private handleDialogShortcut(event: KeyboardEvent): string | null {
         if (event.key === "Delete") {
             this.remove();
-            // Deleting shifts the rest of the markers down, so the next point now sits at this index
             this.editPointAtIndex(this.markerIndex);
             return "Delete edited point";
         }
@@ -288,7 +295,6 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
             return null;
         }
         if (isCtrlOrMeta(event)) {
-            // Editing the points of a route one by one is the common case, save and move on
             this.save();
             const markers = this.getRouteMarkers();
             const offset = event.shiftKey ? -1 : 1;
@@ -303,18 +309,13 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         return "Save and close point";
     }
 
-    /**
-     * Closes this dialog and reopens it on another point of the same route, so that going through
-     * the points of a route with the keyboard does not mean reaching for the mouse between them.
-     * Closes without reopening when the route has no point at that index any more.
-     */
+    /** Reopens this dialog on another point of the same route, or closes it if there is none */
     private editPointAtIndex(index: number) {
         this.dialogRef.close();
         const markers = this.getRouteMarkers();
         if (markers.length === 0) {
             return;
         }
-        // Deleting the last point leaves nothing after it, keep editing the one before it instead
         const indexToEdit = Math.min(index, markers.length - 1);
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markers[indexToEdit], indexToEdit, this.routeId);
     }

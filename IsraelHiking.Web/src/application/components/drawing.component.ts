@@ -15,7 +15,7 @@ import { ToastService } from "../services/toast.service";
 import { SidebarService } from "../services/sidebar.service";
 import { ShareUrlsService } from "../services/share-urls.service";
 import { DataContainerService } from "../services/data-container.service";
-import { handleShortcutKey, isCtrlOrMeta, isMapPopupOpen } from "../services/keyboard-shortcuts";
+import { isTypingInTextField, isCtrlOrMeta, isMapPopupOpen, SHORTCUT_ANALYTICS_CATEGORY } from "../services/keyboard-shortcuts";
 import { AnalyticsService } from "../services/analytics.service";
 import {
     ReplaceSegmentsAction,
@@ -31,7 +31,6 @@ import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
 
-/** Switching the routing type mid-draw is a mouse trip to the side control otherwise */
 const ROUTING_TYPE_BY_DIGIT: Record<string, RoutingType> = {
     "1": "Hike",
     "2": "Bike",
@@ -78,11 +77,18 @@ export class DrawingComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.handleDrawingShortcut(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleDrawingShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private handleDrawingShortcut(event: KeyboardEvent): string | null {
-        // A dialog is nearer to the user than the map behind it and owns the keyboard while it is up
         if (this.dialog.openDialogs.length > 0) {
             return null;
         }
@@ -98,7 +104,6 @@ export class DrawingComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return null;
         }
-        // ESC peels one layer at a time, a popup or the sidebar goes before the edit mode does
         if (event.key === "Escape" && this.isEditActive() && !isMapPopupOpen() && !this.sidebarService.isSidebarOpen()) {
             if (this.isPoiEditActive()) {
                 this.toggleEditPoi();

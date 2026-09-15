@@ -8,7 +8,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import type { LatLngAltTime } from "../../models";
 
@@ -37,11 +37,18 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     @HostListener("window:keydown", ["$event"])
     public onPopupShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.deleteOnDelete(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.deleteOnDelete(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private deleteOnDelete(event: KeyboardEvent): string | null {
-        // An open dialog has its own DEL, and it is nearer to the user than this popup
         if (event.key !== "Delete" || this.matDialog.openDialogs.length > 0) {
             return null;
         }

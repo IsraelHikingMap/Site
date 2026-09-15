@@ -29,7 +29,7 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { handleShortcutKey, isMapPopupOpen } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, isMapPopupOpen, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import { MatDialog } from "@angular/material/dialog";
 import type { ApplicationState, LocationState } from "../../models";
@@ -88,14 +88,21 @@ export class MainMapComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onSidebarShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.closeSidebarOnEscape(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closeSidebarOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private closeSidebarOnEscape(event: KeyboardEvent): string | null {
         if (event.key !== "Escape" || !this.sidebarService.isSidebarOpen()) {
             return null;
         }
-        // ESC peels one layer at a time, a popup or a dialog goes before the sidebar does
         if (isMapPopupOpen() || this.matDialog.openDialogs.length > 0) {
             return null;
         }

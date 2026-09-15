@@ -21,7 +21,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
-import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
@@ -67,10 +67,17 @@ export class PublicPoisComponent implements OnInit {
 
     public readonly getSelectedFeatureLatlng = computed(() => SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]));
 
-    /** ESC is the keyboard's equivalent of the popup's "x" button, maplibre has no built in support for it */
     @HostListener("window:keydown", ["$event"])
     public onPopupShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.closePopupsOnEscape(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closePopupsOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private closePopupsOnEscape(event: KeyboardEvent): string | null {

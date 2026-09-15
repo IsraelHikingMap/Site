@@ -28,7 +28,6 @@ import {
 import type { ApplicationState, BatteryOptimizationType, ThemeSetting } from "../../models";
 
 type KeyboardShortcut = {
-    /** The keys, joined with a "+" when they need to be pressed together */
     keys: string[];
     description: string;
 };
@@ -65,10 +64,6 @@ export class SettingsComponent {
     public batteryOptimizationType = this.store.selectSignal((state: ApplicationState) => state.configuration.batteryOptimizationType);
     public isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
 
-    /**
-     * Shortcuts are of no use without a keyboard, so this list is only shown on a desktop, where
-     * the settings screen is the only place they are documented.
-     */
     public readonly keyboardShortcuts = computed<KeyboardShortcut[]>(() => {
         const controlKey = this.runningContextService.isMac ? "Cmd" : "Ctrl";
         return [

@@ -16,7 +16,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
-import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import { Urls } from "../../urls";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../../models";
@@ -110,10 +110,17 @@ export class RoutesComponent implements AfterViewInit {
         }, 0);
     };
 
-    /** ESC is the keyboard's equivalent of the popup's "x" button, maplibre has no built in support for it */
     @HostListener("window:keydown", ["$event"])
     public onPopupShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.closePopupsOnEscape(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closePopupsOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private closePopupsOnEscape(event: KeyboardEvent): string | null {

@@ -132,7 +132,6 @@
   <dl class="flex flex-col gap-1">
     @for (shortcut of keyboardShortcuts(); track shortcut.description) {
     <div class="flex flex-row gap-2 items-baseline">
-      <!-- The keys are always written left to right, in RTL they still belong next to the description -->
       <dt class="w-40 shrink-0" dir="ltr" [class.text-right]="resources.start === 'right'">
         @for (key of shortcut.keys; track key; let isLast = $last) {
         <kbd class="border rounded px-1.5 py-0.5 text-xs font-mono">{{key}}</kbd>@if (!isLast) {<span

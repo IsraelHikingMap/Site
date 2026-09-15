@@ -4,7 +4,7 @@ import { MatButton } from "@angular/material/button";
 
 
 import { ResourcesService } from "../../services/resources.service";
-import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 
 export type ConfirmType = "YesNo" | "OkCancel" | "Ok" | "Custom";
@@ -35,10 +35,17 @@ export class ConfirmDialogComponent {
         this.declineAction = () => { throw new Error("Decline action method must be provided!"); };
     }
 
-    /** This is a snackbar and not a dialog, so it gets none of the keyboard handling for free */
     @HostListener("window:keydown", ["$event"])
     public onConfirmShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.confirmOrDecline(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.confirmOrDecline(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private confirmOrDecline(event: KeyboardEvent): string | null {

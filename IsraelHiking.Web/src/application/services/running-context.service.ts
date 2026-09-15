@@ -18,7 +18,6 @@ export class RunningContextService {
         if (!this.isIos && this.isCapacitor) {
             this.isIos = Capacitor.getPlatform() === "ios";
         }
-        // iPads asking for a desktop site also report "MacIntel", the iOS check above separates them
         this.isMac = !this.isIos && navigator.platform.startsWith("Mac");
         const agent: string = navigator.userAgent || navigator.vendor || (window as Window & { opera?: string }).opera || "";
         /* eslint-disable */

@@ -37,7 +37,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { handleShortcutKey } from "../../services/keyboard-shortcuts";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
 import { ZoomComponent } from "../zoom.component";
@@ -359,7 +359,15 @@ export class TracesComponent implements OnInit {
 
     @HostListener("window:keydown", ["$event"])
     public onMissingPartShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.handleMissingPartShortcut(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleMissingPartShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private handleMissingPartShortcut(event: KeyboardEvent): string | null {

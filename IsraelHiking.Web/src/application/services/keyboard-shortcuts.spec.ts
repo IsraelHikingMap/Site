@@ -1,7 +1,6 @@
-import { describe, beforeEach, afterEach, it, expect, vi } from "vitest";
+import { describe, afterEach, it, expect } from "vitest";
 
-import { handleShortcutKey, isCtrlOrMeta, isMapPopupOpen } from "./keyboard-shortcuts";
-import type { AnalyticsService } from "./analytics.service";
+import { isCtrlOrMeta, isMapPopupOpen, isTypingInTextField } from "./keyboard-shortcuts";
 
 describe("Keyboard shortcuts", () => {
     const keyPress = (init: KeyboardEventInit, target?: HTMLElement) => {
@@ -14,15 +13,12 @@ describe("Keyboard shortcuts", () => {
 
     const textField = () => document.createElement("input");
 
-    /** A handler that claims every key press, so a test can tell whether it was consulted at all */
-    const claimingHandler = () => vi.fn((): string | null => "Some shortcut");
-
     describe("isCtrlOrMeta", () => {
-        it("should accept CTRL, for Windows and Linux", () => {
+        it("should accept CTRL", () => {
             expect(isCtrlOrMeta(keyPress({ key: "z", ctrlKey: true }))).toBe(true);
         });
 
-        it("should accept CMD, for macOS", () => {
+        it("should accept CMD", () => {
             expect(isCtrlOrMeta(keyPress({ key: "z", metaKey: true }))).toBe(true);
         });
 
@@ -38,7 +34,7 @@ describe("Keyboard shortcuts", () => {
             expect(isMapPopupOpen()).toBe(false);
         });
 
-        it("should report a popup once maplibre opened one", () => {
+        it("should report an open popup", () => {
             const popup = document.createElement("div");
             popup.className = "maplibregl-popup";
             document.body.appendChild(popup);
@@ -47,69 +43,29 @@ describe("Keyboard shortcuts", () => {
         });
     });
 
-    describe("handleShortcutKey", () => {
-        let analyticsService: AnalyticsService;
-        let trackEvent: ReturnType<typeof vi.fn>;
-        let handler: ReturnType<typeof claimingHandler>;
-
-        beforeEach(() => {
-            trackEvent = vi.fn();
-            analyticsService = { trackEvent } as unknown as AnalyticsService;
-            handler = claimingHandler();
+    describe("isTypingInTextField", () => {
+        it("should claim a key press for a text field", () => {
+            expect(isTypingInTextField(keyPress({ key: "Delete" }, textField()))).toBe(true);
         });
 
-        it("should report and swallow a key press the handler claimed", () => {
-            const event = keyPress({ key: "z", ctrlKey: true });
-
-            handleShortcutKey(event, analyticsService, () => "Undo");
-
-            expect(trackEvent).toHaveBeenCalledWith("Keyboard Shortcuts", "Undo");
-            expect(event.defaultPrevented).toBe(true);
-        });
-
-        it("should leave a key press the handler did not claim alone", () => {
-            const event = keyPress({ key: "q" });
-
-            handleShortcutKey(event, analyticsService, () => null);
-
-            expect(trackEvent).not.toHaveBeenCalled();
-            expect(event.defaultPrevented).toBe(false);
-        });
-
-        it("should not call the handler while the user is typing in a text field", () => {
-            handleShortcutKey(keyPress({ key: "Delete" }, textField()), analyticsService, handler);
-
-            expect(handler).not.toHaveBeenCalled();
-            expect(trackEvent).not.toHaveBeenCalled();
-        });
-
-        it("should not call the handler while the user is typing in a contenteditable", () => {
+        it("should claim a key press for a contenteditable", () => {
             const editable = document.createElement("div");
-            // Both jsdom and the browser derive isContentEditable from layout, so set it outright
             Object.defineProperty(editable, "isContentEditable", { value: true });
 
-            handleShortcutKey(keyPress({ key: "Delete" }, editable), analyticsService, handler);
-
-            expect(handler).not.toHaveBeenCalled();
+            expect(isTypingInTextField(keyPress({ key: "Delete" }, editable))).toBe(true);
         });
 
-        it("should call the handler for ENTER and ESC even from inside a text field", () => {
-            handleShortcutKey(keyPress({ key: "Enter" }, textField()), analyticsService, handler);
-            handleShortcutKey(keyPress({ key: "Escape" }, textField()), analyticsService, handler);
-
-            expect(handler).toHaveBeenCalledTimes(2);
+        it("should leave ENTER and ESC to the shortcuts", () => {
+            expect(isTypingInTextField(keyPress({ key: "Enter" }, textField()))).toBe(false);
+            expect(isTypingInTextField(keyPress({ key: "Escape" }, textField()))).toBe(false);
         });
 
-        it("should call the handler for CTRL + DEL from inside a text field, a dialog focuses its first field", () => {
-            handleShortcutKey(keyPress({ key: "Delete", ctrlKey: true }, textField()), analyticsService, handler);
-
-            expect(handler).toHaveBeenCalledOnce();
+        it("should leave CTRL + DEL to the shortcuts", () => {
+            expect(isTypingInTextField(keyPress({ key: "Delete", ctrlKey: true }, textField()))).toBe(false);
         });
 
-        it("should call the handler for any key press outside a text field", () => {
-            handleShortcutKey(keyPress({ key: "Delete" }, document.createElement("div")), analyticsService, handler);
-
-            expect(handler).toHaveBeenCalledOnce();
+        it("should leave a key press outside a text field to the shortcuts", () => {
+            expect(isTypingInTextField(keyPress({ key: "Delete" }, document.createElement("div")))).toBe(false);
         });
     });
 });

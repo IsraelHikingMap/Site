@@ -15,7 +15,7 @@ import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { MapService } from "../services/map.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
-import { handleShortcutKey, isCtrlOrMeta } from "../services/keyboard-shortcuts";
+import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../services/keyboard-shortcuts";
 import { AnalyticsService } from "../services/analytics.service";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
@@ -181,7 +181,15 @@ export class SearchComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys(event: KeyboardEvent): void {
-        handleShortcutKey(event, this.analyticsService, e => this.handleSearchShortcut(e));
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleSearchShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
     }
 
     private handleSearchShortcut(event: KeyboardEvent): string | null {
@@ -203,8 +211,6 @@ export class SearchComponent {
      * @returns the shortcut's name if the key press was handled, null otherwise
      */
     private handleEnterKeydown(): string | null {
-        // ENTER belongs to whatever the user is actually looking at, the search box only claims it
-        // while it holds the focus - otherwise it fires over dialogs, confirmations and popups too
         if (this.searchFromInput()?.nativeElement !== this.document.activeElement) {
             return null;
         }
