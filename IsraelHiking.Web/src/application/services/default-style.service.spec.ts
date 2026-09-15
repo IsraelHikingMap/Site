@@ -36,6 +36,9 @@ describe("DefaultStyleService", () => {
                 {
                     provide: ResourcesService,
                     useValue: {
+                        endOfBaseDrapedLayers: "endOfBaseDrapedLayers",
+                        endOfOverlaysDrapedLayers: "endOfOverlaysDrapedLayers",
+                        endOfDrapedLayers: "endOfDrapedLayers",
                         endOfBaseLayer: "endOfBaseLayer",
                         endOfOverlays: "endOfOverlays",
                         endOfClusters: "endOfClusters",
@@ -70,6 +73,9 @@ describe("DefaultStyleService", () => {
 
         expect(style.sources.dummy.type).toBe("geojson");
         expect(style.layers.map(l => l.id)).toEqual([
+            "endOfBaseDrapedLayers",
+            "endOfOverlaysDrapedLayers",
+            "endOfDrapedLayers",
             "endOfBaseLayer",
             "endOfOverlays",
             "endOfClusters",

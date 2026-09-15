@@ -1,6 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
-import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
+import type { LayerSpecification, RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
@@ -67,6 +67,15 @@ export class DefaultStyleService {
         };
     }
 
+    private createPlaceholder(id: string): LayerSpecification {
+        return {
+            id,
+            type: "circle" as const,
+            source: "dummy",
+            layout: { visibility: "none" as const }
+        };
+    }
+
     public getStyleWithPlaceholders(): StyleSpecification {
         const styleWithPlaceholder = { ...this.style };
         styleWithPlaceholder.sources = {
@@ -83,30 +92,13 @@ export class DefaultStyleService {
             }
         };
         styleWithPlaceholder.layers = [
-            {
-                id: this.resources.endOfBaseLayer,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfOverlays,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfClusters,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfRoutes,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            }
+            this.createPlaceholder(this.resources.endOfBaseDrapedLayers),
+            this.createPlaceholder(this.resources.endOfOverlaysDrapedLayers),
+            this.createPlaceholder(this.resources.endOfDrapedLayers),
+            this.createPlaceholder(this.resources.endOfBaseLayer),
+            this.createPlaceholder(this.resources.endOfOverlays),
+            this.createPlaceholder(this.resources.endOfClusters),
+            this.createPlaceholder(this.resources.endOfRoutes)
         ];
         return styleWithPlaceholder;
     }
