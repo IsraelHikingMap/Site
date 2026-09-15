@@ -133,6 +133,10 @@ public class ConfigurationData
     /// A list of allowed image sites
     /// </summary>
     public List<string> ImageUrlsAllowList { get; set; }
+    /// <summary>
+    /// The base address of the user-images service the site uploads points of interest pictures to
+    /// </summary>
+    public string UserImagesServerAddress { get; set; }
 
     public ConfigurationData()
     {
@@ -166,6 +170,7 @@ public class ConfigurationData
         RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
+        UserImagesServerAddress = "http://localhost:3001/";
         ImageUrlsAllowList =
         [
             "wikimedia.org",

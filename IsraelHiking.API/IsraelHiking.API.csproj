@@ -30,8 +30,6 @@
     <PackageReference Include="OsmSharp.IO.API" />
     <PackageReference Include="ProjNet" />
     <PackageReference Include="SharpZipLib.NETStandard" />
-    <PackageReference Include="SkiaSharp" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
     <PackageReference Include="Wangkanai.Detection" />
   </ItemGroup>
 
