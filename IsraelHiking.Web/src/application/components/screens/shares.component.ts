@@ -187,7 +187,7 @@ export class SharesComponent implements OnInit {
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.runFilter();
                 } catch (ex) {
-                    this.toastService.error(ex, this.resources.unableToDeleteCloudSave);
+                    this.toastService.error(ex, this.resources.unableToDeleteSavedRoute);
                 }
             },
             type: "YesNo"

@@ -250,7 +250,7 @@ export class SearchComponent {
             return this.resources.searchLandingPlaceHolder;
         }
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
-            return this.resources.searchCloudSavesPlaceHolder;
+            return this.resources.searchSavedRoutesPlaceHolder;
         }
         if (currentUrl === RouteStrings.ROUTE_TRACES) {
             return this.resources.searchTracesPlaceHolder;
