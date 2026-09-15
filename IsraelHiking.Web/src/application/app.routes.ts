@@ -53,7 +53,7 @@ export const routes: Route[] = [
     {
         path: "shares",
         loadComponent: () => import("./components/screens/shares.component").then(m => m.SharesComponent),
-        title: "Mapeak - Cloud Saves",
+        title: "Mapeak - Saved Routes",
         resolve: { map: initializeMapResolver }
     },
     {

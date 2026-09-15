@@ -73,7 +73,7 @@
   </button>
   }
   @if (hasMultipleRoutes()) {
-  <button mat-button matTooltip="{{resources.saveInCloudAndShare}}" [matMenuTriggerFor]="shareMenu"
+  <button mat-button matTooltip="{{resources.saveRouteAndShare}}" [matMenuTriggerFor]="shareMenu"
     matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
     <i class="fa icon-cloud-share fa-lg"></i>
   </button>
@@ -88,7 +88,7 @@
     </button>
   </mat-menu>
   } @else {
-  <button mat-button matTooltip="{{resources.saveInCloudAndShare}}" (click)="share('current')"
+  <button mat-button matTooltip="{{resources.saveRouteAndShare}}" (click)="share('current')"
     [disabled]="!hasRoutes()" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
     analyticsLabel="Share">
     <i class="fa icon-cloud-share fa-lg"></i>

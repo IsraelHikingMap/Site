@@ -89,8 +89,8 @@ export class ResourcesService {
     public duplicateRoute: string;
     public deleteRoute: string;
     public share: string;
-    public saveInCloudAndShare: string;
-    public saveInCloudAndShareWithYourFriends: string;
+    public saveRouteAndShare: string;
+    public saveRouteAndShareWithYourFriends: string;
     public zoomIn: string;
     public zoomOut: string;
     public showMeWhereIAm: string;
@@ -124,8 +124,8 @@ export class ResourcesService {
     public moveToRoute: string;
     public myTraces: string;
     public noTraces: string;
-    public mySavesInTheCloud: string;
-    public noCloudSaves: string;
+    public mySavedRoutes: string;
+    public noSavedRoutes: string;
     public title: string;
     public titlePlaceHolder: string;
     public description: string;
@@ -165,7 +165,7 @@ export class ResourcesService {
     public imgurTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
-    public updateCurrentCloudSave: string;
+    public updateCurrentSavedRoute: string;
     public yes: string;
     public no: string;
     public ok: string;
@@ -275,7 +275,7 @@ export class ResourcesService {
     public contactUsToPublishAPublicRoute: string;
     public activityType: string;
     public editProperties: string;
-    public openCloudSave: string;
+    public openSavedRoute: string;
     public openInPlanAndExplore: string;
     public FAQ: string;
     public downloadMapForOfflineViewing: string;
@@ -284,7 +284,7 @@ export class ResourcesService {
     public privacyNoticeDescription: string;
     public editThisMap: string;
     public list: string;
-    public searchCloudSavesPlaceHolder: string;
+    public searchSavedRoutesPlaceHolder: string;
     public searchTracesPlaceHolder: string;
     public noRoutesFoundZoomInOrChangeTheFilters: string;
     public copyToClipboard: string;
@@ -330,7 +330,7 @@ export class ResourcesService {
     public areYouSureYouWantToDeleteAllRoutes: string;
     public clickBackAgainToCloseTheApp: string;
     public wrappingThingsUp: string;
-    public unableToDeleteCloudSave: string;
+    public unableToDeleteSavedRoute: string;
     public preparingDataForIssueReport: string;
     public openingAFilePleaseWait: string;
     public finishedOpeningTheFile: string;
@@ -501,7 +501,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789496577498");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789506857147");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -539,8 +539,8 @@ export class ResourcesService {
         this.duplicateRoute = this.gettextCatalog.getString("Duplicate Route");
         this.deleteRoute = this.gettextCatalog.getString("Delete Route");
         this.share = this.gettextCatalog.getString("Share");
-        this.saveInCloudAndShare = this.gettextCatalog.getString("Save in the Cloud and Share");
-        this.saveInCloudAndShareWithYourFriends = this.gettextCatalog.getString("Save in the Cloud and Share With Your Friends!");
+        this.saveRouteAndShare = this.gettextCatalog.getString("Save Route and Share");
+        this.saveRouteAndShareWithYourFriends = this.gettextCatalog.getString("Save Route and Share With Your Friends!");
         this.zoomIn = this.gettextCatalog.getString("Zoom In");
         this.zoomOut = this.gettextCatalog.getString("Zoom Out");
         this.showMeWhereIAm = this.gettextCatalog.getString("Show Me Where I am");
@@ -575,12 +575,12 @@ export class ResourcesService {
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");
         this.myTraces = this.gettextCatalog.getString("My Traces");
         this.noTraces = this.gettextCatalog.getString("No traces yet - uploading some to OSM helps improve the map for everyone.");
-        this.mySavesInTheCloud = this.gettextCatalog.getString("My Saves in the Cloud");
-        this.noCloudSaves = this.gettextCatalog.getString("No saves were found in the cloud...");
+        this.mySavedRoutes = this.gettextCatalog.getString("My Saved Routes");
+        this.noSavedRoutes = this.gettextCatalog.getString("No saved routes were found...");
         this.title = this.gettextCatalog.getString("Title");
-        this.titlePlaceHolder = this.gettextCatalog.getString("The title for your saved work.");
+        this.titlePlaceHolder = this.gettextCatalog.getString("The title for your saved route.");
         this.description = this.gettextCatalog.getString("Description");
-        this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about what you are saving in the cloud.");
+        this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about the route you are saving.");
         this.map = this.gettextCatalog.getString("Map");
         this.startDownload = this.gettextCatalog.getString("Start Download");
         // end
@@ -617,7 +617,7 @@ export class ResourcesService {
         this.imgurTermsOfService = this.gettextCatalog.getString("Imgur terms of service");
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
-        this.updateCurrentCloudSave = this.gettextCatalog.getString("Update current saved work");
+        this.updateCurrentSavedRoute = this.gettextCatalog.getString("Update the current saved route");
         this.yes = this.gettextCatalog.getString("Yes");
         this.no = this.gettextCatalog.getString("No");
         this.ok = this.gettextCatalog.getString("OK");
@@ -728,7 +728,7 @@ export class ResourcesService {
         this.contactUsToPublishAPublicRoute = this.gettextCatalog.getString("Contact us to publish a public route");
         this.activityType = this.gettextCatalog.getString("Activity Type");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
-        this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
+        this.openSavedRoute = this.gettextCatalog.getString("Open Saved Route");
         this.openInPlanAndExplore = this.gettextCatalog.getString("Open in Plan & Explore");
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineViewing = this.gettextCatalog.getString("Download Map for Offline viewing");
@@ -738,7 +738,7 @@ export class ResourcesService {
             "Our privacy policy explains what is collected, how it is used and the choices you have.");
         this.editThisMap = this.gettextCatalog.getString("Edit this map");
         this.list = this.gettextCatalog.getString("List");
-        this.searchCloudSavesPlaceHolder = this.gettextCatalog.getString("Search cloud saves...");
+        this.searchSavedRoutesPlaceHolder = this.gettextCatalog.getString("Search saved routes...");
         this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
         this.noRoutesFoundZoomInOrChangeTheFilters = this.gettextCatalog.getString("No routes found, zoom in the map or change the filters...");
         this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
@@ -794,7 +794,7 @@ export class ResourcesService {
         this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all {{count}} routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
-        this.unableToDeleteCloudSave = this.gettextCatalog.getString("Unable to delete the work saved in the cloud...");
+        this.unableToDeleteSavedRoute = this.gettextCatalog.getString("Unable to delete the saved route...");
         this.preparingDataForIssueReport = this.gettextCatalog.getString("Preparing data for issue report...");
         this.openingAFilePleaseWait = this.gettextCatalog.getString("Opening file, this might take a while, please don't close the app...");
         this.finishedOpeningTheFile = this.gettextCatalog.getString("Finished opening file! :-)");

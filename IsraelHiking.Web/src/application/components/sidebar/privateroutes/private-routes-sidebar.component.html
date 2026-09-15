@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" [disabled]="routes().length === 0" (click)="share()"
-                matTooltip="{{resources.saveInCloudAndShare}}" matTooltipPosition="below" analyticsOn="click"
+                matTooltip="{{resources.saveRouteAndShare}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Private Routes" analyticsLabel="Share">
                 <i class="fa fa-lg icon-cloud-share"></i>
                 @if (hiddenRoutesCount() === 0) {
