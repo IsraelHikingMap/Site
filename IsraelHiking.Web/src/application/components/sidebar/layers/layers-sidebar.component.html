@@ -15,7 +15,7 @@
           </div>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      @for (baseLayer of defaultBaseLayers; track baseLayer.key) {
+      @for (baseLayer of defaultBaseLayers(); track baseLayer.key) {
       <div class="flex flex-row">
         <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
@@ -23,11 +23,13 @@
               [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
           <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
         </button>
+        @if (hasLegend(baseLayer)) {
         <div class="w-1/12">
           <button mat-button class="w-full short-button" (click)="openLegend(baseLayer)"
             matTooltip="{{resources.legend}}" matTooltipPosition="before" analyticsOn="click" analyticsCategory="Layers"
             analyticsLabel="Open legend {{baseLayer.key}}"><i class="fa icon-info"></i></button>
         </div>
+        }
       </div>
       }
       @for (baseLayer of baseLayers(); track baseLayer.key) {

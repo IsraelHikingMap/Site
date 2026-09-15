@@ -1,6 +1,11 @@
-<div class="maplibregl-ctrl m-0! bg-[#ffffff80] px-1" dir="ltr">
+﻿<div class="maplibregl-ctrl m-0! bg-[#ffffff80] px-1" dir="ltr">
     <a class="no-underline text-black text-xs" href="https://www.openstreetmap.org/copyright" target="_blank">©
         OpenStreetMap</a>
+    @if (isSatelliteImageryShown()) {
+    <a class="no-underline text-black text-xs mx-1" href="https://www.mapbox.com/about/maps/" target="_blank">©
+        Mapbox</a>
+    <a class="no-underline text-black text-xs" href="https://www.maxar.com/" target="_blank">© Maxar</a>
+    }
     @if (!isMobile()) {
     <span class="mx-1 text-black text-xs">|</span>
     <a class="no-underline text-black text-xs" [href]="getEditAddress()" [dir]="resources.direction"
