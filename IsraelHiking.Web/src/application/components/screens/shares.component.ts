@@ -1,4 +1,4 @@
-﻿import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, signal } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, signal } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";

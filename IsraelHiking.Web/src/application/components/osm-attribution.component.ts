@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 
 import { OsmAddressesService } from "../services/osm-addresses.service";
 import { RunningContextService } from "../services/running-context.service";

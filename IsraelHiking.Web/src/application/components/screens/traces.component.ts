@@ -1,4 +1,4 @@
-﻿import { Component, HostListener, DestroyRef, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
+import { Component, HostListener, DestroyRef, OnInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";

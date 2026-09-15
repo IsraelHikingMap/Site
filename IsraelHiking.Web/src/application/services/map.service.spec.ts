@@ -1,4 +1,4 @@
-﻿import { describe, beforeEach, vi, it, expect } from "vitest";
+import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideStore, Store } from "@ngxs/store";
 import type { ErrorEvent, LayerSpecification, Map, SourceSpecification } from "maplibre-gl";
@@ -37,7 +37,7 @@ describe("MapService", () => {
 
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
         service.setMap({ on: () => { }, setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { } } as unknown as Map);
+            setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         expect(true).toBeTruthy();
     }));
@@ -74,7 +74,7 @@ describe("MapService", () => {
     it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
         const spy = vi.fn();
         service.setMap({ on: () => { }, off: spy, setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { } } as unknown as Map);
+            setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(spy).toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe("MapService", () => {
         loggingService.error = vi.fn();
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("418") } as unknown as ErrorEvent);
@@ -160,7 +160,7 @@ describe("MapService", () => {
         loggingService.error = vi.fn();
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
                     callback({ error: new Error("other") } as unknown as ErrorEvent);
@@ -182,7 +182,7 @@ describe("MapService", () => {
         });
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") callback({});
             },
@@ -206,7 +206,7 @@ describe("MapService", () => {
         });
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") callback({});
             },
@@ -221,7 +221,7 @@ describe("MapService", () => {
         let moveendCallback: (e: unknown) => void;
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") moveendCallback = callback;
             },
@@ -235,7 +235,7 @@ describe("MapService", () => {
     it("should get bounds from map", inject([MapService], async (service: MapService) => {
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             getBounds: () => ({
                 getNorthEast: () => ({ lat: 1, lng: 1 }),
@@ -249,7 +249,7 @@ describe("MapService", () => {
     it("should project point", inject([MapService], async (service: MapService) => {
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             project: () => ({ x: 1, y: 2 })
         } as unknown as Map);
@@ -266,7 +266,7 @@ describe("MapService", () => {
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
             getLayer: () => true
@@ -278,7 +278,7 @@ describe("MapService", () => {
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
         service.setMap({
             setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             isMoving: () => true
         } as unknown as Map);

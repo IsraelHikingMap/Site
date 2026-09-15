@@ -1,4 +1,4 @@
-﻿import { Component, DestroyRef, inject, signal } from "@angular/core";
+import { Component, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";

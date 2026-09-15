@@ -1,4 +1,4 @@
-﻿import { inject, Service } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
 import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";

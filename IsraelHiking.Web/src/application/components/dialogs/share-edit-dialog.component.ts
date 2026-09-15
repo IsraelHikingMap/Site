@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA, MatDialogActions, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MatAnchor, MatButtonModule } from "@angular/material/button";
