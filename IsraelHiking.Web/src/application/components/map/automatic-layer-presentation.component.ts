@@ -5,7 +5,14 @@ import { Store } from "@ngxs/store";
 import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
 import { DefaultStyleService } from "../../services/default-style.service";
+import { ResourcesService } from "../../services/resources.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
+
+/**
+ * The layer types maplibre renders into a terrain tile's drape texture. Any other type ends the run of draped
+ * layers, and the next draped layer after it starts a new one, costing another texture per terrain tile.
+ */
+const DRAPED_LAYER_TYPES = new Set(["background", "fill", "line", "raster", "hillshade", "color-relief"]);
 
 @Component({
     selector: "auto-layer",
@@ -28,6 +35,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     private readonly mapComponent = inject(MapComponent);
     private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
     constructor() {
@@ -87,6 +95,11 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.mapComponent.mapInstance.addSource(sourceKey, source);
             this.jsonSourcesIds.push(sourceKey);
         }
+        // The style goes in as two chunks that keep its order: everything up to its first non-draped layer joins
+        // the draped region, the rest goes after it. A style that is all lines and fills has no second chunk,
+        // one that starts with a symbol has no first.
+        const beforeDraped = this.isBaselayer() ? this.resources.endOfBaseDrapedLayers : this.resources.endOfOverlaysDrapedLayers;
+        let reachedNonDraped = false;
         for (const layer of layers) {
             if (!this.isBaselayer() && layer.metadata && !(layer.metadata as Record<string, unknown>)["IHM:overlay"]) {
                 continue;
@@ -98,7 +111,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 layer.id = layerData.key + "_" + layer.id;
                 layer.source = layerData.key + "_" + layer.source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before());
+            if (reachedNonDraped || !DRAPED_LAYER_TYPES.has(layer.type)) {
+                reachedNonDraped = true;
+                this.mapComponent.mapInstance.addLayer(layer, this.before());
+            } else {
+                this.mapComponent.mapInstance.addLayer(layer, beforeDraped);
+            }
             this.jsonLayersIds.push(layer.id);
         }
     }
