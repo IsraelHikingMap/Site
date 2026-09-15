@@ -1,15 +1,13 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { registerPlugin } from "@capacitor/core";
 import { Store } from "@ngxs/store";
 import { skip } from "rxjs";
-import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { DefaultStyleService } from "./default-style.service";
-import { DEFAULT_BASE_LAYERS, SATELLITE_MAP } from "../reducers/initial-state";
-import type { ApplicationState, EditableLayer } from "../models";
+import type { ApplicationState } from "../models";
 
 type CarStoreKey = "style" | "route" | "config" | "route_instructions";
 
@@ -56,6 +54,9 @@ export class CarService {
             await this.setConfig();
             await this.setStyle();
         });
+        this.store.select((state: ApplicationState) => state.userState.token).pipe(skip(1)).subscribe(async () => {
+            await this.setConfig();
+        });
         await this.setConfig();
         await this.setStyle();
         await this.setRoutes();
@@ -63,17 +64,8 @@ export class CarService {
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(this.getBaseLayer(), true, "car");
+        const styleLike = await this.defaultStyleService.getSourcesAndLayers(this.layersService.selectedBaseLayer(), true, "car");
         await ReactivePreferences.storeValue({ key: "style", value: styleLike });
-    }
-
-    /**
-     * The car app draws the map by itself, without the user's token, so a base layer whose tiles our
-     * server only serves to a subscribed user can not be drawn there and the default map is used instead.
-     */
-    private getBaseLayer(): Immutable<EditableLayer> {
-        const selectedBaseLayer = this.layersService.selectedBaseLayer();
-        return selectedBaseLayer.key === SATELLITE_MAP ? DEFAULT_BASE_LAYERS[0] : selectedBaseLayer;
     }
 
     private async setRoutes() {
@@ -95,13 +87,18 @@ export class CarService {
         await ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
     }
 
+    /**
+     * The car app draws the map by itself and has no session of its own, so it is given the user's token
+     * in order to fetch the tiles of a base layer that our server only serves to a subscribed user.
+     */
     private async setConfig() {
         this.loggingService.info("[Car] Setting config");
         await ReactivePreferences.storeValue({
             key: "config",
             value: {
                 language: this.store.selectSnapshot((state: ApplicationState) => state.configuration.language).code,
-                units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units)
+                units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units),
+                token: this.store.selectSnapshot((state: ApplicationState) => state.userState).token ?? ""
             }
         });
     }

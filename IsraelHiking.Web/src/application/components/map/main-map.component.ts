@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
+﻿import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";

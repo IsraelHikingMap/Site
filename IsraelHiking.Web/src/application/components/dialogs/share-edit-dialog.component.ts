@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+﻿import { Component, inject, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA, MatDialogActions, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { MatAnchor, MatButtonModule } from "@angular/material/button";
@@ -125,6 +125,7 @@ export class ShareEditDialogComponent {
 
     public async mapLoaded(map: Map) {
         this.map = map;
+        this.mapService.setTransformRequest(map);
         this.mapService.addArrowToMap(map);
         if (this.shareUrl.dataContainer) {
             this.map.fitBounds([this.shareUrl.dataContainer.southWest, this.shareUrl.dataContainer.northEast], { duration: 0 });

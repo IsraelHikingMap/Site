@@ -31,19 +31,6 @@ export class MapService {
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
-    /**
-     * Adds the user's token to the requests the map makes to our own API, since the tiles of a base layer
-     * that comes with the subscription are only served to a subscribed user. Every map that shows a base
-     * layer binds it, so it is a field with a stable identity rather than a method, which the map would
-     * see as a new transform on every change detection.
-     */
-    public readonly transformRequest = (url: string): RequestParameters => {
-        if (!Urls.isOwnApiAddress(url)) {
-            return { url };
-        }
-        const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
-        return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
-    };
 
     private initializeOncePromise: Promise<void> | null = null;
 
@@ -106,6 +93,7 @@ export class MapService {
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.setTransformRequest(map);
         this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
@@ -128,6 +116,22 @@ export class MapService {
             this.resolve = resolve;
         });
         this.currentMap = null;
+    }
+
+    /**
+     * Adds the user's token to the requests a map makes to our own API - the tiles of a base layer that
+     * comes with the subscription are only served to a subscribed user. Every map that shows a base layer
+     * needs it, so it is set here and not bound by each of the screens that hold a map.
+     * The token is read when the request is made, so a map that outlives a login picks up the new one.
+     */
+    public setTransformRequest(map: Map) {
+        map.setTransformRequest((url: string): RequestParameters => {
+            if (!Urls.isOwnApiAddress(url)) {
+                return { url };
+            }
+            const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
+            return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
+        });
     }
 
     public async addArrowToMap(map: Map) {
