@@ -79,26 +79,30 @@
 <mgl-geojson-source id="selected-poi" [data]="selectedPoiGeoJson()"></mgl-geojson-source>
 <mgl-layer id="selected-poi-fill" source="selected-poi" type="fill" [paint]="{ 
                 'fill-color': 'rgba(19, 106, 224, 0.2)'
-            }" [filter]="['==', '$type', 'Polygon']">
+            }" [filter]="['==', '$type', 'Polygon']"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="selected-poi-fill-line" source="selected-poi" type="line" [paint]="{ 
                 'line-color': 'blue', 
                 'line-width': 2 
-            }" [filter]="['==', '$type', 'Polygon']">
+            }" [filter]="['==', '$type', 'Polygon']"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="selected-poi-left" type="line" source="selected-poi" [paint]="{
                 'line-color': 'magenta',
                 'line-offset': -5,
                 'line-opacity': 0.5,
                 'line-width': 2
-            }">
+            }"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="selected-poi-right" type="line" source="selected-poi" [paint]="{
                 'line-color': 'magenta',
                 'line-offset': 5,
                 'line-opacity': 0.5,
                 'line-width': 2
-            }">
+            }"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="selected-poi-arrows" type="symbol" source="selected-poi" [layout]="{
                 'symbol-placement': 'line',

@@ -5,7 +5,14 @@ import { Store } from "@ngxs/store";
 import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
 import { DefaultStyleService } from "../../services/default-style.service";
+import { ResourcesService } from "../../services/resources.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
+
+/**
+ * The layer types maplibre renders into a terrain tile's drape texture. Any other type ends the run of draped
+ * layers, and the next draped layer after it starts a new one, costing another texture per terrain tile.
+ */
+const DRAPED_LAYER_TYPES = new Set(["background", "fill", "line", "raster", "hillshade", "color-relief"]);
 
 @Component({
     selector: "auto-layer",
@@ -14,6 +21,11 @@ import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from ".
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
     public readonly visible = input<boolean>();
     public readonly before = input<string>();
+    /**
+     * Anchor for the leading draped layers of this style. They are added there instead of at {@link before}, which
+     * keeps them in the style's single run of draped layers; see the anchors in `ResourcesService`.
+     */
+    public readonly beforeDraped = input<string>();
     public readonly isBaselayer = input<boolean>();
     public readonly layerData = input<EditableLayer>();
     public readonly allowOffline = input<boolean>();
@@ -87,6 +99,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.mapComponent.mapInstance.addSource(sourceKey, source);
             this.jsonSourcesIds.push(sourceKey);
         }
+        let reachedNonDraped = false;
         for (const layer of layers) {
             if (!this.isBaselayer() && layer.metadata && !(layer.metadata as Record<string, unknown>)["IHM:overlay"]) {
                 continue;
@@ -98,7 +111,12 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 layer.id = layerData.key + "_" + layer.id;
                 layer.source = layerData.key + "_" + layer.source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before());
+            if (reachedNonDraped || !DRAPED_LAYER_TYPES.has(layer.type)) {
+                reachedNonDraped = true;
+                this.mapComponent.mapInstance.addLayer(layer, this.before());
+            } else {
+                this.mapComponent.mapInstance.addLayer(layer, this.beforeDraped() ?? this.before());
+            }
             this.jsonLayersIds.push(layer.id);
         }
     }
