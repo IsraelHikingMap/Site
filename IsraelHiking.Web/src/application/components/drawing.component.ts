@@ -15,6 +15,8 @@ import { ToastService } from "../services/toast.service";
 import { SidebarService } from "../services/sidebar.service";
 import { ShareUrlsService } from "../services/share-urls.service";
 import { DataContainerService } from "../services/data-container.service";
+import { isTypingInTextField, isCtrlOrMeta, isMapPopupOpen, SHORTCUT_ANALYTICS_CATEGORY } from "../services/keyboard-shortcuts";
+import { AnalyticsService } from "../services/analytics.service";
 import {
     ReplaceSegmentsAction,
     ClearPoisAction,
@@ -28,6 +30,13 @@ import {
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
+
+const ROUTING_TYPE_BY_DIGIT: Record<string, RoutingType> = {
+    "1": "Hike",
+    "2": "Bike",
+    "3": "4WD",
+    "4": "None"
+};
 
 @Component({
     selector: "drawing",
@@ -45,6 +54,7 @@ export class DrawingComponent {
     private readonly dialog = inject(MatDialog);
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly analyticsService = inject(AnalyticsService);
 
     public undoQueueLength = this.store.selectSignal((state: ApplicationState) => state.routes.past.length);
     private readonly routeEditingState = this.store.selectSignal((state: ApplicationState) => state.routeEditingState);
@@ -66,27 +76,49 @@ export class DrawingComponent {
     public readonly hasMultipleRoutes = computed(() => this.presentRoutes().length > 1);
 
     @HostListener("window:keydown", ["$event"])
-    public onDrawingShortcutKeys($event: KeyboardEvent) {
-        if (($event.ctrlKey && $event.code === "KeyY") ||
-            ($event.metaKey && $event.shiftKey && $event.code === "KeyZ")) {
-            this.redo();
+    public onDrawingShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
             return;
         }
-        if (($event.ctrlKey || $event.metaKey) && $event.code === "KeyZ") {
-            this.undo();
+        const shortcutName = this.handleDrawingShortcut(event);
+        if (shortcutName == null) {
             return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private handleDrawingShortcut(event: KeyboardEvent): string | null {
+        if (this.dialog.openDialogs.length > 0) {
+            return null;
+        }
+        if ((event.ctrlKey && event.code === "KeyY") ||
+            (isCtrlOrMeta(event) && event.shiftKey && event.code === "KeyZ")) {
+            this.redo();
+            return "Redo";
+        }
+        if (isCtrlOrMeta(event) && !event.shiftKey && event.code === "KeyZ") {
+            this.undo();
+            return "Undo";
         }
         if (this.selectedRouteService.getSelectedRoute() == null) {
-            return;
+            return null;
         }
-        if ($event.key === "Escape") {
+        if (event.key === "Escape" && this.isEditActive() && !isMapPopupOpen() && !this.sidebarService.isSidebarOpen()) {
             if (this.isPoiEditActive()) {
                 this.toggleEditPoi();
             }
             if (this.isRouteEditActive()) {
                 this.toggleEditRoute();
             }
+            return "Exit edit mode";
         }
+        const routingType = ROUTING_TYPE_BY_DIGIT[event.key];
+        if (this.isRouteEditActive() && routingType != null && !isCtrlOrMeta(event) && !event.altKey) {
+            this.setRouting(routingType);
+            return `Routing ${routingType}`;
+        }
+        return null;
     }
 
     public clearRoute() {

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
@@ -29,6 +29,9 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SidebarService } from "../../services/sidebar.service";
+import { isTypingInTextField, isMapPopupOpen, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
+import { MatDialog } from "@angular/material/dialog";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
@@ -59,6 +62,8 @@ export class MainMapComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly analyticsService = inject(AnalyticsService);
+    private readonly matDialog = inject(MatDialog);
 
     private addedControls: IControl[] = [];
     private map: Map;
@@ -79,6 +84,30 @@ export class MainMapComponent {
         });
         this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
+    }
+
+    @HostListener("window:keydown", ["$event"])
+    public onSidebarShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closeSidebarOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private closeSidebarOnEscape(event: KeyboardEvent): string | null {
+        if (event.key !== "Escape" || !this.sidebarService.isSidebarOpen()) {
+            return null;
+        }
+        if (isMapPopupOpen() || this.matDialog.openDialogs.length > 0) {
+            return null;
+        }
+        this.sidebarService.hide();
+        return "Close sidebar";
     }
 
     public mapLoaded(map: Map) {
