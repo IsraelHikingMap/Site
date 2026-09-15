@@ -263,6 +263,7 @@ export class ResourcesService {
     public activityType: string;
     public editProperties: string;
     public openCloudSave: string;
+    public openInPlanAndExplore: string;
     public FAQ: string;
     public downloadMapForOfflineViewing: string;
     public privacyPolicyTermsOfService: string;
@@ -487,7 +488,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789486843290");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789487191146");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -705,6 +706,7 @@ export class ResourcesService {
         this.activityType = this.gettextCatalog.getString("Activity Type");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
         this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
+        this.openInPlanAndExplore = this.gettextCatalog.getString("Open in Plan & Explore");
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineViewing = this.gettextCatalog.getString("Download Map for Offline viewing");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");

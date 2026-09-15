@@ -135,7 +135,14 @@
                     {{resources.share}}
                 </button>
             </div>
-            @if (isEditable(selectedRoutePoint())) {
+            @if (isFromOsm(selectedRoutePoint())) {
+            <div class="flex flex-row">
+                <button class="mt-2" mat-button (click)="navigateToPoi(selectedRoutePoint())" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore">
+                    <i class="fa icon-external-link-square"></i>
+                    {{resources.openInPlanAndExplore}}
+                </button>
+            </div>
             <div class="flex flex-row">
                 <button class="mt-2" (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
@@ -231,7 +238,12 @@
                         <i class="fa icon-plus"></i>
                         {{resources.addToRoutes}}
                     </button>
-                    @if (isEditable(route)) {
+                    @if (isFromOsm(route)) {
+                    <button mat-menu-item (click)="navigateToPoi(route)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore from list">
+                        <i class="fa icon-external-link-square"></i>
+                        {{resources.openInPlanAndExplore}}
+                    </button>
                     <button mat-menu-item (click)="navigateToEditPoi(route)" analyticsOn="click"
                         analyticsCategory="Public routes" analyticsLabel="Edit OSM route from list">
                         <i class="fa icon-pencil"></i>

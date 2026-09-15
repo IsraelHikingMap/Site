@@ -215,8 +215,16 @@ export class PublicRoutesComponent {
         });
     }
 
-    public isEditable(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+    public isFromOsm(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         return route.properties.poiSource === "OSM";
+    }
+
+    /**
+     * Moves to the plan & explore screen with this route's point of interest open, which is where its
+     * full details are, the link to it in OSM included.
+     */
+    public navigateToPoi(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
+        this.router.navigate([RouteStrings.ROUTE_POI, route.properties.poiSource, route.properties.identifier]);
     }
 
     public navigateToEditPoi(route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
