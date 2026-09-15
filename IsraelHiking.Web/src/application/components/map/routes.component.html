@@ -3,7 +3,7 @@
   (lineLayerClick)="routeLineClick($event)" (pointsLayerClick)="nonEditRoutePointClick($event)"></routes-path>
 <mgl-geojson-source [id]="resources.editRouteSource" [data]="editingRouteGeoJson()"></mgl-geojson-source>
 <mgl-layer [id]="resources.editRouteLines" type="line" [source]="resources.editRouteSource"
-  [filter]="['==', '$type', 'LineString']" [before]="resources.endOfRoutes" [layout]="{
+  [filter]="['==', '$type', 'LineString']" [before]="resources.endOfDrapedLayers" [layout]="{
                 'line-cap': 'butt',
                 'line-join': 'bevel'
             }" [paint]="{

@@ -198,6 +198,10 @@
   content: "\e928";
 }
 
+.icon-copy:before {
+  content: "\e992";
+}
+
 .icon-crosshairs:before {
   content: "\e929";
 }
@@ -568,6 +572,10 @@
 
 .icon-viewpoint:before {
   content: "\e982";
+}
+
+.icon-volume-up:before {
+  content: "\e991";
 }
 
 .icon-water-hole:before {

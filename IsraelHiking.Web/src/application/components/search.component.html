@@ -7,7 +7,7 @@
   @else {
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
     [matAutocomplete]="autoFrom" [placeholder]="placeholder()" [dir]="resources.getDirection(searchTerm())"
-    (focus)="focusOnSearchInput()">
+    (focus)="selectSearchTermOnFocus()">
   <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete"
     [displayWith]="displayResults">
     @for (result of searchResults(); track result.id) {

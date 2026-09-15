@@ -26,11 +26,6 @@
               "src/googlef59316cdb0845a8c.html",
               "src/robots.txt",
               {
-                "glob": "**/mapbox-gl-rtl-text.js",
-                "input": "./node_modules/@mapbox/mapbox-gl-rtl-text/dist",
-                "output": "./"
-              },
-              {
                 "glob": "**/add-protocol-worker.js",
                 "input": "./node_modules/maplibre-contour/dist",
                 "output": "./"

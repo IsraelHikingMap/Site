@@ -21,9 +21,8 @@ if (specificImage) {
 // This is used in the evaluate function in puppeteer to access the map instance, the definition here is to allow TypeScript to recognize the type.
 const map: Map = null;
 
-// Both libraries are loaded from a CDN, so keep the versions in sync with the ones this project depends on.
+// MapLibre is loaded from a CDN, so keep the version in sync with the one this project depends on.
 const maplibreVersion = projectPackage.dependencies["maplibre-gl"];
-const rtlTextVersion = projectPackage.dependencies["@mapbox/mapbox-gl-rtl-text"];
 
 // MapLibre v6 is ESM only and starts its worker from a same-origin blob URL, which the browser refuses on the
 // opaque origin that page.setContent() creates. Serving the page over http gives it a real origin instead.
@@ -51,11 +50,6 @@ async function createImages(style: string, type: string) {
 <div id="map"></div>
 <script type="module">
     import * as maplibregl from 'https://unpkg.com/maplibre-gl@${maplibreVersion}/dist/maplibre-gl.mjs';
-
-    maplibregl.setRTLTextPlugin(
-        'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@${rtlTextVersion}/dist/mapbox-gl-rtl-text.js',
-        true // Lazy load the plugin
-    );
 
     // A module script has its own scope, so the map is put on window for page.evaluate to reach it.
     window.map = new maplibregl.Map({

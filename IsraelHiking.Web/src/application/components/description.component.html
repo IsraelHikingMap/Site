@@ -3,6 +3,13 @@
         [dir]="resources.getDirection(description())">
         {{description()}}
     </p>
+    @if (canReadOutLoud()) {
+    <button mat-button class="shrink-0 min-w-[unset]! px-2!" (click)="toggleReadOutLoud()"
+        [matTooltip]="isReadingOutLoud() ? resources.stopReadingOutLoud : resources.readOutLoud"
+        matTooltipPosition="below" analyticsOn="click" analyticsCategory="Description" analyticsLabel="Read out loud">
+        <i class="fa fa-lg" [ngClass]="isReadingOutLoud() ? 'icon-stop' : 'icon-volume-up'"></i>
+    </button>
+    }
 </div>
 @if (showToggleTranslation()) {
 <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" analyticsOn="click"

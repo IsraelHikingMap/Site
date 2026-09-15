@@ -98,6 +98,11 @@
                                         <i class="fa fa-lg icon-arrows-h"></i>
                                         <span class="ms-2">{{resources.reverseRoute}}</span>
                                     </button>
+                                    <button mat-menu-item (click)="duplicateRoute(route)" analyticsOn="click"
+                                        analyticsCategory="Route" analyticsLabel="Duplicate route">
+                                        <i class="fa fa-lg icon-copy"></i>
+                                        <span class="ms-2">{{resources.duplicateRoute}}</span>
+                                    </button>
                                 </mat-menu>
                                 <button mat-button class="flex-1" (click)="deleteRoute($event, route)"
                                     analyticsOn="click" analyticsCategory="Private Routes"

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewEncapsulation, inject, signal } from "@angular/core";
+import { Component, HostListener, AfterViewInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { Dir } from "@angular/cdk/bidi";
@@ -16,6 +16,8 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
+import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import { Urls } from "../../urls";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../../models";
 
@@ -51,6 +53,7 @@ export class RoutesComponent implements AfterViewInit {
     private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
     private readonly mapComponent = inject(MapComponent);
     private readonly store = inject(Store);
+    private readonly analyticsService = inject(AnalyticsService);
 
     private readonly selectedRouteId = this.store.selectSignal((s: ApplicationState) => s.routeEditingState.selectedRouteId);
 
@@ -106,6 +109,34 @@ export class RoutesComponent implements AfterViewInit {
             });
         }, 0);
     };
+
+    @HostListener("window:keydown", ["$event"])
+    public onPopupShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closePopupsOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private closePopupsOnEscape(event: KeyboardEvent): string | null {
+        if (event.key !== "Escape") {
+            return null;
+        }
+        if (this.routePointPopupData() != null) {
+            this.closeRoutePointPopup();
+            return "Close route point popup";
+        }
+        if (this.nonEditRoutePointPopupData() != null) {
+            this.nonEditRoutePointPopupData.set(null);
+            return "Close non edit route point popup";
+        }
+        return null;
+    }
 
     public closeRoutePointPopup() {
         this.routePointPopupData.set(null);

@@ -36,6 +36,9 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
+    public readonly endOfBaseDrapedLayers = "end-of-base-draped-layers";
+    public readonly endOfOverlaysDrapedLayers = "end-of-overlays-draped-layers";
+    public readonly endOfDrapedLayers = "end-of-draped-layers";
     public readonly endOfBaseLayer = "end-of-base-layer";
     public readonly endOfOverlays = "end-of-overlays";
     public readonly endOfClusters = "end-of-clusters";
@@ -60,6 +63,16 @@ export class ResourcesService {
     public straightLines: string;
     public routeStatistics: string;
     public undo: string;
+    public redo: string;
+    public search: string;
+    public confirm: string;
+    public keyboardShortcuts: string;
+    public keyboardShortcutsHint: string;
+    public closePopupOrExitEditMode: string;
+    public deleteSelectedPoint: string;
+    public deleteEditedPoint: string;
+    public saveAndEditNextPoint: string;
+    public saveAndEditPreviousPoint: string;
     public editThisMapUsingOsm: string;
     public openAFile: string;
     public save: string;
@@ -73,6 +86,7 @@ export class ResourcesService {
     public addRoute: string;
     public exportRoute: string;
     public reverseRoute: string;
+    public duplicateRoute: string;
     public deleteRoute: string;
     public share: string;
     public saveInCloudAndShare: string;
@@ -238,6 +252,9 @@ export class ResourcesService {
     public download: string;
     public translatedBy: string;
     public clickToTranslate: string;
+    public readOutLoud: string;
+    public stopReadingOutLoud: string;
+    public unableToReadOutLoud: string;
     public minimize: string;
     public restore: string;
     public planAndExplore: string;
@@ -259,6 +276,7 @@ export class ResourcesService {
     public activityType: string;
     public editProperties: string;
     public openCloudSave: string;
+    public openInPlanAndExplore: string;
     public FAQ: string;
     public downloadMapForOfflineViewing: string;
     public privacyPolicyTermsOfService: string;
@@ -483,7 +501,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1788951134303");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1789496577498");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -495,6 +513,16 @@ export class ResourcesService {
         this.straightLines = this.gettextCatalog.getString("Straight Lines");
         this.routeStatistics = this.gettextCatalog.getString("Route Statistics");
         this.undo = this.gettextCatalog.getString("Undo");
+        this.redo = this.gettextCatalog.getString("Redo");
+        this.search = this.gettextCatalog.getString("Search");
+        this.confirm = this.gettextCatalog.getString("Confirm");
+        this.keyboardShortcuts = this.gettextCatalog.getString("Keyboard Shortcuts");
+        this.keyboardShortcutsHint = this.gettextCatalog.getString("Most shortcuts are ignored while typing in a text field.");
+        this.closePopupOrExitEditMode = this.gettextCatalog.getString("Close a popup, close the sidebar or exit edit mode");
+        this.deleteSelectedPoint = this.gettextCatalog.getString("Delete the point the popup belongs to");
+        this.deleteEditedPoint = this.gettextCatalog.getString("Delete the point being edited and edit the next one");
+        this.saveAndEditNextPoint = this.gettextCatalog.getString("Save and edit the next point");
+        this.saveAndEditPreviousPoint = this.gettextCatalog.getString("Save and edit the previous point");
         this.editThisMapUsingOsm = this.gettextCatalog.getString("Edit This Map Using OSM");
         this.openAFile = this.gettextCatalog.getString("Open a File");
         this.save = this.gettextCatalog.getString("Save");
@@ -508,6 +536,7 @@ export class ResourcesService {
         this.addRoute = this.gettextCatalog.getString("Add Route");
         this.exportRoute = this.gettextCatalog.getString("Export Route");
         this.reverseRoute = this.gettextCatalog.getString("Reverse Route");
+        this.duplicateRoute = this.gettextCatalog.getString("Duplicate Route");
         this.deleteRoute = this.gettextCatalog.getString("Delete Route");
         this.share = this.gettextCatalog.getString("Share");
         this.saveInCloudAndShare = this.gettextCatalog.getString("Save in the Cloud and Share");
@@ -676,6 +705,9 @@ export class ResourcesService {
         this.download = this.gettextCatalog.getString("Download");
         this.translatedBy = this.gettextCatalog.getString("Translated by LibreTranslate, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
+        this.readOutLoud = this.gettextCatalog.getString("Read out loud");
+        this.stopReadingOutLoud = this.gettextCatalog.getString("Stop reading out loud");
+        this.unableToReadOutLoud = this.gettextCatalog.getString("Unable to read this text out loud");
         this.minimize = this.gettextCatalog.getString("Minimize");
         this.restore = this.gettextCatalog.getString("Restore");
         this.planAndExplore = this.gettextCatalog.getString("Plan & Explore");
@@ -697,6 +729,7 @@ export class ResourcesService {
         this.activityType = this.gettextCatalog.getString("Activity Type");
         this.editProperties = this.gettextCatalog.getString("Edit Properties");
         this.openCloudSave = this.gettextCatalog.getString("Open Cloud Save");
+        this.openInPlanAndExplore = this.gettextCatalog.getString("Open in Plan & Explore");
         this.FAQ = this.gettextCatalog.getString("F.A.Q");
         this.downloadMapForOfflineViewing = this.gettextCatalog.getString("Download Map for Offline viewing");
         this.privacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");

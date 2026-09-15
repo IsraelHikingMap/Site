@@ -1,3 +1,4 @@
-- Support more types of points in search
-- Highlight search terms in traces and cloud saves
+- Add duplicate route
+- Add text-to-speech
+- Add 3D terrain
 - Various bug fixes and performance improvements

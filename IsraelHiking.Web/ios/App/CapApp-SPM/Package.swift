@@ -26,6 +26,7 @@ let package = Package(
         .package(name: "CapgoCapacitorCompass", path: "../../../node_modules/@capgo/capacitor-compass"),
         .package(name: "CapgoCapacitorInappbrowser", path: "../../../node_modules/@capgo/capacitor-inappbrowser"),
         .package(name: "CapgoCapacitorShareTarget", path: "../../../node_modules/@capgo/capacitor-share-target"),
+        .package(name: "CapgoCapacitorSpeechSynthesis", path: "../../../node_modules/@capgo/capacitor-speech-synthesis"),
         .package(name: "RevenuecatPurchasesCapacitor", path: "../../../node_modules/@revenuecat/purchases-capacitor"),
         .package(name: "RevenuecatPurchasesCapacitorUi", path: "../../../node_modules/@revenuecat/purchases-capacitor-ui")
     ],
@@ -49,6 +50,7 @@ let package = Package(
                 .product(name: "CapgoCapacitorCompass", package: "CapgoCapacitorCompass"),
                 .product(name: "CapgoCapacitorInappbrowser", package: "CapgoCapacitorInappbrowser"),
                 .product(name: "CapgoCapacitorShareTarget", package: "CapgoCapacitorShareTarget"),
+                .product(name: "CapgoCapacitorSpeechSynthesis", package: "CapgoCapacitorSpeechSynthesis"),
                 .product(name: "RevenuecatPurchasesCapacitor", package: "RevenuecatPurchasesCapacitor"),
                 .product(name: "RevenuecatPurchasesCapacitorUi", package: "RevenuecatPurchasesCapacitorUi")
             ]
