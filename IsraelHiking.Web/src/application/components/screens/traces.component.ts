@@ -37,7 +37,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
 import { ZoomComponent } from "../zoom.component";
@@ -378,7 +378,7 @@ export class TracesComponent implements OnInit {
             this.clearSelection();
             return "Close missing part popup";
         }
-        if (event.key === "Delete") {
+        if (isDeleteKey(event)) {
             this.removeMissingPart();
             return "Delete missing part";
         }

@@ -1,15 +1,12 @@
-import { Component, HostListener, OnChanges, inject, output, input, signal } from "@angular/core";
+import { Component, OnChanges, inject, output, input, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
-import { MatDialog } from "@angular/material/dialog";
 import { MatTooltip } from "@angular/material/tooltip";
 
 
 import { CoordinatesComponent } from "../coordinates.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
-import { AnalyticsService } from "../../services/analytics.service";
 import type { LatLngAltTime } from "../../models";
 
 @Component({
@@ -32,29 +29,6 @@ export class RoutePointOverlayComponent implements OnChanges {
     public readonly resources = inject(ResourcesService);
 
     private readonly selectedRouteService = inject(SelectedRouteService);
-    private readonly analyticsService = inject(AnalyticsService);
-    private readonly matDialog = inject(MatDialog);
-
-    @HostListener("window:keydown", ["$event"])
-    public onPopupShortcutKeys(event: KeyboardEvent): void {
-        if (isTypingInTextField(event)) {
-            return;
-        }
-        const shortcutName = this.deleteOnDelete(event);
-        if (shortcutName == null) {
-            return;
-        }
-        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
-        event.preventDefault();
-    }
-
-    private deleteOnDelete(event: KeyboardEvent): string | null {
-        if (event.key !== "Delete" || this.matDialog.openDialogs.length > 0) {
-            return null;
-        }
-        this.remove();
-        return "Delete route point";
-    }
 
     public ngOnChanges(): void {
         this.isMiddle.set(this.isFirst() === false && this.isLast() === false);

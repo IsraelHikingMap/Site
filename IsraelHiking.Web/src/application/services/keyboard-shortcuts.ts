@@ -8,6 +8,11 @@ export function isCtrlOrMeta(event: KeyboardEvent): boolean {
     return event.ctrlKey || event.metaKey;
 }
 
+/** The key labelled "delete" sends Backspace on a Mac keyboard, forward delete needs FN */
+export function isDeleteKey(event: KeyboardEvent): boolean {
+    return event.key === "Delete" || event.key === "Backspace";
+}
+
 /** Maplibre has no API to ask, and the popups are spread over several components */
 export function isMapPopupOpen(): boolean {
     return document.querySelector(".maplibregl-popup") != null;
@@ -29,5 +34,5 @@ export function isTypingInTextField(event: KeyboardEvent): boolean {
     if (!isTypingTarget(event.target)) {
         return false;
     }
-    return !KEYS_ALLOWED_WHILE_TYPING.includes(event.key) && !(event.key === "Delete" && isCtrlOrMeta(event));
+    return !KEYS_ALLOWED_WHILE_TYPING.includes(event.key) && !(isDeleteKey(event) && isCtrlOrMeta(event));
 }

@@ -19,6 +19,7 @@ describe("Keyboard shortcuts", () => {
 
     it("should claim a key press the user is typing", () => {
         expect(isTypingInTextField(keyPress({ key: "Delete" }, textField()))).toBe(true);
+        expect(isTypingInTextField(keyPress({ key: "Backspace" }, textField()))).toBe(true);
         expect(isTypingInTextField(keyPress({ key: "Delete" }, contentEditable()))).toBe(true);
     });
 
@@ -26,6 +27,7 @@ describe("Keyboard shortcuts", () => {
         expect(isTypingInTextField(keyPress({ key: "Enter" }, textField()))).toBe(false);
         expect(isTypingInTextField(keyPress({ key: "Escape" }, textField()))).toBe(false);
         expect(isTypingInTextField(keyPress({ key: "Delete", ctrlKey: true }, textField()))).toBe(false);
+        expect(isTypingInTextField(keyPress({ key: "Backspace", metaKey: true }, textField()))).toBe(false);
         expect(isTypingInTextField(keyPress({ key: "Delete" }, document.createElement("div")))).toBe(false);
     });
 });

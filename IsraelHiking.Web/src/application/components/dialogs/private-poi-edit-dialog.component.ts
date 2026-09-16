@@ -25,7 +25,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { isDeleteKey, isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
@@ -286,7 +286,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
     }
 
     private handleDialogShortcut(event: KeyboardEvent): string | null {
-        if (event.key === "Delete") {
+        if (isDeleteKey(event)) {
             this.remove();
             this.editPointAtIndex(this.markerIndex);
             return "Delete edited point";
