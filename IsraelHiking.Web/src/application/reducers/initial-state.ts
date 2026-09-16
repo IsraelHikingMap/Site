@@ -155,7 +155,7 @@ export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
  */
 export const SUBSCRIBED_BASE_LAYERS: EditableLayer[] = [{
     key: SATELLITE_MAP,
-    address: Urls.satelliteTiles,
+    address: Urls.SATELLITE_STYLE_ADDRESS,
     isEditable: false,
     minZoom: 1,
     maxZoom: 19,

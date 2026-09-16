@@ -16,6 +16,7 @@ import { ResourcesService } from "./resources.service";
 import { FileService } from "./file.service";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { EditableLayer } from "../models";
+import { Urls } from "../urls";
 
 describe("DefaultStyleService", () => {
     const builtInLayerKey = DEFAULT_BASE_LAYERS[0].key;
@@ -480,5 +481,17 @@ describe("DefaultStyleService", () => {
 
         expect((result.layers[0] as BackgroundLayerSpecification).paint?.["background-color"]).toBe("#FFFFFF");
         expect((result.layers[1] as FillLayerSpecification).paint?.["fill-color"]).toBe("#AAD3DF");
+    }));
+
+    it("should point the tiles a style asks our api for at the api this client talks to", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: { Satellite: { type: "raster", tiles: ["https://mapeak.com/api/satellite/{z}/{x}/{y}"] } },
+            layers: [{ id: "satellite", type: "raster", source: "Satellite" }]
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({ key: builtInLayerKey, address: "https://x/style.json" }), true, "online-only");
+
+        expect((result.sources.Satellite as RasterSourceSpecification).tiles).toEqual([Urls.satelliteTiles]);
     }));
 });

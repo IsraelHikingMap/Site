@@ -6,6 +6,7 @@ import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 import { FileService } from "./file.service";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
+import { Urls } from "../urls";
 import type { ApplicationState, EditableLayer, LayerData } from "../models";
 
 @Service()
@@ -147,6 +148,16 @@ export class DefaultStyleService {
         }
     }
 
+    /**
+     * Points the tiles a style asks our own API for at the API this client talks to. A style is served from
+     * one place for every client, with the production address written into it, while the development server
+     * answers on another - and only an address this client recognizes as ours is sent the user's token,
+     * without which the satellite imagery is not served. A no-op in production, where the two are the same.
+     */
+    private useCurrentApiAddress(styleAsText: string): string {
+        return styleAsText.replaceAll("https://mapeak.com/api/", Urls.apiBase);
+    }
+
     private useSliceQuery(styleJson: StyleSpecification) {
         for (const source of Object.values(styleJson.sources)) {
             if (source.type === "vector") {
@@ -229,6 +240,7 @@ export class DefaultStyleService {
             const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units);
 
             let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
+            styleAsText = this.useCurrentApiAddress(styleAsText);
             styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
             styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
             if (units === "imperial") {
