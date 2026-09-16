@@ -1,3 +1,0 @@
-files:
-  - source: /IsraelHiking.Web/src/translations/en-US.json
-    translation: /%original_path%/%two_letters_code%.json
