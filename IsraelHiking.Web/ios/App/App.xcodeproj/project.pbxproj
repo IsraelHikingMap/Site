@@ -16,6 +16,7 @@
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
 		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
+		736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */; };
 		0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */; };
 		0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */; };
 		0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */; };
@@ -82,6 +83,7 @@
 		0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapeakCarSceneDelegate.swift; sourceTree = "<group>"; };
 		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
 		0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliceURLProtocol.swift; sourceTree = "<group>"; };
+		0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscribedTilesURLProtocol.swift; sourceTree = "<group>"; };
 		0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarContourTilesProvider.swift; sourceTree = "<group>"; };
 		0DAA0101000000000000AA01 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */,
 				0D46EA122FCC67830033E098 /* PMTilesService.swift */,
 				0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */,
+				0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */,
 			);
 			path = Car;
 			sourceTree = "<group>";
@@ -335,6 +338,7 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */,
 				0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */,
+				736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */,
 				0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */,
 				0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */,
 				0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */,

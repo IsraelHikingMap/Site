@@ -16,6 +16,12 @@ stays attached to what it describes.
 When the explanation is about one specific line rather than the method as a whole, that is usually a
 sign that the line should be its own well named method, documented as such.
 
+Keep that documentation short - a couple of sentences, and rarely more than three. It is there to say
+what a reader can not get from the name and the signature: why the member exists, or what would go
+wrong without it. Recounting what the body does, restating the parameters, or writing down the reasoning
+that led to the code is noise that pushes the code off the screen and goes stale the moment the body
+changes. If the explanation does not fit in a few sentences, the member is usually doing too much.
+
 This does not apply to test files, where the `describe`/`it` description is what documents the test
 and a comment is the only place left to say why an expectation is what it is.
 

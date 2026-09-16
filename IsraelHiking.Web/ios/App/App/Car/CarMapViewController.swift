@@ -81,7 +81,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         if tileLoadingConfigured { return }
         tileLoadingConfigured = true
         let config = URLSessionConfiguration.default
-        var protocols: [AnyClass] = [SliceURLProtocol.self]
+        var protocols: [AnyClass] = [SliceURLProtocol.self, SubscribedTilesURLProtocol.self]
         protocols.append(contentsOf: config.protocolClasses ?? [])
         config.protocolClasses = protocols
         MLNNetworkConfiguration.sharedManager.sessionConfiguration = config

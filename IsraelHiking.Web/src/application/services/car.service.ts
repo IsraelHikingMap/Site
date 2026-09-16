@@ -54,6 +54,9 @@ export class CarService {
             await this.setConfig();
             await this.setStyle();
         });
+        this.store.select((state: ApplicationState) => state.userState.token).pipe(skip(1)).subscribe(async () => {
+            await this.setConfig();
+        });
         await this.setConfig();
         await this.setStyle();
         await this.setRoutes();
@@ -61,8 +64,7 @@ export class CarService {
 
     private async setStyle() {
         this.loggingService.info("[Car] Setting style");
-        const layerData = this.layersService.selectedBaseLayer();
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, true, "car");
+        const styleLike = await this.defaultStyleService.getSourcesAndLayers(this.layersService.selectedBaseLayer(), true, "car");
         await ReactivePreferences.storeValue({ key: "style", value: styleLike });
     }
 
@@ -85,13 +87,18 @@ export class CarService {
         await ReactivePreferences.storeValue({ key: "route", value: { routes: routesValue } });
     }
 
+    /**
+     * The car app draws the map by itself and has no session of its own, so it is given the user's token
+     * in order to fetch the tiles of a base layer that our server only serves to a subscribed user.
+     */
     private async setConfig() {
         this.loggingService.info("[Car] Setting config");
         await ReactivePreferences.storeValue({
             key: "config",
             value: {
                 language: this.store.selectSnapshot((state: ApplicationState) => state.configuration.language).code,
-                units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units)
+                units: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units),
+                token: this.store.selectSnapshot((state: ApplicationState) => state.userState).token ?? ""
             }
         });
     }

@@ -1,7 +1,7 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification, MapMovementEvent } from "maplibre-gl";
+import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
@@ -11,6 +11,7 @@ import { ResourcesService } from "./resources.service";
 import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
+import { Urls } from "../urls";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
 @Service()
@@ -29,6 +30,7 @@ export class MapService {
     private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
+
 
     private initializeOncePromise: Promise<void> | null = null;
 
@@ -91,6 +93,7 @@ export class MapService {
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.setTransformRequest(map);
         this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
@@ -113,6 +116,21 @@ export class MapService {
             this.resolve = resolve;
         });
         this.currentMap = null;
+    }
+
+    /**
+     * Adds the user's token to the requests a map makes to our own API, whose subscribed layers are only
+     * served to a subscribed user. The satellite imagery is named on its own since a style carries its
+     * production address even when this client talks to its own API.
+     */
+    public setTransformRequest(map: Map) {
+        map.setTransformRequest((url: string): RequestParameters => {
+            if (!Urls.isOwnApiAddress(url) && !url.startsWith(Urls.satelliteTiles)) {
+                return { url };
+            }
+            const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
+            return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
+        });
     }
 
     public async addArrowToMap(map: Map) {

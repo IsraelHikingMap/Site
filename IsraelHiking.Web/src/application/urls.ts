@@ -35,8 +35,8 @@ export class Urls {
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
+    public static readonly satelliteTiles = "https://mapeak.com/api/satellite/";
     public static readonly overpassApi = "https://mapeak.com/api/interpreter";
-
     public static readonly userImages = "https://images.mapeak.com";
 
     public static readonly panoramaxApi = "https://api.panoramax.xyz/api/";
@@ -62,6 +62,7 @@ export class Urls {
     public static readonly HIKING_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
     public static readonly MTB_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json";
     public static readonly HEATMAP_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-traces.json";
+    public static readonly SATELLITE_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-satellite.json";
 
     public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
