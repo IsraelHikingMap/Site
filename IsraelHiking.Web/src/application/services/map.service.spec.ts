@@ -47,7 +47,7 @@ describe("MapService", () => {
             store.reset({ userState: { token: "some-token" } });
             const transform = captureTransformRequest(service);
 
-            const result = transform(Urls.satelliteTiles.replace("{z}/{x}/{y}", "10/20/30"));
+            const result = transform(Urls.satelliteTiles + "10/20/30");
 
             expect(result.headers.Authorization).toBe("Bearer some-token");
         }));
@@ -65,7 +65,7 @@ describe("MapService", () => {
             store.reset({ userState: { token: null } });
             const transform = captureTransformRequest(service);
 
-            const result = transform(Urls.satelliteTiles.replace("{z}/{x}/{y}", "10/20/30"));
+            const result = transform(Urls.satelliteTiles + "10/20/30");
 
             expect(result.headers).toBeUndefined();
         }));

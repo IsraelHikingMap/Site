@@ -119,14 +119,13 @@ export class MapService {
     }
 
     /**
-     * Adds the user's token to the requests a map makes to our own API - the tiles of a base layer that
-     * comes with the subscription are only served to a subscribed user. Every map that shows a base layer
-     * needs it, so it is set here and not bound by each of the screens that hold a map.
-     * The token is read when the request is made, so a map that outlives a login picks up the new one.
+     * Adds the user's token to the requests a map makes to our own API, whose subscribed layers are only
+     * served to a subscribed user. The satellite imagery is named on its own since a style carries its
+     * production address even when this client talks to its own API.
      */
     public setTransformRequest(map: Map) {
         map.setTransformRequest((url: string): RequestParameters => {
-            if (!Urls.isOwnApiAddress(url)) {
+            if (!Urls.isOwnApiAddress(url) && !url.startsWith(Urls.satelliteTiles)) {
                 return { url };
             }
             const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
