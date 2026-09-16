@@ -607,7 +607,7 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should only delete the files of unused sources that belong to the tile that is being downloaded",
+    it("Should delete the root files of an unused source even while another tile still holds files of it",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                 vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([
@@ -629,9 +629,11 @@ describe("OfflineFilesDownloadService", () => {
                 await promise;
 
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+7-76-51.pmtiles");
-                // 75-50 was not asked for, and it still needs its files and the root files they go with
+                // 75-50 was not asked for, so it is left with what it has and goes on being an area the user has
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source+7-75-50.pmtiles");
-                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source-6.pmtiles");
+                // The styles on the device are the ones that were just downloaded, so 75-50 can not be drawn
+                // from that source either way and nothing is left that the root file could serve
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-6.pmtiles");
             }
         )
     );

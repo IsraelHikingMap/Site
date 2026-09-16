@@ -599,10 +599,13 @@ export class OfflineFilesDownloadService {
 
     /**
      * Deletes the offline files whose source is not used by the styles nor by the app - a source that was
-     * removed or renamed leaves its files behind, only taking up space. Only the files of the tile that is
-     * being downloaded are deleted: a tile the user did not ask for keeps what it has until it is
-     * downloaded itself, so that downloading one tile never takes another one apart. The root files are
-     * shared by every tile, so they only go once no tile is left that still holds that source.
+     * removed or renamed leaves its files behind, only taking up space. Of the files of a tile only those
+     * of the tile that is being downloaded are deleted: a tile the user did not ask for keeps what it has
+     * until it is downloaded itself, so that downloading one tile never takes another one apart and leaves
+     * the user without an area they see they have. The root files are of no tile and are not shown
+     * anywhere, and the styles on the device are by now the ones that were just downloaded, so nothing on
+     * the device can read a source they do not have - a root file of such a source is of no use to any
+     * tile, downloaded or not, and goes as soon as it is found.
      * Only the offline map files are deleted, the styles and any other file that is stored in the same
      * directory are not this service's.
      */
@@ -619,17 +622,9 @@ export class OfflineFilesDownloadService {
         for (const { fileName } of unusedFiles) {
             const fileTileKey = OfflineFilesDownloadService.getTileKey(fileName);
             if (fileTileKey !== tileKey && fileTileKey !== rootTileKey) {
-                continue; // It is another tile's, and that tile still needs it until it is downloaded again
+                continue; // It is another tile's, and taking it apart would leave the user without that area
             }
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase();
-            const isLeftToAnotherTile = fileTileKey === rootTileKey && unusedFiles.some(other => {
-                const otherTileKey = OfflineFilesDownloadService.getTileKey(other.fileName);
-                return otherTileKey !== rootTileKey && otherTileKey !== tileKey &&
-                    OfflineFilesDownloadService.getSourceFileName(other.fileName).toLowerCase() === sourceFileName;
-            });
-            if (isLeftToAnotherTile) {
-                continue;
-            }
             this.loggingService.info(`[Offline Download] Deleting ${fileName}, ${sourceFileName} is not a source of the styles`);
             await this.fileService.deleteFileInDataDirectory(fileName);
             this.pmtilesService.invalidateFile(fileName);
