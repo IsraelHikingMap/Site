@@ -1,25 +1,19 @@
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace IsraelHiking.DataAccess;
 
 class TileServerImageCreatorBody
 {
-    [JsonProperty("path")]
+    [JsonPropertyName("path")]
     public string Path { get; set; }
-    [JsonProperty("linejoin")]
-    public string LineJoin { get; set; }
-    [JsonProperty("linecap")]
-    public string LineCap { get; set; }
-    [JsonProperty("border")]
-    public string Border { get; set; }
 }
 
 public class ImageCreationGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options) : IImageCreationGateway

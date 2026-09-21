@@ -17,12 +17,10 @@ namespace IsraelHiking.DataAccess.ElasticSearch;
 
 public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger) :
     IInitializable,
-    ISearchRepository,
-    IImagesRepository
+    ISearchRepository
 {
     private readonly ConfigurationData _options = options.Value;
 
-    private const string IMAGES = "images";
     private const string POINTS = "points";
     private const string BBOX = "bbox";
 
@@ -50,10 +48,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 (_, _) => new SystemTextJsonSerializer())
             .PrettyJson();
         _elasticClient = new ElasticClient(connectionString);
-        if ((await _elasticClient.Indices.ExistsAsync(IMAGES)).Exists == false)
-        {
-            await CreateImagesIndex();
-        }
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
 
@@ -232,30 +226,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
                 new[] { coordinates.Max(c => c.X), coordinates.Min(c => c.Y) }
             }
         };
-    }
-
-    private async Task CreateImagesIndex()
-    {
-        await _elasticClient.Indices.CreateAsync(IMAGES, c =>
-            c.Map<ImageItem>(m =>
-                m.Properties(p =>
-                    p.Keyword(k => k.Name(ii => ii.Hash))
-                        .Keyword(s => s.Name(n => n.ImageUrls))
-                        .Binary(a => a.Name(i => i.Thumbnail))
-                )
-            )
-        );
-    }
-
-    public async Task<ImageItem> GetImageByHash(string hash)
-    {
-        var response = await _elasticClient.GetAsync<ImageItem>(hash, r => r.Index(IMAGES));
-        return response.Source;
-    }
-
-    public Task StoreImage(ImageItem imageItem)
-    {
-        return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
     }
 
 }

@@ -58,7 +58,7 @@ public class PointsOfInterestController : ControllerBase
     /// <summary>
     /// Create a point of interest
     /// </summary>
-    /// <remarks>Creates a new POI, uploading its image to Wikimedia Commons when needed.</remarks>
+    /// <remarks>Creates a new POI, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
     /// <returns></returns>
@@ -100,7 +100,7 @@ public class PointsOfInterestController : ControllerBase
     /// <summary>
     /// Update a point of interest
     /// </summary>
-    /// <remarks>Updates an existing POI by id, uploading its image to Wikimedia Commons when needed.</remarks>
+    /// <remarks>Updates an existing POI by id, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="id">The feature ID</param>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
