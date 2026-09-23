@@ -1,4 +1,2 @@
-- Add duplicate route
-- Add text-to-speech
-- Add 3D terrain
+- Improve translations
 - Various bug fixes and performance improvements
