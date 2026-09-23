@@ -108,7 +108,6 @@
     "eslint": "^10.11.0",
     "fontkit": "^2.0.4",
     "openapi-typescript": "^7.13.0",
-    "patch-package": "^8.0.1",
     "playwright": "^1.63.0",
     "postcss": "^8.5.28",
     "puppeteer": "^25.11.0",
@@ -140,8 +139,7 @@
     "generate-sprite": "node ./scripts/generate-sprite.ts",
     "generate-icon-font": "node ./scripts/generate-icon-font.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
-    "set-version": "node ./scripts/set-version.ts",
-    "postinstall": "patch-package"
+    "set-version": "node ./scripts/set-version.ts"
   },
   "type": "module",
   "version": "9.21.0",
