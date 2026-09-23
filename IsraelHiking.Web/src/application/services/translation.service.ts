@@ -15,7 +15,7 @@ export type TranslationResponse = {
 export class TranslationService {
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
-    private readonly translationCache = new Map<string, string>();
+    private readonly translationCache = new Map<string, Promise<string>>();
 
     public isTranslationPossibleAndNeeded(feature: Immutable<GeoJSON.Feature>): boolean {
         const language = this.resources.getCurrentLanguageCodeSimplified();
@@ -40,28 +40,34 @@ export class TranslationService {
         return description.trim();
     }
 
-    public async getTranslatedDescription(feature: Immutable<GeoJSON.Feature>): Promise<string> {
+    /**
+     * A translation is kept for as long as the app runs, and the request itself is shared rather than
+     * repeated - reopening a point, or toggling the translation off and back on, must not pay for it
+     * a second time, and two callers asking at once must not send two requests. The key is the text
+     * rather than the point's id, so points sharing a description share a translation, and points
+     * that have no id yet do not all collide onto one entry.
+     */
+    public getTranslatedDescription(feature: Immutable<GeoJSON.Feature>): Promise<string> {
         const language = this.resources.getCurrentLanguageCodeSimplified();
-        const cacheKey = `${feature.properties.poiId}_${language}`;
-        if (this.translationCache.has(cacheKey)) {
-            return this.translationCache.get(cacheKey);
-        }
         const description = this.getBestDescription(feature);
         if (description.length === 0) {
+            return Promise.resolve("");
+        }
+        const cacheKey = `${language}_${description}`;
+        const cachedTranslation = this.translationCache.get(cacheKey);
+        if (cachedTranslation != null) {
+            return cachedTranslation;
+        }
+        const request = firstValueFrom(this.httpClient.post<TranslationResponse>(Urls.tranlation, {
+            q: description,
+            source: "auto",
+            target: language,
+            format: "text"
+        }).pipe(timeout(60000))).then(response => response.translatedText).catch(() => {
+            this.translationCache.delete(cacheKey);
             return "";
-        }
-        try {
-            const translatedResponse = await firstValueFrom(this.httpClient.post<TranslationResponse>(Urls.tranlation, {
-                q: description,
-                source: "auto",
-                target: language,
-                format: "text"
-            }).pipe(timeout(10000)));
-            this.translationCache.set(cacheKey, translatedResponse.translatedText);
-            return translatedResponse.translatedText;
-        }
-        catch {
-            return "";
-        }
+        });
+        this.translationCache.set(cacheKey, request);
+        return request;
     }
 }
