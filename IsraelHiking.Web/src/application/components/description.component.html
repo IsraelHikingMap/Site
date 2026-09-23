@@ -11,7 +11,12 @@
     </button>
     }
 </div>
-@if (showToggleTranslation()) {
+@if (isTranslating()) {
+<div class="flex flex-row items-center justify-center gap-2 opacity-70">
+    <mat-spinner diameter="14"></mat-spinner>
+    <span class="text-sm">{{resources.translating}}</span>
+</div>
+} @else if (showToggleTranslation()) {
 <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" analyticsOn="click"
     analyticsCategory="Description" analyticsLabel="Toggle translation">
     <span class="w-full text-sm text-center">

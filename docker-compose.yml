@@ -52,12 +52,14 @@
       - 11987:80
     restart: always
   translation:
-    image: libretranslate/libretranslate
+    image: ghcr.io/mapeak-com/translation:latest
     container_name: translation
+    environment:
+      - LTENGINE_MODEL=gemma3-12b
     volumes:
-      - tldata:/home/libretranslate:rw
+      - ltdata:/models
     ports:
-      - 5432:5000
+      - 5432:5050
     restart: always
   user-data:
     image: ghcr.io/mapeak-com/user-data
@@ -95,5 +97,5 @@ volumes:
     driver: local
   valhalladata:
     driver: local
-  tldata:
+  ltdata:
     driver: local
