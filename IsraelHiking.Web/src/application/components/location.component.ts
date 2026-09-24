@@ -134,6 +134,12 @@ export class LocationComponent {
             return;
         }
         // is active must be true
+        if (this.selectedRouteService.isEditingRoute()) {
+            // Following can't be turned on while editing, so the button can only center the map once.
+            this.locationService.moveMapToGpsPosition();
+            this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
+            return;
+        }
         if (!this.isFollowingLocation()) {
             this.store.dispatch(new SetFollowingAction(true));
             this.store.dispatch(new SetPannedAction(null));
