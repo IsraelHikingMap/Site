@@ -13,6 +13,25 @@ data class CarRouteData(
         val name: String? = null,
         val markers: List<CarMarkerData> = emptyList()
 ) {
+    /**
+     * The distance in meters from the start of the route to each of its points. Measured once,
+     * since it only changes when the route does, while the GPS position is matched against the
+     * route on every fix.
+     */
+    val distancesAlongRouteMeters: DoubleArray by lazy {
+        val distances = DoubleArray(lngLats.size)
+        for (index in 1 until lngLats.size) {
+            distances[index] =
+                    distances[index - 1] +
+                            SpatialService.distanceMeters(lngLats[index - 1], lngLats[index])
+        }
+        distances
+    }
+
+    /** The length of the whole route in meters. */
+    val lengthMeters: Double
+        get() = distancesAlongRouteMeters.lastOrNull() ?: 0.0
+
     companion object {
         @Throws(JSONException::class)
         fun fromJson(json: JSONObject): CarRouteData {

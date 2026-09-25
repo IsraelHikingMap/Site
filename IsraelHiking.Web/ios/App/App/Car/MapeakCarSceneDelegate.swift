@@ -19,6 +19,7 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
     private var currentTrip: CPTrip?
     private var navigationSession: CPNavigationSession?
     private var lastStatistics: CarStatistics?
+    private let paceCalculator = CarPaceCalculator()
     private var routes: [CarRouteData] = []
 
     // Retained map buttons (re-asserted after the panning interface dismisses).
@@ -138,7 +139,12 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         case CarStoreKeys.route:
             routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             recomputeStatistics()
-        case CarStoreKeys.location, CarStoreKeys.config:
+        case CarStoreKeys.location:
+            if let location: CLLocation = store.getTransient(CarStoreKeys.location) {
+                paceCalculator.updatePace(location)
+            }
+            recomputeStatistics()
+        case CarStoreKeys.config:
             recomputeStatistics()
         default:
             break
@@ -149,7 +155,9 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
 
     private func recomputeStatistics() {
         let location: CLLocation? = store.getTransient(CarStoreKeys.location)
-        let stats = location.flatMap { CarStatisticsCalculator.compute(routes: routes, location: $0) }
+        let stats = location.flatMap {
+            CarRouteCalculator.computeStatistics(routes: routes, location: $0, speed: paceCalculator.speed)
+        }
         guard stats != lastStatistics else { return }
         lastStatistics = stats
 
@@ -172,7 +180,9 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         let units = (store.load(CarStoreKeys.config)?["units"] as? String) ?? "metric"
         let meters = Measurement(value: stats.remainingMeters, unit: UnitLength.meters)
         let distance = units == "imperial" ? meters.converted(to: .miles) : meters.converted(to: .kilometers)
-        return CPTravelEstimates(distanceRemaining: distance, timeRemaining: TimeInterval(stats.remainingSeconds))
+        // A negative time renders as "--", which is what an unknown pace should show
+        let timeRemaining = stats.remainingSeconds.map(TimeInterval.init) ?? -1
+        return CPTravelEstimates(distanceRemaining: distance, timeRemaining: timeRemaining)
     }
 
     private func makeTrip(start: CLLocationCoordinate2D, end: CLLocationCoordinate2D) -> CPTrip {

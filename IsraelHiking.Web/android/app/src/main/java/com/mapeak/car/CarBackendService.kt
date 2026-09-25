@@ -155,6 +155,9 @@ class CarBackendService(context: Context) {
             onResult(emptyList())
             return
         }
+        // A recorded route holds a point every few meters, far denser than map matching needs and
+        // more than fits in a request. Simplifying keeps the corners the instructions are read from.
+        val pointsToMatch = SpatialService.simplify(points, MAP_MATCH_TOLERANCE_METERS)
         val url =
                 API_BASE.toHttpUrl()
                         .newBuilder()
@@ -165,7 +168,7 @@ class CarBackendService(context: Context) {
                         .build()
         val body =
                 JSONArray().apply {
-                    points.forEach { point ->
+                    pointsToMatch.forEach { point ->
                         put(JSONObject().put("lat", point.latitude).put("lng", point.longitude))
                     }
                 }
@@ -383,6 +386,12 @@ class CarBackendService(context: Context) {
         private const val API_BASE = "https://mapeak.com/api/"
         private const val MAX_RESULTS = 6
         private const val POLYLINE_PRECISION = 6
+
+        /**
+         * How far a point may sit from the line its neighbours draw and still be dropped before map
+         * matching. Below the width of the roads being matched against, so the turns survive.
+         */
+        private const val MAP_MATCH_TOLERANCE_METERS = 10.0
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
 }

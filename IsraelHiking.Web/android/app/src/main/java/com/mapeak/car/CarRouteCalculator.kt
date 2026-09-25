@@ -1,11 +1,8 @@
 package com.mapeak.car
 
 import android.location.Location
-import kotlin.math.abs
-import org.maplibre.geojson.Point
-import org.maplibre.turf.TurfConstants
-import org.maplibre.turf.TurfMeasurement
-import org.maplibre.turf.TurfMisc
+import kotlin.math.sqrt
+import org.maplibre.android.geometry.LatLng
 
 /**
  * Remaining distance/time for the route the driver is currently on. [remainingSeconds] is null
@@ -23,6 +20,11 @@ data class CarStatistics(val remainingMeters: Double, val remainingSeconds: Long
  * from it. The heading term keeps the match on the correct leg where a route overlaps itself in the
  * opposite direction (e.g. an out-and-back). Mirrors the weighting in route-statistics.service.ts
  * (findDistanceForLatLngInKMInternal / getClosestRouteToGPSInternal).
+ *
+ * This runs over every point of every route on every GPS fix, so the points are measured on a plane
+ * laid around the driver instead of on the sphere - see [SpatialService]. The plane is only trusted
+ * near its center, which is where a match can happen at all: how far along the route the match
+ * falls is read off the route's own distances, measured once when the route arrives.
  */
 object CarRouteCalculator {
     /**
@@ -34,20 +36,22 @@ object CarRouteCalculator {
     private const val MINIMAL_ANGLE_DEG = 30.0
 
     /**
-     * Distance, in meters, from the start of [linePoints] to where [location] projects onto it. The
-     * GPS heading is taken into account so a self-overlapping route matches the leg actually being
+     * Distance, in meters, from the start of [route] to where [location] projects onto it. The GPS
+     * heading is taken into account so a self-overlapping route matches the leg actually being
      * driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
-     * degenerate line (fewer than two points).
+     * degenerate route (fewer than two points).
      */
-    fun distanceAlongRoute(linePoints: List<Point>, location: Location): Double {
-        val target = Point.fromLngLat(location.longitude, location.latitude)
-        return project(linePoints, target, headingOf(location))?.distanceAlongLineM ?: 0.0
-    }
+    fun distanceAlongRoute(route: CarRouteData, location: Location): Double =
+            distanceAlongRoute(route, LatLng(location.latitude, location.longitude), headingOf(location))
+
+    /** [distanceAlongRoute] for a position that does not come from the framework. */
+    fun distanceAlongRoute(route: CarRouteData, position: LatLng, headingDeg: Double?): Double =
+            project(route, position, headingDeg)?.distanceAlongRouteM ?: 0.0
 
     /**
      * Picks the route the driver is most likely on (perpendicular distance + heading penalty), then
-     * derives remaining distance by subtracting the projection's along-line position from the total
-     * line length. Returns null when no route scores below the MINIMAL_DISTANCE / MINIMAL_ANGLE
+     * derives remaining distance by subtracting the projection's along-route position from the
+     * route's length. Returns null when no route scores below the MINIMAL_DISTANCE / MINIMAL_ANGLE
      * threshold.
      *
      * @param speed the speed in meters per second the remaining time is derived from, measured by
@@ -58,13 +62,26 @@ object CarRouteCalculator {
             routes: List<CarRouteData>,
             location: Location,
             speed: Float?
+    ): CarStatistics? =
+            computeStatistics(
+                    routes,
+                    LatLng(location.latitude, location.longitude),
+                    headingOf(location),
+                    speed
+            )
+
+    /** [computeStatistics] for a position that does not come from the framework. */
+    fun computeStatistics(
+            routes: List<CarRouteData>,
+            position: LatLng,
+            headingDeg: Double?,
+            speed: Float?
     ): CarStatistics? {
         if (routes.isEmpty()) {
             return null
         }
-        val hit = findClosestRoute(routes, location) ?: return null
-        val totalM = TurfMeasurement.length(hit.linePoints, TurfConstants.UNIT_METERS)
-        val remainingM = (totalM - hit.distanceAlongLineM).coerceAtLeast(0.0)
+        val hit = findClosestRoute(routes, position, headingDeg) ?: return null
+        val remainingM = (hit.route.lengthMeters - hit.distanceAlongRouteM).coerceAtLeast(0.0)
         return CarStatistics(
                 remainingMeters = remainingM,
                 remainingSeconds = speed?.let { (remainingM / it).toLong() }
@@ -74,16 +91,17 @@ object CarRouteCalculator {
     private fun headingOf(location: Location): Double? =
             if (location.hasBearing()) location.bearing.toDouble() else null
 
-    private fun findClosestRoute(routes: List<CarRouteData>, location: Location): ClosestRouteHit? {
-        val gpsPoint = Point.fromLngLat(location.longitude, location.latitude)
-        val heading = headingOf(location)
-        return findClosestRouteWeighted(routes, gpsPoint, heading)
-                ?: heading?.let { findClosestRouteWeighted(routes, gpsPoint, null) }
-    }
+    private fun findClosestRoute(
+            routes: List<CarRouteData>,
+            position: LatLng,
+            heading: Double?
+    ): ClosestRouteHit? =
+            findClosestRouteWeighted(routes, position, heading)
+                    ?: heading?.let { findClosestRouteWeighted(routes, position, null) }
 
     private fun findClosestRouteWeighted(
             routes: List<CarRouteData>,
-            gpsPoint: Point,
+            gpsPoint: LatLng,
             heading: Double?
     ): ClosestRouteHit? {
         var minimalWeight = MINIMAL_DISTANCE_M
@@ -93,78 +111,88 @@ object CarRouteCalculator {
 
         var hit: ClosestRouteHit? = null
         for (route in routes) {
-            val lngLats = route.lngLats
-            if (lngLats.size < 2) continue
-            val linePoints = lngLats.map { Point.fromLngLat(it.longitude, it.latitude) }
-            val projection = project(linePoints, gpsPoint, heading) ?: continue
+            val projection = project(route, gpsPoint, heading) ?: continue
             if (projection.weight < minimalWeight) {
                 minimalWeight = projection.weight
-                hit = ClosestRouteHit(linePoints, projection.distanceAlongLineM)
+                hit = ClosestRouteHit(route, projection.distanceAlongRouteM)
             }
         }
         return hit
     }
 
     /**
-     * Projects [target] onto [linePoints], choosing the segment that minimizes perpendicular
-     * distance plus — when [headingDeg] is given — how much that segment's bearing differs from the
-     * heading. Returns null for a degenerate line (fewer than two points).
+     * Projects [target] onto [route], choosing the segment that minimizes perpendicular distance
+     * plus - when [headingDeg] is given - how much that segment's bearing differs from the heading.
+     * Returns null for a degenerate route (fewer than two points).
      */
     private fun project(
-            linePoints: List<Point>,
-            target: Point,
+            route: CarRouteData,
+            target: LatLng,
             headingDeg: Double?
     ): RouteProjection? {
-        if (linePoints.size < 2) return null
-        var cumulative = 0.0
-        var best: RouteProjection? = null
-        for (i in 0 until linePoints.size - 1) {
-            val segment = listOf(linePoints[i], linePoints[i + 1])
-            val projection = TurfMisc.nearestPointOnLine(target, segment, TurfConstants.UNIT_METERS)
-            var weight = projection.getNumberProperty("dist").toDouble()
-            if (headingDeg != null) {
-                val segBearing = TurfMeasurement.bearing(linePoints[i], linePoints[i + 1])
-                weight += angleDifference(headingDeg, segBearing)
-            }
-            val currentBest = best
-            if (currentBest == null || weight < currentBest.weight) {
-                val along =
-                        cumulative +
-                                TurfMeasurement.distance(
-                                        linePoints[i],
-                                        projection.geometry() as Point,
-                                        TurfConstants.UNIT_METERS
-                                )
-                best = RouteProjection(along, weight)
-            }
-            cumulative +=
-                    TurfMeasurement.distance(
-                            linePoints[i],
-                            linePoints[i + 1],
-                            TurfConstants.UNIT_METERS
-                    )
+        val points = route.lngLats
+        if (points.size < 2) {
+            return null
         }
-        return best
+        val distancesAlongRoute = route.distancesAlongRouteMeters
+        val metersPerLongitudeDegree = SpatialService.metersPerLongitudeDegree(target.latitude)
+        var startX = (points[0].longitude - target.longitude) * metersPerLongitudeDegree
+        var startY = (points[0].latitude - target.latitude) * SpatialService.METERS_PER_LATITUDE_DEGREE
+        var bestWeight = Double.MAX_VALUE
+        var bestDistanceAlongRoute = 0.0
+        for (index in 0 until points.size - 1) {
+            val endX = (points[index + 1].longitude - target.longitude) * metersPerLongitudeDegree
+            val endY =
+                    (points[index + 1].latitude - target.latitude) *
+                            SpatialService.METERS_PER_LATITUDE_DEGREE
+            val deltaX = endX - startX
+            val deltaY = endY - startY
+            val lengthSquared = deltaX * deltaX + deltaY * deltaY
+            val projectionFactor =
+                    if (lengthSquared > 0)
+                            (-(startX * deltaX + startY * deltaY) / lengthSquared).coerceIn(
+                                    0.0,
+                                    1.0
+                            )
+                    else 0.0
+            val x = startX + projectionFactor * deltaX
+            val y = startY + projectionFactor * deltaY
+            var weight = sqrt(x * x + y * y)
+            if (headingDeg != null) {
+                weight +=
+                        SpatialService.angleDifference(
+                                headingDeg,
+                                SpatialService.bearingDegrees(points[index], points[index + 1])
+                        )
+            }
+            if (weight < bestWeight) {
+                bestWeight = weight
+                // Taken off the route's own distances rather than measured in the plane, which is
+                // only trusted around the driver - the far end of a long route is nowhere near it.
+                bestDistanceAlongRoute =
+                        distancesAlongRoute[index] +
+                                projectionFactor *
+                                        (distancesAlongRoute[index + 1] -
+                                                distancesAlongRoute[index])
+            }
+            startX = endX
+            startY = endY
+        }
+        return RouteProjection(bestDistanceAlongRoute, bestWeight)
     }
 
-    /** Smallest absolute difference between two bearings, in degrees within [0, 180]. */
-    private fun angleDifference(a: Double, b: Double): Double {
-        val diff = abs(a - b) % 360.0
-        return if (diff > 180.0) 360.0 - diff else diff
-    }
-
-    /** Where a GPS position projects onto a route line. */
+    /** Where a GPS position projects onto a route. */
     private data class RouteProjection(
-            /** Distance, in meters, from the line start to the projected point. */
-            val distanceAlongLineM: Double,
+            /** Distance, in meters, from the route start to the projected point. */
+            val distanceAlongRouteM: Double,
             /** Match cost: perpendicular distance plus the heading penalty when supplied. */
             val weight: Double
     )
 
     /** The route picked by [findClosestRoute] and where the GPS projects onto it. */
     private data class ClosestRouteHit(
-            val linePoints: List<Point>,
+            val route: CarRouteData,
             /** Distance in meters from the route start to the projected GPS position. */
-            val distanceAlongLineM: Double
+            val distanceAlongRouteM: Double
     )
 }
