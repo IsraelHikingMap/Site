@@ -162,6 +162,8 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 5
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
         uses: actions/upload-artifact@v7.0.1
