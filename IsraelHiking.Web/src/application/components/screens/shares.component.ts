@@ -30,7 +30,7 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { MapService } from "../../services/map.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -168,7 +168,7 @@ export class SharesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.routesGeoJson.set({ type: "FeatureCollection", features });
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.routesGeoJson());
+        const bounds = SpatialHelper.getBoundsForFeatureCollection(this.routesGeoJson());
         this.mapService.fitBounds(bounds, 100, { top: 150, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 

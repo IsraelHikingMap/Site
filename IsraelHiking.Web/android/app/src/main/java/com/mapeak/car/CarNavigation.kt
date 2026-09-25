@@ -32,9 +32,6 @@ import kotlin.math.roundToInt
 import org.json.JSONArray
 import org.json.JSONException
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.geojson.Point
-import org.maplibre.turf.TurfConstants
-import org.maplibre.turf.TurfMeasurement
 
 /**
  * Drives the Android for Cars navigation contract for the active route:
@@ -64,7 +61,7 @@ class CarNavigation(
     private val backend = CarBackendService(carContext)
     private val paceCalculator = CarPaceCalculator()
 
-    private var routePoints: List<Point> = emptyList()
+    private var route: CarRouteData? = null
     private var maneuvers: List<CarManeuver> = emptyList()
     /**
      * Bumped on every route change so a late instructions fetch for an old route can be dropped.
@@ -124,17 +121,15 @@ class CarNavigation(
                     emptyList()
                 }
         val route = routes.firstOrNull { it.lngLats.size >= 2 }
+        this.route = route
         destinationName = route?.name
         val lngLats = route?.lngLats ?: emptyList()
-        routePoints = lngLats.map { Point.fromLngLat(it.longitude, it.latitude) }
         routeEpoch++
         maneuvers = loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats)
-        totalLengthM =
-                if (routePoints.size >= 2)
-                        TurfMeasurement.length(routePoints, TurfConstants.UNIT_METERS)
-                else 0.0
+        // Measured once by the route itself, the location updates below only read it
+        totalLengthM = route?.lengthMeters ?: 0.0
 
-        if (routePoints.size >= 2) {
+        if (route != null) {
             if (!navigating) {
                 navigationManager.navigationStarted()
                 navigating = true
@@ -196,10 +191,11 @@ class CarNavigation(
     }
 
     private fun onLocationChanged() {
-        if (!navigating || routePoints.size < 2 || maneuvers.isEmpty()) return
+        val route = this.route
+        if (!navigating || route == null || maneuvers.isEmpty()) return
         val location: Location = store.getTransient(CarStoreKeys.LOCATION) ?: return
 
-        val traveled = CarRouteCalculator.distanceAlongRoute(routePoints, location)
+        val traveled = CarRouteCalculator.distanceAlongRoute(route, location)
         val currentIndex = maneuvers.indexOfFirst { it.distanceAlongRouteM > traveled + EPSILON_M }
         val current = if (currentIndex >= 0) maneuvers[currentIndex] else maneuvers.last()
         val next = if (currentIndex >= 0) maneuvers.getOrNull(currentIndex + 1) else null
@@ -352,7 +348,7 @@ class CarNavigation(
     private val simulationTick =
             object : Runnable {
                 override fun run() {
-                    if (routePoints.size < 2) {
+                    if (route == null) {
                         stopSimulation()
                         return
                     }
@@ -369,7 +365,7 @@ class CarNavigation(
             }
 
     private fun startSimulation() {
-        if (simulating || routePoints.size < 2) return
+        if (simulating || route == null) return
         simulating = true
         simDistanceM = 0.0
         handler.post(simulationTick)
@@ -382,34 +378,30 @@ class CarNavigation(
     }
 
     private fun publishSimulatedLocation() {
-        var accumulated = 0.0
-        for (i in 0 until routePoints.size - 1) {
-            val segment =
-                    TurfMeasurement.distance(
-                            routePoints[i],
-                            routePoints[i + 1],
-                            TurfConstants.UNIT_METERS
-                    )
-            if (accumulated + segment >= simDistanceM || i == routePoints.size - 2) {
-                val t =
-                        if (segment > 0) ((simDistanceM - accumulated) / segment).coerceIn(0.0, 1.0)
-                        else 0.0
-                val a = routePoints[i]
-                val b = routePoints[i + 1]
-                val location =
-                        Location(SIM_PROVIDER).apply {
-                            latitude = a.latitude() + (b.latitude() - a.latitude()) * t
-                            longitude = a.longitude() + (b.longitude() - a.longitude()) * t
-                            bearing = TurfMeasurement.bearing(a, b).toFloat()
-                            speed = SIM_SPEED_MPS.toFloat()
-                            accuracy = SIM_ACCURACY_M
-                            time = System.currentTimeMillis()
-                            elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
-                        }
-                store.setTransient(CarStoreKeys.LOCATION, location)
-                return
-            }
-            accumulated += segment
+        val route = this.route ?: return
+        val points = route.lngLats
+        val distancesAlongRoute = route.distancesAlongRouteMeters
+        for (i in 0 until points.size - 1) {
+            if (distancesAlongRoute[i + 1] < simDistanceM && i != points.size - 2) continue
+            val segment = distancesAlongRoute[i + 1] - distancesAlongRoute[i]
+            val t =
+                    if (segment > 0)
+                            ((simDistanceM - distancesAlongRoute[i]) / segment).coerceIn(0.0, 1.0)
+                    else 0.0
+            val a = points[i]
+            val b = points[i + 1]
+            val location =
+                    Location(SIM_PROVIDER).apply {
+                        latitude = a.latitude + (b.latitude - a.latitude) * t
+                        longitude = a.longitude + (b.longitude - a.longitude) * t
+                        bearing = SpatialHelper.bearingDegrees(a, b).toFloat()
+                        speed = SIM_SPEED_MPS.toFloat()
+                        accuracy = SIM_ACCURACY_M
+                        time = System.currentTimeMillis()
+                        elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                    }
+            store.setTransient(CarStoreKeys.LOCATION, location)
+            return
         }
     }
 

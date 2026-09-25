@@ -6,7 +6,7 @@ import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "./resources.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { ToastService } from "./toast.service";
 import { SidebarService } from "./sidebar.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
@@ -214,8 +214,8 @@ export class SelectedRouteService {
                 continue;
             }
             const firstLatLng = routeData.segments[0].latlngs[0];
-            const distanceToEnd = SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck);
-            const distanceToStart = SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck);
+            const distanceToEnd = SpatialHelper.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck);
+            const distanceToStart = SpatialHelper.getDistanceInMeters(firstLatLng, latLngToCheck);
             const distance = Math.min(distanceToEnd, distanceToStart);
             if (distance < SelectedRouteService.MERGE_THRESHOLD && distance < minimalDistance) {
                 closetRoute = routeData;
@@ -260,8 +260,8 @@ export class SelectedRouteService {
                 if (segment.latlngs.length === 0) {
                     continue;
                 }
-                const segmentBounds = SpatialService.getBoundsForLatlngs(segment.latlngs);
-                if (SpatialService.getDistanceFromPointToBounds(currentLocation, segmentBounds) >= minimalWeight) {
+                const segmentBounds = SpatialHelper.getBoundsForLatlngs(segment.latlngs);
+                if (SpatialHelper.getDistanceFromPointToBounds(currentLocation, segmentBounds) >= minimalWeight) {
                     // No point in this segment can beat the best match so far, skip measuring them.
                     previousLatLng = segment.latlngs[segment.latlngs.length - 1];
                     continue;
@@ -270,9 +270,9 @@ export class SelectedRouteService {
                     if (latLng === previousLatLng) {
                         continue;
                     }
-                    let currentWeight = SpatialService.getDistanceFromPointToLine(currentLocation, [previousLatLng, latLng]);
+                    let currentWeight = SpatialHelper.getDistanceFromPointToLine(currentLocation, [previousLatLng, latLng]);
                     if (heading != null) {
-                        currentWeight += Math.abs(heading - SpatialService.getLineBearingInDegrees(previousLatLng, latLng));
+                        currentWeight += Math.abs(heading - SpatialHelper.getLineBearingInDegrees(previousLatLng, latLng));
                     }
                     if (currentWeight < minimalWeight) {
                         minimalWeight = currentWeight;
@@ -334,7 +334,7 @@ export class SelectedRouteService {
             ? closestRoute.segments[0].latlngs[0]
             : this.getLastLatLng(closestRoute);
 
-        if (SpatialService.getDistanceInMeters(closestRouteLatLngToCheck, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
+        if (SpatialHelper.getDistanceInMeters(closestRouteLatLngToCheck, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
         const firstPart = structuredClone(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments) as RouteSegmentData[];
@@ -462,7 +462,7 @@ export class SelectedRouteService {
                 },
                 geometry: {
                     type: "LineString",
-                    coordinates: route.segments[segmentIndex].latlngs.map(l => SpatialService.toCoordinate(l))
+                    coordinates: route.segments[segmentIndex].latlngs.map(l => SpatialHelper.toCoordinate(l))
                 }
             } as GeoJSON.Feature<GeoJSON.LineString>;
             features.push(segmentFeature);
@@ -475,7 +475,7 @@ export class SelectedRouteService {
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: SpatialService.toCoordinate(route.segments[segmentIndex].routePoint)
+                    coordinates: SpatialHelper.toCoordinate(route.segments[segmentIndex].routePoint)
                 }
             } as GeoJSON.Feature<GeoJSON.Point>;
             if (segmentIndex === 0) {
@@ -491,7 +491,7 @@ export class SelectedRouteService {
     public createFeaturesForRoute(
         route: Immutable<RouteDataWithoutState>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
-        const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialService.toCoordinate(l));
+        const routeCoordinates = route.segments.map(s => s.latlngs).flat().map(l => SpatialHelper.toCoordinate(l));
         const routeProperties = this.routeToProperties(route);
         for (const marker of route.markers) {
             const markerFeature = {
@@ -502,7 +502,7 @@ export class SelectedRouteService {
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: SpatialService.toCoordinate(marker.latlng)
+                    coordinates: SpatialHelper.toCoordinate(marker.latlng)
                 }
             } as GeoJSON.Feature<GeoJSON.Point>;
             features.push(markerFeature);

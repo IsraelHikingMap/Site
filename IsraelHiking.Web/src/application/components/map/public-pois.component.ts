@@ -19,7 +19,7 @@ import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
@@ -65,7 +65,7 @@ export class PublicPoisComponent implements OnInit {
     private readonly mapComponent = inject(MapComponent);
     private readonly analyticsService = inject(AnalyticsService);
 
-    public readonly getSelectedFeatureLatlng = computed(() => SpatialService.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]));
+    public readonly getSelectedFeatureLatlng = computed(() => SpatialHelper.toLatLng(this.selectedPoiFeature().geometry.coordinates as [number, number]));
 
     @HostListener("window:keydown", ["$event"])
     public onPopupShortcutKeys(event: KeyboardEvent): void {

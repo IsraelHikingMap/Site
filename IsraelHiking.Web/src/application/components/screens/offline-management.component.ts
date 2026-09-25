@@ -12,7 +12,7 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
 
@@ -218,7 +218,7 @@ export class OfflineManagementComponent {
             maxTileY = Math.max(maxTileY, tileY);
         }
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2 }, TILES_ZOOM)),
+            center: SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: (minTileX + maxTileX + 1) / 2, y: (minTileY + maxTileY + 1) / 2 }, TILES_ZOOM)),
             zoom: Math.max(1, TILES_ZOOM - Math.log2(Math.max(maxTileX - minTileX + 1, maxTileY - minTileY + 1)) - 1)
         });
     }
@@ -227,7 +227,7 @@ export class OfflineManagementComponent {
         this.toastService.info(this.resources.dontSwitchApps);
         const { tileX, tileY } = this.selectedTileXY();
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
+            center: SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
         this.selectedTileXY.set(null);
@@ -257,11 +257,11 @@ export class OfflineManagementComponent {
                 type: "Polygon",
                 coordinates: [
                     [
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY }, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + progress, y: tileY + 1 }, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY + 1 }, TILES_ZOOM)),
-                        SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX, y: tileY }, TILES_ZOOM))
+                        SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX, y: tileY }, TILES_ZOOM)),
+                        SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + progress, y: tileY }, TILES_ZOOM)),
+                        SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + progress, y: tileY + 1 }, TILES_ZOOM)),
+                        SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX, y: tileY + 1 }, TILES_ZOOM)),
+                        SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX, y: tileY }, TILES_ZOOM))
                     ]
                 ]
             },
@@ -288,7 +288,7 @@ export class OfflineManagementComponent {
     private selectTile(tileX: number, tileY: number) {
         this.selectedTileXY.set({ tileX, tileY });
         this.map.flyTo({
-            center: SpatialService.toCoordinate(SpatialService.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
+            center: SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
         });
     }

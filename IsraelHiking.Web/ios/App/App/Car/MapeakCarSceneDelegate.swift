@@ -19,6 +19,9 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
     private var currentTrip: CPTrip?
     private var navigationSession: CPNavigationSession?
     private var lastStatistics: CarStatistics?
+    private let paceCalculator = CarPaceCalculator()
+    private let navigation = CarNavigation()
+    private var searchController: CarSearchController?
     private var routes: [CarRouteData] = []
 
     // Retained map buttons (re-asserted after the panning interface dismisses).
@@ -45,12 +48,16 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         template.automaticallyHidesNavigationBar = false
         template.hidesButtonsWithNavigationBar = false
         template.trailingNavigationBarButtons = [panButton()]
+        template.leadingNavigationBarButtons = [searchButton()]
         interfaceController.setRootTemplate(template, animated: false, completion: nil)
         mapTemplate = template
         template.mapButtons = mapButtons
 
         routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
+        searchController = CarSearchController(interfaceController: interfaceController)
         store.addListener(self)
+        navigation.onNavigationChanged = { [weak self] in self?.updateManeuvers() }
+        navigation.attach()
         locationProvider.start()
         recomputeStatistics()
     }
@@ -59,8 +66,11 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
                                   didDisconnectInterfaceController interfaceController: CPInterfaceController,
                                   from window: CPWindow) {
         store.removeListener(self)
+        navigation.detach()
+        navigation.onNavigationChanged = nil
         locationProvider.stop()
         endNavigationSession()
+        searchController = nil
         mapViewController = nil
         mapTemplate = nil
         self.interfaceController = nil
@@ -72,6 +82,17 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         let button = CPMapButton { _ in action() }
         button.image = Self.symbol(symbolName)
         return button
+    }
+
+    /// Mirrors the search action on Android's action strip: opens the destination search.
+    private func searchButton() -> CPBarButton {
+        let image = UIImage(systemName: "magnifyingglass") ?? UIImage()
+        return CPBarButton(image: image) { [weak self] _ in
+            guard let self = self, let searchController = self.searchController else { return }
+            self.interfaceController?.pushTemplate(searchController.makeTemplate(),
+                                                   animated: true,
+                                                   completion: nil)
+        }
     }
 
     private func panButton() -> CPBarButton {
@@ -138,7 +159,12 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         case CarStoreKeys.route:
             routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
             recomputeStatistics()
-        case CarStoreKeys.location, CarStoreKeys.config:
+        case CarStoreKeys.location:
+            if let location: CLLocation = store.getTransient(CarStoreKeys.location) {
+                paceCalculator.updatePace(location)
+            }
+            recomputeStatistics()
+        case CarStoreKeys.config:
             recomputeStatistics()
         default:
             break
@@ -149,7 +175,9 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
 
     private func recomputeStatistics() {
         let location: CLLocation? = store.getTransient(CarStoreKeys.location)
-        let stats = location.flatMap { CarStatisticsCalculator.compute(routes: routes, location: $0) }
+        let stats = location.flatMap {
+            CarRouteCalculator.computeStatistics(routes: routes, location: $0, speed: paceCalculator.speed)
+        }
         guard stats != lastStatistics else { return }
         lastStatistics = stats
 
@@ -166,13 +194,33 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         }
         guard let trip = currentTrip else { return }
         mapTemplate.update(travelEstimates(stats), for: trip, with: .default)
+        updateManeuvers()
+    }
+
+    /**
+     * Pushes the turns `CarNavigation` computed into the live navigation session, so the cluster
+     * shows the next one and how far it is. Mirrors the cluster updates `CarNavigation.kt` makes
+     * through NavigationManager.updateTrip.
+     */
+    private func updateManeuvers() {
+        guard let session = navigationSession else { return }
+        session.upcomingManeuvers = navigation.upcomingManeuvers
+        guard let current = navigation.upcomingManeuvers.first else { return }
+        session.updateEstimates(
+            CPTravelEstimates(
+                distanceRemaining: navigation.measurement(navigation.distanceToCurrentManeuverMeters),
+                // Only the distance to a single turn is measured, not the time to it
+                timeRemaining: -1),
+            for: current)
     }
 
     private func travelEstimates(_ stats: CarStatistics) -> CPTravelEstimates {
         let units = (store.load(CarStoreKeys.config)?["units"] as? String) ?? "metric"
         let meters = Measurement(value: stats.remainingMeters, unit: UnitLength.meters)
         let distance = units == "imperial" ? meters.converted(to: .miles) : meters.converted(to: .kilometers)
-        return CPTravelEstimates(distanceRemaining: distance, timeRemaining: TimeInterval(stats.remainingSeconds))
+        // A negative time renders as "--", which is what an unknown pace should show
+        let timeRemaining = stats.remainingSeconds.map(TimeInterval.init) ?? -1
+        return CPTravelEstimates(distanceRemaining: distance, timeRemaining: timeRemaining)
     }
 
     private func makeTrip(start: CLLocationCoordinate2D, end: CLLocationCoordinate2D) -> CPTrip {

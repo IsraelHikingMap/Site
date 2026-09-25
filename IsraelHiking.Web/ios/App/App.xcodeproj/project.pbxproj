@@ -14,7 +14,15 @@
 		0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000007 /* ValhallaTarExtractor.swift */; };
 		0DFA1100000000000000005D /* Valhalla in Frameworks */ = {isa = PBXBuildFile; productRef = 0DFA1100000000000000005C /* Valhalla */; };
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
-		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
+		0D46EA142FCC67830033E098 /* CarRouteCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */; };
+		FEF30A95B95149E3AD1195CC /* CarSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */; };
+		72D9E5F5CF2F4D5889D1B626 /* CarNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */; };
+		242A4B25E0FE4CDAB9E865D9 /* CarBackendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1568390AF42F4AAAA4290510 /* CarBackendService.swift */; };
+		CE10248109C84A88AD4664B1 /* CarManeuver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6A9941331649EC9FF56E86 /* CarManeuver.swift */; };
+		DFCC4FB4566C43D8A6030DAD /* CarSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967EF6B878441E58D848336 /* CarSearchResult.swift */; };
+		35321534184C47AA887C6BDC /* CarMarkerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */; };
+		FC282DCF4C944BB1A84859FF /* CarPaceCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */; };
+		60EDF85C2EC2458EB39D211E /* SpatialHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8673A71137D8405895E8A74A /* SpatialHelper.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
 		736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */; };
 		0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */; };
@@ -78,7 +86,15 @@
 		0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMapViewController.swift; sourceTree = "<group>"; };
 		0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactivePreferencesPlugin.swift; sourceTree = "<group>"; };
 		0D46EA0E2FCC67830033E098 /* CarRouteData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarRouteData.swift; sourceTree = "<group>"; };
-		0D46EA0F2FCC67830033E098 /* CarStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStatistics.swift; sourceTree = "<group>"; };
+		0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarRouteCalculator.swift; sourceTree = "<group>"; };
+		CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarSearchController.swift; sourceTree = "<group>"; };
+		4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarNavigation.swift; sourceTree = "<group>"; };
+		1568390AF42F4AAAA4290510 /* CarBackendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarBackendService.swift; sourceTree = "<group>"; };
+		3F6A9941331649EC9FF56E86 /* CarManeuver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarManeuver.swift; sourceTree = "<group>"; };
+		6967EF6B878441E58D848336 /* CarSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarSearchResult.swift; sourceTree = "<group>"; };
+		9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMarkerData.swift; sourceTree = "<group>"; };
+		720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPaceCalculator.swift; sourceTree = "<group>"; };
+		8673A71137D8405895E8A74A /* SpatialHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialHelper.swift; sourceTree = "<group>"; };
 		0D46EA102FCC67830033E098 /* CapacitorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapacitorStore.swift; sourceTree = "<group>"; };
 		0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapeakCarSceneDelegate.swift; sourceTree = "<group>"; };
 		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
@@ -147,7 +163,15 @@
 				0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */,
 				0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */,
 				0D46EA0E2FCC67830033E098 /* CarRouteData.swift */,
-				0D46EA0F2FCC67830033E098 /* CarStatistics.swift */,
+				0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */,
+				CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */,
+				4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */,
+				1568390AF42F4AAAA4290510 /* CarBackendService.swift */,
+				3F6A9941331649EC9FF56E86 /* CarManeuver.swift */,
+				6967EF6B878441E58D848336 /* CarSearchResult.swift */,
+				9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */,
+				720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */,
+				8673A71137D8405895E8A74A /* SpatialHelper.swift */,
 				0D46EA102FCC67830033E098 /* CapacitorStore.swift */,
 				0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */,
 				0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */,
@@ -336,7 +360,15 @@
 			files = (
 				0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
-				0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */,
+				0D46EA142FCC67830033E098 /* CarRouteCalculator.swift in Sources */,
+				FEF30A95B95149E3AD1195CC /* CarSearchController.swift in Sources */,
+				72D9E5F5CF2F4D5889D1B626 /* CarNavigation.swift in Sources */,
+				242A4B25E0FE4CDAB9E865D9 /* CarBackendService.swift in Sources */,
+				CE10248109C84A88AD4664B1 /* CarManeuver.swift in Sources */,
+				DFCC4FB4566C43D8A6030DAD /* CarSearchResult.swift in Sources */,
+				35321534184C47AA887C6BDC /* CarMarkerData.swift in Sources */,
+				FC282DCF4C944BB1A84859FF /* CarPaceCalculator.swift in Sources */,
+				60EDF85C2EC2458EB39D211E /* SpatialHelper.swift in Sources */,
 				0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */,
 				736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */,
 				0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */,

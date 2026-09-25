@@ -6,7 +6,7 @@ import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, Paddin
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
@@ -190,7 +190,7 @@ export class MapService {
 
     public getMapBounds(): Bounds {
         const bounds = this.currentMap.getBounds();
-        return SpatialService.mBBoundsToBounds(bounds);
+        return SpatialHelper.mBBoundsToBounds(bounds);
     }
 
     public project(latlng: LatLngAltTime): Point {
@@ -215,7 +215,7 @@ export class MapService {
     public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
-        const mbBounds = SpatialService.boundsToMBBounds(bounds);
+        const mbBounds = SpatialHelper.boundsToMBBounds(bounds);
 
         this.store.dispatch(new SetPannedAction(new Date()));
         this.currentMap.fitBounds(mbBounds, {
@@ -239,7 +239,7 @@ export class MapService {
         if (!zoom) {
             zoom = this.currentMap.getZoom();
         }
-        if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
+        if (SpatialHelper.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {
             // ignoring flyto for small coordinates change:
             // this happens due to route percision reduce which causes another map move.

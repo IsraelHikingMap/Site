@@ -1,6 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { MapService } from "./map.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 
 @Service()
 export class LogReaderService {
@@ -56,7 +56,7 @@ export class LogReaderService {
                         color: foreground ? "#00FF00" : "#0000FF"
                     }
                 });
-                accuracyGeojson.features.push(SpatialService.getCirclePolygonFeature({ lng, lat }, accuracy));
+                accuracyGeojson.features.push(SpatialHelper.getCirclePolygonFeature({ lng, lat }, accuracy));
                 continue;
             }
             if (line.includes("[Record] Rejecting position")) {
@@ -147,6 +147,6 @@ export class LogReaderService {
                 "line-opacity": 0.8
             }
         });
-        this.mapService.fitBounds(SpatialService.getBoundsForFeatureCollection(pointsGeojson));
+        this.mapService.fitBounds(SpatialHelper.getBoundsForFeatureCollection(pointsGeojson));
     }
 }

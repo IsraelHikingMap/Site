@@ -11,7 +11,7 @@ import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { ElevationProvider } from "./elevation.provider";
@@ -343,7 +343,7 @@ export class FileService {
 
     private addRoutesFromContainer(container: DataContainer) {
         this.selectedRouteService.addRoutes(container.routes);
-        this.mapService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
+        this.mapService.fitBounds(SpatialHelper.getBounds([container.southWest, container.northEast]));
     }
 
     public async writeStyle(styleFileName: string, styleText: string) {
