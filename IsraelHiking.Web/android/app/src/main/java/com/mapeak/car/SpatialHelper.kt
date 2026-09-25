@@ -9,11 +9,11 @@ import org.maplibre.android.geometry.LatLng
 
 /**
  * The spatial calculations the car experience measures routes with - the counterpart of
- * SpatialService on the web client, and of SpatialService.swift on iOS. Turf allocates a feature
+ * SpatialHelper on the web client, and of SpatialHelper.swift on iOS. Turf allocates a feature
  * per call, which a route with tens of thousands of points cannot afford when it is re-measured
  * against the GPS position on every fix.
  */
-object SpatialService {
+object SpatialHelper {
 
     /** Good enough for the local, flat plane calculations, the earth is not a perfect sphere anyway. */
     const val METERS_PER_LATITUDE_DEGREE = 111_320.0

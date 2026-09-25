@@ -23,7 +23,7 @@ data class CarRouteData(
         for (index in 1 until lngLats.size) {
             distances[index] =
                     distances[index - 1] +
-                            SpatialService.distanceMeters(lngLats[index - 1], lngLats[index])
+                            SpatialHelper.distanceMeters(lngLats[index - 1], lngLats[index])
         }
         distances
     }

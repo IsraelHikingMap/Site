@@ -157,7 +157,7 @@ class CarBackendService(context: Context) {
         }
         // A recorded route holds a point every few meters, far denser than map matching needs and
         // more than fits in a request. Simplifying keeps the corners the instructions are read from.
-        val pointsToMatch = SpatialService.simplify(points, MAP_MATCH_TOLERANCE_METERS)
+        val pointsToMatch = SpatialHelper.simplify(points, MAP_MATCH_TOLERANCE_METERS)
         val url =
                 API_BASE.toHttpUrl()
                         .newBuilder()

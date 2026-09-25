@@ -7,7 +7,7 @@ import polyline from "@mapbox/polyline";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
@@ -52,7 +52,7 @@ export class RoutingProvider {
 
     public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         if (routinType === "None") {
-            const distance = SpatialService.getDistanceInMeters(latlngStart, latlngEnd);
+            const distance = SpatialHelper.getDistanceInMeters(latlngStart, latlngEnd);
             const pointsCount = Math.min(100, Math.ceil(distance / 100));
             const latlngs = [];
             for (let i = 0; i <= pointsCount; i++) {
@@ -69,7 +69,7 @@ export class RoutingProvider {
         try {
             const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address)
                 .pipe(timeout(hasTiles ? RoutingProvider.ONLINE_TIMEOUT_WITH_TILES_MS : RoutingProvider.ONLINE_TIMEOUT_MS)));
-            return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
+            return data.features[0].geometry.coordinates.map(c => SpatialHelper.toLatLng(c));
         } catch (ex) {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType, hasTiles);
@@ -106,8 +106,8 @@ export class RoutingProvider {
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
-        const startTile = SpatialService.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
-        const endTile = SpatialService.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
+        const startTile = SpatialHelper.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
+        const endTile = SpatialHelper.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
         const tiles = new Set<string>();
         for (let x = Math.floor(startTile.x); x <= Math.floor(endTile.x); x++) {
             for (let y = Math.floor(startTile.y); y <= Math.floor(endTile.y); y++) {
@@ -219,7 +219,7 @@ export class RoutingProvider {
         let cumulativeDistance = 0;
         for (let index = 0; index < points.length; index++) {
             if (index > 0) {
-                cumulativeDistance += SpatialService.getDistanceInMeters(points[index - 1], points[index]);
+                cumulativeDistance += SpatialHelper.getDistanceInMeters(points[index - 1], points[index]);
             }
             const sample = cumulativeDistance / RoutingProvider.ELEVATION_INTERVAL_METERS;
             const low = Math.min(Math.floor(sample), elevations.length - 1);

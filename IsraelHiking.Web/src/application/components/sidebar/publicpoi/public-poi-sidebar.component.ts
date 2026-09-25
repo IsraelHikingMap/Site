@@ -27,7 +27,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RouteStrings, PoiRouteUrlInfo } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { MapService } from "../../../services/map.service";
-import { SpatialService } from "../../../services/spatial.service";
+import { SpatialHelper } from "../../../services/spatial.helper";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
@@ -177,7 +177,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
                 this.store.dispatch(new SetSelectedPoiAction(clonedFeature));
                 await this.initFromFeature(clonedFeature);
             }
-            const bounds = SpatialService.getBoundsForFeature(clonedFeature);
+            const bounds = SpatialHelper.getBoundsForFeature(clonedFeature);
             this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
             if (data.source === RouteStrings.COORDINATES) {
                 this.fullFeature.set(null);
@@ -249,7 +249,7 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     public async convertToRoute() {
         this.selectedRouteService.convertToRoute(this.fullFeature(), this.translationService.getBestDescription(this.fullFeature()));
         this.close();
-        const bounds = SpatialService.getBoundsForFeature(this.fullFeature());
+        const bounds = SpatialHelper.getBoundsForFeature(this.fullFeature());
         await this.mapService.fitBounds(bounds);
     }
 

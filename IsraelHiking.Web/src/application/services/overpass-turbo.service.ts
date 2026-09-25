@@ -4,7 +4,7 @@ import { firstValueFrom, timeout } from "rxjs";
 import osmtogeojson from "osm2geojson-lite";
 import type { GetResourceResponse } from "maplibre-gl";
 
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { Urls } from "../urls";
 import type { LatLngAltTime } from "../models";
 
@@ -86,7 +86,7 @@ export class OverpassTurboService {
             return geojson.features[0];
         }
         if (geojson.features.length === 1 && geojson.features[0].geometry.type === "MultiLineString") {
-            geojson.features[0].geometry = SpatialService.mergeLines(geojson.features[0].geometry.coordinates.map(l => ({ type: "LineString", coordinates: l })));
+            geojson.features[0].geometry = SpatialHelper.mergeLines(geojson.features[0].geometry.coordinates.map(l => ({ type: "LineString", coordinates: l })));
             return geojson.features[0];
         }
         let hasPolygon = false;
@@ -103,7 +103,7 @@ export class OverpassTurboService {
         if (allLines.length === 0 || hasPolygon) {
             return geojson.features[0];
         }
-        geojson.features[0].geometry = SpatialService.mergeLines(allLines.map(l => ({ type: "LineString", coordinates: l })));
+        geojson.features[0].geometry = SpatialHelper.mergeLines(allLines.map(l => ({ type: "LineString", coordinates: l })));
         return geojson.features[0];
     }
 

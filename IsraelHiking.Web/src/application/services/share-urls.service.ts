@@ -14,7 +14,7 @@ import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { Urls } from "../urls";
 import type { ImageAttribution, ImageAttributionProvider } from "./image-attribution.service";
 import type { ShareUrl, ApplicationState, UserPermissions, ActivityType } from "../models";
@@ -69,7 +69,7 @@ export class ShareUrlsService implements ImageAttributionProvider {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
         const shareUrl = await firstValueFrom(this.httpClient.get<ShareUrl>(Urls.urls + shareUrlId).pipe(timeout(timeToWait)));
         shareUrl.start = shareUrl.start ?? shareUrl.dataContainer.routes?.[0]?.segments?.[0]?.latlngs?.[0];
-        shareUrl.start = shareUrl.start ?? SpatialService.getLatlngInterpolatedValue(shareUrl.dataContainer.northEast, shareUrl.dataContainer.southWest, 0.5);
+        shareUrl.start = shareUrl.start ?? SpatialHelper.getLatlngInterpolatedValue(shareUrl.dataContainer.northEast, shareUrl.dataContainer.southWest, 0.5);
         this.databaseService.storeShareUrl(shareUrl);
         return shareUrl;
     }
@@ -164,7 +164,7 @@ export class ShareUrlsService implements ImageAttributionProvider {
                 if (fullShareUrl != null) {
                     const shareToUpdate = structuredClone(shareUrl) as ShareUrl;
                     shareToUpdate.start = fullShareUrl.dataContainer.routes?.[0]?.segments?.[0]?.latlngs?.[0];
-                    shareToUpdate.start = shareToUpdate.start ?? SpatialService.getLatlngInterpolatedValue(fullShareUrl.dataContainer.northEast, fullShareUrl.dataContainer.southWest, 0.5);
+                    shareToUpdate.start = shareToUpdate.start ?? SpatialHelper.getLatlngInterpolatedValue(fullShareUrl.dataContainer.northEast, fullShareUrl.dataContainer.southWest, 0.5);
                     this.store.dispatch(new UpdateShareUrlAction(shareToUpdate));
                 }
             } catch (ex) {

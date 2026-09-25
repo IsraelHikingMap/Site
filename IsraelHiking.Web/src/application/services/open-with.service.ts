@@ -12,7 +12,7 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { CoordinatesService } from "./coordinates.service";
 import { getIdFromLatLng, RouteStrings } from "./hash.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import type { LatLngAltTime } from "../models";
 
 /** Hosts used by Google Maps short links, which need to be resolved before coordinates can be read */
@@ -169,7 +169,7 @@ export class OpenWithService {
         for (const matcher of [PLACE_COORDINATES, QUERY_COORDINATES, VIEWPORT_COORDINATES]) {
             const match = matcher.exec(decoded);
             if (match != null) {
-                return SpatialService.toLatLng([+match[2], +match[1]]);
+                return SpatialHelper.toLatLng([+match[2], +match[1]]);
             }
         }
         return null;
@@ -196,7 +196,7 @@ export class OpenWithService {
                 return null;
             }
             const latLng = cellId.toLatLng();
-            return SpatialService.toLatLng([latLng.lngDegrees, latLng.latDegrees]);
+            return SpatialHelper.toLatLng([latLng.lngDegrees, latLng.latDegrees]);
         } catch {
             return null;
         }
@@ -219,7 +219,7 @@ export class OpenWithService {
         if (isNaN(lat) || isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
             return null;
         }
-        return SpatialService.toLatLng([lng, lat]);
+        return SpatialHelper.toLatLng([lng, lat]);
     }
 
     /**
@@ -241,14 +241,14 @@ export class OpenWithService {
         const decoded = decodeURIComponent(href);
         const queryMatch = QUERY_COORDINATES.exec(decoded);
         if (queryMatch != null) {
-            return SpatialService.toLatLng([+queryMatch[2], +queryMatch[1]]);
+            return SpatialHelper.toLatLng([+queryMatch[2], +queryMatch[1]]);
         }
         const match = new RegExp(`^geo:${NUMBER},${NUMBER}`).exec(decoded);
         // `geo:0,0?q=<address>` is a placeholder for a query the app cannot resolve, not a point in the ocean
         if (match == null || (+match[1] === 0 && +match[2] === 0)) {
             return null;
         }
-        return SpatialService.toLatLng([+match[2], +match[1]]);
+        return SpatialHelper.toLatLng([+match[2], +match[1]]);
     }
 
     private handleMapeakUrl(url: URL) {

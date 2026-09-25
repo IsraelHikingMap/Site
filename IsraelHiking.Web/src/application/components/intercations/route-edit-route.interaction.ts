@@ -5,7 +5,7 @@ import type { MapMouseEvent, Map, GeoJSONSource, Point, MapTouchEvent } from "ma
 import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "../../services/selected-route.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { RoutingProvider } from "../../services/routing.provider";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
@@ -189,7 +189,7 @@ export class RouteEditRouteInteraction {
     };
 
     private handleRoutePointDrag(event: MapMouseEvent | MapTouchEvent) {
-        const coordinate = SpatialService.toCoordinate(event.lngLat);
+        const coordinate = SpatialHelper.toCoordinate(event.lngLat);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
         const featuresToUpdate: GeoJSON.Feature<GeoJSON.Point | GeoJSON.LineString>[] = [this.selectedRoutePoint];
 
@@ -215,7 +215,7 @@ export class RouteEditRouteInteraction {
     }
 
     private handleRouteMiddleSegmentDrag(event: MapMouseEvent | MapTouchEvent) {
-        const coordinate = SpatialService.toCoordinate(event.lngLat);
+        const coordinate = SpatialHelper.toCoordinate(event.lngLat);
         const segment = this.selectedRouteSegments[0];
         const coordinates = segment.geometry.coordinates;
         segment.geometry.coordinates = [coordinates[0], coordinate, coordinates[coordinates.length - 1]];
@@ -352,7 +352,7 @@ export class RouteEditRouteInteraction {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
-        const newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
+        const newLatlngs = SpatialHelper.splitLine(latlng, segment.latlngs);
         segment.latlngs = newLatlngs.end;
         const middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));

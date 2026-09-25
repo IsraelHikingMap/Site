@@ -19,7 +19,7 @@ struct CarStatistics: Equatable {
 /// route-statistics.service.ts (findDistanceForLatLngInKMInternal / getClosestRouteToGPSInternal).
 ///
 /// This runs over every point of every route on every GPS fix, so the points are measured on a
-/// plane laid around the driver instead of on the sphere - see `SpatialService`. The plane is only
+/// plane laid around the driver instead of on the sphere - see `SpatialHelper`. The plane is only
 /// trusted near its center, which is where a match can happen at all: how far along the route the
 /// match falls is read off the route's own distances, measured once when the route arrives.
 enum CarRouteCalculator {
@@ -66,6 +66,18 @@ enum CarRouteCalculator {
         )
     }
 
+    /**
+     * Distance, in meters, from the start of `route` to where `location` projects onto it. The GPS
+     * heading is taken into account so a self-overlapping route matches the leg actually being
+     * driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
+     * degenerate route (fewer than two points). Mirrors `distanceAlongRoute` in Kotlin, which the
+     * turn-by-turn navigation reads to know which maneuver is the current one.
+     */
+    static func distanceAlongRoute(_ route: CarRouteData, location: CLLocation) -> Double {
+        let heading = location.course >= 0 ? location.course : nil
+        return project(route, target: location.coordinate, headingDeg: heading)?.distanceAlongRouteM ?? 0
+    }
+
     private static func findClosestRoute(_ routes: [CarRouteData],
                                          position: CLLocationCoordinate2D,
                                          heading: Double?) -> ClosestRouteHit? {
@@ -97,14 +109,14 @@ enum CarRouteCalculator {
         let points = route.coordinates
         guard points.count >= 2 else { return nil }
         let distancesAlongRoute = route.distancesAlongRouteMeters
-        let metersPerLongitudeDegree = SpatialService.metersPerLongitudeDegree(atLatitude: target.latitude)
+        let metersPerLongitudeDegree = SpatialHelper.metersPerLongitudeDegree(atLatitude: target.latitude)
         var startX = (points[0].longitude - target.longitude) * metersPerLongitudeDegree
-        var startY = (points[0].latitude - target.latitude) * SpatialService.metersPerLatitudeDegree
+        var startY = (points[0].latitude - target.latitude) * SpatialHelper.metersPerLatitudeDegree
         var bestWeight = Double.greatestFiniteMagnitude
         var bestDistanceAlongRoute = 0.0
         for index in 0..<(points.count - 1) {
             let endX = (points[index + 1].longitude - target.longitude) * metersPerLongitudeDegree
-            let endY = (points[index + 1].latitude - target.latitude) * SpatialService.metersPerLatitudeDegree
+            let endY = (points[index + 1].latitude - target.latitude) * SpatialHelper.metersPerLatitudeDegree
             let deltaX = endX - startX
             let deltaY = endY - startY
             let lengthSquared = deltaX * deltaX + deltaY * deltaY
@@ -116,8 +128,8 @@ enum CarRouteCalculator {
             let y = startY + projectionFactor * deltaY
             var weight = (x * x + y * y).squareRoot()
             if let headingDeg = headingDeg {
-                weight += SpatialService.angleDifference(
-                    headingDeg, SpatialService.bearingDegrees(points[index], points[index + 1]))
+                weight += SpatialHelper.angleDifference(
+                    headingDeg, SpatialHelper.bearingDegrees(points[index], points[index + 1]))
             }
             if weight < bestWeight {
                 bestWeight = weight

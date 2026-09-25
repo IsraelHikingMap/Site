@@ -7,6 +7,7 @@ struct CarRouteData {
     let weight: Double
     let color: String?
     let opacity: Double
+    let name: String?
     let markers: [CarMarkerData]
 
     /// The distance in meters from the start of the route to each of its points. Measured once,
@@ -21,12 +22,12 @@ struct CarRouteData {
         var distances = [Double](repeating: 0, count: coordinates.count)
         for index in 1..<max(coordinates.count, 1) {
             distances[index] = distances[index - 1]
-                + SpatialService.distanceMeters(coordinates[index - 1], coordinates[index])
+                + SpatialHelper.distanceMeters(coordinates[index - 1], coordinates[index])
         }
         return distances
     }
 
-    /// Parses a single `{ points: [[lng, lat], ...], weight, color, opacity, markers }` object.
+    /// Parses a single `{ points: [[lng, lat], ...], weight, color, opacity, name, markers }` object.
     static func from(_ json: [String: Any]) -> CarRouteData? {
         guard let points = json["points"] as? [[Any]] else { return nil }
         let coordinates: [CLLocationCoordinate2D] = points.compactMap { pair in
@@ -42,6 +43,7 @@ struct CarRouteData {
             weight: (json["weight"] as? NSNumber)?.doubleValue ?? 0,
             color: json["color"] as? String,
             opacity: (json["opacity"] as? NSNumber)?.doubleValue ?? 0,
+            name: (json["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
             markers: markers,
             distancesAlongRouteMeters: distancesAlongRoute(coordinates)
         )

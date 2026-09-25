@@ -22,7 +22,7 @@ data class CarStatistics(val remainingMeters: Double, val remainingSeconds: Long
  * (findDistanceForLatLngInKMInternal / getClosestRouteToGPSInternal).
  *
  * This runs over every point of every route on every GPS fix, so the points are measured on a plane
- * laid around the driver instead of on the sphere - see [SpatialService]. The plane is only trusted
+ * laid around the driver instead of on the sphere - see [SpatialHelper]. The plane is only trusted
  * near its center, which is where a match can happen at all: how far along the route the match
  * falls is read off the route's own distances, measured once when the route arrives.
  */
@@ -135,16 +135,16 @@ object CarRouteCalculator {
             return null
         }
         val distancesAlongRoute = route.distancesAlongRouteMeters
-        val metersPerLongitudeDegree = SpatialService.metersPerLongitudeDegree(target.latitude)
+        val metersPerLongitudeDegree = SpatialHelper.metersPerLongitudeDegree(target.latitude)
         var startX = (points[0].longitude - target.longitude) * metersPerLongitudeDegree
-        var startY = (points[0].latitude - target.latitude) * SpatialService.METERS_PER_LATITUDE_DEGREE
+        var startY = (points[0].latitude - target.latitude) * SpatialHelper.METERS_PER_LATITUDE_DEGREE
         var bestWeight = Double.MAX_VALUE
         var bestDistanceAlongRoute = 0.0
         for (index in 0 until points.size - 1) {
             val endX = (points[index + 1].longitude - target.longitude) * metersPerLongitudeDegree
             val endY =
                     (points[index + 1].latitude - target.latitude) *
-                            SpatialService.METERS_PER_LATITUDE_DEGREE
+                            SpatialHelper.METERS_PER_LATITUDE_DEGREE
             val deltaX = endX - startX
             val deltaY = endY - startY
             val lengthSquared = deltaX * deltaX + deltaY * deltaY
@@ -160,9 +160,9 @@ object CarRouteCalculator {
             var weight = sqrt(x * x + y * y)
             if (headingDeg != null) {
                 weight +=
-                        SpatialService.angleDifference(
+                        SpatialHelper.angleDifference(
                                 headingDeg,
-                                SpatialService.bearingDegrees(points[index], points[index + 1])
+                                SpatialHelper.bearingDegrees(points[index], points[index + 1])
                         )
             }
             if (weight < bestWeight) {

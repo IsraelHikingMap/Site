@@ -7,9 +7,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.geojson.Point
-import org.maplibre.turf.TurfConstants
-import org.maplibre.turf.TurfMeasurement
 
 /**
  * A turn along the route. Android for Cars requires navigation apps to provide turn-by-turn
@@ -200,18 +197,16 @@ object CarManeuverGenerator {
      */
     fun generate(route: List<LatLng>): List<CarManeuver> {
         if (route.size < 2) return emptyList()
-        val points = route.map { Point.fromLngLat(it.longitude, it.latitude) }
         val maneuvers = ArrayList<CarManeuver>()
         maneuvers.add(CarManeuver(Maneuver.TYPE_DEPART, "Head out", 0.0))
         var cumulative = 0.0
         var lastTurnAt = 0.0
-        for (i in 1 until points.size - 1) {
-            cumulative +=
-                    TurfMeasurement.distance(points[i - 1], points[i], TurfConstants.UNIT_METERS)
+        for (i in 1 until route.size - 1) {
+            cumulative += SpatialHelper.distanceMeters(route[i - 1], route[i])
             val delta =
                     normalize(
-                            TurfMeasurement.bearing(points[i], points[i + 1]) -
-                                    TurfMeasurement.bearing(points[i - 1], points[i])
+                            SpatialHelper.bearingDegrees(route[i], route[i + 1]) -
+                                    SpatialHelper.bearingDegrees(route[i - 1], route[i])
                     )
             val magnitude = abs(delta)
             if (magnitude < MIN_TURN_DEG) continue
@@ -222,12 +217,7 @@ object CarManeuverGenerator {
             )
             lastTurnAt = cumulative
         }
-        cumulative +=
-                TurfMeasurement.distance(
-                        points[points.size - 2],
-                        points[points.size - 1],
-                        TurfConstants.UNIT_METERS
-                )
+        cumulative += SpatialHelper.distanceMeters(route[route.size - 2], route[route.size - 1])
         maneuvers.add(CarManeuver(Maneuver.TYPE_DESTINATION, "Arrive at destination", cumulative))
         return maneuvers
     }

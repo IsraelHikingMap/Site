@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import Valhalla
 import ValhallaConfigModels
@@ -15,6 +16,17 @@ struct ValhallaRouteRequest {
     let toLng: Double
     let profile: String
     let elevationInterval: Int
+}
+
+/**
+ * A map match request: the recorded points to snap onto the road network, and the profile whose
+ * costing they are snapped with. `language` picks the language the instructions come back in.
+ * Mirrors `ValhallaTraceRequest` in `ValhallaRouter.kt`.
+ */
+struct ValhallaTraceRequest {
+    let points: [CLLocationCoordinate2D]
+    let profile: String
+    let language: String?
 }
 
 enum ValhallaRouterError: Error {
@@ -45,6 +57,15 @@ final class ValhallaRouter {
             throw ValhallaRouterError.responseEncodingFailed
         }
         return json
+    }
+
+    /**
+     * Matches recorded points onto the road network, so a route that was already calculated still
+     * gets real turn-by-turn instructions when the backend is unreachable. Returns valhalla's own
+     * maneuvers, which the caller converts the same way the backend converts its own.
+     */
+    func traceRoute(_ request: ValhallaTraceRequest) throws -> MapMatchRouteResponse {
+        try engine().traceRoute(request: try mapMatchRequest(request))
     }
 
     /**
@@ -90,6 +111,44 @@ final class ValhallaRouter {
             units: .km,
             elevationInterval: Double(request.elevationInterval)
         )
+    }
+
+    private func mapMatchRequest(_ request: ValhallaTraceRequest) throws -> MapMatchRequest {
+        guard let profile = profiles.profile(named: request.profile) else {
+            throw ValhallaRouterError.profileNotFound(request.profile)
+        }
+        guard let costing = CostingModel(rawValue: profile.costing) else {
+            throw ValhallaRouterError.unknownCosting(profile.costing)
+        }
+        guard let matchCosting = MapMatchCostingModel(rawValue: profile.costing) else {
+            throw ValhallaRouterError.unknownCosting(profile.costing)
+        }
+        let lastIndex = request.points.count - 1
+        return MapMatchRequest(
+            // Only the ends are break points, so that the trace comes back as a single leg with one
+            // depart and one arrive, and the rest are snapped through - as the server asks for it
+            shape: request.points.enumerated().map { index, point in
+                MapMatchWaypoint(
+                    lat: point.latitude,
+                    lon: point.longitude,
+                    type: index == 0 || index == lastIndex ? ._break : .via)
+            },
+            costing: matchCosting,
+            costingOptions: try costingOptions(costing, profile.costingOptions),
+            shapeMatch: .mapSnap,
+            directionsOptions: DirectionsOptions(units: .km, language: language(request.language))
+        )
+    }
+
+    /// The closest language valhalla knows to the one asked for, falling back to the base language
+    /// of a regional code, and to valhalla's own default when it knows neither.
+    private func language(_ language: String?) -> ValhallaLanguages? {
+        guard let language = language else { return nil }
+        if let exact = ValhallaLanguages(rawValue: language) {
+            return exact
+        }
+        let base = language.split(separator: "-").first.map(String.init) ?? language
+        return ValhallaLanguages.allCases.first { $0.rawValue.split(separator: "-").first.map(String.init) == base }
     }
 
     /**

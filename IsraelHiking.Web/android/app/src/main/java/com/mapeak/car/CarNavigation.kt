@@ -394,7 +394,7 @@ class CarNavigation(
                     Location(SIM_PROVIDER).apply {
                         latitude = a.latitude + (b.latitude - a.latitude) * t
                         longitude = a.longitude + (b.longitude - a.longitude) * t
-                        bearing = SpatialService.bearingDegrees(a, b).toFloat()
+                        bearing = SpatialHelper.bearingDegrees(a, b).toFloat()
                         speed = SIM_SPEED_MPS.toFloat()
                         accuracy = SIM_ACCURACY_M
                         time = System.currentTimeMillis()

@@ -20,6 +20,8 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
     private var navigationSession: CPNavigationSession?
     private var lastStatistics: CarStatistics?
     private let paceCalculator = CarPaceCalculator()
+    private let navigation = CarNavigation()
+    private var searchController: CarSearchController?
     private var routes: [CarRouteData] = []
 
     // Retained map buttons (re-asserted after the panning interface dismisses).
@@ -46,12 +48,16 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         template.automaticallyHidesNavigationBar = false
         template.hidesButtonsWithNavigationBar = false
         template.trailingNavigationBarButtons = [panButton()]
+        template.leadingNavigationBarButtons = [searchButton()]
         interfaceController.setRootTemplate(template, animated: false, completion: nil)
         mapTemplate = template
         template.mapButtons = mapButtons
 
         routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
+        searchController = CarSearchController(interfaceController: interfaceController)
         store.addListener(self)
+        navigation.onNavigationChanged = { [weak self] in self?.updateManeuvers() }
+        navigation.attach()
         locationProvider.start()
         recomputeStatistics()
     }
@@ -60,8 +66,11 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
                                   didDisconnectInterfaceController interfaceController: CPInterfaceController,
                                   from window: CPWindow) {
         store.removeListener(self)
+        navigation.detach()
+        navigation.onNavigationChanged = nil
         locationProvider.stop()
         endNavigationSession()
+        searchController = nil
         mapViewController = nil
         mapTemplate = nil
         self.interfaceController = nil
@@ -73,6 +82,17 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         let button = CPMapButton { _ in action() }
         button.image = Self.symbol(symbolName)
         return button
+    }
+
+    /// Mirrors the search action on Android's action strip: opens the destination search.
+    private func searchButton() -> CPBarButton {
+        let image = UIImage(systemName: "magnifyingglass") ?? UIImage()
+        return CPBarButton(image: image) { [weak self] _ in
+            guard let self = self, let searchController = self.searchController else { return }
+            self.interfaceController?.pushTemplate(searchController.makeTemplate(),
+                                                   animated: true,
+                                                   completion: nil)
+        }
     }
 
     private func panButton() -> CPBarButton {
@@ -174,6 +194,24 @@ final class MapeakCarSceneDelegate: UIResponder, CPTemplateApplicationSceneDeleg
         }
         guard let trip = currentTrip else { return }
         mapTemplate.update(travelEstimates(stats), for: trip, with: .default)
+        updateManeuvers()
+    }
+
+    /**
+     * Pushes the turns `CarNavigation` computed into the live navigation session, so the cluster
+     * shows the next one and how far it is. Mirrors the cluster updates `CarNavigation.kt` makes
+     * through NavigationManager.updateTrip.
+     */
+    private func updateManeuvers() {
+        guard let session = navigationSession else { return }
+        session.upcomingManeuvers = navigation.upcomingManeuvers
+        guard let current = navigation.upcomingManeuvers.first else { return }
+        session.updateEstimates(
+            CPTravelEstimates(
+                distanceRemaining: navigation.measurement(navigation.distanceToCurrentManeuverMeters),
+                // Only the distance to a single turn is measured, not the time to it
+                timeRemaining: -1),
+            for: current)
     }
 
     private func travelEstimates(_ stats: CarStatistics) -> CPTravelEstimates {
