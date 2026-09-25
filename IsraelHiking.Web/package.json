@@ -45,7 +45,6 @@
     "@turf/line-intersect": "^7.4.0",
     "@turf/line-split": "^7.4.0",
     "@turf/nearest-point-on-line": "^7.4.0",
-    "@turf/point-to-line-distance": "^7.4.0",
     "@turf/simplify": "^7.4.0",
     "base64-arraybuffer": "^1.0.2",
     "bowser": "^2.14.1",

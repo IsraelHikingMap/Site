@@ -257,6 +257,15 @@ export class SelectedRouteService {
             }
             let previousLatLng = routeData.segments[0].latlngs[0];
             for (const segment of routeData.segments) {
+                if (segment.latlngs.length === 0) {
+                    continue;
+                }
+                const segmentBounds = SpatialService.getBoundsForLatlngs(segment.latlngs);
+                if (SpatialService.getDistanceFromPointToBounds(currentLocation, segmentBounds) >= minimalWeight) {
+                    // No point in this segment can beat the best match so far, skip measuring them.
+                    previousLatLng = segment.latlngs[segment.latlngs.length - 1];
+                    continue;
+                }
                 for (const latLng of segment.latlngs) {
                     if (latLng === previousLatLng) {
                         continue;

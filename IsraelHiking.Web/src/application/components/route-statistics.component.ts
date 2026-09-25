@@ -37,6 +37,16 @@ interface IMargin {
     right: number;
 }
 
+/** The route the chart and its map layers show, see getRouteForChart */
+interface RouteForChart {
+    routeData?: Immutable<RouteData>;
+    /** Whether routeData is the route closest to the current location rather than the selected one */
+    isClosestToGps?: boolean;
+    latlngs: Immutable<LatLngAltTime[]>;
+    color: string;
+    weight: number;
+}
+
 interface IChartSubRouteRange {
     xStart: number;
     xEnd: number;
@@ -132,7 +142,9 @@ export class RouteStatisticsComponent implements OnInit {
     constructor() {
         this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
-            this.updateKmMarkers();
+            if (this.isKmMarkersOn()) {
+                this.updateKmMarkers();
+            }
         });
         this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
             this.redrawChart();
@@ -273,16 +285,20 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private routeChanged() {
-        this.setDataToChart([]);
         this.hideLocationGroup();
         this.onRouteDataChanged();
     }
 
     private readonly onRouteDataChanged = () => {
-        this.updateStatistics();
-        this.updateKmMarkers();
-        this.updateSlopeRoute();
-        if (!this.getRouteForChart() || !(this.isOpen())) {
+        const route = this.getRouteForChart();
+        this.updateStatistics(route);
+        this.updateKmMarkers(route);
+        this.updateSlopeRoute(route);
+        if (!route) {
+            this.setDataToChart([]);
+            return;
+        }
+        if (!this.isOpen()) {
             return;
         }
         this.clearSubRouteSelection();
@@ -694,7 +710,8 @@ export class RouteStatisticsComponent implements OnInit {
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScale(d[1]));
-        chartTransition.select(".line").duration(duration).attr("d", line(data));
+        const visibleData = this.resampleToChartResolution(data, d => d[0], d => d[1], this.chartElements.xScale.domain());
+        this.chartElements.chartArea.select(".line").attr("d", line(visibleData));
 
         const units = this.store.selectSnapshot((state: ApplicationState) => state.configuration.units);
         const kmToDistance = units === "imperial" ? 1.60934 : 1;
@@ -722,11 +739,12 @@ export class RouteStatisticsComponent implements OnInit {
             );
         let slopeData = [] as [number, number][];
         if (data.length > 0) {
-            // smoothing the slope data for the chart
+            const slopePoints = this.resampleToChartResolution(this.statistics.points,
+                p => p.coordinate[0], p => p.slope, this.chartElements.xScaleOriginal.domain());
             slopeData = regressionLoess<RouteStatisticsPoint>()
                 .x(d => d.coordinate[0])
                 .y(d => d.slope)
-                .bandwidth(0.03)(this.statistics.points);
+                .bandwidth(0.03)(slopePoints);
         }
         if (slopeData.length > 1) {
             const xMin = slopeData[0][0];
@@ -751,10 +769,81 @@ export class RouteStatisticsComponent implements OnInit {
                 .y0(this.chartElements.height)
                 .y1(d => this.chartElements.yScale(d[1]));
 
-            chartTransition.select(".slope-area")
-                .duration(duration)
+            this.chartElements.chartArea.select(".slope-area")
                 .attr("fill", "url(#slope-gradient)")
-                .attr("d", area(data));
+                .attr("d", area(visibleData));
+        }
+    }
+
+    /**
+     * Reduces the points to what the chart can actually draw: the lowest and the highest of every
+     * pixel of the given range, so that peaks are kept and the rest is dropped before it reaches d3.
+     * Zooming in runs this again on the smaller range, so no detail is lost - it is only left undrawn
+     * while there are no pixels to draw it on.
+     */
+    private resampleToChartResolution<TPoint>(points: readonly TPoint[],
+        getX: (point: TPoint) => number,
+        getY: (point: TPoint) => number,
+        [rangeStart, rangeEnd]: number[]): TPoint[] {
+        const pixels = Math.max(Math.round(this.chartElements.width), 1);
+        const pixelSize = (rangeEnd - rangeStart) / pixels;
+        if (!(pixelSize > 0) || points.length <= 2 * pixels) {
+            return points as TPoint[];
+        }
+        const resampled = [] as TPoint[];
+        let currentPixel: number = null;
+        let lowestIndex = -1;
+        let highestIndex = -1;
+        let lastIndexBeforeRange = -1;
+        let firstIndexAfterRange = -1;
+        // The points are ordered by their distance along the route, which is what getX returns
+        for (let index = 0; index < points.length; index++) {
+            const x = getX(points[index]);
+            if (x < rangeStart) {
+                lastIndexBeforeRange = index;
+                continue;
+            }
+            if (x > rangeEnd) {
+                firstIndexAfterRange = index;
+                break;
+            }
+            const pixel = Math.floor((x - rangeStart) / pixelSize);
+            if (pixel !== currentPixel) {
+                this.addPixelExtremes(resampled, points, lowestIndex, highestIndex);
+                currentPixel = pixel;
+                lowestIndex = -1;
+                highestIndex = -1;
+            }
+            if (lowestIndex < 0 || getY(points[index]) < getY(points[lowestIndex])) {
+                lowestIndex = index;
+            }
+            if (highestIndex < 0 || getY(points[index]) > getY(points[highestIndex])) {
+                highestIndex = index;
+            }
+        }
+        this.addPixelExtremes(resampled, points, lowestIndex, highestIndex);
+        // The points just outside the range keep the line going all the way to its edges
+        if (lastIndexBeforeRange >= 0) {
+            resampled.unshift(points[lastIndexBeforeRange]);
+        }
+        if (firstIndexAfterRange >= 0) {
+            resampled.push(points[firstIndexAfterRange]);
+        }
+        return resampled;
+    }
+
+    /**
+     * Adds the lowest and the highest point of a pixel to the resampled points, in the order they
+     * appear in the route, so that the line does not zigzag inside the pixel.
+     * Does nothing when the pixel has no points, which is the case before the first one is found.
+     */
+    private addPixelExtremes<TPoint>(resampled: TPoint[], points: readonly TPoint[], lowestIndex: number, highestIndex: number) {
+        if (lowestIndex < 0) {
+            return;
+        }
+        resampled.push(points[Math.min(lowestIndex, highestIndex)]);
+        if (lowestIndex !== highestIndex) {
+            resampled.push(points[Math.max(lowestIndex, highestIndex)]);
         }
     }
 
@@ -766,12 +855,11 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.dispatch(new ToggleIsShowSlopeAction());
     }
 
-    private updateKmMarkers() {
+    private updateKmMarkers(route = this.getRouteForChart()) {
         this.kmMarkersSource.set({
             type: "FeatureCollection",
             features: []
         });
-        const route = this.getRouteForChart();
         if (route == null) {
             return;
         }
@@ -939,8 +1027,7 @@ export class RouteStatisticsComponent implements OnInit {
         return this.routeStatisticsService.interpolateStatistics(this.statistics, x);
     }
 
-    private updateStatistics() {
-        const route = this.getRouteForChart();
+    private updateStatistics(route = this.getRouteForChart()) {
         if (!route) {
             this.statistics = null;
             this.setViewStatisticsValues(null);
@@ -948,7 +1035,7 @@ export class RouteStatisticsComponent implements OnInit {
         }
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
-        const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
+        const closestRouteToGps = route.isClosestToGps ? route.routeData : null;
 
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isRecording && closestRouteToGps) {
@@ -975,15 +1062,17 @@ export class RouteStatisticsComponent implements OnInit {
 
     /**
      * @returns the route the chart shows, routeData is set when it originates from a route in the state,
-     * which allows getting its statistics from the cache instead of calculating them again
+     * which allows getting its statistics from the cache instead of calculating them again.
+     * This goes over the points of all the routes, call it once and pass the result on.
      */
-    private getRouteForChart(): { routeData?: Immutable<RouteData>; latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number } | null {
+    private getRouteForChart(): RouteForChart | null {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         if (closestRouteToGps) {
             return {
                 routeData: closestRouteToGps,
+                isClosestToGps: true,
                 latlngs: this.selectedRouteService.getLatlngs(closestRouteToGps),
                 color: closestRouteToGps.color,
                 weight: closestRouteToGps.weight
@@ -1025,8 +1114,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.isFollowing.set(newIsFollowing);
     }
 
-    private updateSlopeRoute() {
-        const route = this.getRouteForChart();
+    private updateSlopeRoute(route = this.getRouteForChart()) {
         this.slopeRouteSource.set({
             type: "FeatureCollection",
             features: []

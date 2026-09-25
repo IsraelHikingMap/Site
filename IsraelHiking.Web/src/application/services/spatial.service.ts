@@ -6,7 +6,6 @@ import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import circle from "@turf/circle";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
-import pointToLineDistance from "@turf/point-to-line-distance";
 import lineSplit from "@turf/line-split";
 import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
@@ -14,6 +13,9 @@ import type { LngLatBounds, LngLatLike } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import type { LatLngAltTime, Bounds } from "../models";
+
+/** Good enough for the local, flat plane calculations below, the earth is not a perfect sphere anyway. */
+const METERS_PER_LATITUDE_DEGREE = 111320;
 
 export class SpatialService {
 
@@ -61,8 +63,64 @@ export class SpatialService {
         return Math.sqrt(Math.pow(coordinate1[0] - coordinate2[0], 2) + Math.pow(coordinate1[1] - coordinate2[1], 2));
     }
 
-    public static getDistanceFromPointToLine(latlng: LatLngAltTime, line: LatLngAltTime[]): number {
-        return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
+    /**
+     * The distance in meters between a point and the closest place on a line.
+     * The line is projected to a plane around the point instead of being measured on the sphere,
+     * which is accurate for the short segments this is used for and an order of magnitude faster -
+     * this runs for every point of every route when looking for the route closest to a location.
+     */
+    public static getDistanceFromPointToLine(latlng: LatLngAltTime, line: Immutable<LatLngAltTime[]>): number {
+        const toPlane = (l: Immutable<LatLngAltTime>) => ({
+            x: (l.lng - latlng.lng) * METERS_PER_LATITUDE_DEGREE * Math.cos(latlng.lat * Math.PI / 180),
+            y: (l.lat - latlng.lat) * METERS_PER_LATITUDE_DEGREE
+        });
+        let start = toPlane(line[0]);
+        if (line.length === 1) {
+            return Math.sqrt(start.x * start.x + start.y * start.y);
+        }
+        let minimalDistance = Infinity;
+        for (let index = 1; index < line.length; index++) {
+            const end = toPlane(line[index]);
+            minimalDistance = Math.min(minimalDistance, SpatialService.getDistanceFromOriginToSegment(start, end));
+            start = end;
+        }
+        return minimalDistance;
+    }
+
+    public static getBoundsForLatlngs(latlngs: Immutable<LatLngAltTime[]>): Bounds {
+        const northEast = { lat: -Infinity, lng: -Infinity };
+        const southWest = { lat: Infinity, lng: Infinity };
+        for (const latlng of latlngs) {
+            northEast.lat = Math.max(northEast.lat, latlng.lat);
+            northEast.lng = Math.max(northEast.lng, latlng.lng);
+            southWest.lat = Math.min(southWest.lat, latlng.lat);
+            southWest.lng = Math.min(southWest.lng, latlng.lng);
+        }
+        return { northEast, southWest };
+    }
+
+    /**
+     * The distance in meters between a point and the closest place on the bounds' rectangle,
+     * zero when the point is inside them. No point inside the bounds can be closer than that,
+     * which allows skipping whole parts of a route without measuring their points.
+     */
+    public static getDistanceFromPointToBounds(latlng: LatLngAltTime, bounds: Bounds): number {
+        const latitudeDelta = Math.max(bounds.southWest.lat - latlng.lat, latlng.lat - bounds.northEast.lat, 0);
+        const longitudeDelta = Math.max(bounds.southWest.lng - latlng.lng, latlng.lng - bounds.northEast.lng, 0);
+        const y = latitudeDelta * METERS_PER_LATITUDE_DEGREE;
+        const x = longitudeDelta * METERS_PER_LATITUDE_DEGREE * Math.cos(latlng.lat * Math.PI / 180);
+        return Math.sqrt(x * x + y * y);
+    }
+
+    private static getDistanceFromOriginToSegment(start: { x: number; y: number }, end: { x: number; y: number }): number {
+        const deltaX = end.x - start.x;
+        const deltaY = end.y - start.y;
+        const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+        let projectionFactor = lengthSquared === 0 ? 0 : -(start.x * deltaX + start.y * deltaY) / lengthSquared;
+        projectionFactor = Math.max(0, Math.min(1, projectionFactor));
+        const x = start.x + projectionFactor * deltaX;
+        const y = start.y + projectionFactor * deltaY;
+        return Math.sqrt(x * x + y * y);
     }
 
     /**

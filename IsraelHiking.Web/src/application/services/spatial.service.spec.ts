@@ -50,6 +50,21 @@ describe("Spatial service", () => {
         expect(distance).toBeGreaterThan(1);
     });
 
+    it("Should get a zero distance from a lat-lng point inside the bounds", () => {
+        const bounds = SpatialService.getBoundsForLatlngs([{ lat: 0, lng: 0 }, { lat: 1, lng: 1 }]);
+        const distance = SpatialService.getDistanceFromPointToBounds({ lat: 0.5, lng: 0.5 }, bounds);
+        expect(distance).toBe(0);
+    });
+
+    it("Should get a distance from a lat-lng point to the bounds that is not bigger than the distance to their points", () => {
+        const corner = { lat: 1, lng: 1 };
+        const bounds = SpatialService.getBoundsForLatlngs([{ lat: 0, lng: 0 }, corner]);
+        const point = { lat: 1.01, lng: 1.01 };
+        const distance = SpatialService.getDistanceFromPointToBounds(point, bounds);
+        expect(distance).toBeGreaterThan(0);
+        expect(distance).toBeCloseTo(SpatialService.getDistanceInMeters(point, corner), -1);
+    });
+
     it("Should not change a line that is within a tile", () => {
         const lines = [lineString([[0.1, 0.1], [1, 1]])];
         const clippedLines = SpatialService.clipLinesToTileBoundary(lines, { x: 128, y: 127 }, 8);

@@ -483,6 +483,33 @@ describe("Selected Route Service", () => {
         }
     ));
 
+    it("Should not get closet route to GPS when the location is far from the route's bounds", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [
+                {
+                    id: "1",
+                    description: "",
+                    markers: [],
+                    name: "name",
+                    segments: [
+                        {
+                            latlngs: [
+                                { lat: 1, lng: 1, timestamp: new Date().toISOString() },
+                                { lat: 2, lng: 2, timestamp: new Date().toISOString() }
+                            ],
+                            routePoint: { lat: 1, lng: 1 },
+                            routingType: "Hike"
+                        }
+                    ],
+                    state: "ReadOnly"
+                }
+            ]);
+
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 5, lng: 5, timestamp: new Date().toISOString() }, null);
+            expect(closetRoute).toBeNull();
+        }
+    ));
+
     it("Should get closet route to GPS when there are routes when heading is opposite", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [
