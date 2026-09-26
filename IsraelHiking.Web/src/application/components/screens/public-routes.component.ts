@@ -1,8 +1,8 @@
-import { Component, DestroyRef, inject, signal } from "@angular/core";
+import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, ControlComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, ControlComponent } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
@@ -13,8 +13,9 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
+import { skip } from "rxjs";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
-import type { StyleSpecification, Map, MapSourceDataEvent } from "maplibre-gl";
+import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
@@ -35,6 +36,7 @@ import { TranslationService } from "../../services/translation.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
+import { initialState } from "../../reducers/initial-state";
 import { Urls } from "../../urls";
 import type { ApplicationState } from "../../models";
 
@@ -42,7 +44,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
@@ -51,6 +53,23 @@ export class PublicRoutesComponent {
     public readonly mapStyle: StyleSpecification;
     public readonly showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
+    public readonly routesClusterSourceId = "routes-cluster-source";
+    public readonly minZoom = 8;
+
+    /**
+     * How many routes the list shows at most, above which it only says there are too many: every route
+     * is a card of its own with an image and a menu, and a list of thousands of them takes the screen
+     * apart rather than being of any use. The map keeps showing them all, clustered.
+     */
+    private static readonly MAX_ROUTES_IN_LIST = 500;
+
+    /**
+     * Keeps the points this screen never shows out of the reading of the tiles: a tile of a dense area
+     * holds tens of thousands of points and only a fraction of them are routes, and every one that is
+     * read is converted and thrown away on every map movement.
+     */
+    private static readonly ROUTE_CATEGORIES_FILTER: FilterSpecification =
+        ["in", ["get", "poiCategory"], ["literal", ["Hiking", "Bicycle", "4x4"]]];
 
     public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public readonly poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
@@ -72,6 +91,24 @@ export class PublicRoutesComponent {
 
     public readonly resources = inject(ResourcesService);
 
+    /** Whether the map is too far out for the routes tiles, which is why the screen shows nothing */
+    public readonly isZoomedOut = computed(() => this.zoom() < this.minZoom);
+
+    /** Whether there are more routes than the list shows, see {@link MAX_ROUTES_IN_LIST} */
+    public readonly hasTooManyRoutes = computed(() =>
+        this.poiGeoJsonData().features.length > PublicRoutesComponent.MAX_ROUTES_IN_LIST);
+
+    /** Whether any filter is set to something other than what the screen starts with */
+    public readonly isFiltered = computed(() => {
+        const filters = this.filters();
+        const initialFilters = initialState.inMemoryState.publicRoutesFilter;
+        return filters.categories.length !== initialFilters.categories.length ||
+            filters.difficulty.length !== initialFilters.difficulty.length ||
+            filters.lengthRange[0] !== initialFilters.lengthRange[0] ||
+            filters.lengthRange[1] !== initialFilters.lengthRange[1] ||
+            filters.userId != null;
+    });
+
     private readonly mapService = inject(MapService);
     private readonly poiService = inject(PoiService);
     private readonly defaultStyleService = inject(DefaultStyleService);
@@ -81,6 +118,9 @@ export class PublicRoutesComponent {
     private readonly router = inject(Router);
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly translationService = inject(TranslationService);
+
+    private readonly zoom = this.store.selectSignal((s: ApplicationState) => s.locationState.zoom);
+    private readonly filters = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -93,6 +133,10 @@ export class PublicRoutesComponent {
         this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.runFilter();
         });
+        this.store.select((state: ApplicationState) => state.configuration.language)
+            .pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
+                this.runFilter();
+            });
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
         });
@@ -114,7 +158,7 @@ export class PublicRoutesComponent {
 
     public runFilter() {
         if (this.showMap()) {
-            this.routesFromTiles = this.poiService.getPoisFromTiles();
+            this.routesFromTiles = this.poiService.getPoisFromTiles(PublicRoutesComponent.ROUTE_CATEGORIES_FILTER);
         }
         const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
         let features = this.poiService.getPublicRoutes(filters, this.routesFromTiles).features;
@@ -167,6 +211,15 @@ export class PublicRoutesComponent {
 
     public hover(feature: GeoJSON.Feature<GeoJSON.Point>) {
         this.hoverFeature.set(feature);
+    }
+
+    /**
+     * Opens a cluster by moving to the zoom at which it breaks apart, since a filter can leave
+     * hundreds of routes in one place and a list of them all is of no use on the map.
+     */
+    public async zoomToCluster(feature: GeoJSON.Feature<GeoJSON.Point>, source: GeoJSONSourceComponent) {
+        const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id);
+        await this.mapService.flyTo(SpatialService.toLatLng(feature.geometry.coordinates as [number, number]), zoom);
     }
 
     public onSortChange() {

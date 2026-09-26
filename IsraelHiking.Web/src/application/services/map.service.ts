@@ -1,7 +1,7 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
+import type { ErrorEvent, FilterSpecification, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
@@ -197,7 +197,13 @@ export class MapService {
         return this.currentMap.project(latlng);
     }
 
-    public getFeaturesFromTiles(): GeoJSONFeature[] {
+    /**
+     * The points the map currently draws from the tiles.
+     * @param filter limits the features to those that match it, which is done by the map itself and is
+     * far cheaper than reading every point of the tile only to throw most of them away - a tile of a
+     * dense area holds tens of thousands of points of which a caller usually wants a fraction.
+     */
+    public getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
         if (this.currentMap == null) {
             // Map is not ready yet
             return [];
@@ -205,7 +211,10 @@ export class MapService {
         if (!this.currentMap.getLayer(this.resourcesService.globalPointsExternalLayer)) {
             return [];
         }
-        return this.currentMap.queryRenderedFeatures({ layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer] });
+        return this.currentMap.queryRenderedFeatures({
+            layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer],
+            filter
+        });
     }
 
     public isMoving(): boolean {

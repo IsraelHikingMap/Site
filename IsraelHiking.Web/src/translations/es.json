@@ -231,7 +231,8 @@
     "No description available in your language": "No hay descripción disponible en tu idioma",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "No se encontró ninguna aplicación de correo electrónico en este dispositivo. Instala o configura una aplicación de correo electrónico e inténtalo de nuevo, o envíanos un correo electrónico a support@mapeak.com describiendo el problema",
     "No Entry": "Sin entrada",
-    "No routes found, zoom in the map or change the filters...": "No se encontraron rutas, acerca el mapa o cambia los filtros...",
+    "No routes found in this area...": "No se encontraron rutas en esta zona...",
+    "No routes found, change the filters...": "No se encontraron rutas, cambia los filtros...",
     "No saved routes were found...": "No se encontraron rutas guardadas...",
     "No traces yet - uploading some to OSM helps improve the map for everyone.": "Aún no tienes trazas. Subir algunas a OSM ayuda a mejorar el mapa para todos.",
     "No unmapped routes! :-)": "¡No hay rutas sin mapear! 😊",
@@ -366,6 +367,7 @@
     "Title": "Título",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "Para evitar errores de descarga, por favor no cambies de aplicación ni bloquees la pantalla hasta que la descarga haya terminado",
     "Toilets": "Aseos",
+    "Too many routes found, zoom in the map or change the filters...": "Se encontraron demasiadas rutas, acerca el mapa o cambia los filtros...",
     "Traces are only saved locally. You can change that in the settings screen.": "Las trazas solo se guardan localmente. Puedes cambiarlo en la pantalla de configuración.",
     "Tracks and Paths": "Caminos y senderos",
     "Translated by LTEngine, click to view original text": "Traducido por LTEngine, toca para ver el texto original",
@@ -427,5 +429,6 @@
     "Yes": "Sí",
     "You have more than 10 routes which can cause performance issues.": "Tienes más de 10 rutas, lo que puede causar problemas de rendimiento.",
     "Zoom In": "Acercar",
+    "Zoom in the map to see routes...": "Acerca el mapa para ver rutas...",
     "Zoom Out": "Alejar"
 }

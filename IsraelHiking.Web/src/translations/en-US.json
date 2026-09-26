@@ -231,7 +231,8 @@
     "No description available in your language": "No description available in your language",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "No e-mail app was found on this device. Please install or set up an e-mail app and try again, or send us an e-mail to support@mapeak.com describing the issue",
     "No Entry": "No Entry",
-    "No routes found, zoom in the map or change the filters...": "No routes found, zoom in the map or change the filters...",
+    "No routes found in this area...": "No routes found in this area...",
+    "No routes found, change the filters...": "No routes found, change the filters...",
     "No saved routes were found...": "No saved routes were found...",
     "No traces yet - uploading some to OSM helps improve the map for everyone.": "No traces yet - uploading some to OSM helps improve the map for everyone.",
     "No unmapped routes! :-)": "No unmapped routes! 😊",
@@ -366,6 +367,7 @@
     "Title": "Title",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "To prevent download errors, please don't switch apps or lock your screen until the download is finished",
     "Toilets": "Toilets",
+    "Too many routes found, zoom in the map or change the filters...": "Too many routes found, zoom in the map or change the filters...",
     "Traces are only saved locally. You can change that in the settings screen.": "Traces are only saved locally. You can change that in the settings screen.",
     "Tracks and Paths": "Tracks and Paths",
     "Translated by LTEngine, click to view original text": "Translated by LTEngine, click to view original text",
@@ -427,5 +429,6 @@
     "Yes": "Yes",
     "You have more than 10 routes which can cause performance issues.": "You have more than 10 routes which can cause performance issues.",
     "Zoom In": "Zoom In",
+    "Zoom in the map to see routes...": "Zoom in the map to see routes...",
     "Zoom Out": "Zoom Out"
 }

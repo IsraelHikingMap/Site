@@ -288,7 +288,10 @@ export class ResourcesService {
     public list: string;
     public searchSavedRoutesPlaceHolder: string;
     public searchTracesPlaceHolder: string;
-    public noRoutesFoundZoomInOrChangeTheFilters: string;
+    public zoomInToSeeRoutes: string;
+    public noRoutesFoundChangeTheFilters: string;
+    public noRoutesFoundInThisArea: string;
+    public tooManyRoutesFoundZoomInOrChangeTheFilters: string;
     public copyToClipboard: string;
     public findRoutes: string;
     public units: string;
@@ -503,7 +506,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1790153582505");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1790435600298");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -744,7 +747,10 @@ export class ResourcesService {
         this.list = this.gettextCatalog.getString("List");
         this.searchSavedRoutesPlaceHolder = this.gettextCatalog.getString("Search saved routes...");
         this.searchTracesPlaceHolder = this.gettextCatalog.getString("Search traces...");
-        this.noRoutesFoundZoomInOrChangeTheFilters = this.gettextCatalog.getString("No routes found, zoom in the map or change the filters...");
+        this.zoomInToSeeRoutes = this.gettextCatalog.getString("Zoom in the map to see routes...");
+        this.noRoutesFoundChangeTheFilters = this.gettextCatalog.getString("No routes found, change the filters...");
+        this.noRoutesFoundInThisArea = this.gettextCatalog.getString("No routes found in this area...");
+        this.tooManyRoutesFoundZoomInOrChangeTheFilters = this.gettextCatalog.getString("Too many routes found, zoom in the map or change the filters...");
         this.copyToClipboard = this.gettextCatalog.getString("Copy to clipboard");
         this.findRoutes = this.gettextCatalog.getString("Find Routes");
         this.units = this.gettextCatalog.getString("Units");

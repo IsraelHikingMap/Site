@@ -231,7 +231,8 @@
     "No description available in your language": "Описание на вашем языке отсутствует",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "На этом устройстве не найдено приложение электронной почты. Установите или настройте почтовое приложение и повторите попытку, либо отправьте нам письмо на support@mapeak.com с описанием проблемы",
     "No Entry": "Нет проезда",
-    "No routes found, zoom in the map or change the filters...": "Не найдены маршруты, увеличьте масштаб карты или измените фильтры...",
+    "No routes found in this area...": "В этой области маршруты не найдены...",
+    "No routes found, change the filters...": "Не найдены маршруты, измените фильтры...",
     "No saved routes were found...": "Сохранённые маршруты не найдены...",
     "No traces yet - uploading some to OSM helps improve the map for everyone.": "Пока нет записей - загрузка в OSM помогает улучшить карту для всех.",
     "No unmapped routes! :-)": "Нет незакартированных маршрутов! 😊",
@@ -366,6 +367,7 @@
     "Title": "Заголовок",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "Чтобы предотвратить ошибки загрузки, пожалуйста, не переключайте приложения и не блокируйте экран до завершения загрузки",
     "Toilets": "Туалеты",
+    "Too many routes found, zoom in the map or change the filters...": "Найдено слишком много маршрутов, увеличьте масштаб карты или измените фильтры...",
     "Traces are only saved locally. You can change that in the settings screen.": "Следы сохраняются только локально. Вы можете изменить это на экране настроек.",
     "Tracks and Paths": "Дороги и тропы",
     "Translated by LTEngine, click to view original text": "Переведено с помощью LTEngine, нажмите, чтобы просмотреть оригинальный текст",
@@ -427,5 +429,6 @@
     "Yes": "Да",
     "You have more than 10 routes which can cause performance issues.": "У вас есть более 10 маршрутов, что может вызвать проблемы с производительностью.",
     "Zoom In": "Увеличить",
+    "Zoom in the map to see routes...": "Увеличьте масштаб карты, чтобы увидеть маршруты...",
     "Zoom Out": "Уменьшить"
 }

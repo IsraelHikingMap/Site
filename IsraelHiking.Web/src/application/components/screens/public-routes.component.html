@@ -28,26 +28,34 @@
                 </div>
             </mgl-control>
             <mgl-vector-source [id]="routesSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
-                [minzoom]="9"></mgl-vector-source>
+                [minzoom]="minZoom"></mgl-vector-source>
             <mgl-layer [id]="resources.globalPointsLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="global_points" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
             <mgl-layer [id]="resources.globalPointsExternalLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
-            @for (feature of poiGeoJsonData().features; track feature.properties.poiId) {
-            <mgl-marker [lngLat]="feature.geometry.coordinates">
-                <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
-                    (mouseenter)="hover(feature)" (mouseleave)="hover(null)" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Select route on map">
-                    <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
-                    <i class="fa icon-map-marker-rect fa-stack-2x"
-                        style="color: white; text-shadow: 3px 3px 3px #000;"></i>
-                    <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
-                        [style.color]="feature.properties.poiIconColor"></i>
-                </span>
-            </mgl-marker>
-            }
+            <mgl-geojson-source #routesClusterSource [id]="routesClusterSourceId" [data]="poiGeoJsonData()"
+                [cluster]="true" [clusterMaxZoom]="13" [clusterRadius]="100"></mgl-geojson-source>
+            <mgl-markers-for-clusters [source]="routesClusterSourceId">
+                <ng-template mglPoint let-feature>
+                    <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
+                        (mouseenter)="hover(feature)" (mouseleave)="hover(null)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Select route on map">
+                        <span class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
+                        <i class="fa icon-map-marker-rect fa-stack-2x"
+                            style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                        <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+                            [style.color]="feature.properties.poiIconColor"></i>
+                    </span>
+                </ng-template>
+                <ng-template mglClusterPoint let-feature>
+                    <div class="marker-cluster" (click)="zoomToCluster(feature, routesClusterSource)" analyticsOn="click"
+                        analyticsCategory="Public routes" analyticsLabel="Zoom into routes cluster">
+                        {{ feature.properties?.point_count }}
+                    </div>
+                </ng-template>
+            </mgl-markers-for-clusters>
             <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson()"></mgl-geojson-source>
             <mgl-layer id="selected-route-left" type="line" source="selected-route" [paint]="{
                 'line-color': 'magenta',
@@ -211,6 +219,11 @@
         <div class="sticky top-0 z-10">
             <public-routes-filter></public-routes-filter>
         </div>
+        @if (hasTooManyRoutes()) {
+        <div class="flex flex-row m-10">
+            {{resources.tooManyRoutesFoundZoomInOrChangeTheFilters}} ({{poiGeoJsonData().features.length}})
+        </div>
+        } @else {
         @for (route of poiGeoJsonData().features; track route.properties.poiId) {
         <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
             <div class="flex flex-row mx-10 max-md:mx-2">
@@ -293,10 +306,14 @@
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2">
                 <div class="relative w-full h-[200px] overflow-hidden">
+                    @defer (on viewport) {
                     @if (route.properties.image) {
-                    <img class="w-full object-contain img-center" [src]="route.properties.image" alt="">
+                    <img class="w-full object-contain img-center" [src]="route.properties.image" alt="" loading="lazy">
                     } @else {
                     <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
+                    }
+                    } @placeholder {
+                    <div class="h-full"></div>
                     }
                 </div>
             </div>
@@ -314,8 +331,15 @@
         }
         @empty {
         <div class="flex flex-row m-10">
-            {{resources.noRoutesFoundZoomInOrChangeTheFilters}}
+            @if (isZoomedOut()) {
+            {{resources.zoomInToSeeRoutes}}
+            } @else if (isFiltered()) {
+            {{resources.noRoutesFoundChangeTheFilters}}
+            } @else {
+            {{resources.noRoutesFoundInThisArea}}
+            }
         </div>
+        }
         }
     </div>
 </div>
