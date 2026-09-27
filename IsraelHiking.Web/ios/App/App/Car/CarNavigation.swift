@@ -76,7 +76,7 @@ final class CarNavigation: CapacitorStore.Listener {
             onManeuversChanged?()
             return
         }
-        maneuvers = loadCachedManeuvers() ?? CarManeuverGenerator.generate(route.coordinates)
+        maneuvers = alignedToRoute(loadCachedManeuvers() ?? CarManeuverGenerator.generate(route.coordinates))
         onLocationChanged()
         fetchInstructions(route.coordinates, epoch: routeEpoch)
     }
@@ -88,10 +88,29 @@ final class CarNavigation: CapacitorStore.Listener {
     private func fetchInstructions(_ points: [CLLocationCoordinate2D], epoch: Int) {
         backend.mapMatch(points: points, routingType: Self.defaultRoutingType, language: language()) { [weak self] fetched in
             guard let self = self, epoch == self.routeEpoch, !fetched.isEmpty else { return }
-            self.maneuvers = fetched
+            self.maneuvers = self.alignedToRoute(fetched)
             self.cacheManeuvers(fetched)
             self.currentManeuverIndex = nil
             self.onLocationChanged()
+        }
+    }
+
+    /// Puts the turns on the route's own scale. The backend measures them along the path it matched
+    /// to the road network, which can run a hundred meters shorter than the route's polyline, so
+    /// unscaled they all arrive early - the arrival most visibly of all.
+    private func alignedToRoute(_ maneuvers: [CarManeuver]) -> [CarManeuver] {
+        guard let route = route, let last = maneuvers.last, last.distanceAlongRouteM > 0 else {
+            return maneuvers
+        }
+        let factor = route.lengthMeters / last.distanceAlongRouteM
+        guard factor.isFinite, factor > 0 else {
+            return maneuvers
+        }
+        return maneuvers.map {
+            CarManeuver(type: $0.type,
+                        cue: $0.cue,
+                        distanceAlongRouteM: $0.distanceAlongRouteM * factor,
+                        roundaboutExitNumber: $0.roundaboutExitNumber)
         }
     }
 

@@ -125,7 +125,7 @@ class CarNavigation(
         destinationName = route?.name
         val lngLats = route?.lngLats ?: emptyList()
         routeEpoch++
-        maneuvers = loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats)
+        maneuvers = alignedToRoute(loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats))
         // Measured once by the route itself, the location updates below only read it
         totalLengthM = route?.lengthMeters ?: 0.0
 
@@ -150,10 +150,28 @@ class CarNavigation(
     private fun fetchInstructions(lngLats: List<LatLng>, epoch: Int) {
         backend.mapMatch(lngLats, DEFAULT_ROUTING_TYPE, language()) { fetched ->
             if (epoch != routeEpoch || fetched.isEmpty()) return@mapMatch
-            maneuvers = fetched
+            maneuvers = alignedToRoute(fetched)
             cacheManeuvers(fetched)
             onLocationChanged()
         }
+    }
+
+    /**
+     * Puts the turns on the route's own scale. The backend measures them along the path it matched to
+     * the road network, which can run a hundred meters shorter than the route's polyline, so unscaled
+     * they all arrive early - the arrival most visibly of all.
+     */
+    private fun alignedToRoute(maneuvers: List<CarManeuver>): List<CarManeuver> {
+        val route = this.route ?: return maneuvers
+        val last = maneuvers.lastOrNull() ?: return maneuvers
+        if (last.distanceAlongRouteM <= 0.0) {
+            return maneuvers
+        }
+        val factor = route.lengthMeters / last.distanceAlongRouteM
+        if (!factor.isFinite() || factor <= 0.0) {
+            return maneuvers
+        }
+        return maneuvers.map { it.copy(distanceAlongRouteM = it.distanceAlongRouteM * factor) }
     }
 
     private fun cacheManeuvers(maneuvers: List<CarManeuver>) {
