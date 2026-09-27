@@ -13,12 +13,12 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
 
 const sliceKeyOf = (lat: number, lng: number) => {
-    const tile = SpatialService.toTile({ lat, lng }, 7);
+    const tile = SpatialHelper.toTile({ lat, lng }, 7);
     return `${Math.floor(tile.x)}-${Math.floor(tile.y)}`;
 };
 

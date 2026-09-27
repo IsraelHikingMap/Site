@@ -1,2 +1,3 @@
 - Improve translations
+- Add turn-by-turn instructions to car-play
 - Various bug fixes and performance improvements

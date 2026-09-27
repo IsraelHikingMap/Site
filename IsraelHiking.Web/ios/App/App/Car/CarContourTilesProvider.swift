@@ -1,14 +1,12 @@
 import Foundation
 import MaplibreContour
 
-/**
- * Generates vector contour tiles on the fly from a terrain (DEM) source. The native
- * maplibre-contour-rs library does the heavy lifting: we hand it a `DemTileFetcher` that downloads a
- * DEM tile and it returns a ready-to-render MVT for any z/x/y.
- *
- * Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached per
- * units string; the managers are thread-safe and shared across requests.
- */
+/// Generates vector contour tiles on the fly from a terrain (DEM) source. The native
+/// maplibre-contour-rs library does the heavy lifting: we hand it a `DemTileFetcher` that downloads a
+/// DEM tile and it returns a ready-to-render MVT for any z/x/y.
+///
+/// Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached per
+/// units string; the managers are thread-safe and shared across requests.
 final class CarContourTilesProvider {
 
     private let baseConfig: ContourConfig
@@ -56,12 +54,10 @@ final class CarContourTilesProvider {
     private static let imperialMultiplier: Float = 3.28084
 }
 
-/**
- * Downloads the raw DEM tile bytes for a fully-resolved URL. The `use=slice` marker in the DEM URL
- * pattern routes the request through `SliceURLProtocol`, giving DEM fetches the same offline
- * (PMTiles) fallback the rest of the map enjoys. Returns nil when there is no data, which the library
- * renders as an empty contour tile.
- */
+/// Downloads the raw DEM tile bytes for a fully-resolved URL. The `use=slice` marker in the DEM URL
+/// pattern routes the request through `SliceURLProtocol`, giving DEM fetches the same offline
+/// (PMTiles) fallback the rest of the map enjoys. Returns nil when there is no data, which the library
+/// renders as an empty contour tile.
 private final class ContourDemTileFetcher: DemTileFetcher, @unchecked Sendable {
 
     private let session: URLSession

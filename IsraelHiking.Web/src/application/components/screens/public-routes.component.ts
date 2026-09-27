@@ -28,7 +28,7 @@ import { LayersComponent } from "../map/layers.component";
 import { MapService } from "../../services/map.service";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService } from "../../services/poi.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { TranslationService } from "../../services/translation.service";
@@ -157,7 +157,7 @@ export class PublicRoutesComponent {
                 features: [fullFeature]
             });
         }
-        const bounds = SpatialService.getBoundsForFeature(fullFeature);
+        const bounds = SpatialHelper.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
@@ -197,7 +197,7 @@ export class PublicRoutesComponent {
         this.router.navigate([RouteStrings.MAP]);
         // This is to let the route change to the map so that the relevant map will be used for fit bounds.
         await new Promise((resolve) => setTimeout(resolve, 100));
-        const bounds = SpatialService.getBoundsForFeature(fullFeature);
+        const bounds = SpatialHelper.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds);
     }
 
