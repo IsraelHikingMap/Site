@@ -101,6 +101,8 @@ export class MapService {
         this.currentMap.setMissingStyleImageResolver(this.resolveMissingStyleImage);
         this.currentMap.on("error", this.onError);
         this.currentMap.on("moveend", this.onMoveEnd);
+        this.currentMap.on("webglcontextlost", this.onContextLost);
+        this.currentMap.on("webglcontextrestored", this.onContextRestored);
     }
 
     public unsetMap() {
@@ -112,6 +114,8 @@ export class MapService {
         this.currentMap.setMissingStyleImageResolver(null);
         this.currentMap.off("error", this.onError);
         this.currentMap.off("moveend", this.onMoveEnd);
+        this.currentMap.off("webglcontextlost", this.onContextLost);
+        this.currentMap.off("webglcontextrestored", this.onContextRestored);
         this.initializationPromise = new Promise<void>((resolve) => {
             this.resolve = resolve;
         });
@@ -162,6 +166,19 @@ export class MapService {
         this.missingImagesArray.push(id);
         const image = await this.currentMap.loadImage(id);
         this.currentMap.addImage(id, image.data);
+    }
+
+    /**
+     * Losing the webgl context leaves the map blank, and maplibre only redraws it if the browser
+     * follows with a restore event, which does not always happen on mobile. These two lines tell
+     * a blank map caused by the context from a blank map caused by anything else.
+     */
+    private readonly onContextLost = () => {
+        this.loggingService.warning("[Map] Lost the webgl context");
+    }
+
+    private readonly onContextRestored = () => {
+        this.loggingService.info("[Map] The webgl context was restored");
     }
 
     private readonly onError = (e: ErrorEvent) => {
