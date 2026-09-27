@@ -124,5 +124,6 @@ public static class OsmApiClientExtensions
                 await Task.Delay(200);
             }
         }
+        logger.LogError($"Giving up on uploading data to OSM, changeset: {changeSetId}, message: {message}");
     }
 }

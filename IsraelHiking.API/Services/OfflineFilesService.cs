@@ -271,7 +271,6 @@ public class OfflineFilesService : IOfflineFilesService
             names.Add(name);
         }
         names.Add(GLOBAL_POINTS);
-        _logger.LogInformation("The offline files sources are: " + string.Join(", ", names));
         return names;
     }
 
