@@ -219,7 +219,7 @@ export class PublicRoutesComponent {
      */
     public async zoomToCluster(feature: GeoJSON.Feature<GeoJSON.Point>, source: GeoJSONSourceComponent) {
         const zoom = await source.getClusterExpansionZoom(feature.properties.cluster_id);
-        await this.mapService.flyTo(SpatialService.toLatLng(feature.geometry.coordinates as [number, number]), zoom);
+        await this.mapService.flyTo(SpatialHelper.toLatLng(feature.geometry.coordinates as [number, number]), zoom);
     }
 
     public onSortChange() {
