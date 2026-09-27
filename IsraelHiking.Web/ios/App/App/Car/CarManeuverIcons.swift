@@ -6,7 +6,12 @@ import UIKit
 /// hollow middle the way `CarNavigation.roundaboutIcon` puts it there on Android.
 enum CarManeuverIcons {
 
-    private static let sidePixels = 96.0
+    /// The side of the drawn icon, taken from the height of the SF Symbols the other maneuvers use:
+    /// CarPlay draws a symbol image at its own size, so anything else stands out and lands off place.
+    private static var sidePoints: Double {
+        Double(UIImage(systemName: "arrow.up")?.size.height ?? 20)
+    }
+
     private static let viewportPoints = 24.0
     private static let strokeWidth = 2.0
     private static let exitTextRatio = 0.40
@@ -15,8 +20,9 @@ enum CarManeuverIcons {
     /// to the left, top and right, carrying `exitNumber` in the middle when there is one to show.
     /// Comes back already white, so the dark guidance card must not tint it again.
     static func roundabout(exitNumber: Int?) -> UIImage? {
-        let scale = sidePixels / viewportPoints
-        let size = CGSize(width: sidePixels, height: sidePixels)
+        let side = sidePoints
+        let scale = side / viewportPoints
+        let size = CGSize(width: side, height: side)
         let image = UIGraphicsImageRenderer(size: size).image { context in
             let canvas = context.cgContext
             canvas.scaleBy(x: scale, y: scale)
