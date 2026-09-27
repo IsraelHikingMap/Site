@@ -18,6 +18,9 @@ import { ElevationProvider } from "./elevation.provider";
 import { Urls } from "../urls";
 import type { DataContainer } from "../models";
 
+/** What a style that can not be found anywhere is replaced with - an empty map. */
+const EMPTY_STYLE = JSON.stringify({ version: 8, layers: [], sources: {} });
+
 /**
  * Downloads a blob under the given file name using the anchor "download" attribute,
  * which is supported by every browser this app targets.
@@ -82,6 +85,9 @@ export class FileService {
      * cleared without touching anything else that is cached.
      */
     private static readonly OFFLINE_CACHE_DIRECTORY = "offline-files";
+
+    /** The extension of the offline map files an offline download leaves in the data directory. */
+    private static readonly OFFLINE_FILE_EXTENSION = ".pmtiles";
 
     /**
      * Tells the file a download is writing apart from the one another download of the same file writes,
@@ -165,33 +171,87 @@ export class FileService {
         return filesToReturn;
     }
 
-    public async getStyleJsonContent(url: string, tryLocalStyle: boolean): Promise<string> {
+    /**
+     * Gets a style from the network, so that a style that changed online is never missed.
+     * What is on the device - the built in base style an offline download wrote, the kept copy of every
+     * other style - is what is drawn when the network can not be reached.
+     */
+    public async getStyleJsonContent(url: string, isBuiltInBaseLayer: boolean): Promise<string> {
+        if (this.runningContextService.isCapacitor && url.startsWith(".")) {
+            const styleOnDevice = await this.readStyleFile(last(url.split("/")), Directory.Data);
+            if (styleOnDevice == null) {
+                this.loggingService.error(`[Files] Missing local style file: ${url}`);
+                return EMPTY_STYLE;
+            }
+            return styleOnDevice;
+        }
+        const startTime = performance.now();
         try {
-            if (this.runningContextService.isCapacitor && url.startsWith(".")) {
-                return await this.getLocalStyleJson(url);
+            const styleText = await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
+            if (!isBuiltInBaseLayer) {
+                await this.keepStyleInCache(url, styleText);
             }
-            if (tryLocalStyle) {
-                return await this.getLocalStyleJson(url);
-            }
-            return await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
+            return styleText;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unable to get style file, tryLocalStyle: ${tryLocalStyle}, ${url}, ${(ex as Error).message}`);
-            return JSON.stringify({
-                version: 8,
-                layers: [],
-                sources: {}
-            });
+            const failure = `after ${Math.round(performance.now() - startTime)} ms: ${(ex as Error).message}`;
+            const styleOnDevice = isBuiltInBaseLayer
+                ? await this.readStyleFile(last(url.split("/")), Directory.Data)
+                : await this.readStyleFile(FileService.getStyleCacheFileName(url), Directory.Cache);
+            if (styleOnDevice != null) {
+                this.loggingService.info(`[Files] Drawing ${url} with the style on the device, it could not be fetched ${failure}`);
+                return styleOnDevice;
+            }
+            this.loggingService.error(`[Files] There is no style to draw ${url} with, it could not be fetched ${failure}`);
+            return EMPTY_STYLE;
         }
     }
 
-    private async getLocalStyleJson(url: string): Promise<string> {
-        const styleFileName = last(url.split("/"));
-        const file = await Filesystem.readFile({
-            path: styleFileName,
-            directory: Directory.Data,
-            encoding: Encoding.UTF8
-        });
-        return file.data as string;
+    /** The style of a base layer as it is on the device, an empty style when it is not there. */
+    public async getStyleJsonContentFromDevice(url: string): Promise<string> {
+        return await this.readStyleFile(last(url.split("/")), Directory.Data) ?? EMPTY_STYLE;
+    }
+
+    /**
+     * The name a fetched style is kept under, at the cache root, where the offline files download never looks.
+     * It is the escaped url since two styles of different repositories are both called "style.json".
+     */
+    private static getStyleCacheFileName(url: string): string {
+        return `style-cache-${encodeURIComponent(url)}`;
+    }
+
+    private async keepStyleInCache(url: string, styleText: string): Promise<void> {
+        if (!this.runningContextService.isCapacitor) {
+            return;
+        }
+        try {
+            await Filesystem.writeFile({
+                path: FileService.getStyleCacheFileName(url),
+                data: styleText,
+                directory: Directory.Cache,
+                encoding: Encoding.UTF8
+            });
+        } catch (ex) {
+            this.loggingService.warning(`[Files] Unable to keep a copy of the style ${url}: ${(ex as Error).message}`);
+        }
+    }
+
+    /**
+     * Reads a style that is on the device, null when there is none under that name.
+     */
+    private async readStyleFile(styleFileName: string, directory: Directory): Promise<string | null> {
+        if (!this.runningContextService.isCapacitor) {
+            return null;
+        }
+        try {
+            const file = await Filesystem.readFile({
+                path: styleFileName,
+                directory,
+                encoding: Encoding.UTF8
+            });
+            return file.data as string;
+        } catch {
+            return null;
+        }
     }
 
     private async base64StringToBlob(base64: string, type = "application/octet-stream"): Promise<Blob> {
@@ -594,16 +654,17 @@ export class FileService {
         return `${FileService.OFFLINE_CACHE_DIRECTORY}/${fileName}`;
     }
 
-    /**
-     * The files that are currently stored in the data directory, which is where the offline files are
-     * kept, with the time each of them was last written to. Directories are not returned, only files.
+    /** 
+     * The offline map files an offline download left in the data directory, the only files there anyone asks about.
      */
-    public async listFilesInDataDirectory(): Promise<DataDirectoryFile[]> {
+    public async listOfflineFilesInDataDirectory(): Promise<DataDirectoryFile[]> {
         const results = await Filesystem.readdir({
             path: "",
             directory: Directory.Data
         });
-        return results.files.filter(f => f.type === "file").map(f => ({ fileName: f.name, modifiedDate: new Date(f.mtime), size: f.size }));
+        return results.files
+            .filter(f => f.type === "file" && f.name.endsWith(FileService.OFFLINE_FILE_EXTENSION))
+            .map(f => ({ fileName: f.name, modifiedDate: new Date(f.mtime), size: f.size }));
     }
 
     public async deleteFileInDataDirectory(fileName: string): Promise<void> {
