@@ -4,6 +4,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -33,6 +34,7 @@ public class OsmController : ControllerBase
     private readonly GeometryFactory _geometryFactory;
     private readonly MathTransform _itmWgs84MathTransform;
     private readonly MathTransform _wgs84ItmMathTransform;
+    private readonly ILogger _logger;
 
     /// <summary>
     /// Controller's constructor
@@ -43,12 +45,14 @@ public class OsmController : ControllerBase
     /// <param name="addibleGpxLinesFinderService"></param>
     /// <param name="osmLineAdderService"></param>
     /// <param name="geometryFactory"></param>
+    /// <param name="logger"></param>
     public OsmController(IClientsFactory clientsFactory,
         IDataContainerConverterService dataContainerConverterService,
         IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
         IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
         IOsmLineAdderService osmLineAdderService,
-        GeometryFactory geometryFactory)
+        GeometryFactory geometryFactory,
+        ILogger logger)
     {
         _clientsFactory = clientsFactory;
         _dataContainerConverterService = dataContainerConverterService;
@@ -57,6 +61,7 @@ public class OsmController : ControllerBase
         _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
         _osmLineAdderService = osmLineAdderService;
         _geometryFactory = geometryFactory;
+        _logger = logger;
     }
 
     /// <summary>
@@ -66,9 +71,10 @@ public class OsmController : ControllerBase
     /// <param name="feature"></param>
     /// <returns></returns>
     [HttpPut]
-    public async Task PutAddUnmappedPartIntoOsm([FromBody]IFeature feature)
+    public async Task PutAddUnmappedPartIntoOsm([FromBody] IFeature feature)
     {
         var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
+        _logger.LogInformation($"Processing add unmapped part into OSM request, tags: {string.Join(", ", tags.Select(t => t.Key + "=" + t.Value))}");
         var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
         await _osmLineAdderService.Add(feature.Geometry as LineString, tags, gateway, HttpContext?.Request.GetClientDetails());
     }
@@ -81,7 +87,7 @@ public class OsmController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [ProducesResponseType(typeof(FeatureCollection), 200)]
-    public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery]long traceId)
+    public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery] long traceId)
     {
         TypedStream file = null;
         try

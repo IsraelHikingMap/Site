@@ -9,7 +9,7 @@ import { ToastService } from "./toast.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction, AddPendingProcessingRoutePointAction, ClearPendingProcessingRoutePointsAction } from "../reducers/recorded-route.reducer";
@@ -209,7 +209,7 @@ export class RecordedRouteService {
 
     private isValid(test: LatLngAltTime, position: Immutable<GeolocationPosition>): string {
         const positionLatLng = GeoLocationService.positionToLatLngTime(position);
-        const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
+        const distance = SpatialHelper.getDistanceInMeters(test, positionLatLng);
         const timeDifference = (position.timestamp - new Date(test.timestamp).getTime()) / 1000;
         if (timeDifference <= 0) {
             return `Time difference below or zero: ${timeDifference}`;

@@ -4,7 +4,7 @@ import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
 import { LoggingService } from "./logging.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { PmTilesService } from "./pmtiles.service";
 import type { LatLngAltTime } from "../models";
 
@@ -50,7 +50,7 @@ export class ElevationProvider {
     }
 
     private async populateElevationCache(latlngs: LatLngAltTime[]) {
-        const tiles = latlngs.map(latlng => SpatialService.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM));
+        const tiles = latlngs.map(latlng => SpatialHelper.toTile(latlng, ElevationProvider.MAX_ELEVATION_ZOOM));
         const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
         const tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
@@ -74,11 +74,11 @@ export class ElevationProvider {
     private getElevationForLatlng(latlng: LatLngAltTime): number {
         const tileSize = 512;
         const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
-        const tile = SpatialService.toTile(latlng, zoom);
+        const tile = SpatialHelper.toTile(latlng, zoom);
         const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
         const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
 
-        const relative = SpatialService.toRelativePixelCenter(latlng, zoom, tileSize);
+        const relative = SpatialHelper.toRelativePixelCenter(latlng, zoom, tileSize);
         // Get the coordinates of the center of the top-left pixel
         const pixelX1 = Math.floor(relative.pixelX);
         const pixelY1 = Math.floor(relative.pixelY);

@@ -1,7 +1,7 @@
 import { Service } from "@angular/core";
 import type { Immutable } from "immer";
 
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import type { LatLngAltTime, RouteDataWithoutState, RouteSegmentData } from "../models";
 
 export const MINIMAL_DISTANCE = 50;
@@ -88,7 +88,7 @@ export class RouteStatisticsService {
         let previousLatlng = latlngs[0];
         routeStatistics.points.push(start || { coordinate: [0, previousLatlng.alt], latlng: previousLatlng, slope: 0 });
         for (const latlng of latlngs) {
-            const distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
+            const distance = SpatialHelper.getDistanceInMeters(previousLatlng, latlng);
             routeStatistics.length += distance;
             const point = {
                 coordinate: [(routeStatistics.length / 1000), latlng.alt],
@@ -262,11 +262,11 @@ export class RouteStatisticsService {
                 continue;
             }
             const ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
-            const alt = SpatialService.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
+            const alt = SpatialHelper.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
             const point: RouteStatisticsPoint = {
                 coordinate: [x, alt],
-                slope: SpatialService.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
-                latlng: SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
+                slope: SpatialHelper.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
+                latlng: SpatialHelper.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
             };
             point.latlng.alt = alt;
             return point;
@@ -283,7 +283,7 @@ export class RouteStatisticsService {
             bestPoint = this.findDistanceForLatLngInKMInternal(statistics, latLng, null);
         }
         return bestPoint
-            ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
+            ? bestPoint.coordinate[0] + SpatialHelper.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
             : 0;
     }
 
@@ -298,9 +298,9 @@ export class RouteStatisticsService {
             if (point === statistics.points[0]) {
                 continue;
             }
-            let currentWeight = SpatialService.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
+            let currentWeight = SpatialHelper.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
             if (heading != null) {
-                currentWeight += this.angleDifference(heading, SpatialService.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
+                currentWeight += this.angleDifference(heading, SpatialHelper.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
             }
             if (currentWeight < minimalWeight) {
                 minimalWeight = currentWeight;

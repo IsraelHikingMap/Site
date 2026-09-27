@@ -1,7 +1,7 @@
 import { inject, Service } from "@angular/core";
 import type { Immutable } from "immer";
 
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { MapService } from "./map.service";
 import type { LatLngAltTime, MarkerData } from "../models";
 
@@ -28,14 +28,14 @@ export class SnappingService {
         const pointOnScreen = this.mapService.project(latlng);
         for (const markerData of points) {
             const markerPointOnScreen = this.mapService.project(markerData.latlng);
-            if (SpatialService.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
+            if (SpatialHelper.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
                 [pointOnScreen.x, pointOnScreen.y]) < SnappingService.SENSITIVITY &&
                 response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             } else if (response.markerData != null
-                && SpatialService.getDistanceInMeters(response.markerData.latlng, latlng) >
-                SpatialService.getDistanceInMeters(markerData.latlng, latlng)) {
+                && SpatialHelper.getDistanceInMeters(response.markerData.latlng, latlng) >
+                SpatialHelper.getDistanceInMeters(markerData.latlng, latlng)) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             }

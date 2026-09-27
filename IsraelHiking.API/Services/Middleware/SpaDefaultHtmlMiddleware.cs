@@ -34,8 +34,20 @@ public class SpaDefaultHtmlMiddleware
             await _next.Invoke(context);
             return;
         }
+        // A request for a file the browser was told to fetch, mainly a script or a style, should
+        // end with a 404 and not with the html file, otherwise the browser fails on the mime type.
+        // This happens when a page that was loaded before a deployment asks for a hashed file name
+        // that no longer exists on the server.
+        var destination = context.Request.Headers["Sec-Fetch-Dest"].ToString();
+        if (destination != string.Empty && destination != "document" && destination != "iframe")
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
         var indexFileInfo = _environment.WebRootFileProvider.GetFileInfo("/index.csr.html");
         context.Response.ContentType = "text/html";
+        // This file points at the hashed file names, so a cached copy of it breaks after a deployment.
+        context.Response.Headers.CacheControl = "no-cache";
         context.Response.ContentLength = indexFileInfo.Length;
         await context.Response.SendFileAsync(indexFileInfo);
     }

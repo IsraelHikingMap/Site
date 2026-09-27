@@ -293,10 +293,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     /// <inheritdoc/>
     public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null)
     {
-        var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
         var location = feature.GetLocation();
-        var idString = feature.GetId();
-        _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
         var imagesList = await UploadImages(feature, language, osmGateway);
         var node = new Node
         {

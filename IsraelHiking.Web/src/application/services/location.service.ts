@@ -6,7 +6,7 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { RouteStrings } from "./hash.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
@@ -230,7 +230,7 @@ export class LocationService {
         }
         const distance = this.pace.lastCountedPosition == null
             ? 0
-            : SpatialService.getDistanceInMeters(this.pace.lastCountedPosition, center);
+            : SpatialHelper.getDistanceInMeters(this.pace.lastCountedPosition, center);
         if (this.pace.lastCountedPosition == null || distance >= MINIMAL_MOVEMENT_IN_METERS) {
             this.pace.distance += distance;
             this.pace.lastCountedPosition = center;

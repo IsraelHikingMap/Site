@@ -2,19 +2,17 @@ import CoreLocation
 import MapLibre
 import UIKit
 
-/**
- * Hosts the MapLibre map shown on the CarPlay screen. Ports `CarMapContainer.kt`: loads the style
- * pushed from JS, renders the planned route (line + directional arrows + start/end points + private
- * route points) and the GPS location (heading arrow + accuracy circle), keeps the dot in the bottom
- * third, auto-recenters after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
- *
- * Layer ordering uses the hidden `car-layering-anchor` layer that `addLayeringAnchor` injects into
- * the style: route layers go below it, location layers above it.
- */
+/// Hosts the MapLibre map shown on the CarPlay screen. Ports `CarMapContainer.kt`: loads the style
+/// pushed from JS, renders the planned route (line + directional arrows + start/end points + private
+/// route points) and the GPS location (heading arrow + accuracy circle), keeps the dot in the bottom
+/// third, auto-recenters after a pan, and exposes pan/zoom/recenter for the CarPlay map buttons.
+///
+/// Layer ordering uses the hidden `car-layering-anchor` layer that `addLayeringAnchor` injects into
+/// the style: route layers go below it, location layers above it.
 final class CarMapViewController: UIViewController, MLNMapViewDelegate, CapacitorStore.Listener {
 
-    // Injected into every style by addLayeringAnchor so that route layers can be added below the
-    // anchor and location layers above it. Mirrors the constants in CarMapContainer.kt.
+    /// Injected into every style by addLayeringAnchor so that route layers can be added below the
+    /// anchor and location layers above it. Mirrors the constants in CarMapContainer.kt.
     static let layeringAnchorId = "car-layering-anchor"
     static let layeringAnchorSourceId = "car-layering-anchor-source"
 
@@ -26,8 +24,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private var lastSavedZoom = Double.nan
     private var didApplyInitialCamera = false
 
-    // Manual camera animation: MapLibre's own animated transitions don't tick on the CarPlay
-    // external display, so we interpolate center + heading frame-by-frame off the CarPlay screen.
+    /// Manual camera animation: MapLibre's own animated transitions don't tick on the CarPlay
+    /// external display, so we interpolate center + heading frame-by-frame off the CarPlay screen.
     private var displayLink: CADisplayLink?
     private var animStart: CFTimeInterval = 0
     private var animFromCenter = CLLocationCoordinate2D()
@@ -36,8 +34,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     private var animToHeading: CLLocationDirection = 0
     private var animFromZoom: Double = 0
     private var animToZoom: Double = 0
-
-    // MARK: lifecycle
 
     override func loadView() {
         CarMapViewController.configureTileLoading()
@@ -74,8 +70,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         store.removeListener(self)
     }
 
-    // MARK: tile loading
-
     private static var tileLoadingConfigured = false
     static func configureTileLoading() {
         if tileLoadingConfigured { return }
@@ -86,8 +80,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         config.protocolClasses = protocols
         MLNNetworkConfiguration.sharedManager.sessionConfiguration = config
     }
-
-    // MARK: CapacitorStore.Listener
 
     func onCarStoreUpdated(_ key: String) {
         switch key {
@@ -104,8 +96,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
     }
 
     private func currentLocation() -> CLLocation? { store.getTransient(CarStoreKeys.location) }
-
-    // MARK: MLNMapViewDelegate
 
     func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
 
@@ -125,8 +115,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         if zoom < 4 { zoom = 14 }
         mapView.setCenter(coordinate, zoomLevel: zoom, direction: 0, animated: false)
     }
-
-    // MARK: location
 
     private func handleLocationUpdate() {
         if let style = mapView.style { renderGpsLocation(style) }
@@ -150,11 +138,12 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return Const.zoomAtLowSpeed + (Const.zoomAtHighSpeed - Const.zoomAtLowSpeed) * t
     }
 
+    /// Points the camera at a position, heading up. The target is shifted so the position lands
+    /// in the bottom third and what is ahead stays in view, mirroring CarMapContainer.center on
+    /// Android: project the point, offset it down by a sixth of the height in screen space, then
+    /// unproject. The manual animation is retargeted from wherever the camera is now, so a running
+    /// one carries on smoothly.
     private func center(on coordinate: CLLocationCoordinate2D, course: CLLocationDirection, zoom: Double? = nil) {
-        // Shift the camera target so the location lands in the bottom third (what's ahead stays in
-        // view), mirroring CarMapContainer.center on Android: project the point against the current
-        // camera, offset it down by a sixth of the height in screen space, then unproject. A good
-        // approximation even though the bearing changes during the animation.
         let bounds = mapView.bounds
         let anchorX = bounds.midX
         let anchorY = bounds.midY + bounds.height / 6
@@ -163,8 +152,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
                                   y: current.y - (anchorY - bounds.midY))
         let target = mapView.convert(targetPoint, toCoordinateFrom: mapView)
 
-        // Retarget the manual animation from the current camera to the new pose. If an animation is
-        // already running it continues smoothly from where it is; otherwise we start the display link.
         animFromCenter = mapView.centerCoordinate
         animToCenter = target
         animFromHeading = mapView.direction
@@ -175,10 +162,10 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         startCameraAnimation()
     }
 
+    /// Starts the camera animation, bound to the CarPlay screen so its display link actually ticks -
+    /// the main screen's link does not drive the external display.
     private func startCameraAnimation() {
         if displayLink != nil { return }
-        // Bind the link to the CarPlay screen so it actually ticks (the main-screen link does not
-        // drive the external display).
         let screen = view.window?.screen ?? mapView.window?.screen ?? UIScreen.main
         guard let link = screen.displayLink(withTarget: self, selector: #selector(stepCameraAnimation)) else { return }
         link.add(to: .main, forMode: .common)
@@ -192,11 +179,11 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
 
     @objc private func stepCameraAnimation() {
         let t = min(1, (CACurrentMediaTime() - animStart) / Const.cameraEase)
-        let e = 1 - pow(1 - t, 3) // ease-out cubic
-        let lat = animFromCenter.latitude + (animToCenter.latitude - animFromCenter.latitude) * e
-        let lng = animFromCenter.longitude + (animToCenter.longitude - animFromCenter.longitude) * e
-        let heading = animFromHeading + shortestHeadingDelta(animFromHeading, animToHeading) * e
-        let zoom = animFromZoom + (animToZoom - animFromZoom) * e
+        let easeOutCubic = 1 - pow(1 - t, 3)
+        let lat = animFromCenter.latitude + (animToCenter.latitude - animFromCenter.latitude) * easeOutCubic
+        let lng = animFromCenter.longitude + (animToCenter.longitude - animFromCenter.longitude) * easeOutCubic
+        let heading = animFromHeading + shortestHeadingDelta(animFromHeading, animToHeading) * easeOutCubic
+        let zoom = animFromZoom + (animToZoom - animFromZoom) * easeOutCubic
         mapView.setCenter(CLLocationCoordinate2D(latitude: lat, longitude: lng),
                           zoomLevel: zoom, animated: false)
         // setCenter's direction parameter doesn't rotate the map on the CarPlay display; set the
@@ -239,6 +226,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         addLocationLayers(style, pointSource: pointSource, circleSource: circleSource)
     }
 
+    /// The GPS location layers, inserted above the layering anchor and therefore above the routes.
     private func addLocationLayers(_ style: MLNStyle, pointSource: MLNShapeSource, circleSource: MLNShapeSource) {
         let fill = MLNFillStyleLayer(identifier: Const.locationCircleLayer, source: circleSource)
         fill.fillColor = NSExpression(forConstantValue: Const.accuracyColor)
@@ -257,7 +245,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         icon.iconAllowsOverlap = NSExpression(forConstantValue: true)
         icon.iconIgnoresPlacement = NSExpression(forConstantValue: true)
 
-        // Location renders above the layering anchor (and therefore above routes).
         for layer in [fill, stroke, icon] { insertAboveAnchor(layer, in: style) }
     }
 
@@ -276,8 +263,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         }
         return MLNPolygonFeature(coordinates: coords, count: UInt(coords.count))
     }
-
-    // MARK: routes
 
     private func renderRoutes(_ style: MLNStyle) {
         let valid = routes.filter { $0.coordinates.count >= 2 }
@@ -336,6 +321,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         }
     }
 
+    /// The route layers, inserted below the layering anchor so the labels stay on top, with the
+    /// arrows and points just above the line.
     private func addRouteLayers(_ style: MLNStyle, lineSource: MLNShapeSource, pointSource: MLNShapeSource) {
         let line = MLNLineStyleLayer(identifier: Const.routeLayer, source: lineSource)
         line.lineColor = NSExpression(forKeyPath: "color")
@@ -383,7 +370,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         markerLabels.textOffset = NSExpression(forConstantValue: NSValue(cgVector: CGVector(dx: 0, dy: 0.7)))
         markerLabels.textOptional = NSExpression(forConstantValue: true)
 
-        // Routes render below the layering anchor (under labels), arrows/points just above the line.
         insertBelowAnchor(line, in: style)
         if let above = style.layer(withIdentifier: Const.routeLayer) {
             style.insertLayer(arrows, above: above)
@@ -420,8 +406,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
     }
 
-    // MARK: layer insertion relative to the anchor
-
     private func insertBelowAnchor(_ layer: MLNStyleLayer, in style: MLNStyle) {
         if let anchor = style.layer(withIdentifier: Self.layeringAnchorId) {
             style.insertLayer(layer, below: anchor)
@@ -437,8 +421,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
             style.addLayer(layer)
         }
     }
-
-    // MARK: interaction (driven by CarPlay buttons / pan interface)
 
     func scrollBy(dx: CGFloat, dy: CGFloat) {
         lastUserInteraction = Date()
@@ -471,9 +453,10 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         }
     }
 
+    /// Persists the zoom, but only when the driver changed it by pinching: pan, recenter and the
+    /// follow animation are programmatic and must not overwrite the chosen zoom, and the buttons
+    /// persist their own target.
     func mapView(_ mapView: MLNMapView, regionDidChangeWith reason: MLNCameraChangeReason, animated: Bool) {
-        // Persist only when the user changed zoom via a pinch / zoom gesture. Pan, recenter and the
-        // follow animation are programmatic and must not write; button zoom persists its own target.
         let zoomGestures: MLNCameraChangeReason = [.gesturePinch, .gestureZoomIn, .gestureZoomOut, .gestureOneFingerZoom]
         if !reason.isDisjoint(with: zoomGestures) { persistZoom(mapView.zoomLevel) }
     }
@@ -484,8 +467,6 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
             store.saveDouble(CarStoreKeys.zoom, zoom)
         }
     }
-
-    // MARK: helpers
 
     private func loadStyleImage(_ style: MLNStyle, resource: String, name: String, sdf: Bool, scale: CGFloat) {
         guard let url = Bundle.main.url(forResource: resource, withExtension: "png", subdirectory: "public/content"),
@@ -535,11 +516,9 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         return out
     }
 
-    /**
-     * Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
-     * arrives. Falls back to London on a cold install with no saved fix so the map never opens at
-     * (0, 0). The returned coordinate has no speed/bearing/accuracy and must not feed ETA.
-     */
+    /// Last lat/lng we ever received from GPS, used to center the map on launch before a fresh fix
+    /// arrives. Falls back to London on a cold install with no saved fix so the map never opens at
+    /// (0, 0). The returned coordinate has no speed/bearing/accuracy and must not feed ETA.
     private func loadLastKnownLocation() -> CLLocationCoordinate2D {
         CLLocationCoordinate2D(
             latitude: store.loadDouble(CarStoreKeys.lastLat, default: Const.defaultLat),
@@ -575,14 +554,14 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let panSuppression: TimeInterval = 5
         static let cameraEase: TimeInterval = 0.25
 
-        // Speed-adaptive zoom (see zoomForSpeed); speeds in m/s. Mirrors CarMapContainer.kt.
+        /// Speed-adaptive zoom (see zoomForSpeed); speeds in m/s. Mirrors CarMapContainer.kt.
         static let speedMinMps = 0.0
         static let speedMaxMps = 30.0
         static let zoomAtLowSpeed = 16.5
         static let zoomAtHighSpeed = 14.0
 
         static let defaultZoom = 14.0
-        // Cold-install fallbacks; see loadLastKnownLocation / setStyle.
+        /// Cold-install fallbacks; see loadLastKnownLocation / setStyle.
         static let defaultLat = 51.5074
         static let defaultLng = -0.1278
         static let defaultStyleUrl =
