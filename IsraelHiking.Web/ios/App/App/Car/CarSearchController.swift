@@ -2,15 +2,13 @@ import CarPlay
 import CoreLocation
 import Foundation
 
-/**
- * Mirrors `CarSearchScreen.kt`: in-app search for CarPlay. Lets the driver search for a
- * destination, then computes a route from the current location to the selected result and publishes
- * it to the shared store so the map renders it and the navigation session follows it.
- *
- * Android hosts this as its own `Screen` with a `SearchTemplate`; CarPlay pushes a
- * `CPSearchTemplate` onto the interface controller, so the same flow lives in a controller that
- * owns the template rather than in a screen subclass.
- */
+/// Mirrors `CarSearchScreen.kt`: in-app search for CarPlay. Lets the driver search for a
+/// destination, then computes a route from the current location to the selected result and publishes
+/// it to the shared store so the map renders it and the navigation session follows it.
+///
+/// Android hosts this as its own `Screen` with a `SearchTemplate`; CarPlay pushes a
+/// `CPSearchTemplate` onto the interface controller, so the same flow lives in a controller that
+/// owns the template rather than in a screen subclass.
 final class CarSearchController: NSObject, CPSearchTemplateDelegate {
 
     private static let routingType = "4WD"
@@ -39,8 +37,8 @@ final class CarSearchController: NSObject, CPSearchTemplateDelegate {
         return template
     }
 
-    // MARK: CPSearchTemplateDelegate
-
+    /// Results for what the driver has typed. A coordinate pair is resolved locally first, the way
+    /// the web client does before it hits the API; anything else goes to the backend search.
     func searchTemplate(_ searchTemplate: CPSearchTemplate,
                         updatedSearchText searchText: String,
                         completionHandler: @escaping ([CPListItem]) -> Void) {
@@ -50,8 +48,6 @@ final class CarSearchController: NSObject, CPSearchTemplateDelegate {
             completionHandler([])
             return
         }
-        // Coordinate strings are resolved locally first, the web client does the same before
-        // hitting the API
         if let coordinate = Self.parseCoordinates(term) {
             completionHandler(self.items(for: [CarSearchResult(title: term, subtitle: "", location: coordinate)]))
             return
@@ -87,12 +83,10 @@ final class CarSearchController: NSObject, CPSearchTemplateDelegate {
         }
     }
 
+    /// Nothing to do: the list already carries every result the search returned, so there is no
+    /// separate screen of them to show.
     func searchTemplateSearchButtonPressed(_ searchTemplate: CPSearchTemplate) {
-        // The list already carries every result the search returned, so there is nothing more to
-        // show on its own screen.
     }
-
-    // MARK: results
 
     private func items(for results: [CarSearchResult]) -> [CPListItem] {
         var mapping: [ObjectIdentifier: CarSearchResult] = [:]
@@ -106,10 +100,8 @@ final class CarSearchController: NSObject, CPSearchTemplateDelegate {
         return items
     }
 
-    /**
-     * Publish the computed route in the same shape the web layer uses (see car.service.ts), so the
-     * existing map rendering and travel-estimate logic pick it up unchanged.
-     */
+    /// Publish the computed route in the same shape the web layer uses (see car.service.ts), so the
+    /// existing map rendering and travel-estimate logic pick it up unchanged.
     private func publishRoute(_ points: [CLLocationCoordinate2D], title: String) {
         guard !points.isEmpty else { return }
         let route: [String: Any] = [

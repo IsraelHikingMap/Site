@@ -3,15 +3,13 @@ import Foundation
 import UIKit
 import ValhallaModels
 
-/**
- * The normalized, engine-agnostic maneuver kinds shared with the backend v2 instructions model
- * (mirrors `RouteManeuverType` in `CarManeuver.kt` and IsraelHiking.Common.Api.ManeuverType).
- *
- * Android pairs each kind with an `androidx.car.app` maneuver type that the host draws. CarPlay has
- * no such vocabulary - a `CPManeuver` carries an image the app supplies - so each kind is paired
- * with the SF Symbol that stands for it instead. Kinds without a turn of their own
- * (continue / roundabout-exit / ferry-exit, and any unknown future kind) read as going straight.
- */
+/// The normalized, engine-agnostic maneuver kinds shared with the backend v2 instructions model
+/// (mirrors `RouteManeuverType` in `CarManeuver.kt` and IsraelHiking.Common.Api.ManeuverType).
+///
+/// Android pairs each kind with an `androidx.car.app` maneuver type that the host draws. CarPlay has
+/// no such vocabulary - a `CPManeuver` carries an image the app supplies - so each kind is paired
+/// with the SF Symbol that stands for it instead. Kinds without a turn of their own
+/// (continue / roundabout-exit / ferry-exit, and any unknown future kind) read as going straight.
 enum CarManeuverType: String, CaseIterable {
     case depart = "depart"
     case arrive = "arrive"
@@ -29,6 +27,7 @@ enum CarManeuverType: String, CaseIterable {
     case rampRight = "ramp-right"
     case merge = "merge"
     case roundabout = "roundabout"
+    case roundaboutExit = "roundabout-exit"
     case ferryEnter = "ferry-enter"
     case continueStraight = "continue"
 
@@ -37,12 +36,10 @@ enum CarManeuverType: String, CaseIterable {
         CarManeuverType(rawValue: wire) ?? .continueStraight
     }
 
-    /**
-     * Resolves one of valhalla's numeric maneuver types, which is what an offline trace returns,
-     * the same way the backend resolves it for the v2 instructions (see
-     * ValhallaGateway.ToManeuverType). Kinds without a turn of their own - continue, becomes, the
-     * exit of a roundabout or of a ferry, and transit - fall through to `continueStraight`.
-     */
+    /// Resolves one of valhalla's numeric maneuver types, which is what an offline trace returns,
+    /// the same way the backend resolves it for the v2 instructions (see
+    /// ValhallaGateway.ToManeuverType). Kinds without a turn of their own - continue, becomes, the
+    /// exit of a roundabout or of a ferry, and transit - fall through to `continueStraight`.
     static func fromValhalla(_ type: Int) -> CarManeuverType {
         switch type {
         case 1, 2, 3: return .depart
@@ -61,13 +58,15 @@ enum CarManeuverType: String, CaseIterable {
         case 24: return .keepLeft
         case 25, 37, 38: return .merge
         case 26: return .roundabout
+        case 27: return .roundaboutExit
         case 28: return .ferryEnter
         default: return .continueStraight
         }
     }
 
-    /// The SF Symbol the CarPlay maneuver is drawn with.
-    var symbolName: String {
+    /// The SF Symbol the maneuver is drawn with, or nil for the roundabouts, which SF Symbols has
+    /// no glyph for - `CarManeuverIcons` draws those.
+    var symbolName: String? {
         switch self {
         case .depart, .continueStraight: return "arrow.up"
         case .arrive: return "flag.checkered"
@@ -78,29 +77,21 @@ enum CarManeuverType: String, CaseIterable {
         case .right, .sharpRight, .rampRight: return "arrow.turn.up.right"
         case .uturnRight: return "arrow.uturn.right"
         case .merge: return "arrow.triangle.merge"
-        case .roundabout: return "arrow.triangle.turn.up.right.circle"
+        case .roundabout, .roundaboutExit: return nil
         case .ferryEnter: return "ferry"
         }
     }
-
-    /// The symbol image for the maneuver, falling back to a straight arrow for any symbol this
-    /// system does not know, so an unrecognized glyph never leaves the cluster without an icon.
-    var symbolImage: UIImage? {
-        UIImage(systemName: symbolName) ?? UIImage(systemName: "arrow.up")
-    }
 }
 
-/**
- * Mirrors `CarManeuver.kt`: a turn along the route. CarPlay requires navigation apps to provide
- * turn-by-turn directions. These come from the map-match backend when available
- * (see `fromInstructions`) and otherwise fall back to turns synthesized from the polyline geometry
- * (see `CarManeuverGenerator`).
- *
- * `cue` is the instruction text: backend instructions are already localized and used as-is, while
- * synthesized cues are English `Translations` keys (translation falls back to the key itself).
- * `distanceAlongRouteM` is measured from the start of the route. `roundaboutExitNumber` is set only
- * for roundabout maneuvers, nil otherwise.
- */
+/// Mirrors `CarManeuver.kt`: a turn along the route. CarPlay requires navigation apps to provide
+/// turn-by-turn directions. These come from the map-match backend when available
+/// (see `fromInstructions`) and otherwise fall back to turns synthesized from the polyline geometry
+/// (see `CarManeuverGenerator`).
+///
+/// `cue` is the instruction text: backend instructions are already localized and used as-is, while
+/// synthesized cues are English `Translations` keys (translation falls back to the key itself).
+/// `distanceAlongRouteM` is measured from the start of the route. `roundaboutExitNumber` is set only
+/// for roundabout maneuvers, nil otherwise.
 struct CarManeuver {
     let type: CarManeuverType
     let cue: String
@@ -139,16 +130,24 @@ struct CarManeuver {
         )
     }
 
+    /// The image CarPlay draws for this turn: the roundabouts are drawn with their exit number in
+    /// the middle, the rest come from SF Symbols, with a straight arrow standing in for any glyph
+    /// this system does not know.
+    var symbolImage: UIImage? {
+        guard let symbolName = type.symbolName else {
+            return CarManeuverIcons.roundabout(exitNumber: roundaboutExitNumber)
+        }
+        return UIImage(systemName: symbolName) ?? UIImage(systemName: "arrow.up")
+    }
+
     private static let metersInKilometer = 1000.0
 
-    /**
-     * Build maneuvers from the v2 `instructions` array returned by the map-match endpoint
-     * (requested with instructionsFormat=v2). Each instruction carries the length of its own
-     * segment in `distanceMeters`; the maneuver is performed at the start of that segment, so its
-     * distance-from-start is the running total of the preceding instructions' lengths. `text` is
-     * already localized by the backend (the language is sent with the request), so it is used
-     * directly as the cue.
-     */
+    /// Build maneuvers from the v2 `instructions` array returned by the map-match endpoint
+    /// (requested with instructionsFormat=v2). Each instruction carries the length of its own
+    /// segment in `distanceMeters`; the maneuver is performed at the start of that segment, so its
+    /// distance-from-start is the running total of the preceding instructions' lengths. `text` is
+    /// already localized by the backend (the language is sent with the request), so it is used
+    /// directly as the cue.
     static func fromInstructions(_ instructions: [[String: Any]]) -> [CarManeuver] {
         var maneuvers: [CarManeuver] = []
         var cumulative = 0.0
@@ -162,14 +161,12 @@ struct CarManeuver {
         return maneuvers
     }
 
-    /**
-     * Build maneuvers from valhalla's own maneuvers, as they come back from an offline trace. This
-     * is the very same conversion the backend does for the v2 instructions above, so a route matched
-     * on the device gets the same turns as one matched by the server: the kind of turn comes from
-     * valhalla's numeric maneuver type, its instruction is already localized by the engine, and its
-     * length - which valhalla gives in the requested units, kilometers - is the length of the
-     * segment that starts at it.
-     */
+    /// Build maneuvers from valhalla's own maneuvers, as they come back from an offline trace. This
+    /// is the very same conversion the backend does for the v2 instructions above, so a route matched
+    /// on the device gets the same turns as one matched by the server: the kind of turn comes from
+    /// valhalla's numeric maneuver type, its instruction is already localized by the engine, and its
+    /// length - which valhalla gives in the requested units, kilometers - is the length of the
+    /// segment that starts at it.
     static func fromValhallaManeuvers(_ maneuvers: [RouteManeuver]) -> [CarManeuver] {
         var result: [CarManeuver] = []
         var cumulative = 0.0
@@ -183,10 +180,8 @@ struct CarManeuver {
         return result
     }
 
-    /**
-     * Builds a single maneuver. A roundabout needs a valid exit number (>= 1) to read as one, so
-     * without one it falls back to a plain straight maneuver.
-     */
+    /// Builds a single maneuver. A roundabout needs a valid exit number (>= 1) to read as one, so
+    /// without one it falls back to a plain straight maneuver.
     private static func toManeuver(_ type: CarManeuverType,
                                    _ text: String,
                                    _ distanceAlongRouteM: Double,
@@ -212,10 +207,8 @@ enum CarManeuverGenerator {
     /// Don't emit two maneuvers closer than this - collapses shape-point jitter into one turn.
     private static let minSpacingMeters = 25.0
 
-    /**
-     * Show locally-synthesized turns right away. These are deliberately never cached, so every
-     * launch re-fetches from the backend; the cache is only consulted if that fetch fails.
-     */
+    /// Show locally-synthesized turns right away. These are deliberately never cached, so every
+    /// launch re-fetches from the backend; the cache is only consulted if that fetch fails.
     static func generate(_ route: [CLLocationCoordinate2D]) -> [CarManeuver] {
         guard route.count >= 2 else { return [] }
         var maneuvers: [CarManeuver] = [

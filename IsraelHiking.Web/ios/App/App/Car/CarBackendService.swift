@@ -1,22 +1,18 @@
 import CoreLocation
 import Foundation
 
-/**
- * Mirrors `CarBackendService.kt`: a thin client over the Mapeak backend so the CarPlay experience
- * can search for places and compute point-to-point routes without going through the web layer.
- * Mirrors the endpoints used by the Angular app (see search-results.provider.ts /
- * routing.provider.ts): all results are delivered back on the main queue so callers can update
- * car templates directly.
- */
+/// Mirrors `CarBackendService.kt`: a thin client over the Mapeak backend so the CarPlay experience
+/// can search for places and compute point-to-point routes without going through the web layer.
+/// Mirrors the endpoints used by the Angular app (see search-results.provider.ts /
+/// routing.provider.ts): all results are delivered back on the main queue so callers can update
+/// car templates directly.
 final class CarBackendService {
 
     private let valhallaTiles = ValhallaTiles()
     private lazy var valhallaRouter = ValhallaRouter(tiles: valhallaTiles)
 
-    /**
-     * Search for places matching `query` near `center`. Mirrors GET /api/search/{term}. Results are
-     * capped to `maxResults` so they fit the car list.
-     */
+    /// Search for places matching `query` near `center`. Mirrors GET /api/search/{term}. Results are
+    /// capped to `maxResults` so they fit the car list.
     func search(query: String,
                 center: CLLocationCoordinate2D?,
                 zoom: Double,
@@ -52,12 +48,10 @@ final class CarBackendService {
         }.resume()
     }
 
-    /**
-     * Compute a route from `from` to `to` using the given `routingType`. Mirrors GET /api/routing.
-     * When the backend call fails the route is calculated on the device from the offline routing
-     * tiles, and only if those are missing or cannot produce a route does it fall back to a straight
-     * line between the two points, so the user always gets a usable destination on the map.
-     */
+    /// Compute a route from `from` to `to` using the given `routingType`. Mirrors GET /api/routing.
+    /// When the backend call fails the route is calculated on the device from the offline routing
+    /// tiles, and only if those are missing or cannot produce a route does it fall back to a straight
+    /// line between the two points, so the user always gets a usable destination on the map.
     func route(from: CLLocationCoordinate2D,
                to: CLLocationCoordinate2D,
                routingType: String,
@@ -83,14 +77,14 @@ final class CarBackendService {
         }.resume()
     }
 
-    /**
-     * Fetch turn-by-turn instructions for an existing route by map-matching its `points` to the
-     * network. Mirrors POST /api/routing with the routing type, language and the v2 instructions
-     * format as query parameters and the points as the JSON body. When the backend call fails or
-     * carries no instructions the points are matched on the device against the offline routing
-     * tiles, and only if those are missing or cannot match them does it return an empty list, so
-     * that the caller keeps its locally-synthesized turns.
-     */
+    /// Fetch turn-by-turn instructions for an existing route by map-matching its `points` to the
+    /// network. Mirrors POST /api/routing with the routing type, language and the v2 instructions
+    /// format as query parameters and the points as the JSON body. When the backend call fails or
+    /// carries no instructions the points are matched on the device against the offline routing
+    /// tiles, and only if those are missing or cannot match them does it return an empty list, so
+    /// that the caller keeps its locally-synthesized turns. The points are simplified first: a
+    /// recorded route holds one every few meters, denser than matching needs and more than fits in a
+    /// request, and the corners the instructions are read from survive it.
     func mapMatch(points: [CLLocationCoordinate2D],
                   routingType: String,
                   language: String,
@@ -99,8 +93,6 @@ final class CarBackendService {
             onResult([])
             return
         }
-        // A recorded route holds a point every few meters, far denser than map matching needs and
-        // more than fits in a request. Simplifying keeps the corners the instructions are read from.
         let pointsToMatch = SpatialHelper.simplify(points, toleranceMeters: Self.mapMatchToleranceMeters)
         var components = URLComponents(string: Self.apiBase + "routing")!
         components.queryItems = [
@@ -131,11 +123,9 @@ final class CarBackendService {
         }.resume()
     }
 
-    /**
-     * Calculate the route on the device from the tiles the user downloaded for offline use. Returns
-     * nil when there are no tiles, or when valhalla cannot connect the two points, so the caller can
-     * fall back to a straight line. Called from URLSession's queues, never the main one.
-     */
+    /// Calculate the route on the device from the tiles the user downloaded for offline use. Returns
+    /// nil when there are no tiles, or when valhalla cannot connect the two points, so the caller can
+    /// fall back to a straight line. Called from URLSession's queues, never the main one.
     private func offlineRoute(from: CLLocationCoordinate2D,
                               to: CLLocationCoordinate2D,
                               routingType: String) -> [CLLocationCoordinate2D]? {
@@ -152,12 +142,10 @@ final class CarBackendService {
         }
     }
 
-    /**
-     * Match the route's points to the road network on the device, so that a route that was already
-     * calculated still gets real turn by turn instructions when the backend is unreachable. Returns
-     * an empty list when there are no tiles, or when valhalla cannot match the points, so that the
-     * caller keeps the turns it synthesized from the geometry.
-     */
+    /// Match the route's points to the road network on the device, so that a route that was already
+    /// calculated still gets real turn by turn instructions when the backend is unreachable. Returns
+    /// an empty list when there are no tiles, or when valhalla cannot match the points, so that the
+    /// caller keeps the turns it synthesized from the geometry.
     private func offlineMapMatch(points: [CLLocationCoordinate2D],
                                  routingType: String,
                                  language: String) -> [CarManeuver] {

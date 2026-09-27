@@ -1,16 +1,14 @@
 import Foundation
 
-/**
- * Adds the user's token to the tile requests that go to our own API. The tiles of a base layer that
- * comes with the subscription - the satellite imagery - are only served to a subscribed user, and the
- * car app has no session of its own, so it uses the token the app stores for it under `CarStoreKeys.config`.
- * Mirrors `SubscribedTilesInterceptor.kt` on Android and the transform request of the web map, see
- * `MapService.setTransformRequest`. Registered on MapLibre's `URLSession` configuration alongside
- * `SliceURLProtocol` (see `CarMapViewController.configureTileLoading`).
- *
- * The token is read per request rather than held, so that a sign in or a token refresh in the app is
- * picked up without reconfiguring the session.
- */
+/// Adds the user's token to the tile requests that go to our own API. The tiles of a base layer that
+/// comes with the subscription - the satellite imagery - are only served to a subscribed user, and the
+/// car app has no session of its own, so it uses the token the app stores for it under `CarStoreKeys.config`.
+/// Mirrors `SubscribedTilesInterceptor.kt` on Android and the transform request of the web map, see
+/// `MapService.setTransformRequest`. Registered on MapLibre's `URLSession` configuration alongside
+/// `SliceURLProtocol` (see `CarMapViewController.configureTileLoading`).
+///
+/// The token is read per request rather than held, so that a sign in or a token refresh in the app is
+/// picked up without reconfiguring the session.
 final class SubscribedTilesURLProtocol: URLProtocol {
 
     private static let handledKey = "SubscribedTilesURLProtocolHandled"
@@ -18,8 +16,8 @@ final class SubscribedTilesURLProtocol: URLProtocol {
     private static let tokenKey = "token"
 
     private var dataTask: URLSessionDataTask?
-    // One shared session for all of these fetches. Ephemeral config carries no custom protocols, so the
-    // network fetch can't recurse back into us.
+    /// One shared session for all of these fetches. Ephemeral config carries no custom protocols, so the
+    /// network fetch can't recurse back into us.
     private static let session = URLSession(configuration: .ephemeral)
 
     override class func canInit(with request: URLRequest) -> Bool {

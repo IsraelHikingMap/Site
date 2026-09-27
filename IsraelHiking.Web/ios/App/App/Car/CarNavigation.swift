@@ -2,25 +2,15 @@ import CarPlay
 import CoreLocation
 import Foundation
 
-/**
- * Mirrors `CarNavigation.kt`: drives the turn-by-turn side of the CarPlay experience for the active
- * route. It owns the maneuvers and which of them is current; the scene delegate owns the
- * `CPNavigationSession` and pushes what this publishes into it.
- *
- * Whenever the route changes we ask the map-match backend for real turn-by-turn instructions and
- * cache them (keyed to the route) under `CarStoreKeys.routeInstructions` so navigation keeps the
- * directions offline. Until/unless the backend answers we fall back to turns synthesized from the
- * route geometry (see `CarManeuverGenerator`). Everything reacts to the existing store keys
- * (route/location), so the map, statistics and cluster all update with no extra wiring.
- *
- * Android additionally posts a notification and can drive a test-drive simulation; CarPlay has no
- * equivalent of either - the host draws the cluster from the session itself.
- */
+/// Mirrors `CarNavigation.kt`: owns the turns of the active route and which of them is next, while
+/// the scene delegate owns the `CPNavigationSession` they are pushed into. Turns come from the
+/// map-match backend and are cached under `CarStoreKeys.routeInstructions` to survive offline, with
+/// `CarManeuverGenerator`'s geometry-synthesized ones standing in until they arrive.
 final class CarNavigation: CapacitorStore.Listener {
 
     /// A maneuver is considered passed once the driver is this far beyond it.
     private static let epsilonMeters = 1.0
-    private static let defaultRoutingType = "Hike"
+    private static let defaultRoutingType = "4WD"
 
     private let store = CapacitorStore.shared
     private let backend = CarBackendService()
@@ -31,7 +21,11 @@ final class CarNavigation: CapacitorStore.Listener {
     private var routeEpoch = 0
 
     /// The maneuvers CarPlay should show, current one first. Empty when there is nothing to follow.
+    /// The same objects are kept while the driver is heading for the same turn: handing CarPlay new
+    /// ones makes it present the turn card again, animation and all, on every GPS fix.
     private(set) var upcomingManeuvers: [CPManeuver] = []
+    /// Which maneuver `upcomingManeuvers` was built for, so a fix that did not pass a turn is known.
+    private var currentManeuverIndex: Int?
     /// How far the driver still is from `upcomingManeuvers.first`.
     private(set) var distanceToCurrentManeuverMeters: Double = 0
     /// The name shown as the trip's destination.
@@ -39,9 +33,12 @@ final class CarNavigation: CapacitorStore.Listener {
     /// The length of the route being followed, in meters.
     private(set) var totalLengthMeters: Double = 0
 
-    /// Invoked when the maneuvers or the distance to the current one change, so the delegate can
-    /// push them into the navigation session.
-    var onNavigationChanged: (() -> Void)?
+    /// Invoked when the turns themselves changed - a new route, or the driver passed one - so the
+    /// delegate hands the session a new set of maneuvers.
+    var onManeuversChanged: (() -> Void)?
+    /// Invoked when only the distance to the current turn changed, which the delegate reports as an
+    /// estimate update so that the turn card keeps its place and only its text moves.
+    var onDistanceToManeuverChanged: (() -> Void)?
 
     func attach() {
         store.addListener(self)
@@ -52,6 +49,7 @@ final class CarNavigation: CapacitorStore.Listener {
         store.removeListener(self)
         maneuvers = []
         upcomingManeuvers = []
+        currentManeuverIndex = nil
     }
 
     func onCarStoreUpdated(_ key: String) {
@@ -62,6 +60,7 @@ final class CarNavigation: CapacitorStore.Listener {
         }
     }
 
+    /// Takes up the route the store now holds: its turns, its length and the name of its destination.
     private func onRouteChanged() {
         let routes = CarRouteData.list(from: store.load(CarStoreKeys.route))
         let route = routes.first { $0.coordinates.count >= 2 }
@@ -70,10 +69,11 @@ final class CarNavigation: CapacitorStore.Listener {
         totalLengthMeters = route?.lengthMeters ?? 0
         routeEpoch += 1
 
+        currentManeuverIndex = nil
         guard let route = route else {
             maneuvers = []
             upcomingManeuvers = []
-            onNavigationChanged?()
+            onManeuversChanged?()
             return
         }
         maneuvers = loadCachedManeuvers() ?? CarManeuverGenerator.generate(route.coordinates)
@@ -81,17 +81,16 @@ final class CarNavigation: CapacitorStore.Listener {
         fetchInstructions(route.coordinates, epoch: routeEpoch)
     }
 
-    /**
-     * Ask the backend to map-match the route to the network and replace `maneuvers` with the real
-     * turn-by-turn instructions, caching them so they are available offline. On failure (e.g.
-     * offline) the locally-synthesized turns already in place are kept. A response that arrives
-     * after the route has changed (`epoch` no longer current) is dropped.
-     */
+    /// Replaces the synthesized turns with the backend's real ones, caching them for offline use.
+    /// A failure keeps the ones already in place, and a response for a route that has since changed
+    /// (`epoch` no longer current) is dropped. These are new turns, so they replace the card rather
+    /// than only moving its distance.
     private func fetchInstructions(_ points: [CLLocationCoordinate2D], epoch: Int) {
         backend.mapMatch(points: points, routingType: Self.defaultRoutingType, language: language()) { [weak self] fetched in
             guard let self = self, epoch == self.routeEpoch, !fetched.isEmpty else { return }
             self.maneuvers = fetched
             self.cacheManeuvers(fetched)
+            self.currentManeuverIndex = nil
             self.onLocationChanged()
         }
     }
@@ -113,54 +112,61 @@ final class CarNavigation: CapacitorStore.Listener {
         return maneuvers.isEmpty ? nil : maneuvers
     }
 
+    /// Places the driver on the route and works out which turn is next. While that is the same turn as
+    /// before, only its distance is reported, so the turn card is not handed new maneuvers and does
+    /// not animate itself back in on every fix.
     private func onLocationChanged() {
         guard let route = route, !maneuvers.isEmpty,
               let location: CLLocation = store.getTransient(CarStoreKeys.location)
         else {
             if !upcomingManeuvers.isEmpty {
                 upcomingManeuvers = []
-                onNavigationChanged?()
+                currentManeuverIndex = nil
+                onManeuversChanged?()
             }
             return
         }
         let traveled = CarRouteCalculator.distanceAlongRoute(route, location: location)
-        let currentIndex = maneuvers.firstIndex { $0.distanceAlongRouteM > traveled + Self.epsilonMeters }
-        let current = currentIndex.map { maneuvers[$0] } ?? maneuvers[maneuvers.count - 1]
-        let next = currentIndex.flatMap { index -> CarManeuver? in
-            index + 1 < maneuvers.count ? maneuvers[index + 1] : nil
-        }
+        let index = maneuvers.firstIndex { $0.distanceAlongRouteM > traveled + Self.epsilonMeters }
+            ?? maneuvers.count - 1
+        distanceToCurrentManeuverMeters = max(0, maneuvers[index].distanceAlongRouteM - traveled)
 
-        distanceToCurrentManeuverMeters = max(0, current.distanceAlongRouteM - traveled)
-        var built = [carManeuver(current, distanceMeters: distanceToCurrentManeuverMeters)]
-        if let next = next {
+        guard index != currentManeuverIndex else {
+            onDistanceToManeuverChanged?()
+            return
+        }
+        currentManeuverIndex = index
+        var built = [carManeuver(maneuvers[index], distanceMeters: distanceToCurrentManeuverMeters)]
+        if index + 1 < maneuvers.count {
+            let next = maneuvers[index + 1]
             built.append(carManeuver(next, distanceMeters: max(0, next.distanceAlongRouteM - traveled)))
         }
         upcomingManeuvers = built
-        onNavigationChanged?()
+        onManeuversChanged?()
     }
 
+    /// A turn as CarPlay draws it. The estimate carries a distance but no time, since only the
+    /// distance to a single turn is measured.
     private func carManeuver(_ maneuver: CarManeuver, distanceMeters: Double) -> CPManeuver {
         let built = CPManeuver()
-        built.symbolImage = maneuver.type.symbolImage
+        built.symbolImage = maneuver.symbolImage
         built.instructionVariants = [instruction(maneuver)]
         built.initialTravelEstimates = CPTravelEstimates(
             distanceRemaining: measurement(distanceMeters),
-            // The time to a single turn is not measured, only the distance to it
             timeRemaining: -1)
         return built
     }
 
-    /**
-     * The text of a maneuver. Backend and valhalla instructions arrive already localized, so a
-     * translation lookup falls through to the text itself; the synthesized cues are English keys.
-     * A roundabout says which exit to take, which CarPlay has no field of its own for.
-     */
+    /// The text of a maneuver. Backend and valhalla cues arrive localized, so the lookup falls
+    /// through to them; the synthesized ones are English keys. A roundabout's exit number is drawn
+    /// into its icon rather than appended here, which would need a translation of its own.
     private func instruction(_ maneuver: CarManeuver) -> String {
-        let cue = translations().getString(maneuver.cue)
-        guard maneuver.type == .roundabout, let exit = maneuver.roundaboutExitNumber else {
-            return cue
-        }
-        return "\(cue) (\(translations().getString("Exit")) \(exit))"
+        translations().getString(maneuver.cue)
+    }
+
+    /// The name for the trip's destination, falling back the way Android's Destination does.
+    var tripDestinationName: String {
+        destinationName ?? translations().getString("Destination")
     }
 
     /// The distance as CarPlay shows it, in the units the app is configured with.

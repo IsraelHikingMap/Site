@@ -292,7 +292,9 @@ class CarNavigation(
                 Maneuver.TYPE_U_TURN_LEFT, Maneuver.TYPE_U_TURN_RIGHT ->
                         R.drawable.ic_maneuver_uturn
                 Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW,
-                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW -> R.drawable.ic_maneuver_roundabout
+                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW,
+                Maneuver.TYPE_ROUNDABOUT_EXIT_CW,
+                Maneuver.TYPE_ROUNDABOUT_EXIT_CCW -> R.drawable.ic_maneuver_roundabout
                 Maneuver.TYPE_DESTINATION -> R.drawable.ic_maneuver_destination
                 else -> R.drawable.ic_maneuver_straight
             }

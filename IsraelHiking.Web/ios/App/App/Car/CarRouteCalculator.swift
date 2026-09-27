@@ -50,8 +50,8 @@ enum CarRouteCalculator {
     /// minimalAngleDeg threshold.
     ///
     /// - Parameter speed: the speed in meters per second the remaining time is derived from,
-    ///   measured by `CarPaceCalculator` rather than read off `location`. Nil before the car has
-    ///   moved, which leaves the remaining time unknown.
+    /// measured by `CarPaceCalculator` rather than read off `location`. Nil before the car has
+    /// moved, which leaves the remaining time unknown.
     static func computeStatistics(routes: [CarRouteData],
                                   location: CLLocation,
                                   speed: Double?) -> CarStatistics? {
@@ -66,13 +66,11 @@ enum CarRouteCalculator {
         )
     }
 
-    /**
-     * Distance, in meters, from the start of `route` to where `location` projects onto it. The GPS
-     * heading is taken into account so a self-overlapping route matches the leg actually being
-     * driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
-     * degenerate route (fewer than two points). Mirrors `distanceAlongRoute` in Kotlin, which the
-     * turn-by-turn navigation reads to know which maneuver is the current one.
-     */
+    /// Distance, in meters, from the start of `route` to where `location` projects onto it. The GPS
+    /// heading is taken into account so a self-overlapping route matches the leg actually being
+    /// driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
+    /// degenerate route (fewer than two points). Mirrors `distanceAlongRoute` in Kotlin, which the
+    /// turn-by-turn navigation reads to know which maneuver is the current one.
     static func distanceAlongRoute(_ route: CarRouteData, location: CLLocation) -> Double {
         let heading = location.course >= 0 ? location.course : nil
         return project(route, target: location.coordinate, headingDeg: heading)?.distanceAlongRouteM ?? 0
@@ -133,8 +131,6 @@ enum CarRouteCalculator {
             }
             if weight < bestWeight {
                 bestWeight = weight
-                // Taken off the route's own distances rather than measured in the plane, which is
-                // only trusted around the driver - the far end of a long route is nowhere near it.
                 bestDistanceAlongRoute = distancesAlongRoute[index]
                     + projectionFactor * (distancesAlongRoute[index + 1] - distancesAlongRoute[index])
             }

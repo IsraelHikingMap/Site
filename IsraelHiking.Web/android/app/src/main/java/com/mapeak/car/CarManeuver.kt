@@ -123,8 +123,9 @@ data class CarManeuver(
 /**
  * The normalized, engine-agnostic maneuver kinds shared with the backend v2 instructions model
  * (mirrors IsraelHiking.Common.Api.ManeuverType), each paired with the Android for Cars maneuver
- * type it renders as. Kinds without a dedicated turn (continue/roundabout-exit/ferry-exit, and any
- * unknown future kind) render as a plain straight maneuver.
+ * type it renders as. Kinds without a dedicated turn (continue/ferry-exit, and any unknown
+ * future kind) render as a plain straight maneuver. Only the enter-and-exit types carry an exit
+ * number, so leaving the roundabout does not take one.
  */
 private enum class RouteManeuverType(val wire: String, val androidType: Int) {
     DEPART("depart", Maneuver.TYPE_DEPART),
@@ -143,6 +144,7 @@ private enum class RouteManeuverType(val wire: String, val androidType: Int) {
     RAMP_RIGHT("ramp-right", Maneuver.TYPE_ON_RAMP_NORMAL_RIGHT),
     MERGE("merge", Maneuver.TYPE_MERGE_SIDE_UNSPECIFIED),
     ROUNDABOUT("roundabout", Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW),
+    ROUNDABOUT_EXIT("roundabout-exit", Maneuver.TYPE_ROUNDABOUT_EXIT_CCW),
     FERRY_ENTER("ferry-enter", Maneuver.TYPE_FERRY_BOAT),
     CONTINUE("continue", Maneuver.TYPE_STRAIGHT);
 
@@ -176,6 +178,7 @@ private enum class RouteManeuverType(val wire: String, val androidType: Int) {
                     24 -> KEEP_LEFT
                     25, 37, 38 -> MERGE
                     26 -> ROUNDABOUT
+                    27 -> ROUNDABOUT_EXIT
                     28 -> FERRY_ENTER
                     else -> CONTINUE
                 }
