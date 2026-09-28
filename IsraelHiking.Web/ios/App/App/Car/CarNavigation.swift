@@ -188,14 +188,43 @@ final class CarNavigation: CapacitorStore.Listener {
         destinationName ?? translations().getString("Destination")
     }
 
-    /// The distance as CarPlay shows it, in the units the app is configured with.
+    /// The distance to the turn as CarPlay shows it, in the units the app is configured with. Rounded
+    /// to a step the driver can read at a glance rather than counting down meter by meter, and below
+    /// `hideDistance` reported as unavailable - a negative distance, which CarPlay draws as "--" -
+    /// since a countdown that close to the turn only flickers.
     func measurement(_ meters: Double) -> Measurement<UnitLength> {
-        let measurement = Measurement(value: meters, unit: UnitLength.meters)
         if units() == "imperial" {
-            return meters < 402 ? measurement.converted(to: .feet) : measurement.converted(to: .miles)
+            let feet = meters / Self.metersPerFoot
+            if feet < Self.hideDistanceFeet {
+                return Measurement(value: -1, unit: .feet)
+            }
+            return meters < Self.metersPerMile / 4
+                ? Measurement(value: Self.rounded(feet, to: Self.stepFeet), unit: .feet)
+                : Measurement(value: meters, unit: UnitLength.meters).converted(to: .miles)
         }
-        return meters < 1000 ? measurement : measurement.converted(to: .kilometers)
+        if meters < Self.hideDistanceMeters {
+            return Measurement(value: -1, unit: .meters)
+        }
+        return meters < Self.metersPerKilometer
+            ? Measurement(value: Self.rounded(meters, to: Self.stepMeters), unit: .meters)
+            : Measurement(value: meters, unit: UnitLength.meters).converted(to: .kilometers)
     }
+
+    private static func rounded(_ value: Double, to step: Double) -> Double {
+        (value / step).rounded() * step
+    }
+
+    /// The step the distance to a turn is rounded to, so it does not tick down meter by meter.
+    private static let stepMeters = 10.0
+    private static let stepFeet = 50.0
+
+    /// Below this the turn is close enough that a distance only flickers, so it is left out.
+    private static let hideDistanceMeters = 30.0
+    private static let hideDistanceFeet = 100.0
+
+    private static let metersPerFoot = 0.3048
+    private static let metersPerMile = 1609.344
+    private static let metersPerKilometer = 1000.0
 
     private func config() -> [String: Any] { store.load(CarStoreKeys.config) ?? [:] }
 

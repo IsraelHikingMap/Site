@@ -225,7 +225,7 @@ class CarNavigation(
         val nextStep = next?.let { step(it) }
         val routing =
                 RoutingInfo.Builder()
-                        .setCurrentStep(currentStep, distance(distanceToStep))
+                        .setCurrentStep(currentStep, maneuverDistance(distanceToStep))
                         .apply { nextStep?.let { setNextStep(it) } }
                         .build()
         navigationInfo = routing
@@ -343,15 +343,47 @@ class CarNavigation(
         }
     }
 
-    /** Human-readable distance for the notification text, respecting the configured units. */
+    /**
+     * Human-readable distance to the turn for the notification text, respecting the configured units.
+     * Empty once the turn is near enough that a countdown only flickers, see [maneuverDistance].
+     */
     private fun formatDistance(meters: Double): String =
             if (units() == UNIT_IMPERIAL) {
-                if (meters < METERS_PER_MILE / 4) "${(meters / METERS_PER_FOOT).roundToInt()} ft"
-                else "%.1f mi".format(meters / METERS_PER_MILE)
+                val feet = meters / METERS_PER_FOOT
+                when {
+                    feet < HIDE_MANEUVER_DISTANCE_FT -> ""
+                    meters < METERS_PER_MILE / 4 -> "${roundTo(feet, MANEUVER_STEP_FT).roundToInt()} ft"
+                    else -> "%.1f mi".format(meters / METERS_PER_MILE)
+                }
             } else {
-                if (meters < METERS_PER_KILOMETER) "${meters.roundToInt()} m"
-                else "%.1f km".format(meters / METERS_PER_KILOMETER)
+                when {
+                    meters < HIDE_MANEUVER_DISTANCE_M -> ""
+                    meters < METERS_PER_KILOMETER -> "${roundTo(meters, MANEUVER_STEP_M).roundToInt()} m"
+                    else -> "%.1f km".format(meters / METERS_PER_KILOMETER)
+                }
             }
+
+    /**
+     * The distance to the turn as the cluster shows it, rounded to a step the driver can read at a
+     * glance rather than counting down meter by meter. Unlike iOS it keeps counting below
+     * [HIDE_MANEUVER_DISTANCE_M]: RoutingInfo requires a distance and Distance.create rejects a
+     * negative one, so there is no "unavailable" to hand the host.
+     */
+    private fun maneuverDistance(meters: Double): Distance =
+            if (units() == UNIT_IMPERIAL) {
+                if (meters < METERS_PER_MILE / 4)
+                        Distance.create(
+                                roundTo(meters / METERS_PER_FOOT, MANEUVER_STEP_FT),
+                                Distance.UNIT_FEET
+                        )
+                else Distance.create(meters / METERS_PER_MILE, Distance.UNIT_MILES)
+            } else {
+                if (meters < METERS_PER_KILOMETER)
+                        Distance.create(roundTo(meters, MANEUVER_STEP_M), Distance.UNIT_METERS)
+                else Distance.create(meters / METERS_PER_KILOMETER, Distance.UNIT_KILOMETERS)
+            }
+
+    private fun roundTo(value: Double, step: Double): Double = (value / step).roundToInt() * step
 
     private fun distance(meters: Double): Distance =
             if (units() == UNIT_IMPERIAL) {
@@ -439,6 +471,14 @@ class CarNavigation(
         private const val DEFAULT_ROUTING_TYPE = "4WD"
         private const val EPSILON_M = 1.0
         private const val METERS_PER_KILOMETER = 1000.0
+
+        /** The step the distance to a turn is rounded to, so it does not tick down meter by meter. */
+        private const val MANEUVER_STEP_M = 10.0
+        private const val MANEUVER_STEP_FT = 50.0
+
+        /** Below this the turn is close enough that a distance only flickers, so it is left out. */
+        private const val HIDE_MANEUVER_DISTANCE_M = 30.0
+        private const val HIDE_MANEUVER_DISTANCE_FT = 100.0
         private const val METERS_PER_MILE = 1609.344
         private const val METERS_PER_FOOT = 0.3048
         private const val UNIT_IMPERIAL = "imperial"
