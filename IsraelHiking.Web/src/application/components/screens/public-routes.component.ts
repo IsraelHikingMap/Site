@@ -54,7 +54,7 @@ export class PublicRoutesComponent {
     public readonly showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
     public readonly routesClusterSourceId = "routes-cluster-source";
-    public readonly minZoom = 8;
+    public readonly minZoom = 7;
 
     /**
      * How many routes the list shows at most, above which it only says there are too many: every route

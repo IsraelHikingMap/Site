@@ -36,7 +36,7 @@
                 sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
             <mgl-geojson-source #routesClusterSource [id]="routesClusterSourceId" [data]="poiGeoJsonData()"
-                [cluster]="true" [clusterMaxZoom]="13" [clusterRadius]="100"></mgl-geojson-source>
+                [cluster]="true" [clusterMaxZoom]="11" [clusterRadius]="100"></mgl-geojson-source>
             <mgl-markers-for-clusters [source]="routesClusterSourceId">
                 <ng-template mglPoint let-feature>
                     <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="onStartPointClick(feature, $event)"
@@ -50,8 +50,8 @@
                     </span>
                 </ng-template>
                 <ng-template mglClusterPoint let-feature>
-                    <div class="marker-cluster" (click)="zoomToCluster(feature, routesClusterSource)" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Zoom into routes cluster">
+                    <div class="marker-cluster" (click)="zoomToCluster(feature, routesClusterSource)"
+                        analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Zoom into routes cluster">
                         {{ feature.properties?.point_count }}
                     </div>
                 </ng-template>
