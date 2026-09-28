@@ -4,6 +4,8 @@ import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { Store } from "@ngxs/store";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { skip } from "rxjs";
 
 import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
@@ -38,12 +40,28 @@ export class DescriptionComponent implements OnChanges, OnDestroy {
     public readonly isReadingOutLoud = computed(() => this.description() !== "" &&
         this.textToSpeechService.speakingText() === this.description());
 
+    constructor() {
+        this.store.select((state: ApplicationState) => state.configuration.language)
+            .pipe(takeUntilDestroyed(), skip(1)).subscribe(() => {
+                this.showDescription();
+            });
+    }
+
     public ngOnChanges(): void {
+        this.showDescription();
+    }
+
+    /**
+     * Shows the text that is already at hand and asks for a translation of it, which is what both a
+     * feature and a language change call for - the description of a feature is per language, so the one
+     * on screen is of the language that was picked when it was read.
+     * A translation takes seconds to come back, and waiting for it would leave the user looking at an
+     * empty panel for all of that time.
+     */
+    private showDescription(): void {
         if (!this.feature()) {
             return;
         }
-        // Show the text we already have immediately. A translation takes seconds to come back, and
-        // waiting on it would leave the user looking at an empty panel for all of that time.
         this.showToggleTranslation.set(false);
         this.isTranslating.set(false);
         this.description.set(this.getUntranslatedDescription());

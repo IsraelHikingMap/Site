@@ -231,7 +231,8 @@
     "No description available in your language": "אין תיאור מתאים בשפה שלכם.",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "לא נמצאה אפליקציית דוא\"ל במכשיר. יש להתקין או להגדיר אפליקציית דוא\"ל ולנסות שוב, או לשלוח לנו דוא\"ל לכתובת support@mapeak.com עם תיאור התקלה",
     "No Entry": "אין מעבר",
-    "No routes found, zoom in the map or change the filters...": "לא נמצאו מסלולים, הגדילו את המפה או שנו את הסינונים...",
+    "No routes found in this area...": "לא נמצאו מסלולים באיזור זה...",
+    "No routes found, change the filters...": "לא נמצאו מסלולים, שנו את הסינונים...",
     "No saved routes were found...": "לא נמצאו מסלולים שמורים...",
     "No traces yet - uploading some to OSM helps improve the map for everyone.": "אין הקלטות עדיין. העלאת הקלטות ל-OSM עוזרת לשפר את המפה לכולם.",
     "No unmapped routes! :-)": "אין מסלולים לא ממופים! 😊",
@@ -366,6 +367,7 @@
     "Title": "כותרת",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "על מנת למנוע בעיות בהורדה, אנא הישארו באפליקציה הזו מבלי לנעול את המסך",
     "Toilets": "שירותים",
+    "Too many routes found, zoom in the map or change the filters...": "נמצאו יותר מדי מסלולים, הגדילו את המפה או שנו את הסינונים...",
     "Traces are only saved locally. You can change that in the settings screen.": "ההקלטות נשמרות רק מקומית. תוכלו לשנות זאת במסך ההגדרות.",
     "Tracks and Paths": "דרכים",
     "Translated by LTEngine, click to view original text": "תורגם על ידי LTEngine, לחצו כדי לראות את הטקסט המקורי",
@@ -427,5 +429,6 @@
     "Yes": "כן",
     "You have more than 10 routes which can cause performance issues.": "יש לך יותר מעשרה מסלולים בתכנון, מה שיכול לגרום לבעיות ביצועים.",
     "Zoom In": "הגדלת המפה",
+    "Zoom in the map to see routes...": "הגדילו את המפה כדי לראות מסלולים...",
     "Zoom Out": "הקטנת המפה"
 }

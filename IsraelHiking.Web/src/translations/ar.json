@@ -231,7 +231,8 @@
     "No description available in your language": "لا يوجد وصف متوفر بلغتك.",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "لم يتم العثور على تطبيق بريد إلكتروني على هذا الجهاز. يرجى تثبيت تطبيق بريد إلكتروني أو إعداده والمحاولة مرة أخرى، أو إرسال بريد إلكتروني إلينا على support@mapeak.com مع وصف المشكلة",
     "No Entry": "ممنوع المرور",
-    "No routes found, zoom in the map or change the filters...": "لم يتم العثور على مسارات، قم بتكبير الخريطة أو تغيير الفلاتر...",
+    "No routes found in this area...": "لم يتم العثور على مسارات في هذه المنطقة...",
+    "No routes found, change the filters...": "لم يتم العثور على مسارات، قم بتغيير الفلاتر...",
     "No saved routes were found...": "لم يتم العثور على مسارات محفوظة...",
     "No traces yet - uploading some to OSM helps improve the map for everyone.": "لا توجد آثار بعد. رفع بعضها إلى OSM يساعد على تحسين الخريطة للجميع.",
     "No unmapped routes! :-)": "لا توجد مسارات غير مرسومة! 😊",
@@ -366,6 +367,7 @@
     "Title": "عنوان",
     "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "لمنع أخطاء التحميل، يرجى عدم التبديل بين التطبيقات أو قفل الشاشة حتى يتم الانتهاء من التحميل",
     "Toilets": "مرافق صحية",
+    "Too many routes found, zoom in the map or change the filters...": "تم العثور على عدد كبير جدًا من المسارات، قم بتكبير الخريطة أو تغيير الفلاتر...",
     "Traces are only saved locally. You can change that in the settings screen.": "تُحفظ المسارات فقط محليًا، يمكنك تغيير ذلك في شاشة الإعدادات.",
     "Tracks and Paths": "دروب ومسارات",
     "Translated by LTEngine, click to view original text": "تُرجمت بواسطة LTEngine، اضغط لرؤية النص الأصلي",
@@ -427,5 +429,6 @@
     "Yes": "نعم",
     "You have more than 10 routes which can cause performance issues.": "لديك أكثر من 10 مسارات، وقد يتسبب ذلك في مشاكل في الأداء.",
     "Zoom In": "تكبير",
+    "Zoom in the map to see routes...": "قم بتكبير الخريطة لرؤية المسارات...",
     "Zoom Out": "تصغير"
 }
