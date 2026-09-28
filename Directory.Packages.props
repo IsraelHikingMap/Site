@@ -27,7 +27,7 @@
     <PackageVersion Include="NLog.Web.AspNetCore" Version="6.2.1" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="OsmSharp" Version="7.0.0-pre027" />
-    <PackageVersion Include="OsmSharp.IO.API" Version="1.0.5" />
+    <PackageVersion Include="OsmSharp.IO.API" Version="1.1.0" />
     <PackageVersion Include="ProjNet" Version="2.1.0" />
     <PackageVersion Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageVersion Include="SkiaSharp" Version="4.152.1" />

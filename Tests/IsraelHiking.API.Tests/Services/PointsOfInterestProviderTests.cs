@@ -445,6 +445,51 @@ public class PointsOfInterestProviderTests
 
 
     [TestMethod]
+    public void UpdateFeature_AddImageToSuperRelation_ShouldFetchTheChildRelationsForItsGeometryAndUpdate()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, "Relation_1" },
+            { FeatureAttributes.POI_ICON, "icon" },
+            { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                                          "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+        });
+        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+        // The "full" response of a super relation does not contain the ways of its child relations
+        gateway.GetCompleteRelation(1).Returns(new CompleteRelation
+        {
+            Id = 1,
+            Tags = new TagsCollection { { "name:he", "name" }, { "route", "bicycle" } },
+            Members = [new CompleteRelationMember { Member = new CompleteRelation { Id = 2, Members = [] } }]
+        });
+        gateway.GetCompleteRelation(2).Returns(new CompleteRelation
+        {
+            Id = 2,
+            Tags = new TagsCollection { { "route", "bicycle" } },
+            Members =
+            [
+                new CompleteRelationMember
+                {
+                    Member = new CompleteWay
+                    {
+                        Id = 3,
+                        Nodes = [new Node { Id = 4, Latitude = 1, Longitude = 2 }, new Node { Id = 5, Latitude = 3, Longitude = 4 }]
+                    }
+                }
+            ]
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received(1).GetCompleteRelation(2);
+        _wikimediaCommonGateway.Received(1).UploadImage("name.png", Arg.Any<string>(), user.DisplayName, Arg.Any<Stream>(), Arg.Is<Coordinate>(c => c.X == 2 && c.Y == 1));
+        gateway.Received(1).UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Id == 1));
+    }
+
+    [TestMethod]
     public void UpdateFeature_WithImageIdExists_ShouldUpdate()
     {
         var user = new User { DisplayName = "DisplayName" };
