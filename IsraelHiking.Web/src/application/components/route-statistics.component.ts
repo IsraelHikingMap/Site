@@ -22,7 +22,7 @@ import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
-import { SpatialService } from "../services/spatial.service";
+import { SpatialHelper } from "../services/spatial.helper";
 import { GeoLocationService } from "../services/geo-location.service";
 import { LocationService } from "../services/location.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
@@ -896,7 +896,7 @@ export class RouteStatisticsComponent implements OnInit {
         const results = [start];
         let previousPoint = start;
         for (const latlng of latlngs) {
-            const currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
+            const currentDistance = SpatialHelper.getDistanceInMeters(previousPoint, latlng);
             length += currentDistance;
             if (length < markersDistance) {
                 previousPoint = latlng;
@@ -908,10 +908,10 @@ export class RouteStatisticsComponent implements OnInit {
                 markersToAdd++;
             }
             const ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
-            results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
+            results.push(SpatialHelper.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
             for (let i = 1; i <= markersToAdd; i++) {
                 const currentRatio = (i * markersDistance) / currentDistance + ratio;
-                results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
+                results.push(SpatialHelper.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
             }
             previousPoint = latlng;
         }
@@ -1135,7 +1135,7 @@ export class RouteStatisticsComponent implements OnInit {
                 properties: {},
                 geometry: {
                     type: "LineString",
-                    coordinates: this.statistics.points.map(p => SpatialService.toCoordinate(p.latlng))
+                    coordinates: this.statistics.points.map(p => SpatialHelper.toCoordinate(p.latlng))
                 }
             }]
         });

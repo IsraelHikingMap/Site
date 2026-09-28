@@ -6,13 +6,13 @@ import { timeout } from "rxjs/operators";
 import { validate as validateUuid } from "uuid";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
-import type { GeoJSONFeature } from "maplibre-gl";
+import type { FilterSpecification, GeoJSONFeature } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouteUrlInfo, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { MapService } from "./map.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
@@ -138,25 +138,25 @@ export class PoiService {
     private getGeolocation(feature: GeoJSON.Feature): LatLngAltTime {
         switch (feature.geometry.type) {
             case "Point":
-                return SpatialService.toLatLng(feature.geometry.coordinates);
+                return SpatialHelper.toLatLng(feature.geometry.coordinates);
             case "LineString":
-                return SpatialService.toLatLng(feature.geometry.coordinates[0]);
+                return SpatialHelper.toLatLng(feature.geometry.coordinates[0]);
             case "Polygon": {
-                const bounds = SpatialService.getBoundsForFeature(feature);
+                const bounds = SpatialHelper.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
                     lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiPolygon": {
-                const bounds = SpatialService.getBoundsForFeature(feature);
+                const bounds = SpatialHelper.getBoundsForFeature(feature);
                 return {
                     lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
                     lng: (bounds.northEast.lng + bounds.southWest.lng) / 2
                 };
             }
             case "MultiLineString":
-                return SpatialService.toLatLng(feature.geometry.coordinates[0][0]);
+                return SpatialHelper.toLatLng(feature.geometry.coordinates[0][0]);
             default:
                 throw new Error("Unsupported geometry type: " + feature.geometry.type);
         }
@@ -180,16 +180,17 @@ export class PoiService {
         }
     }
 
-    private getFeaturesFromTiles(): GeoJSONFeature[] {
-        return this.mapService.getFeaturesFromTiles();
+    private getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
+        return this.mapService.getFeaturesFromTiles(filter);
     }
 
     /**
      * Gets the POIs the map holds for the part of the world it currently shows. A map that is not
      * displayed renders nothing, so a caller that outlives the map on screen needs to keep the result.
+     * @param filter limits the points to those the map itself matches, see {@link MapService.getFeaturesFromTiles}
      */
-    public getPoisFromTiles(): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
-        const features = this.getFeaturesFromTiles();
+    public getPoisFromTiles(filter?: FilterSpecification): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+        const features = this.getFeaturesFromTiles(filter);
         const hashSet = new Set();
         let pois = features.map(feature => {
             const poi = this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature));
@@ -332,7 +333,7 @@ export class PoiService {
                         },
                         geometry: {
                             type: "Point",
-                            coordinates: SpatialService.toCoordinate(uploadMarkerData.latlng)
+                            coordinates: SpatialHelper.toCoordinate(uploadMarkerData.latlng)
                         }
                     };
                     return newFeature;
@@ -479,7 +480,7 @@ export class PoiService {
             },
             geometry: {
                 type: "Point",
-                coordinates: SpatialService.toCoordinate(latlng)
+                coordinates: SpatialHelper.toCoordinate(latlng)
             }
         } as GeoJSON.Feature;
         GeoJSONUtils.setLocation(feature, latlng);
@@ -550,7 +551,7 @@ export class PoiService {
                     continue;
                 }
                 poi.properties.poiId = (feature.id as string).replace("node/", "node_");
-                const distance = SpatialService.getDistance(location, SpatialService.toLatLng(feature.geometry.coordinates));
+                const distance = SpatialHelper.getDistance(location, SpatialHelper.toLatLng(feature.geometry.coordinates));
                 if (distance < closestDistance) {
                     closestFeature = poi;
                     closestDistance = distance;
@@ -578,7 +579,7 @@ export class PoiService {
             },
             geometry: {
                 type: "Point",
-                coordinates: SpatialService.toCoordinate(latlng)
+                coordinates: SpatialHelper.toCoordinate(latlng)
             }
         } as GeoJSON.Feature;
         GeoJSONUtils.setLocation(feature, latlng);
@@ -594,7 +595,7 @@ export class PoiService {
         feature.properties.poiSource = "OSM";
         feature.geometry = {
             type: "Point",
-            coordinates: SpatialService.toCoordinate(info.location)
+            coordinates: SpatialHelper.toCoordinate(info.location)
         };
         return this.addPointToUploadQueue(feature);
     }
@@ -679,7 +680,7 @@ export class PoiService {
 
     public getLengthInMeters(feature: Immutable<GeoJSON.Feature>): number | null {
         if (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString") {
-            return SpatialService.getLengthInMetersForGeometry(feature.geometry);
+            return SpatialHelper.getLengthInMetersForGeometry(feature.geometry);
         }
         return null;
     }

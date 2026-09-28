@@ -35,6 +35,7 @@ describe("FileService", () => {
         const loggingServiceMock = {
             info: () => { },
             debug: () => { },
+            warning: () => { },
             error: () => { }
         };
         TestBed.configureTestingModule({
@@ -139,6 +140,93 @@ describe("FileService", () => {
 
             const response = await promise;
             expect(response).toEqual("{}");
+        }
+    ));
+
+    it("Should fall back to the style that was fetched before when it can not be fetched now",
+        inject([FileService, HttpTestingController, RunningContextService],
+            async (service: FileService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
+
+                const firstPromise = service.getStyleJsonContent("https://example.com/kept.json", false);
+                mockBackend.expectOne("https://example.com/kept.json").flush({ kept: true });
+                await firstPromise;
+
+                const secondPromise = service.getStyleJsonContent("https://example.com/kept.json", false);
+                mockBackend.expectOne("https://example.com/kept.json").error(new ProgressEvent("error"));
+
+                expect(JSON.parse(await secondPromise)).toEqual({ kept: true });
+            }
+        )
+    );
+
+    it("Should prefer the style from the network over the one on the device, so a style that changed is not missed",
+        inject([FileService, HttpTestingController, RunningContextService],
+            async (service: FileService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
+                await service.writeStyle("changed.json", "{\"old\": true}");
+
+                const promise = service.getStyleJsonContent("https://example.com/changed.json", true);
+                mockBackend.expectOne("https://example.com/changed.json").flush({ fresh: true });
+
+                expect(JSON.parse(await promise)).toEqual({ fresh: true });
+            }
+        )
+    );
+
+    it("Should use the style an offline download wrote when a built in base layer can not be fetched",
+        inject([FileService, HttpTestingController, RunningContextService],
+            async (service: FileService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
+                await service.writeStyle("downloaded.json", "{\"downloaded\": true}");
+
+                const promise = service.getStyleJsonContent("https://example.com/downloaded.json", true);
+                mockBackend.expectOne("https://example.com/downloaded.json").error(new ProgressEvent("error"));
+
+                expect(JSON.parse(await promise)).toEqual({ downloaded: true });
+            }
+        )
+    );
+
+    it("Should not keep the style of a built in base layer, it needs to match the offline tiles",
+        inject([FileService, HttpTestingController, RunningContextService],
+            async (service: FileService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
+
+                const firstPromise = service.getStyleJsonContent("https://example.com/built-in.json", true);
+                mockBackend.expectOne("https://example.com/built-in.json").flush({ builtIn: true });
+                await firstPromise;
+
+                const secondPromise = service.getStyleJsonContent("https://example.com/built-in.json", true);
+                mockBackend.expectOne("https://example.com/built-in.json").error(new ProgressEvent("error"));
+
+                expect(JSON.parse(await secondPromise)).toEqual({ version: 8, layers: [], sources: {} });
+            }
+        )
+    );
+
+    it("Should return an empty style when it is neither online nor on the device",
+        inject([FileService, HttpTestingController, RunningContextService],
+            async (service: FileService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
+
+                const promise = service.getStyleJsonContent("https://example.com/never-fetched.json", false);
+                mockBackend.expectOne("https://example.com/never-fetched.json").error(new ProgressEvent("error"));
+
+                expect(JSON.parse(await promise)).toEqual({ version: 8, layers: [], sources: {} });
+            }
+        )
+    );
+
+    it("Should only list the offline map files that are in the data directory", inject([FileService],
+        async (service: FileService) => {
+            await service.writeStyle("not-a-map.json", "{}");
+            await Filesystem.writeFile({ path: "a-map+7-76-51.pmtiles", data: "AA==", directory: Directory.Data });
+
+            const files = await service.listOfflineFilesInDataDirectory();
+
+            expect(files.map(f => f.fileName)).toEqual(["a-map+7-76-51.pmtiles"]);
+            await Filesystem.deleteFile({ path: "a-map+7-76-51.pmtiles", directory: Directory.Data });
         }
     ));
 

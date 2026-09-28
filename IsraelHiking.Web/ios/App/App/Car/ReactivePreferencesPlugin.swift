@@ -1,13 +1,11 @@
 import Capacitor
 import Foundation
 
-/**
- * Capacitor bridge mirroring `ReactivePreferencesPlugin.kt`. Exposes a generic reactive
- * preferences store to JS: `ReactivePreferences.storeValue({key, value})` persists any value into
- * `CapacitorStore` (so the CarPlay scene, which may run while the web UI is not foregrounded, can
- * read the last known values), and every store change is pushed back to JS listeners by key. The
- * bridge knows nothing about what the keys mean.
- */
+/// Capacitor bridge mirroring `ReactivePreferencesPlugin.kt`. Exposes a generic reactive
+/// preferences store to JS: `ReactivePreferences.storeValue({key, value})` persists any value into
+/// `CapacitorStore` (so the CarPlay scene, which may run while the web UI is not foregrounded, can
+/// read the last known values), and every store change is pushed back to JS listeners by key. The
+/// bridge knows nothing about what the keys mean.
 @objc(ReactivePreferencesPlugin)
 public class ReactivePreferencesPlugin: CAPPlugin, CAPBridgedPlugin, CapacitorStore.Listener {
     public let identifier = "ReactivePreferencesPlugin"

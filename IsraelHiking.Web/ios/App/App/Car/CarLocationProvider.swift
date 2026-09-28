@@ -10,18 +10,20 @@ final class CarLocationProvider: NSObject, CLLocationManagerDelegate {
     private let store = CapacitorStore.shared
     private var started = false
 
+    /// Configures the manager for navigation, delivering every computed fix rather than gating on
+    /// distance, so CarPlay follows as smoothly as the phone app does.
     override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        // Deliver every computed fix (no 5 m gate) so CarPlay follows as smoothly as the phone app.
         manager.distanceFilter = kCLDistanceFilterNone
         manager.activityType = .automotiveNavigation
     }
 
+    /// Starts the updates, asking for permission first: CarPlay can connect before the phone app
+    /// has ever prompted for it.
     func start() {
         if started { return }
-        // CarPlay can connect before the phone app has prompted for permission.
         if manager.authorizationStatus == .notDetermined {
             manager.requestWhenInUseAuthorization()
         }

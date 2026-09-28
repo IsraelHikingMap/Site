@@ -2,11 +2,9 @@ import Compression
 import Foundation
 import PMTiles
 
-/**
- * Reads offline vector tiles from the PMTiles archives the app downloads into its Documents
- * directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt`: same sub-pyramid file
- * naming (`{type}+7-{x}-{y}.pmtiles` for z>=7, `{type}-6.pmtiles` below)
- */
+/// Reads offline vector tiles from the PMTiles archives the app downloads into its Documents
+/// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt`: same sub-pyramid file
+/// naming (`{type}+7-{x}-{y}.pmtiles` for z>=7, `{type}-6.pmtiles` below)
 final class PMTilesService {
 
     static let tilesZoom = 7

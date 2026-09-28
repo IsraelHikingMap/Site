@@ -4,7 +4,7 @@ import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
 
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import type { ApplicationState } from "../models";
 
@@ -78,7 +78,7 @@ export class PmTilesService {
 
     private getFileNameByType(z: number, x: number, y: number, type: string): string {
         if (z >= TILES_ZOOM) {
-            const { tileX, tileY } = SpatialService.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
+            const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
             return `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
         } else {
             return `${type}-${TILES_ZOOM - 1}.pmtiles`;
@@ -103,7 +103,7 @@ export class PmTilesService {
         let tileX = undefined;
         let tileY = undefined;
         if (z >= TILES_ZOOM) {
-            ({ tileX, tileY } = SpatialService.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
+            ({ tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
         }
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
         if (downloadedTiles[PmTilesService.toTileKey(tileX, tileY)] == null) {

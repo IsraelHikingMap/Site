@@ -8,14 +8,12 @@ enum ValhallaTarError: Error {
     case entryOutsideDirectory(String)
 }
 
-/**
- * Reads the contents of a gzipped file as they are asked for, so that neither the file nor what it
- * holds is ever held in memory - an area is hundreds of megabytes packed and more than that unpacked.
- *
- * The compression framework's zlib is raw deflate, which is what a gzip file holds between its header
- * and its trailer, so the header is read here and the trailer, which is only a checksum and a length,
- * is simply never asked for.
- */
+/// Reads the contents of a gzipped file as they are asked for, so that neither the file nor what it
+/// holds is ever held in memory - an area is hundreds of megabytes packed and more than that unpacked.
+///
+/// The compression framework's zlib is raw deflate, which is what a gzip file holds between its header
+/// and its trailer, so the header is read here and the trailer, which is only a checksum and a length,
+/// is simply never asked for.
 private final class GzipReader {
     private static let compressedChunkSize = 1 << 16
     private static let decompressedChunkSize = 1 << 20
@@ -36,10 +34,8 @@ private final class GzipReader {
         try? handle.close()
     }
 
-    /**
-     * The next bytes of the file, as many as were asked for and fewer only at its end, where nil says
-     * that there is nothing left.
-     */
+    /// The next bytes of the file, as many as were asked for and fewer only at its end, where nil says
+    /// that there is nothing left.
     func read(count: Int) throws -> Data? {
         while pending.count < count {
             guard let chunk = try filter.readData(ofLength: GzipReader.decompressedChunkSize), !chunk.isEmpty else {
@@ -55,9 +51,7 @@ private final class GzipReader {
         return taken
     }
 
-    /**
-     * Passes over the next bytes, which a compressed file can only do by reading them.
-     */
+    /// Passes over the next bytes, which a compressed file can only do by reading them.
     func skip(_ count: Int) throws {
         var remaining = count
         while remaining > 0 {
@@ -68,9 +62,7 @@ private final class GzipReader {
         }
     }
 
-    /**
-     * Reads past the gzip header, which is ten bytes and then whatever its flags say it also carries.
-     */
+    /// Reads past the gzip header, which is ten bytes and then whatever its flags say it also carries.
     private func skipHeader() throws {
         guard let header = try handle.read(upToCount: 10), header.count == 10,
               header[0] == 0x1F, header[1] == 0x8B, header[2] == 8 else {
@@ -97,14 +89,12 @@ private final class GzipReader {
     }
 }
 
-/**
- * A minimal streaming reader for the gzipped tar files that hold the routing tiles, mirroring what
- * commons-compress does on android. It is streaming on purpose - an area can be hundreds of megabytes,
- * so neither the archive nor a single tile is ever held in memory.
- *
- * Only what valhalla's extracts contain is handled: regular files and directories, with the plain
- * ustar header. Anything else is skipped rather than guessed at.
- */
+/// A minimal streaming reader for the gzipped tar files that hold the routing tiles, mirroring what
+/// commons-compress does on android. It is streaming on purpose - an area can be hundreds of megabytes,
+/// so neither the archive nor a single tile is ever held in memory.
+///
+/// Only what valhalla's extracts contain is handled: regular files and directories, with the plain
+/// ustar header. Anything else is skipped rather than guessed at.
 enum ValhallaTarExtractor {
     private static let blockSize = 512
     private static let copyBufferSize = 1 << 20
@@ -116,15 +106,13 @@ enum ValhallaTarExtractor {
         static let prefix = (offset: 345, length: 155)
     }
 
-    /**
-     * Extracts the archive into the given directory and returns the relative paths of the files it wrote.
-     * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
-     * within a directory names that directory itself first, which is the one entry that is allowed to be
-     * the tiles directory rather than something under it.
-     * What is returned is where each file ended up rather than how the archive spelled it, so that an
-     * archive packed as "./0/002/753.gph" and one packed as "0/002/753.gph" leave the same manifest
-     * behind - it is what the tiles are deleted by later on.
-     */
+    /// Extracts the archive into the given directory and returns the relative paths of the files it wrote.
+    /// An entry whose name would escape the tiles directory is rejected. An archive that was packed from
+    /// within a directory names that directory itself first, which is the one entry that is allowed to be
+    /// the tiles directory rather than something under it.
+    /// What is returned is where each file ended up rather than how the archive spelled it, so that an
+    /// archive packed as "./0/002/753.gph" and one packed as "0/002/753.gph" leave the same manifest
+    /// behind - it is what the tiles are deleted by later on.
     static func extract(archiveAt archiveURL: URL, into directoryURL: URL) throws -> [String] {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: archiveURL.path) else {
@@ -200,9 +188,7 @@ enum ValhallaTarExtractor {
         }
     }
 
-    /**
-     * Reads a null padded, and possibly space padded, ascii field out of a header block.
-     */
+    /// Reads a null padded, and possibly space padded, ascii field out of a header block.
     private static func string(in header: Data, at offset: Int, length: Int) -> String {
         let field = header.subdata(in: offset..<(offset + length))
         let value = field.prefix { $0 != 0 }

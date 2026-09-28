@@ -8,7 +8,7 @@ import type { Marker } from "maplibre-gl";
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { ApplicationState, LatLngAltTime } from "../../models";
 
 @Component({
@@ -64,7 +64,7 @@ export class RecordedRouteComponent {
         }
         const latlngs = [...recording.latlngs];
         if (!this.startPointGeoJson()) {
-            this.startPointGeoJson.set(SpatialService.getPointFeature(latlngs[0]));
+            this.startPointGeoJson.set(SpatialHelper.getPointFeature(latlngs[0]));
         }
 
         latlngs.splice(0, this.lastSplit);
@@ -81,8 +81,8 @@ export class RecordedRouteComponent {
 
     private getFeatureFromLatLngs(latlngs: LatLngAltTime[]): GeoJSON.Feature<GeoJSON.LineString> {
         if (latlngs.length === 1) {
-            return SpatialService.getLineString([latlngs[0], latlngs[0]]);
+            return SpatialHelper.getLineString([latlngs[0], latlngs[0]]);
         }
-        return SpatialService.getLineString(latlngs);
+        return SpatialHelper.getLineString(latlngs);
     }
 }

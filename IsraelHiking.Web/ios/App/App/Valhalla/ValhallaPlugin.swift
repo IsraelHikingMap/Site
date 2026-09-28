@@ -1,13 +1,11 @@
 import Capacitor
 import Foundation
 
-/**
- * Offline routing using the native Valhalla engine against tiles that were downloaded and extracted
- * on the device. The capacitor bridge mirrors `ValhallaPlugin.kt` method for method.
- *
- * This is a self contained plugin so that it can later be moved out into its own capacitor plugin -
- * it must not depend on anything else in the app.
- */
+/// Offline routing using the native Valhalla engine against tiles that were downloaded and extracted
+/// on the device. The capacitor bridge mirrors `ValhallaPlugin.kt` method for method.
+///
+/// This is a self contained plugin so that it can later be moved out into its own capacitor plugin -
+/// it must not depend on anything else in the app.
 @objc(ValhallaPlugin)
 public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "ValhallaPlugin"
@@ -25,11 +23,9 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     private let profiles = ValhallaProfiles()
     private lazy var router = ValhallaRouter(tiles: tiles)
 
-    /**
-     * Extracts a downloaded file of routing tiles into the shared tiles directory.
-     * Extracting the files of several adjacent tiles into it is the way to route across them.
-     * The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
-     */
+    /// Extracts a downloaded file of routing tiles into the shared tiles directory.
+    /// Extracting the files of several adjacent tiles into it is the way to route across them.
+    /// The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
     @objc func extractFile(_ call: CAPPluginCall) {
         guard let tarFileName = call.getString("tarFileName"), !tarFileName.isEmpty else {
             call.reject("tarFileName is required")
@@ -48,17 +44,13 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /**
-     * The keys of the tiles whose routing tiles are on the device, so that the app can tell which
-     * areas it can route in without keeping a list of its own.
-     */
+    /// The keys of the tiles whose routing tiles are on the device, so that the app can tell which
+    /// areas it can route in without keeping a list of its own.
     @objc func listTiles(_ call: CAPPluginCall) {
         call.resolve(["tileKeys": tiles.tileKeys()])
     }
 
-    /**
-     * Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
-     */
+    /// Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
     @objc func deleteTile(_ call: CAPPluginCall) {
         guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
             call.reject("tileKey is required")
@@ -69,10 +61,8 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
 
-    /**
-     * Keeps the routing profiles, as the app downloaded them, so that a route uses the same costing
-     * options the server would have used.
-     */
+    /// Keeps the routing profiles, as the app downloaded them, so that a route uses the same costing
+    /// options the server would have used.
     @objc func storeProfiles(_ call: CAPPluginCall) {
         guard let content = call.getString("profiles"), !content.isEmpty else {
             call.reject("profiles is required")
@@ -86,9 +76,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /**
-     * Removes all the extracted tiles.
-     */
+    /// Removes all the extracted tiles.
     @objc func clearTiles(_ call: CAPPluginCall) {
         do {
             try tiles.clear()
@@ -99,9 +87,7 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /**
-     * Calculates a route between two points, returns the raw valhalla response json.
-     */
+    /// Calculates a route between two points, returns the raw valhalla response json.
     @objc func route(_ call: CAPPluginCall) {
         guard let fromLat = call.getDouble("fromLat") else {
             call.reject("fromLat is required")
@@ -144,12 +130,10 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /**
-     * What went wrong, in a way that can be read. This plugin's errors are swift enums with no
-     * descriptions of their own, and localizedDescription says nothing about such an error beyond which
-     * case it was - as in "(App.ValhallaRouterError error 1.)" - while what actually went wrong, such as
-     * the profile that was not found, is in the case itself.
-     */
+    /// What went wrong, in a way that can be read. This plugin's errors are swift enums with no
+    /// descriptions of their own, and localizedDescription says nothing about such an error beyond which
+    /// case it was - as in "(App.ValhallaRouterError error 1.)" - while what actually went wrong, such as
+    /// the profile that was not found, is in the case itself.
     private static func describe(_ error: Error) -> String {
         String(describing: error)
     }

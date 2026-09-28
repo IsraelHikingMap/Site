@@ -32,7 +32,7 @@ import { MapService } from "../../services/map.service";
 import { ToastService } from "../../services/toast.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -181,7 +181,7 @@ export class TracesComponent implements OnInit {
             }
             this.missingParts.set(geoJson);
             this.showMap.set(true);
-            const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
+            const bounds = SpatialHelper.getBoundsForFeatureCollection(geoJson);
             this.mapService.fitBounds(bounds);
         } catch (ex) {
             this.toastService.error(ex, this.resources.unexpectedErrorPleaseTryAgainLater);
@@ -300,7 +300,7 @@ export class TracesComponent implements OnInit {
             features.push(...this.selectedRouteService.createFeaturesForRoute(route));
         }
         this.selectedTraceGeoJson.set({ type: "FeatureCollection", features });
-        const bounds = SpatialService.getBoundsForFeatureCollection(this.selectedTraceGeoJson());
+        const bounds = SpatialHelper.getBoundsForFeatureCollection(this.selectedTraceGeoJson());
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 

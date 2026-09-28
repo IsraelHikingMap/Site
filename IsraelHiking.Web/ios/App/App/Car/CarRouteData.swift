@@ -7,9 +7,27 @@ struct CarRouteData {
     let weight: Double
     let color: String?
     let opacity: Double
+    let name: String?
     let markers: [CarMarkerData]
 
-    /// Parses a single `{ points: [[lng, lat], ...], weight, color, opacity, markers }` object.
+    /// The distance in meters from the start of the route to each of its points. Measured once,
+    /// since it only changes when the route does, while the GPS position is matched against the
+    /// route on every fix.
+    let distancesAlongRouteMeters: [Double]
+
+    /// The length of the whole route in meters.
+    var lengthMeters: Double { distancesAlongRouteMeters.last ?? 0 }
+
+    private static func distancesAlongRoute(_ coordinates: [CLLocationCoordinate2D]) -> [Double] {
+        var distances = [Double](repeating: 0, count: coordinates.count)
+        for index in 1..<max(coordinates.count, 1) {
+            distances[index] = distances[index - 1]
+                + SpatialHelper.distanceMeters(coordinates[index - 1], coordinates[index])
+        }
+        return distances
+    }
+
+    /// Parses a single `{ points: [[lng, lat], ...], weight, color, opacity, name, markers }` object.
     static func from(_ json: [String: Any]) -> CarRouteData? {
         guard let points = json["points"] as? [[Any]] else { return nil }
         let coordinates: [CLLocationCoordinate2D] = points.compactMap { pair in
@@ -25,7 +43,9 @@ struct CarRouteData {
             weight: (json["weight"] as? NSNumber)?.doubleValue ?? 0,
             color: json["color"] as? String,
             opacity: (json["opacity"] as? NSNumber)?.doubleValue ?? 0,
-            markers: markers
+            name: (json["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
+            markers: markers,
+            distancesAlongRouteMeters: distancesAlongRoute(coordinates)
         )
     }
 
@@ -33,22 +53,5 @@ struct CarRouteData {
     static func list(from payload: [String: Any]?) -> [CarRouteData] {
         guard let routes = payload?["routes"] as? [[String: Any]] else { return [] }
         return routes.compactMap { from($0) }
-    }
-}
-
-/// A private route point (POI), mirroring `CarMarkerData.kt`: `{ latlng: [lng, lat], title }`.
-struct CarMarkerData {
-    let coordinate: CLLocationCoordinate2D
-    let title: String
-
-    static func from(_ json: [String: Any]) -> CarMarkerData? {
-        guard let pair = json["latlng"] as? [Any], pair.count >= 2,
-              let lng = (pair[0] as? NSNumber)?.doubleValue,
-              let lat = (pair[1] as? NSNumber)?.doubleValue
-        else { return nil }
-        return CarMarkerData(
-            coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lng),
-            title: (json["title"] as? String) ?? ""
-        )
     }
 }

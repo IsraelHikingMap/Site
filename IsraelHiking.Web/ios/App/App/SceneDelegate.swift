@@ -1,12 +1,10 @@
 import Capacitor
 import UIKit
 
-/**
- * Window scene delegate for the iPhone UI. Adding any CarPlay scene moves the whole app onto the
- * UIScene lifecycle, so the phone window must be created here instead of by the AppDelegate, and the
- * deep-link / universal-link / file-open callbacks that used to land in AppDelegate must be
- * forwarded to Capacitor's `ApplicationDelegateProxy` from the scene callbacks below.
- */
+/// Window scene delegate for the iPhone UI. Adding any CarPlay scene moves the whole app onto the
+/// UIScene lifecycle, so the phone window must be created here instead of by the AppDelegate, and the
+/// deep-link / universal-link / file-open callbacks that used to land in AppDelegate must be
+/// forwarded to Capacitor's `ApplicationDelegateProxy` from the scene callbacks below.
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?

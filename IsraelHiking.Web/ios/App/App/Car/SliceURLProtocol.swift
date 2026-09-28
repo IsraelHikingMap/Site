@@ -1,11 +1,9 @@
 import Foundation
 
-/**
- * Intercepts MapLibre tile requests carrying `?use=slice` and mirrors `SliceProtocolInterceptor.kt`:
- * try the network first (short timeout when an offline archive exists, long timeout otherwise), and
- * on failure fall back to the offline PMTiles archive. Registered on MapLibre's `URLSession`
- * configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
- */
+/// Intercepts MapLibre tile requests carrying `?use=slice` and mirrors `SliceProtocolInterceptor.kt`:
+/// try the network first (short timeout when an offline archive exists, long timeout otherwise), and
+/// on failure fall back to the offline PMTiles archive. Registered on MapLibre's `URLSession`
+/// configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
 final class SliceURLProtocol: URLProtocol {
 
     static let pmTiles = PMTilesService()
@@ -17,8 +15,8 @@ final class SliceURLProtocol: URLProtocol {
 
     private var dataTask: URLSessionDataTask?
     private var isStopped = false
-    // One shared session for all tile fetches. Ephemeral config carries no custom protocols, so the
-    // network fetch can't recurse back into us.
+    /// One shared session for all tile fetches. Ephemeral config carries no custom protocols, so the
+    /// network fetch can't recurse back into us.
     private static let session = URLSession(configuration: .ephemeral)
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -95,8 +93,8 @@ final class SliceURLProtocol: URLProtocol {
         client?.urlProtocolDidFinishLoading(self)
     }
 
+    /// Serves a contour tile, generated off the loading thread: generating blocks on fetching the DEM.
     private func serveContour(parsed: (type: String, z: Int, x: Int, y: Int), units: String) {
-        // Generating is blocking (it fetches the DEM synchronously), so run it off the loading thread.
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
             do {

@@ -87,10 +87,11 @@ describe("OfflineFilesDownloadService", () => {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
                         getStyleJsonContent: vi.fn(() => Promise.resolve(JSON.stringify(createStyle({})))),
+                        getStyleJsonContentFromDevice: vi.fn(() => Promise.resolve(JSON.stringify(createStyle({})))),
                         downloadFileToCacheAuthenticated: vi.fn(() => Promise.resolve()),
                         moveFileFromCacheToDataDirectory: vi.fn(() => Promise.resolve()),
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
-                        listFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
+                        listOfflineFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
                         listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as string[])),
                         clearOfflineCache: vi.fn(() => Promise.resolve())
                     }
@@ -118,8 +119,8 @@ describe("OfflineFilesDownloadService", () => {
     it("Should clear the offline files cache and read the files of the device into the state, keyed by the tile they belong to",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue(
-                    [MAP_FILE, "raster-dem+7-76-51.pmtiles", ROOT_MAP_FILE, "mapeak-hike.json"].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
+                    [MAP_FILE, "raster-dem+7-76-51.pmtiles", ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
 
                 await initialize(service, mockBackend, store, {});
 
@@ -333,7 +334,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService) => {
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue(
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [MAP_FILE, "raster-dem+7-76-51.pmtiles", ROOT_MAP_FILE].map(
                         fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
 
@@ -382,7 +383,7 @@ describe("OfflineFilesDownloadService", () => {
                 fileService: FileService, pmTilesService: PmTilesService) => {
                 vi.mocked(pmTilesService.getVersion).mockResolvedValue("2"); // The files are at version 2
                 // The styles that are already on the device require 3, so the map is drawn wrong right now
-                vi.mocked(fileService.getStyleJsonContent).mockResolvedValue(JSON.stringify(createStyle({ IHM: "3" })));
+                vi.mocked(fileService.getStyleJsonContentFromDevice).mockResolvedValue(JSON.stringify(createStyle({ IHM: "3" })));
 
                 await initialize(service, mockBackend, store, { IHM: "3" });
 
@@ -408,7 +409,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                 const downloadDate = new Date();
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: downloadDate, size: FILE_SIZE })));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: downloadDate, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
@@ -431,7 +432,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService, routingProvider: RoutingProvider) => {
-                vi.mocked(fileService.listFilesInDataDirectory)
+                vi.mocked(fileService.listOfflineFilesInDataDirectory)
                     .mockResolvedValueOnce(["raster-dem+7-76-51.pmtiles"].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))
                     .mockResolvedValue(["raster-dem+7-76-51.pmtiles", MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValueOnce([]).mockResolvedValue([TILE_KEY]);
@@ -461,7 +462,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService, routingProvider: RoutingProvider) => {
-                vi.mocked(fileService.listFilesInDataDirectory)
+                vi.mocked(fileService.listOfflineFilesInDataDirectory)
                     .mockResolvedValueOnce([])
                     .mockResolvedValue([MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
@@ -586,7 +587,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                 // The tile holds a file of a source the styles do not use, so it can not be drawn as it is
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue(
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     ["a-removed-source+7-76-51.pmtiles", ROOT_MAP_FILE].map(
                         fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
@@ -610,7 +611,7 @@ describe("OfflineFilesDownloadService", () => {
     it("Should delete the root files of an unused source even while another tile still holds files of it",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([
                     MAP_FILE,
                     "a-removed-source+7-76-51.pmtiles",
                     "a-removed-source+7-75-50.pmtiles",
@@ -641,12 +642,11 @@ describe("OfflineFilesDownloadService", () => {
     it("Should delete the files of sources that the styles no longer use when a tile is downloaded",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([
                     MAP_FILE,
                     "global_points+7-76-51.pmtiles",
                     "a-removed-source+7-76-51.pmtiles",
-                    "a-removed-source-6.pmtiles",
-                    "mapeak-hike.json"
+                    "a-removed-source-6.pmtiles"
                 ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
@@ -664,7 +664,6 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-6.pmtiles");
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(MAP_FILE);
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("global_points+7-76-51.pmtiles");
-                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("mapeak-hike.json");
             }
         )
     );
@@ -674,7 +673,7 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService, routingProvider: RoutingProvider) => {
                 await initialize(service, mockBackend, store, {});
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
 
                 await service.deleteTile(TILE_KEY);
@@ -693,7 +692,7 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService, routingProvider: RoutingProvider) => {
                 await initialize(service, mockBackend, store, {});
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
                 vi.mocked(routingProvider.deleteOfflineRoutingTiles).mockRejectedValue(new Error("Not implemented"));
 
@@ -738,7 +737,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService, FileService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 toastService: ToastService, fileService: FileService) => {
-                vi.mocked(fileService.listFilesInDataDirectory).mockResolvedValue([]);
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([]);
 
                 await initialize(service, mockBackend, store, {});
 
