@@ -137,7 +137,9 @@ export class PrivateRoutesSidebarComponent {
         if (file.name.endsWith(".txt") && file.name.includes("log")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             const fileContent = await file.text();
-            this.logReaderService.readLogFile(fileContent);
+            if (!this.logReaderService.readLogFile(fileContent)) {
+                this.toastService.warning(this.resources.unableToLoadFromFile);
+            }
             return;
         }
         try {

@@ -12,10 +12,12 @@ import { HttpErrorResponse } from "@angular/common/http";
  */
 async function clearLogs() {
     const database = new Dexie("Logging");
-    database.version(1).stores({
-        logging: "++, date"
+    database.version(2).stores({
+        logging: "++, date",
+        gpsLogging: "++, date"
     });
     await database.table("logging").clear();
+    await database.table("gpsLogging").clear();
     database.close();
 }
 
@@ -67,6 +69,19 @@ describe("LoggingService", () => {
         const logs = await service.getLog();
 
         expect(logs.split("\n").length).toBe(1);
+    });
+
+    it("Should keep the gps channel apart from the general log", async () => {
+        await service.debug("General!");
+        await service.debug("Position!", "gps");
+
+        const logs = await service.getLog();
+        const gpsLogs = await service.getLog("gps");
+
+        expect(logs.split("\n").length).toBe(1);
+        expect(logs).toContain("General!");
+        expect(gpsLogs.split("\n").length).toBe(1);
+        expect(gpsLogs).toContain("Position!");
     });
 
     it("Should classify regular error as server", async () => {

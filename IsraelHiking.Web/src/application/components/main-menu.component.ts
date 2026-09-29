@@ -105,7 +105,7 @@ export class MainMenuComponent {
         const subscription = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
-        const logs = await this.loggingService.getLog();
+        const generalLogs = await this.loggingService.getLog("general");
         const userInfo = this.userInfo() || {
             displayName: "non-registered user",
             id: "----"
@@ -128,7 +128,7 @@ export class MainMenuComponent {
                     `OS: ${browserInfo.os.name} ${browserInfo.os.version}`,
                     ""
                 ].join("\n");
-                await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
+                await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + generalLogs);
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
@@ -149,7 +149,8 @@ export class MainMenuComponent {
             ].join("\n");
             // The log goes over as a file - inline it takes the saved plugin call over android's
             // binder limit and crashes the app when the mail app opens. The info is small enough.
-            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
+            const generalLogFileUri = await this.fileService.storeFileToCache("log.txt", generalLogs, false);
+            const gpsLogFileUri = await this.fileService.storeFileToCache("gps-log.txt", await this.loggingService.getLog("gps"), false);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
 
@@ -158,7 +159,9 @@ export class MainMenuComponent {
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
-                    path: logFileUri
+                    path: generalLogFileUri
+                }, {
+                    path: gpsLogFileUri
                 }, {
                     name: `info-${userInfo.id}.txt`,
                     data: infoBase64

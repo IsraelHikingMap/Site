@@ -7,7 +7,12 @@ export class LogReaderService {
 
     private readonly mapService = inject(MapService);
 
-    public readLogFile(content: string): void {
+    /**
+     * Draws the last recorded session of a gps log file on the map - the positions the plugin reported,
+     * their accuracy and which of them the recording kept. Returns whether anything was found to draw,
+     * which is false for the general log file, whose position lines live in the gps log file instead.
+     */
+    public readLogFile(content: string): boolean {
         const lines = content.split("\n");
         const recordingRelatedLines: string[] = [];
         let foundEndOfRecording = false;
@@ -67,6 +72,10 @@ export class LogReaderService {
                 }
                 continue;
             }
+        }
+
+        if (pointsGeojson.features.length === 0) {
+            return false;
         }
 
         this.mapService.addSource("log-points-geojson", {
@@ -148,5 +157,6 @@ export class LogReaderService {
             }
         });
         this.mapService.fitBounds(SpatialHelper.getBoundsForFeatureCollection(pointsGeojson));
+        return true;
     }
 }
