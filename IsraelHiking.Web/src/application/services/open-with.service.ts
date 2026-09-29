@@ -292,7 +292,7 @@ export class OpenWithService {
             });
         } else {
             this.ngZone.run(() => {
-                this.router.navigate(["/"]);
+                this.router.navigateByUrl(pathname + url.search);
             });
         }
     }
