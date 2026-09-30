@@ -1,5 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import QuickLRU from "quick-lru";
 
@@ -12,7 +13,12 @@ import type { LatLngAltTime } from "../models";
 export class ElevationProvider {
 
     static readonly MAX_ELEVATION_ZOOM = 11;
+    /** The lowest zoom a tile is looked for at when the higher zoom tiles can not be fetched */
+    static readonly FALLBACK_ELEVATION_ZOOM = 9;
     static readonly ELEVATION_SCHEMA = "raster-dem";
+
+    /** How long to wait for a terrain tile before giving up on it and trying a lower zoom */
+    private static readonly TILE_TIMEOUT_MS = 3000;
 
     private readonly transparentPngUrl =
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=";
@@ -41,7 +47,10 @@ export class ElevationProvider {
             await this.populateElevationCache(latlngs);
             for (const relevantIndex of relevantIndexes) {
                 const latlng = latlngs[relevantIndex];
-                latlng.alt = this.getElevationForLatlng(latlng);
+                const elevation = this.getElevationForLatlng(latlng);
+                if (elevation != null) {
+                    latlng.alt = elevation;
+                }
             }
         } catch (ex) {
             this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
@@ -57,27 +66,62 @@ export class ElevationProvider {
         const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
         for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
             for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
-                const key = `${tileX}/${tileY}`;
-                if (this.elevationCache.has(key)) {
-                    continue;
-                }
-                const useOffline = await this.pmTilesService.isOfflineFileAvailable(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
-                const arrayBuffer = useOffline
-                    ? await this.pmTilesService.getTileByType(ElevationProvider.MAX_ELEVATION_ZOOM, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA)
-                    : await firstValueFrom(this.httpClient.get(`https://mapeak.com/vector/data/raster-dem/${ElevationProvider.MAX_ELEVATION_ZOOM}/${tileX}/${tileY}.webp?use=slice`, { responseType: "arraybuffer" }));
-                const data = await this.getImageData(arrayBuffer);
-                this.elevationCache.set(key, data);
+                await this.cacheTile(tileX, tileY);
             }
         }
     }
 
-    private getElevationForLatlng(latlng: LatLngAltTime): number {
-        const tileSize = 512;
-        const zoom = ElevationProvider.MAX_ELEVATION_ZOOM;
-        const tile = SpatialHelper.toTile(latlng, zoom);
-        const tileIndex = { tileX: Math.floor(tile.x), tileY: Math.floor(tile.y) };
-        const data = this.elevationCache.get(`${tileIndex.tileX}/${tileIndex.tileY}`);
+    /**
+     * Caches the terrain tile at the highest zoom, and when it can not be fetched, the tile covering the
+     * same area at a lower zoom. A tile the CDN fails to serve is usually served at a different zoom, and
+     * a coarser elevation is better than leaving the points without one.
+     */
+    private async cacheTile(tileX: number, tileY: number): Promise<void> {
+        for (let zoom = ElevationProvider.MAX_ELEVATION_ZOOM; zoom >= ElevationProvider.FALLBACK_ELEVATION_ZOOM; zoom--) {
+            const { tileX: zoomedTileX, tileY: zoomedTileY } = SpatialHelper.getParentZoomTileCoordinates(
+                { x: tileX, y: tileY }, ElevationProvider.MAX_ELEVATION_ZOOM, zoom);
+            const key = `${zoom}/${zoomedTileX}/${zoomedTileY}`;
+            if (this.elevationCache.has(key)) {
+                return;
+            }
+            try {
+                const arrayBuffer = await this.getTile(zoom, zoomedTileX, zoomedTileY);
+                this.elevationCache.set(key, await this.getImageData(arrayBuffer));
+                return;
+            } catch (ex) {
+                this.loggingService.warning(`[Elevation] Unable to get the terrain tile ${key}: ${(ex as Error).message}`);
+            }
+        }
+    }
 
+    private async getTile(zoom: number, tileX: number, tileY: number): Promise<ArrayBuffer> {
+        const useOffline = await this.pmTilesService.isOfflineFileAvailable(zoom, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA);
+        if (useOffline) {
+            return await this.pmTilesService.getTileByType(zoom, tileX, tileY, ElevationProvider.ELEVATION_SCHEMA);
+        }
+        const address = `https://mapeak.com/vector/data/raster-dem/${zoom}/${tileX}/${tileY}.webp`;
+        return await firstValueFrom(this.httpClient.get(address, { responseType: "arraybuffer" })
+            .pipe(timeout(ElevationProvider.TILE_TIMEOUT_MS)));
+    }
+
+    /**
+     * The elevation of the given point from the cached tile of the highest zoom that holds it,
+     * or undefined when no tile holding it could be fetched.
+     */
+    private getElevationForLatlng(latlng: LatLngAltTime): number | undefined {
+        for (let zoom = ElevationProvider.MAX_ELEVATION_ZOOM; zoom >= ElevationProvider.FALLBACK_ELEVATION_ZOOM; zoom--) {
+            const tile = SpatialHelper.toTile(latlng, zoom);
+            const data = this.elevationCache.get(`${zoom}/${Math.floor(tile.x)}/${Math.floor(tile.y)}`);
+            if (data == null) {
+                continue;
+            }
+            return this.interpolateElevation(data, latlng, zoom);
+        }
+        return undefined;
+    }
+
+    private interpolateElevation(data: Uint8ClampedArray, latlng: LatLngAltTime, zoom: number): number {
+        const tileSize = 512;
         const relative = SpatialHelper.toRelativePixelCenter(latlng, zoom, tileSize);
         // Get the coordinates of the center of the top-left pixel
         const pixelX1 = Math.floor(relative.pixelX);
