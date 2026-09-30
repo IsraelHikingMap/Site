@@ -152,7 +152,7 @@
             }
         </mgl-map>
         @if (selectedShareUrl()) {
-        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up">
+        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up px-safe">
             <div class="flex flex-row justify-center items-center mx-2">
                 <div class="flex-1 text-center text-xl">{{selectedShareUrl().title}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl())"

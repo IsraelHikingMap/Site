@@ -4,6 +4,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import androidx.activity.EdgeToEdge;
+
 import com.getcapacitor.BridgeActivity;
 import com.mapeak.car.ReactivePreferencesPlugin;
 import com.mapeak.valhalla.ValhallaPlugin;
@@ -14,6 +16,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(ReactivePreferencesPlugin.class);
         registerPlugin(ValhallaPlugin.class);
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { // Android 9 and below
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }

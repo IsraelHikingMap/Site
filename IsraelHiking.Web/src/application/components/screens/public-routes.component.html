@@ -90,7 +90,7 @@
             }
         </mgl-map>
         @if (selectedRoutePoint()) {
-        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 max-h-1/2 overflow-y-auto">
+        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 max-h-1/2 overflow-y-auto px-safe">
             <div class="flex flex-row justify-center items-center px-2 sticky top-0 bg-surface z-10 w-full mb-2">
                 <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint())}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint.set(null)" tabindex="-1">

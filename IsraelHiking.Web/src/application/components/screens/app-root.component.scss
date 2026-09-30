@@ -1,4 +1,6 @@
 .toolbar {
     top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
     background-color: #528CFA80;
+    padding-left: calc(16px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
+    padding-right: calc(16px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
 }
