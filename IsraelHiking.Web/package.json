@@ -86,7 +86,7 @@
     "uuid": "^14.0.2"
   },
   "devDependencies": {
-    "@angular/build": "~22.1.8",
+    "@angular/build": "~22.2.1",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.7",
     "@angular/language-service": "^22.1.7",
