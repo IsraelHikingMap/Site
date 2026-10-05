@@ -6,7 +6,6 @@ import bbox from "@turf/bbox";
 import bboxPolygon from "@turf/bbox-polygon";
 import circle from "@turf/circle";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
-import pointToLineDistance from "@turf/point-to-line-distance";
 import lineSplit from "@turf/line-split";
 import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
@@ -15,16 +14,19 @@ import type { Immutable } from "immer";
 
 import type { LatLngAltTime, Bounds } from "../models";
 
-export class SpatialService {
+/** Good enough for the local, flat plane calculations below, the earth is not a perfect sphere anyway. */
+const METERS_PER_LATITUDE_DEGREE = 111320;
+
+export class SpatialHelper {
 
     public static getLengthInMetersForGeometry(geometry: Immutable<GeoJSON.Geometry>) {
         if (geometry.type === "LineString") {
-            return SpatialService.getLengthInMetersForCoordinates(geometry.coordinates);
+            return SpatialHelper.getLengthInMetersForCoordinates(geometry.coordinates);
         }
         if (geometry.type === "MultiLineString") {
             let totalDistance = 0;
             for (const coordinates of geometry.coordinates) {
-                totalDistance += SpatialService.getLengthInMetersForCoordinates(coordinates);
+                totalDistance += SpatialHelper.getLengthInMetersForCoordinates(coordinates);
             }
             return totalDistance;
         }
@@ -40,8 +42,8 @@ export class SpatialService {
     }
 
     public static getDistanceInMeters(latlng1: LatLngAltTime, latlng2: LatLngAltTime) {
-        return distance(SpatialService.toCoordinate(latlng1),
-            SpatialService.toCoordinate(latlng2), { units: "meters" });
+        return distance(SpatialHelper.toCoordinate(latlng1),
+            SpatialHelper.toCoordinate(latlng2), { units: "meters" });
     }
 
     public static simplify(coordinates: [number, number][], tolerance: number): [number, number][] {
@@ -53,16 +55,72 @@ export class SpatialService {
     }
 
     public static getDistance(latlng1: LatLngAltTime, latlng2: LatLngAltTime) {
-        return distance(SpatialService.toCoordinate(latlng1),
-            SpatialService.toCoordinate(latlng2), { units: "degrees" });
+        return distance(SpatialHelper.toCoordinate(latlng1),
+            SpatialHelper.toCoordinate(latlng2), { units: "degrees" });
     }
 
     public static getDistanceForCoordinates(coordinate1: [number, number], coordinate2: [number, number]) {
         return Math.sqrt(Math.pow(coordinate1[0] - coordinate2[0], 2) + Math.pow(coordinate1[1] - coordinate2[1], 2));
     }
 
-    public static getDistanceFromPointToLine(latlng: LatLngAltTime, line: LatLngAltTime[]): number {
-        return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
+    /**
+     * The distance in meters between a point and the closest place on a line.
+     * The line is projected to a plane around the point instead of being measured on the sphere,
+     * which is accurate for the short segments this is used for and an order of magnitude faster -
+     * this runs for every point of every route when looking for the route closest to a location.
+     */
+    public static getDistanceFromPointToLine(latlng: LatLngAltTime, line: Immutable<LatLngAltTime[]>): number {
+        const toPlane = (l: Immutable<LatLngAltTime>) => ({
+            x: (l.lng - latlng.lng) * METERS_PER_LATITUDE_DEGREE * Math.cos(latlng.lat * Math.PI / 180),
+            y: (l.lat - latlng.lat) * METERS_PER_LATITUDE_DEGREE
+        });
+        let start = toPlane(line[0]);
+        if (line.length === 1) {
+            return Math.sqrt(start.x * start.x + start.y * start.y);
+        }
+        let minimalDistance = Infinity;
+        for (let index = 1; index < line.length; index++) {
+            const end = toPlane(line[index]);
+            minimalDistance = Math.min(minimalDistance, SpatialHelper.getDistanceFromOriginToSegment(start, end));
+            start = end;
+        }
+        return minimalDistance;
+    }
+
+    public static getBoundsForLatlngs(latlngs: Immutable<LatLngAltTime[]>): Bounds {
+        const northEast = { lat: -Infinity, lng: -Infinity };
+        const southWest = { lat: Infinity, lng: Infinity };
+        for (const latlng of latlngs) {
+            northEast.lat = Math.max(northEast.lat, latlng.lat);
+            northEast.lng = Math.max(northEast.lng, latlng.lng);
+            southWest.lat = Math.min(southWest.lat, latlng.lat);
+            southWest.lng = Math.min(southWest.lng, latlng.lng);
+        }
+        return { northEast, southWest };
+    }
+
+    /**
+     * The distance in meters between a point and the closest place on the bounds' rectangle,
+     * zero when the point is inside them. No point inside the bounds can be closer than that,
+     * which allows skipping whole parts of a route without measuring their points.
+     */
+    public static getDistanceFromPointToBounds(latlng: LatLngAltTime, bounds: Bounds): number {
+        const latitudeDelta = Math.max(bounds.southWest.lat - latlng.lat, latlng.lat - bounds.northEast.lat, 0);
+        const longitudeDelta = Math.max(bounds.southWest.lng - latlng.lng, latlng.lng - bounds.northEast.lng, 0);
+        const y = latitudeDelta * METERS_PER_LATITUDE_DEGREE;
+        const x = longitudeDelta * METERS_PER_LATITUDE_DEGREE * Math.cos(latlng.lat * Math.PI / 180);
+        return Math.sqrt(x * x + y * y);
+    }
+
+    private static getDistanceFromOriginToSegment(start: { x: number; y: number }, end: { x: number; y: number }): number {
+        const deltaX = end.x - start.x;
+        const deltaY = end.y - start.y;
+        const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+        let projectionFactor = lengthSquared === 0 ? 0 : -(start.x * deltaX + start.y * deltaY) / lengthSquared;
+        projectionFactor = Math.max(0, Math.min(1, projectionFactor));
+        const x = start.x + projectionFactor * deltaX;
+        const y = start.y + projectionFactor * deltaY;
+        return Math.sqrt(x * x + y * y);
     }
 
     /**
@@ -80,7 +138,7 @@ export class SpatialService {
         let closetLine = null;
         let nearestPoint = null;
         let minimalDistance = Infinity;
-        const coordinates = SpatialService.toCoordinate(latlng);
+        const coordinates = SpatialHelper.toCoordinate(latlng);
         for (const line of lines) {
             const currentNearestPoint = nearestPointOnLine(line, coordinates);
             if (currentNearestPoint.properties.dist < minimalDistance) {
@@ -101,8 +159,8 @@ export class SpatialService {
         zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
         const roundedTileX = Math.floor(tile.x);
         const roundedTileY = Math.floor(tile.y);
-        const northEast = SpatialService.fromTile({ x: roundedTileX, y: roundedTileY }, zoom);
-        const southWest = SpatialService.fromTile({ x: roundedTileX + 1, y: roundedTileY + 1 }, zoom);
+        const northEast = SpatialHelper.fromTile({ x: roundedTileX, y: roundedTileY }, zoom);
+        const southWest = SpatialHelper.fromTile({ x: roundedTileX + 1, y: roundedTileY + 1 }, zoom);
         const tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
         // This is to overcome accuracy issues...
         const tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
@@ -139,14 +197,14 @@ export class SpatialService {
                 if (!lineToCheck.bbox) {
                     lineToCheck.bbox = bbox(lineToCheck);
                 }
-                if (SpatialService.insideBbox(start, lineToCheck.bbox)) {
+                if (SpatialHelper.insideBbox(start, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, start, { units: "meters" });
                     if (nearestPoint.properties.dist < 0.5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
                     }
                 }
-                if (SpatialService.insideBbox(end, lineToCheck.bbox)) {
+                if (SpatialHelper.insideBbox(end, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, end, { units: "meters" });
                     if (nearestPoint.properties.dist < 0.5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
@@ -161,8 +219,8 @@ export class SpatialService {
         if (line.length < 2) {
             throw new Error("Line length should be at least 2");
         }
-        const closestSegmentIndex = SpatialService.getClosestSegmentIndex(newLatlng, line);
-        const projected = SpatialService.project(newLatlng, line[closestSegmentIndex], line[closestSegmentIndex + 1]);
+        const closestSegmentIndex = SpatialHelper.getClosestSegmentIndex(newLatlng, line);
+        const projected = SpatialHelper.project(newLatlng, line[closestSegmentIndex], line[closestSegmentIndex + 1]);
         if (projected.projectionFactor === 0.0 && closestSegmentIndex === 0) {
             const firstLngLat = line[0];
             return { start: [firstLngLat, firstLngLat], end: [...line] };
@@ -187,7 +245,7 @@ export class SpatialService {
         let minimalDistance = Infinity;
         for (let segmentIndex = 0; segmentIndex <= line.length - 2; segmentIndex++) {
             const segment = [line[segmentIndex], line[segmentIndex + 1]];
-            const distance = SpatialService.getDistanceFromPointToLine(newLatlng, segment);
+            const distance = SpatialHelper.getDistanceFromPointToLine(newLatlng, segment);
             if (distance < minimalDistance) {
                 closestSegmentIndex = segmentIndex;
                 minimalDistance = distance;
@@ -226,8 +284,8 @@ export class SpatialService {
 
     public static getLatlngInterpolatedValue(latlng1: LatLngAltTime, latlng2: LatLngAltTime, ratio: number): LatLngAltTime {
         return {
-            lat: SpatialService.getInterpolatedValue(latlng1.lat, latlng2.lat, ratio),
-            lng: SpatialService.getInterpolatedValue(latlng1.lng, latlng2.lng, ratio)
+            lat: SpatialHelper.getInterpolatedValue(latlng1.lat, latlng2.lat, ratio),
+            lng: SpatialHelper.getInterpolatedValue(latlng1.lng, latlng2.lng, ratio)
         };
     }
 
@@ -238,18 +296,18 @@ export class SpatialService {
                 southWest: latlngs[0]
             };
         }
-        const line = SpatialService.getLineString(latlngs);
+        const line = SpatialHelper.getLineString(latlngs);
         const boundingBox = bbox(line);
-        return SpatialService.bboxToBounds(boundingBox);
+        return SpatialHelper.bboxToBounds(boundingBox);
     }
 
     public static getCenter(latlngs: LatLngAltTime[]): LatLngAltTime {
         if (latlngs.length === 1) {
             return latlngs[0];
         }
-        const line = SpatialService.getLineString(latlngs);
+        const line = SpatialHelper.getLineString(latlngs);
         const centerPoint = center(line);
-        return SpatialService.toLatLng(centerPoint.geometry.coordinates as [number, number]);
+        return SpatialHelper.toLatLng(centerPoint.geometry.coordinates as [number, number]);
 
     }
 
@@ -283,11 +341,11 @@ export class SpatialService {
     }
 
     public static getBoundsForFeatureCollection(featureCollection: GeoJSON.FeatureCollection): Bounds {
-        return SpatialService.bboxToBounds(bbox(featureCollection));
+        return SpatialHelper.bboxToBounds(bbox(featureCollection));
     }
 
     public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>): Bounds {
-        return SpatialService.getBoundsForFeatureCollection(featureCollection([feature]));
+        return SpatialHelper.getBoundsForFeatureCollection(featureCollection([feature]));
     }
 
     private static bboxToBounds(boundingBox: number[]): Bounds {
@@ -304,18 +362,18 @@ export class SpatialService {
     }
 
     public static getLineString(latlngs: LatLngAltTime[]): GeoJSON.Feature<GeoJSON.LineString> {
-        const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
+        const coordinates = latlngs.map(l => SpatialHelper.toCoordinate(l));
         return lineString(coordinates);
     }
 
     public static getPointFeature(latlng: LatLngAltTime): GeoJSON.Feature<GeoJSON.Point> {
-        return point(SpatialService.toCoordinate(latlng));
+        return point(SpatialHelper.toCoordinate(latlng));
     }
 
     public static getCirclePolygonFeature(centerPoint: LatLngAltTime, radius: number):
         GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number } } {
         const options = { steps: 64, units: "meters" as Units, properties: { radius } };
-        return circle(SpatialService.toCoordinate(centerPoint), radius, options);
+        return circle(SpatialHelper.toCoordinate(centerPoint), radius, options);
     }
 
     public static getLineBearingInDegrees(latlng1: LatLngAltTime, latlng2: LatLngAltTime): number {
@@ -353,7 +411,7 @@ export class SpatialService {
     }
 
     public static toRelativePixelCenter(latlng: LatLngAltTime, zoom: number, tileSize: number) {
-        const tile = SpatialService.toTile(latlng, zoom);
+        const tile = SpatialHelper.toTile(latlng, zoom);
         return {
             pixelX: Math.max(0, (tile.x - Math.floor(tile.x)) * tileSize - 0.5),
             pixelY: Math.max(0, (tile.y - Math.floor(tile.y)) * tileSize - 0.5)
@@ -370,16 +428,16 @@ export class SpatialService {
         const end1 = line1[line1.length - 1];
         const start2 = line2[0];
         const end2 = line2[line2.length - 1];
-        if (SpatialService.getDistanceForCoordinates(start1 as [number, number], start2 as [number, number]) < 1e-5) {
+        if (SpatialHelper.getDistanceForCoordinates(start1 as [number, number], start2 as [number, number]) < 1e-5) {
             return "start-start";
         }
-        if (SpatialService.getDistanceForCoordinates(start1 as [number, number], end2 as [number, number]) < 1e-5) {
+        if (SpatialHelper.getDistanceForCoordinates(start1 as [number, number], end2 as [number, number]) < 1e-5) {
             return "start-end";
         }
-        if (SpatialService.getDistanceForCoordinates(end1 as [number, number], start2 as [number, number]) < 1e-5) {
+        if (SpatialHelper.getDistanceForCoordinates(end1 as [number, number], start2 as [number, number]) < 1e-5) {
             return "end-start";
         }
-        if (SpatialService.getDistanceForCoordinates(end1 as [number, number], end2 as [number, number]) < 1e-5) {
+        if (SpatialHelper.getDistanceForCoordinates(end1 as [number, number], end2 as [number, number]) < 1e-5) {
             return "end-end";
         }
         return null;
@@ -394,7 +452,7 @@ export class SpatialService {
             let foundType = null;
             for (let i = 0; i < linesToMerge.length; i++) {
                 for (let j = 0; j < coordinatesGroups.length; j++) {
-                    foundType = SpatialService.canBeMreged(coordinatesGroups[j], linesToMerge[i].coordinates);
+                    foundType = SpatialHelper.canBeMreged(coordinatesGroups[j], linesToMerge[i].coordinates);
                     if (foundType) {
                         lineIndex = i;
                         coordinatesGroupIndex = j;
@@ -450,9 +508,9 @@ export class SpatialService {
     }
 
     public static isJammingTarget(latlng: LatLngAltTime): boolean {
-        const position = SpatialService.toCoordinate(latlng);
-        return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
-            SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||
-            SpatialService.insideBbox(position, [35.98, 31.70, 36.02, 31.73]);
+        const position = SpatialHelper.toCoordinate(latlng);
+        return SpatialHelper.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
+            SpatialHelper.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]) ||
+            SpatialHelper.insideBbox(position, [35.98, 31.70, 36.02, 31.73]);
     }
 }

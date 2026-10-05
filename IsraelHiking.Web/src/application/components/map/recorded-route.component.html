@@ -12,7 +12,8 @@
             'line-color': resources.recordedRouteColor,
             'line-width': 6,
             'line-opacity': 1.0
-        }">
+        }"
+  [before]="resources.endOfDrapedLayers">
     </mgl-layer>
     <mgl-layer id="{{'recorded-route-line-direction-' + idx}}"
       type="symbol"
@@ -42,7 +43,8 @@
           'line-color': resources.recordedRouteColor,
           'line-width': 6,
           'line-opacity': 1.0
-      }">
+      }"
+  [before]="resources.endOfDrapedLayers">
   </mgl-layer>
   <mgl-layer id="recorded-route-last-line-direction"
     type="symbol"

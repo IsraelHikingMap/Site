@@ -1,12 +1,15 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
-import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
+import type { LayerSpecification, RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 import { FileService } from "./file.service";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LayerData } from "../models";
+
+/** How the tiles of a style are reached - "online-only" keeps them on the server, the others may use the device. */
+export type StyleMode = "online-only" | "allow-offline" | "car";
 
 @Service()
 export class DefaultStyleService {
@@ -67,6 +70,15 @@ export class DefaultStyleService {
         };
     }
 
+    private createPlaceholder(id: string): LayerSpecification {
+        return {
+            id,
+            type: "circle" as const,
+            source: "dummy",
+            layout: { visibility: "none" as const }
+        };
+    }
+
     public getStyleWithPlaceholders(): StyleSpecification {
         const styleWithPlaceholder = { ...this.style };
         styleWithPlaceholder.sources = {
@@ -83,30 +95,13 @@ export class DefaultStyleService {
             }
         };
         styleWithPlaceholder.layers = [
-            {
-                id: this.resources.endOfBaseLayer,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfOverlays,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfClusters,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfRoutes,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            }
+            this.createPlaceholder(this.resources.endOfBaseDrapedLayers),
+            this.createPlaceholder(this.resources.endOfOverlaysDrapedLayers),
+            this.createPlaceholder(this.resources.endOfDrapedLayers),
+            this.createPlaceholder(this.resources.endOfBaseLayer),
+            this.createPlaceholder(this.resources.endOfOverlays),
+            this.createPlaceholder(this.resources.endOfClusters),
+            this.createPlaceholder(this.resources.endOfRoutes)
         ];
         return styleWithPlaceholder;
     }
@@ -226,17 +221,15 @@ export class DefaultStyleService {
         }
     }
 
-    public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: "online-only" | "allow-offline" | "car"): Promise<StyleSpecification> {
+    public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: StyleMode): Promise<StyleSpecification> {
         if (this.isRaster(layerData.address)) {
             return this.createRasterLayer(layerData, isVisible);
         } else {
             const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
-            const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-            const tryLocalStyle = mode !== "online-only" && isBuiltInBaseLayer && Object.keys(downloadedTiles).length > 0;
             const language = this.resources.getCurrentLanguageCodeSimplified();
             const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units);
 
-            let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
+            let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, isBuiltInBaseLayer);
             styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
             styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
             if (units === "imperial") {

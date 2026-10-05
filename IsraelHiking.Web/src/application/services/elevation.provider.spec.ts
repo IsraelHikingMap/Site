@@ -72,7 +72,24 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should not update elevation when getting an error from server and offline is not available",
+    it("Should not update elevation when getting an error from server for all the zoom levels and offline is not available",
+        inject([ElevationProvider, HttpTestingController],
+            async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+
+                const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
+
+                const promise = elevationProvider.updateHeights(latlngs);
+
+                for (let zoom = ElevationProvider.MAX_ELEVATION_ZOOM; zoom >= ElevationProvider.FALLBACK_ELEVATION_ZOOM; zoom--) {
+                    await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
+                    mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
+                }
+                await promise;
+                expect(latlngs[0].alt).toBe(0);
+            }
+        ));
+
+    it("Should update elevation from a lower zoom tile when the highest zoom tile is not served",
         inject([ElevationProvider, HttpTestingController],
             async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
@@ -81,10 +98,17 @@ describe("ElevationProvider", () => {
                 const promise = elevationProvider.updateHeights(latlngs);
 
                 await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
+                const failed = mockBackend.match(() => true)[0];
+                expect(failed.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM}/`);
+                failed.flush(null, { status: 500, statusText: "Server Error" });
 
-                mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
+                await new Promise((resolve) => setTimeout(resolve, 0)); // Let the fallback http call be made
+                const fallback = mockBackend.match(() => true)[0];
+                expect(fallback.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM - 1}/`);
+                fallback.flush(await getArrayBufferOfNonEmptyTile());
+
                 await promise;
-                expect(latlngs[0].alt).toBe(0);
+                expect(latlngs[0].alt).toBe(32512);
             }
         ));
 

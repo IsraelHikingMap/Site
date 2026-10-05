@@ -50,6 +50,10 @@
   content: "\e906";
 }
 
+.icon-arrow-left:before {
+  content: "\e98d";
+}
+
 .icon-arrow-right:before {
   content: "\e907";
 }
@@ -64,6 +68,10 @@
 
 .icon-artwork:before {
   content: "\e90a";
+}
+
+.icon-automobile:before {
+  content: "\e98e";
 }
 
 .icon-avg-speed:before {
@@ -190,6 +198,10 @@
   content: "\e928";
 }
 
+.icon-copy:before {
+  content: "\e992";
+}
+
 .icon-crosshairs:before {
   content: "\e929";
 }
@@ -242,8 +254,16 @@
   content: "\e935";
 }
 
+.icon-fire:before {
+  content: "\e98f";
+}
+
 .icon-first-aid:before {
   content: "\e936";
+}
+
+.icon-flag:before {
+  content: "\e990";
 }
 
 .icon-flower:before {
@@ -506,6 +526,10 @@
   content: "\e977";
 }
 
+.icon-stop:before {
+  content: "\e98c";
+}
+
 .icon-synagogue:before {
   content: "\e978";
 }
@@ -548,6 +572,10 @@
 
 .icon-viewpoint:before {
   content: "\e982";
+}
+
+.icon-volume-up:before {
+  content: "\e991";
 }
 
 .icon-water-hole:before {

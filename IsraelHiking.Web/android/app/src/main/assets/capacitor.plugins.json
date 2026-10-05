@@ -64,6 +64,10 @@
 		"classpath": "app.capgo.sharetarget.CapacitorShareTargetPlugin"
 	},
 	{
+		"pkg": "@capgo/capacitor-speech-synthesis",
+		"classpath": "ee.forgr.plugin.speechsynthesis.SpeechSynthesisPlugin"
+	},
+	{
 		"pkg": "@revenuecat/purchases-capacitor",
 		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	},

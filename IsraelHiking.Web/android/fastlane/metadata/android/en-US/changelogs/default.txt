@@ -1,3 +1,2 @@
-- Support more types of points in search
-- Highlight search terms in traces and cloud saves
+- Improve translations
 - Various bug fixes and performance improvements

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnChanges, inject, output, input, signal } from "@angular/core";
+import { Component, OnChanges, inject, output, input, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -65,14 +65,5 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     private isLast(): boolean {
         return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex();
-    }
-
-    @HostListener("window:keydown", ["$event"])
-    public onEnterPress($event: KeyboardEvent) {
-        if ($event.key !== "Delete") {
-            return true;
-        }
-        this.remove();
-        return false;
     }
 }

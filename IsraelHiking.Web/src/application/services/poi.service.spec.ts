@@ -23,12 +23,12 @@ import { ImageAttributionService } from "./image-attribution.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoJSONUtils } from "./geojson-utils";
 import { GeoJsonParser } from "./geojson.parser";
+import { NakebService } from "./nakeb.service";
 import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
-import { NakebService } from "./nakeb.service";
 
 describe("Poi Service", () => {
     beforeEach(() => {
@@ -256,7 +256,7 @@ describe("Poi Service", () => {
                 }
             ] as unknown as GeoJSONFeature[];
 
-            expect(poiService.getPublicRoutes({ categories: [], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: [], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -286,7 +286,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Bicycle"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Bicycle"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -316,7 +316,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Easy"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Easy"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -347,7 +347,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [15, 50], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [15, 50], difficulty: ["Hard"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -378,7 +378,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 5], difficulty: ["Hard"], userId: "" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 5], difficulty: ["Hard"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -409,7 +409,7 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "42" }).features.length).toBe(0);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "42" }, poiService.getPoisFromTiles()).features.length).toBe(0);
         }
     ));
 
@@ -439,7 +439,38 @@ describe("Poi Service", () => {
                     }
                 }
             ] as unknown as GeoJSONFeature[];
-            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }).features.length).toBe(1);
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "" }, poiService.getPoisFromTiles()).features.length).toBe(1);
+        }
+    ));
+
+    it("Should get public routes for a matching user id", inject([PoiService, Store, MapService],
+        async (poiService: PoiService, store: Store, mapServiceMock: MapService) => {
+            store.reset({
+                configuration: {
+                    language: "he"
+                }
+            });
+            mapServiceMock.getFeaturesFromTiles = () => [
+                {
+                    id: "11",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0, 0], [1, 1]]
+                    },
+                    properties: {
+                        poiId: "42",
+                        poiCategory: "Hiking",
+                        poiIconColor: "black",
+                        poiIcon: "icon-hike",
+                        poiLength: 10000,
+                        poiDifficulty: "Hard",
+                        poiUserId: "42",
+                        name: "line",
+                        "name:he": "line"
+                    }
+                }
+            ] as unknown as GeoJSONFeature[];
+            expect(poiService.getPublicRoutes({ categories: ["Hiking"], lengthRange: [0, 50], difficulty: ["Hard", "Easy"], userId: "42" }, poiService.getPoisFromTiles()).features.length).toBe(1);
         }
     ));
 

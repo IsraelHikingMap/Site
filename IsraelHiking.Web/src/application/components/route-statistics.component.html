@@ -183,7 +183,8 @@
 <mgl-layer id="slope-route-layer" type="line" source="slope-route" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'
-            }" [paint]="slopeRoutePaint()">
+            }" [paint]="slopeRoutePaint()"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="slope-route-layer-direction" type="symbol" source="slope-route" [layout]="{
                 'symbol-placement': 'line',
@@ -217,12 +218,14 @@
   [paint]="{
           'line-color': 'purple',
           'line-width': 5
-          }"></mgl-layer>
+          }"
+  [before]="resources.endOfDrapedLayers"></mgl-layer>
 <mgl-layer id="chart-range-selection-layer" type="line" source="chart-range-selection" before="chart-hover-layer"
   [paint]="{
           'line-color': 'white',
           'line-width': 3
-          }"></mgl-layer>
+          }"
+  [before]="resources.endOfDrapedLayers"></mgl-layer>
 }
 
 <mgl-geojson-source id="chart-hover" [data]="chartHoverSource()"></mgl-geojson-source>

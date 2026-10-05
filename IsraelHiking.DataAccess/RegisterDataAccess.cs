@@ -19,6 +19,7 @@ public static class RegisterDataAccess
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddTransient<IImageUploadGateway, UserImagesGateway>();
         services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
+        services.AddTransient<ISatelliteImageryGateway, MapboxSatelliteImageryGateway>();
         services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();
         services.AddTransient<IWikidataGateway, WikidataGateway>();
         services.AddTransient<IShareUrlGateway, ShareUrlGateway>();

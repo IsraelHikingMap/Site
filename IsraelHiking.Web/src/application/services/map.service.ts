@@ -1,16 +1,17 @@
 import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification, MapMovementEvent } from "maplibre-gl";
+import type { ErrorEvent, FilterSpecification, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
+import { Urls } from "../urls";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
 @Service()
@@ -29,6 +30,7 @@ export class MapService {
     private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
+
 
     private initializeOncePromise: Promise<void> | null = null;
 
@@ -50,7 +52,6 @@ export class MapService {
         const maplibregl = await import("maplibre-gl");
         // This is needs to be specific since capacitor is not http protocol
         maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
-        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
         maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
@@ -92,13 +93,16 @@ export class MapService {
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.setTransformRequest(map);
         this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);
-        this.currentMap.on("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(this.resolveMissingStyleImage);
         this.currentMap.on("error", this.onError);
         this.currentMap.on("moveend", this.onMoveEnd);
+        this.currentMap.on("webglcontextlost", this.onContextLost);
+        this.currentMap.on("webglcontextrestored", this.onContextRestored);
     }
 
     public unsetMap() {
@@ -107,13 +111,30 @@ export class MapService {
             return;
         }
         this.currentMap.off("dragstart", this.onDragstart);
-        this.currentMap.off("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(null);
         this.currentMap.off("error", this.onError);
         this.currentMap.off("moveend", this.onMoveEnd);
+        this.currentMap.off("webglcontextlost", this.onContextLost);
+        this.currentMap.off("webglcontextrestored", this.onContextRestored);
         this.initializationPromise = new Promise<void>((resolve) => {
             this.resolve = resolve;
         });
         this.currentMap = null;
+    }
+
+    /**
+     * Adds the user's token to the requests a map makes to our own API, whose subscribed layers are only
+     * served to a subscribed user. The satellite imagery is named on its own since a style carries its
+     * production address even when this client talks to its own API.
+     */
+    public setTransformRequest(map: Map) {
+        map.setTransformRequest((url: string): RequestParameters => {
+            if (!Urls.isOwnApiAddress(url) && !url.startsWith(Urls.satelliteTiles)) {
+                return { url };
+            }
+            const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
+            return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
+        });
     }
 
     public async addArrowToMap(map: Map) {
@@ -135,16 +156,29 @@ export class MapService {
         this.store.dispatch(new SetPannedAction(new Date()));
     }
 
-    private readonly onStyleImageMissing = async (e: { id: string }) => {
-        if (!/^http/.test(e.id)) {
+    private readonly resolveMissingStyleImage = async (id: string) => {
+        if (!/^http/.test(id)) {
             return;
         }
-        if (this.missingImagesArray.includes(e.id)) {
+        if (this.missingImagesArray.includes(id)) {
             return;
         }
-        this.missingImagesArray.push(e.id);
-        const image = await this.currentMap.loadImage(e.id);
-        this.currentMap.addImage(e.id, image.data);
+        this.missingImagesArray.push(id);
+        const image = await this.currentMap.loadImage(id);
+        this.currentMap.addImage(id, image.data);
+    }
+
+    /**
+     * Losing the webgl context leaves the map blank, and maplibre only redraws it if the browser
+     * follows with a restore event, which does not always happen on mobile. These two lines tell
+     * a blank map caused by the context from a blank map caused by anything else.
+     */
+    private readonly onContextLost = () => {
+        this.loggingService.warning("[Map] Lost the webgl context");
+    }
+
+    private readonly onContextRestored = () => {
+        this.loggingService.info("[Map] The webgl context was restored");
     }
 
     private readonly onError = (e: ErrorEvent) => {
@@ -173,14 +207,20 @@ export class MapService {
 
     public getMapBounds(): Bounds {
         const bounds = this.currentMap.getBounds();
-        return SpatialService.mBBoundsToBounds(bounds);
+        return SpatialHelper.mBBoundsToBounds(bounds);
     }
 
     public project(latlng: LatLngAltTime): Point {
         return this.currentMap.project(latlng);
     }
 
-    public getFeaturesFromTiles(): GeoJSONFeature[] {
+    /**
+     * The points the map currently draws from the tiles.
+     * @param filter limits the features to those that match it, which is done by the map itself and is
+     * far cheaper than reading every point of the tile only to throw most of them away - a tile of a
+     * dense area holds tens of thousands of points of which a caller usually wants a fraction.
+     */
+    public getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
         if (this.currentMap == null) {
             // Map is not ready yet
             return [];
@@ -188,7 +228,10 @@ export class MapService {
         if (!this.currentMap.getLayer(this.resourcesService.globalPointsExternalLayer)) {
             return [];
         }
-        return this.currentMap.queryRenderedFeatures({ layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer] });
+        return this.currentMap.queryRenderedFeatures({
+            layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer],
+            filter
+        });
     }
 
     public isMoving(): boolean {
@@ -198,7 +241,7 @@ export class MapService {
     public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
-        const mbBounds = SpatialService.boundsToMBBounds(bounds);
+        const mbBounds = SpatialHelper.boundsToMBBounds(bounds);
 
         this.store.dispatch(new SetPannedAction(new Date()));
         this.currentMap.fitBounds(mbBounds, {
@@ -222,7 +265,7 @@ export class MapService {
         if (!zoom) {
             zoom = this.currentMap.getZoom();
         }
-        if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
+        if (SpatialHelper.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {
             // ignoring flyto for small coordinates change:
             // this happens due to route percision reduce which causes another map move.

@@ -1,5 +1,5 @@
 <mgl-geojson-source id="non-edit-routes-geojson" [data]="routesGeoJson()"></mgl-geojson-source>
-<mgl-layer id="non-edit-route-line" type="line" source="non-edit-routes-geojson" [before]="resources.endOfRoutes"
+<mgl-layer id="non-edit-route-line" type="line" source="non-edit-routes-geojson" [before]="resources.endOfDrapedLayers"
     [filter]="['==', '$type', 'LineString']" [layout]="{
                 'line-cap': 'butt',
                 'line-join': 'bevel'

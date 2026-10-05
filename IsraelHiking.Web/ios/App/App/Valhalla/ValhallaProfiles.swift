@@ -1,8 +1,6 @@
 import Foundation
 
-/**
- * A single routing profile: the valhalla costing model and the costing options to use with it.
- */
+/// A single routing profile: the valhalla costing model and the costing options to use with it.
 enum ValhallaProfilesError: Error {
     case invalidProfiles
 }
@@ -12,13 +10,11 @@ struct ValhallaProfile {
     let costingOptions: [String: Any]?
 }
 
-/**
- * The routing profiles on the device, mirroring `ValhallaProfiles.kt`.
- *
- * They are handed over after being downloaded with the offline maps, and are the same profiles the
- * server routes with, so that a route on the device follows the same costing options as one online.
- * Without them there is no offline routing, the same as without tiles.
- */
+/// The routing profiles on the device, mirroring `ValhallaProfiles.kt`.
+///
+/// They are handed over after being downloaded with the offline maps, and are the same profiles the
+/// server routes with, so that a route on the device follows the same costing options as one online.
+/// Without them there is no offline routing, the same as without tiles.
 final class ValhallaProfiles {
     /// The plugin's own copy, the app hands it the file it downloaded
     private static let profilesFileName = "valhalla_profiles.json"
@@ -32,11 +28,10 @@ final class ValhallaProfiles {
             .appendingPathComponent(ValhallaProfiles.profilesFileName)
     }
 
-    /**
-     * Keeps the profiles as they were downloaded, they are only read when a route is calculated.
-     */
+    /// Keeps the profiles as they were downloaded, they are only read when a route is calculated.
+    /// Stores the profiles, failing here rather than at routing time so that content which cannot be
+    /// read is never kept.
     func store(_ profiles: String) throws {
-        // Fail here rather than when routing, so that content that can not be read is never kept
         guard let data = profiles.data(using: .utf8),
               (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] != nil else {
             throw ValhallaProfilesError.invalidProfiles
@@ -44,9 +39,7 @@ final class ValhallaProfiles {
         try data.write(to: profilesURL, options: .atomic)
     }
 
-    /**
-     * The profile of the given name, or nil when there are no profiles or no such profile in them.
-     */
+    /// The profile of the given name, or nil when there are no profiles or no such profile in them.
     func profile(named name: String) -> ValhallaProfile? {
         guard let data = try? Data(contentsOf: profilesURL),
               let profiles = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],

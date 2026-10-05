@@ -124,7 +124,7 @@
                 (moveToRoute)="moveToShare(shareUrl)"></share-item>
         </div>
         } @empty {
-        <p class="mx-2">{{resources.noCloudSaves}}</p>
+        <p class="mx-2">{{resources.noSavedRoutes}}</p>
         }
         @if (loading()) {
         <mat-spinner></mat-spinner>
@@ -152,7 +152,7 @@
             }
         </mgl-map>
         @if (selectedShareUrl()) {
-        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up">
+        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up px-safe">
             <div class="flex flex-row justify-center items-center mx-2">
                 <div class="flex-1 text-center text-xl">{{selectedShareUrl().title}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl())"
@@ -171,7 +171,7 @@
                 <button mat-menu-item (click)="openShareUrl(selectedShareUrl())" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Open share from map">
                     <i class="fa icon-external-link-square"></i>
-                    {{resources.openCloudSave}}
+                    {{resources.openSavedRoute}}
                 </button>
             </div>
             <div class="flex flex-row">

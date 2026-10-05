@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" [disabled]="routes().length === 0" (click)="share()"
-                matTooltip="{{resources.saveInCloudAndShare}}" matTooltipPosition="below" analyticsOn="click"
+                matTooltip="{{resources.saveRouteAndShare}}" matTooltipPosition="below" analyticsOn="click"
                 analyticsCategory="Private Routes" analyticsLabel="Share">
                 <i class="fa fa-lg icon-cloud-share"></i>
                 @if (hiddenRoutesCount() === 0) {
@@ -97,6 +97,11 @@
                                         analyticsCategory="Route" analyticsLabel="Reverse route">
                                         <i class="fa fa-lg icon-arrows-h"></i>
                                         <span class="ms-2">{{resources.reverseRoute}}</span>
+                                    </button>
+                                    <button mat-menu-item (click)="duplicateRoute(route)" analyticsOn="click"
+                                        analyticsCategory="Route" analyticsLabel="Duplicate route">
+                                        <i class="fa fa-lg icon-copy"></i>
+                                        <span class="ms-2">{{resources.duplicateRoute}}</span>
                                     </button>
                                 </mat-menu>
                                 <button mat-button class="flex-1" (click)="deleteRoute($event, route)"

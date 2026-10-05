@@ -1,21 +1,31 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Stack traces from play console are only readable through the mapping file that is built
+# alongside the bundle, and only if the line numbers survive to be mapped back. The source file
+# names are renamed rather than kept, so they carry nothing but the line number.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# The camera plugin carries its parameters and its results between the app and the editor as gson
+# objects, and neither gson nor the ioncamera-android library that uses it ships rules of its own.
+# Gson works over these classes by reflection: it needs the fields to still be there to fill them,
+# the @SerializedName on each one to know which json key it answers to, and the generic signature
+# of a TypeToken to know what it is building - none of which R8 can see is used. These are gson's
+# own documented rules.
+-keepattributes Signature
+-dontwarn sun.misc.**
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Capacitor asks a plugin class for its @CapacitorPlugin annotation to learn which permissions the
+# plugin declares, and does not check the answer, so a plugin it cannot read the annotation off
+# takes the app down with a null pointer the first time anything asks after a permission - for
+# background geolocation that is during startup, and for the camera the moment a photo is taken.
+# Letting R8 rename the annotation types is what breaks the lookup; keeping them fixes it, verified
+# by building it both ways and watching the app come up or die on a device.
+-keep @interface com.getcapacitor.**

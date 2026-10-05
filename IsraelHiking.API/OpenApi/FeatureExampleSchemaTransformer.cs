@@ -34,7 +34,7 @@ public class FeatureExampleSchemaTransformer : IOpenApiSchemaTransformer
             new AttributesTable { { "key", "value" } });
         object example = type == typeof(Feature) ? feature : new FeatureCollection { feature };
         var exampleString = JsonSerializer.Serialize(example, options);
-        schema.Example = JsonNode.Parse(exampleString);
+        schema.Examples = [JsonNode.Parse(exampleString)];
         schema.Default = JsonNode.Parse(exampleString);
         return Task.CompletedTask;
     }

@@ -2,46 +2,42 @@ import MapKit
 import UIKit
 import UniformTypeIdentifiers
 
-/**
- * `UIApplication` is unavailable to an extension, so the object found on the responder chain cannot be
- * typed as one. Declaring the selector lets it be called without importing the class.
- *
- * `options` is deliberately untyped and always passed as nil: the object that answers this selector is
- * a scene rather than the application, and it expects a `UISceneOpenExternalURLOptions` - passing a
- * dictionary makes it call `universalLinksOnly` on one, which brings the whole extension down.
- */
+/// `UIApplication` is unavailable to an extension, so the object found on the responder chain cannot be
+/// typed as one. Declaring the selector lets it be called without importing the class.
+///
+/// `options` is deliberately untyped and always passed as nil: the object that answers this selector is
+/// a scene rather than the application, and it expects a `UISceneOpenExternalURLOptions` - passing a
+/// dictionary makes it call `universalLinksOnly` on one, which brings the whole extension down.
 @objc private protocol ApplicationURLOpener {
     @objc(openURL:options:completionHandler:)
     func open(_ url: URL, options: NSObject?, completionHandler: ((Bool) -> Void)?)
 }
 
-/**
- * Receives a location shared into Mapeak from another app - most commonly Google Maps or Apple Maps.
- *
- * There is deliberately no UI: nothing here needs filling in, so the extension takes the location,
- * brings the app to the front on `mapeak://share?sharedText=...` and gets out of the way. It also
- * leaves the location in the shared app group, where CapacitorShareTargetPlugin picks it up whenever
- * the app becomes active - that is what the confirmation alert falls back on if the app cannot be
- * opened.
- *
- * Everything is handed over as text, because the app already knows how to turn both a map link and a
- * plain "lat, lng" pair into a point - so a structured map item needs no protocol of its own.
- */
+/// Receives a location shared into Mapeak from another app - most commonly Google Maps or Apple Maps.
+///
+/// There is deliberately no UI: nothing here needs filling in, so the extension takes the location,
+/// brings the app to the front on `mapeak://share?sharedText=...` and gets out of the way. It also
+/// leaves the location in the shared app group, where CapacitorShareTargetPlugin picks it up whenever
+/// the app becomes active - that is what the confirmation alert falls back on if the app cannot be
+/// opened.
+///
+/// Everything is handed over as text, because the app already knows how to turn both a map link and a
+/// plain "lat, lng" pair into a point - so a structured map item needs no protocol of its own.
 final class ShareViewController: UIViewController {
 
     private static let appGroupId = "group.com.mapeak"
     private static let sharedDataKey = "share-target-data"
     private static let hostAppUrl = "mapeak://share"
-    /** Apple Maps attaches the shared place as an `MKMapItem` under this type identifier */
+    /// Apple Maps attaches the shared place as an `MKMapItem` under this type identifier
     private static let mapItemTypeIdentifier = "com.apple.mapkit.map-item"
 
     private var hasHandledShare = false
 
-    /**
-     * The work is started once the view is on screen rather than in `viewDidLoad`: until then this
-     * controller is not in a window, so the responder chain does not yet reach the object that can
-     * open a url, and the app could never be brought to the front.
-     */
+    /// The work is started once the view is on screen rather than in `viewDidLoad`: until then this
+    /// controller is not in a window, so the responder chain does not yet reach the object that can
+    /// open a url, and the app could never be brought to the front.
+    /// Hands the shared text to the app and gets out of the way. Completing tears this extension down,
+    /// which would cancel a launch still in flight, so the system is given a moment to switch apps.
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if hasHandledShare {
@@ -60,8 +56,6 @@ final class ShareViewController: UIViewController {
                     self.confirmAndDismiss()
                     return
                 }
-                // Completing tears this extension down, which cancels a launch still in flight, so the
-                // system is given a moment to actually switch apps first.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
                 }
@@ -69,11 +63,9 @@ final class ShareViewController: UIViewController {
         }
     }
 
-    /**
-     * Apple Maps attaches the place as a map item, which states it exactly and so wins outright over
-     * the `maps.apple/p/` link it comes with, since that holds no coordinates and cannot be resolved
-     * into any. Everyone else shares a link, as a url or occasionally as plain text.
-     */
+    /// Apple Maps attaches the place as a map item, which states it exactly and so wins outright over
+    /// the `maps.apple/p/` link it comes with, since that holds no coordinates and cannot be resolved
+    /// into any. Everyone else shares a link, as a url or occasionally as plain text.
     private func collectSharedText(from items: [NSExtensionItem]) async -> String? {
         for item in items {
             for provider in item.attachments ?? [] {
@@ -91,11 +83,9 @@ final class ShareViewController: UIViewController {
         return nil
     }
 
-    /**
-     * Reads the coordinate out of an Apple Maps share, which is the supported way to get at it - the
-     * accompanying url is explicitly not meant to be parsed. Depending on the sender the item arrives
-     * either as an `MKMapItem` or as its archived form, so both are accepted.
-     */
+    /// Reads the coordinate out of an Apple Maps share, which is the supported way to get at it - the
+    /// accompanying url is explicitly not meant to be parsed. Depending on the sender the item arrives
+    /// either as an `MKMapItem` or as its archived form, so both are accepted.
     private func mapItemCoordinate(from provider: NSItemProvider) async -> String? {
         guard provider.hasItemConformingToTypeIdentifier(Self.mapItemTypeIdentifier),
               let item = try? await provider.loadItem(forTypeIdentifier: Self.mapItemTypeIdentifier) else {
@@ -115,11 +105,9 @@ final class ShareViewController: UIViewController {
         return String(format: "%.6f, %.6f", coordinate.latitude, coordinate.longitude)
     }
 
-    /**
-     * Null Island is what an unpopulated placemark reports, and it passes `CLLocationCoordinate2DIsValid`
-     * because both of its values are in range - so it has to be rejected by name, or a share with no
-     * location in it silently sends the user to the middle of the Atlantic.
-     */
+    /// Null Island is what an unpopulated placemark reports, and it passes `CLLocationCoordinate2DIsValid`
+    /// because both of its values are in range - so it has to be rejected by name, or a share with no
+    /// location in it silently sends the user to the middle of the Atlantic.
     private static func usableCoordinate(_ coordinate: CLLocationCoordinate2D?) -> CLLocationCoordinate2D? {
         guard let coordinate, CLLocationCoordinate2DIsValid(coordinate),
               coordinate.latitude != 0 || coordinate.longitude != 0 else {
@@ -128,7 +116,7 @@ final class ShareViewController: UIViewController {
         return coordinate
     }
 
-    /** Leaves the location where the plugin can find it, for when the app cannot be brought forward */
+    /// Leaves the location where the plugin can find it, for when the app cannot be brought forward
     private func store(_ text: String) {
         guard let userDefaults = UserDefaults(suiteName: Self.appGroupId) else {
             return
@@ -136,22 +124,20 @@ final class ShareViewController: UIViewController {
         userDefaults.set(["title": "", "texts": [text], "files": []], forKey: Self.sharedDataKey)
     }
 
-    /**
-     * Brings the app to the front, the way Waze and others do when a location is shared to them.
-     *
-     * There is no supported API for this - `UIApplication` is unavailable to an extension - so it is
-     * looked up on the responder chain instead. It must be the non-deprecated
-     * `openURL:options:completionHandler:`: from iOS 18 on, UIKit refuses the older `openURL:` with
-     * "Force returning false" and tells the caller to migrate to this one.
-     *
-     * Failure is not fatal, which is why the completion is honoured rather than assumed: the user is
-     * shown the confirmation instead, and the plugin hands the location over when the app is opened.
-     */
+    /// Brings the app to the front, the way Waze and others do when a location is shared to them.
+    ///
+    /// There is no supported API for this - `UIApplication` is unavailable to an extension - so it is
+    /// looked up on the responder chain instead. It must be the non-deprecated
+    /// `openURL:options:completionHandler:`: from iOS 18 on, UIKit refuses the older `openURL:` with
+    /// "Force returning false" and tells the caller to migrate to this one.
+    ///
+    /// Failure is not fatal, which is why the completion is honoured rather than assumed: the user is
+    /// shown the confirmation instead, and the plugin hands the location over when the app is opened.
+    /// Opens the app on the shared text. The location travels in the url rather than only through the
+    /// app group, which is written in one process and read in another and flushed lazily in between,
+    /// while a url arrives with the launch itself. Everything outside the unreserved set is escaped,
+    /// so a `+` in a map link survives rather than being read back as a space.
     private func openHostApp(with text: String, completion: @escaping (Bool) -> Void) {
-        // The location travels in the url rather than only through the app group, which is written to
-        // one process and read from another and flushed lazily in between. A url arrives with the
-        // launch itself, so there is nothing to race. Everything outside the unreserved set is escaped,
-        // so a `+` in a map link survives as a `+` instead of being read back as a space.
         let unreserved = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._~"))
         guard let escaped = text.addingPercentEncoding(withAllowedCharacters: unreserved),
               let url = URL(string: "\(Self.hostAppUrl)?sharedText=\(escaped)") else {
@@ -172,11 +158,9 @@ final class ShareViewController: UIViewController {
         completion(false)
     }
 
-    /**
-     * Tells the user the location was taken, when the app could not be brought to the front to show it.
-     * The plugin picks the location up from the app group the next time the app becomes active, so
-     * nothing is lost - it just takes the user opening the app themselves.
-     */
+    /// Tells the user the location was taken, when the app could not be brought to the front to show it.
+    /// The plugin picks the location up from the app group the next time the app becomes active, so
+    /// nothing is lost - it just takes the user opening the app themselves.
     private func confirmAndDismiss() {
         let translations = Translations.load(language: Translations.deviceLanguage())
         let alert = UIAlertController(

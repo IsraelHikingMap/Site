@@ -32,9 +32,6 @@ import kotlin.math.roundToInt
 import org.json.JSONArray
 import org.json.JSONException
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.geojson.Point
-import org.maplibre.turf.TurfConstants
-import org.maplibre.turf.TurfMeasurement
 
 /**
  * Drives the Android for Cars navigation contract for the active route:
@@ -62,8 +59,9 @@ class CarNavigation(
     private val handler = Handler(Looper.getMainLooper())
     private val notification = CarNavigationNotification(carContext)
     private val backend = CarBackendService(carContext)
+    private val paceCalculator = CarPaceCalculator()
 
-    private var routePoints: List<Point> = emptyList()
+    private var route: CarRouteData? = null
     private var maneuvers: List<CarManeuver> = emptyList()
     /**
      * Bumped on every route change so a late instructions fetch for an old route can be dropped.
@@ -123,17 +121,15 @@ class CarNavigation(
                     emptyList()
                 }
         val route = routes.firstOrNull { it.lngLats.size >= 2 }
+        this.route = route
         destinationName = route?.name
         val lngLats = route?.lngLats ?: emptyList()
-        routePoints = lngLats.map { Point.fromLngLat(it.longitude, it.latitude) }
         routeEpoch++
-        maneuvers = loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats)
-        totalLengthM =
-                if (routePoints.size >= 2)
-                        TurfMeasurement.length(routePoints, TurfConstants.UNIT_METERS)
-                else 0.0
+        maneuvers = alignedToRoute(loadCachedManeuvers() ?: CarManeuverGenerator.generate(lngLats))
+        // Measured once by the route itself, the location updates below only read it
+        totalLengthM = route?.lengthMeters ?: 0.0
 
-        if (routePoints.size >= 2) {
+        if (route != null) {
             if (!navigating) {
                 navigationManager.navigationStarted()
                 navigating = true
@@ -154,10 +150,28 @@ class CarNavigation(
     private fun fetchInstructions(lngLats: List<LatLng>, epoch: Int) {
         backend.mapMatch(lngLats, DEFAULT_ROUTING_TYPE, language()) { fetched ->
             if (epoch != routeEpoch || fetched.isEmpty()) return@mapMatch
-            maneuvers = fetched
+            maneuvers = alignedToRoute(fetched)
             cacheManeuvers(fetched)
             onLocationChanged()
         }
+    }
+
+    /**
+     * Puts the turns on the route's own scale. The backend measures them along the path it matched to
+     * the road network, which can run a hundred meters shorter than the route's polyline, so unscaled
+     * they all arrive early - the arrival most visibly of all.
+     */
+    private fun alignedToRoute(maneuvers: List<CarManeuver>): List<CarManeuver> {
+        val route = this.route ?: return maneuvers
+        val last = maneuvers.lastOrNull() ?: return maneuvers
+        if (last.distanceAlongRouteM <= 0.0) {
+            return maneuvers
+        }
+        val factor = route.lengthMeters / last.distanceAlongRouteM
+        if (!factor.isFinite() || factor <= 0.0) {
+            return maneuvers
+        }
+        return maneuvers.map { it.copy(distanceAlongRouteM = it.distanceAlongRouteM * factor) }
     }
 
     private fun cacheManeuvers(maneuvers: List<CarManeuver>) {
@@ -195,22 +209,23 @@ class CarNavigation(
     }
 
     private fun onLocationChanged() {
-        if (!navigating || routePoints.size < 2 || maneuvers.isEmpty()) return
+        val route = this.route
+        if (!navigating || route == null || maneuvers.isEmpty()) return
         val location: Location = store.getTransient(CarStoreKeys.LOCATION) ?: return
 
-        val traveled = CarRouteCalculator.distanceAlongRoute(routePoints, location)
+        val traveled = CarRouteCalculator.distanceAlongRoute(route, location)
         val currentIndex = maneuvers.indexOfFirst { it.distanceAlongRouteM > traveled + EPSILON_M }
         val current = if (currentIndex >= 0) maneuvers[currentIndex] else maneuvers.last()
         val next = if (currentIndex >= 0) maneuvers.getOrNull(currentIndex + 1) else null
         val distanceToStep = (current.distanceAlongRouteM - traveled).coerceAtLeast(0.0)
-        val speed =
-                if (location.hasSpeed() && location.speed >= MIN_SPEED_MPS) location.speed else null
+        paceCalculator.updatePace(location)
+        val speed = paceCalculator.speed
 
         val currentStep = step(current)
         val nextStep = next?.let { step(it) }
         val routing =
                 RoutingInfo.Builder()
-                        .setCurrentStep(currentStep, distance(distanceToStep))
+                        .setCurrentStep(currentStep, maneuverDistance(distanceToStep))
                         .apply { nextStep?.let { setNextStep(it) } }
                         .build()
         navigationInfo = routing
@@ -295,7 +310,9 @@ class CarNavigation(
                 Maneuver.TYPE_U_TURN_LEFT, Maneuver.TYPE_U_TURN_RIGHT ->
                         R.drawable.ic_maneuver_uturn
                 Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CW,
-                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW -> R.drawable.ic_maneuver_roundabout
+                Maneuver.TYPE_ROUNDABOUT_ENTER_AND_EXIT_CCW,
+                Maneuver.TYPE_ROUNDABOUT_EXIT_CW,
+                Maneuver.TYPE_ROUNDABOUT_EXIT_CCW -> R.drawable.ic_maneuver_roundabout
                 Maneuver.TYPE_DESTINATION -> R.drawable.ic_maneuver_destination
                 else -> R.drawable.ic_maneuver_straight
             }
@@ -305,11 +322,11 @@ class CarNavigation(
                     .setName(destinationName ?: translations().getString("Destination"))
                     .build()
 
-    private fun travelEstimate(meters: Double, speedMps: Float?): TravelEstimate {
+    private fun travelEstimate(meters: Double, speed: Float?): TravelEstimate {
         val remainingDistance = distance(meters)
         val now = System.currentTimeMillis()
-        return if (speedMps != null && speedMps > 0f) {
-            val seconds = (meters / speedMps).toLong()
+        return if (speed != null && speed > 0f) {
+            val seconds = (meters / speed).toLong()
             TravelEstimate.Builder(
                             remainingDistance,
                             DateTimeWithZone.create(now + seconds * 1000, TimeZone.getDefault())
@@ -326,15 +343,47 @@ class CarNavigation(
         }
     }
 
-    /** Human-readable distance for the notification text, respecting the configured units. */
+    /**
+     * Human-readable distance to the turn for the notification text, respecting the configured units.
+     * Empty once the turn is near enough that a countdown only flickers, see [maneuverDistance].
+     */
     private fun formatDistance(meters: Double): String =
             if (units() == UNIT_IMPERIAL) {
-                if (meters < METERS_PER_MILE / 4) "${(meters / METERS_PER_FOOT).roundToInt()} ft"
-                else "%.1f mi".format(meters / METERS_PER_MILE)
+                val feet = meters / METERS_PER_FOOT
+                when {
+                    feet < HIDE_MANEUVER_DISTANCE_FT -> ""
+                    meters < METERS_PER_MILE / 4 -> "${roundTo(feet, MANEUVER_STEP_FT).roundToInt()} ft"
+                    else -> "%.1f mi".format(meters / METERS_PER_MILE)
+                }
             } else {
-                if (meters < METERS_PER_KILOMETER) "${meters.roundToInt()} m"
-                else "%.1f km".format(meters / METERS_PER_KILOMETER)
+                when {
+                    meters < HIDE_MANEUVER_DISTANCE_M -> ""
+                    meters < METERS_PER_KILOMETER -> "${roundTo(meters, MANEUVER_STEP_M).roundToInt()} m"
+                    else -> "%.1f km".format(meters / METERS_PER_KILOMETER)
+                }
             }
+
+    /**
+     * The distance to the turn as the cluster shows it, rounded to a step the driver can read at a
+     * glance rather than counting down meter by meter. Unlike iOS it keeps counting below
+     * [HIDE_MANEUVER_DISTANCE_M]: RoutingInfo requires a distance and Distance.create rejects a
+     * negative one, so there is no "unavailable" to hand the host.
+     */
+    private fun maneuverDistance(meters: Double): Distance =
+            if (units() == UNIT_IMPERIAL) {
+                if (meters < METERS_PER_MILE / 4)
+                        Distance.create(
+                                roundTo(meters / METERS_PER_FOOT, MANEUVER_STEP_FT),
+                                Distance.UNIT_FEET
+                        )
+                else Distance.create(meters / METERS_PER_MILE, Distance.UNIT_MILES)
+            } else {
+                if (meters < METERS_PER_KILOMETER)
+                        Distance.create(roundTo(meters, MANEUVER_STEP_M), Distance.UNIT_METERS)
+                else Distance.create(meters / METERS_PER_KILOMETER, Distance.UNIT_KILOMETERS)
+            }
+
+    private fun roundTo(value: Double, step: Double): Double = (value / step).roundToInt() * step
 
     private fun distance(meters: Double): Distance =
             if (units() == UNIT_IMPERIAL) {
@@ -351,7 +400,7 @@ class CarNavigation(
     private val simulationTick =
             object : Runnable {
                 override fun run() {
-                    if (routePoints.size < 2) {
+                    if (route == null) {
                         stopSimulation()
                         return
                     }
@@ -368,7 +417,7 @@ class CarNavigation(
             }
 
     private fun startSimulation() {
-        if (simulating || routePoints.size < 2) return
+        if (simulating || route == null) return
         simulating = true
         simDistanceM = 0.0
         handler.post(simulationTick)
@@ -381,34 +430,30 @@ class CarNavigation(
     }
 
     private fun publishSimulatedLocation() {
-        var accumulated = 0.0
-        for (i in 0 until routePoints.size - 1) {
-            val segment =
-                    TurfMeasurement.distance(
-                            routePoints[i],
-                            routePoints[i + 1],
-                            TurfConstants.UNIT_METERS
-                    )
-            if (accumulated + segment >= simDistanceM || i == routePoints.size - 2) {
-                val t =
-                        if (segment > 0) ((simDistanceM - accumulated) / segment).coerceIn(0.0, 1.0)
-                        else 0.0
-                val a = routePoints[i]
-                val b = routePoints[i + 1]
-                val location =
-                        Location(SIM_PROVIDER).apply {
-                            latitude = a.latitude() + (b.latitude() - a.latitude()) * t
-                            longitude = a.longitude() + (b.longitude() - a.longitude()) * t
-                            bearing = TurfMeasurement.bearing(a, b).toFloat()
-                            speed = SIM_SPEED_MPS.toFloat()
-                            accuracy = SIM_ACCURACY_M
-                            time = System.currentTimeMillis()
-                            elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
-                        }
-                store.setTransient(CarStoreKeys.LOCATION, location)
-                return
-            }
-            accumulated += segment
+        val route = this.route ?: return
+        val points = route.lngLats
+        val distancesAlongRoute = route.distancesAlongRouteMeters
+        for (i in 0 until points.size - 1) {
+            if (distancesAlongRoute[i + 1] < simDistanceM && i != points.size - 2) continue
+            val segment = distancesAlongRoute[i + 1] - distancesAlongRoute[i]
+            val t =
+                    if (segment > 0)
+                            ((simDistanceM - distancesAlongRoute[i]) / segment).coerceIn(0.0, 1.0)
+                    else 0.0
+            val a = points[i]
+            val b = points[i + 1]
+            val location =
+                    Location(SIM_PROVIDER).apply {
+                        latitude = a.latitude + (b.latitude - a.latitude) * t
+                        longitude = a.longitude + (b.longitude - a.longitude) * t
+                        bearing = SpatialHelper.bearingDegrees(a, b).toFloat()
+                        speed = SIM_SPEED_MPS.toFloat()
+                        accuracy = SIM_ACCURACY_M
+                        time = System.currentTimeMillis()
+                        elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                    }
+            store.setTransient(CarStoreKeys.LOCATION, location)
+            return
         }
     }
 
@@ -425,8 +470,15 @@ class CarNavigation(
     companion object {
         private const val DEFAULT_ROUTING_TYPE = "4WD"
         private const val EPSILON_M = 1.0
-        private const val MIN_SPEED_MPS = 0.5f
         private const val METERS_PER_KILOMETER = 1000.0
+
+        /** The step the distance to a turn is rounded to, so it does not tick down meter by meter. */
+        private const val MANEUVER_STEP_M = 10.0
+        private const val MANEUVER_STEP_FT = 50.0
+
+        /** Below this the turn is close enough that a distance only flickers, so it is left out. */
+        private const val HIDE_MANEUVER_DISTANCE_M = 30.0
+        private const val HIDE_MANEUVER_DISTANCE_FT = 100.0
         private const val METERS_PER_MILE = 1609.344
         private const val METERS_PER_FOOT = 0.3048
         private const val UNIT_IMPERIAL = "imperial"

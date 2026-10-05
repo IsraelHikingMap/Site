@@ -1,4 +1,4 @@
-import { afterNextRender, Component, inject, signal } from "@angular/core";
+import { afterNextRender, Component, computed, inject, signal } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
@@ -26,6 +26,11 @@ import {
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
 import type { ApplicationState, BatteryOptimizationType, ThemeSetting } from "../../models";
+
+type KeyboardShortcut = {
+    keys: string[];
+    description: string;
+};
 
 @Component({
     selector: "settings",
@@ -59,6 +64,25 @@ export class SettingsComponent {
     public batteryOptimizationType = this.store.selectSignal((state: ApplicationState) => state.configuration.batteryOptimizationType);
     public isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
 
+    public readonly keyboardShortcuts = computed<KeyboardShortcut[]>(() => {
+        const controlKey = this.runningContextService.isMac ? "Cmd" : "Ctrl";
+        return [
+            { keys: [controlKey, "Z"], description: this.resources.undo },
+            { keys: [controlKey, "Shift", "Z"], description: this.resources.redo },
+            { keys: [controlKey, "F"], description: this.resources.search },
+            { keys: ["Esc"], description: this.resources.closePopupOrExitEditMode },
+            { keys: ["Enter"], description: this.resources.confirm },
+            { keys: ["Del"], description: this.resources.deleteSelectedPoint },
+            { keys: [controlKey, "Del"], description: this.resources.deleteEditedPoint },
+            { keys: [controlKey, "Enter"], description: this.resources.saveAndEditNextPoint },
+            { keys: [controlKey, "Shift", "Enter"], description: this.resources.saveAndEditPreviousPoint },
+            { keys: ["1"], description: this.resources.hikeRouting },
+            { keys: ["2"], description: this.resources.bikeRouting },
+            { keys: ["3"], description: this.resources.fourWheelDriveRouting },
+            { keys: ["4"], description: this.resources.straightLines }
+        ];
+    });
+
     constructor() {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
@@ -82,6 +106,10 @@ export class SettingsComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
+    }
+
+    public isShowKeyboardShortcuts() {
+        return !this.runningContextService.isMobile;
     }
 
     public setUnits(units: "metric" | "imperial") {

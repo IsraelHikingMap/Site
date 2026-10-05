@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, ViewEncapsulation, inject, signal } from "@angular/core";
+import { Component, HostListener, AfterViewInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
+import { MatDialog } from "@angular/material/dialog";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { MapLayerMouseEvent, Marker } from "maplibre-gl";
@@ -16,6 +17,8 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
+import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import { Urls } from "../../urls";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../../models";
 
@@ -44,6 +47,8 @@ export class RoutesComponent implements AfterViewInit {
     });
     public readonly routes = signal<Immutable<RouteData[]>>([]);
 
+    private isRemovingRoutePoint = false;
+
     public readonly resources = inject(ResourcesService);
 
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -51,6 +56,8 @@ export class RoutesComponent implements AfterViewInit {
     private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
     private readonly mapComponent = inject(MapComponent);
     private readonly store = inject(Store);
+    private readonly analyticsService = inject(AnalyticsService);
+    private readonly matDialog = inject(MatDialog);
 
     private readonly selectedRouteId = this.store.selectSignal((s: ApplicationState) => s.routeEditingState.selectedRouteId);
 
@@ -106,6 +113,68 @@ export class RoutesComponent implements AfterViewInit {
             });
         }, 0);
     };
+
+    @HostListener("window:keydown", ["$event"])
+    public onPopupShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleRoutePointShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private handleRoutePointShortcut(event: KeyboardEvent): string | null {
+        if (isDeleteKey(event)) {
+            return this.removeRoutePoint();
+        }
+        if (event.key !== "Escape") {
+            return null;
+        }
+        if (this.routePointPopupData() != null) {
+            this.closeRoutePointPopup();
+            return "Close route point popup";
+        }
+        if (this.nonEditRoutePointPopupData() != null) {
+            this.nonEditRoutePointPopupData.set(null);
+            return "Close non edit route point popup";
+        }
+        return null;
+    }
+
+    private removeRoutePoint(): string | null {
+        if (this.routePointPopupData() == null || this.isRemovingRoutePoint || this.matDialog.openDialogs.length > 0) {
+            return null;
+        }
+        this.removeRoutePointAndSelectNeighbour(this.routePointPopupData().segmentIndex);
+        return "Delete route point";
+    }
+
+    /**
+     * Keeps the popup on the point that took the deleted one's place, so that a run of points can
+     * be trimmed with DEL alone. Falls back to the point before it at the end of the route.
+     */
+    private async removeRoutePointAndSelectNeighbour(segmentIndex: number) {
+        this.isRemovingRoutePoint = true;
+        try {
+            await this.selectedRouteService.removeSegment(segmentIndex);
+        } finally {
+            this.isRemovingRoutePoint = false;
+        }
+        const segments = this.selectedRouteService.getSelectedRoute()?.segments ?? [];
+        if (segments.length === 0) {
+            this.routePointPopupData.set(null);
+            return;
+        }
+        const neighbourIndex = Math.min(segmentIndex, segments.length - 1);
+        this.routePointPopupData.set({
+            latlng: segments[neighbourIndex].routePoint,
+            segmentIndex: neighbourIndex
+        });
+    }
 
     public closeRoutePointPopup() {
         this.routePointPopupData.set(null);

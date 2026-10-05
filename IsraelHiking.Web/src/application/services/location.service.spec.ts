@@ -13,8 +13,52 @@ import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
 import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models";
 
+/** A degree of longitude at the equator, which is what lets the pace tests walk in meters. */
+const METERS_IN_A_LONGITUDE_DEGREE = 111319.49;
+
+/** How often the gps reports a position while walking. */
+const POSITION_INTERVAL_IN_SECONDS = 30;
+
+type Walk = {
+    /** The pace to walk at, in meters per second, zero to stand still. */
+    speed: number;
+    /** How long to keep walking for, in seconds. */
+    duration: number;
+};
+
+/**
+ * Walks on along the equator from wherever the gps last was, moving the clock along and feeding a
+ * position into the gps state every {@link POSITION_INTERVAL_IN_SECONDS} - which is how the service
+ * under test receives them.
+ */
+function walk(store: Store, { speed, duration }: Walk) {
+    for (let elapsed = POSITION_INTERVAL_IN_SECONDS; elapsed <= duration; elapsed += POSITION_INTERVAL_IN_SECONDS) {
+        vi.advanceTimersByTime(POSITION_INTERVAL_IN_SECONDS * 1000);
+        const meters = walkedMeters(store) + POSITION_INTERVAL_IN_SECONDS * speed;
+        store.dispatch(new SetCurrentPositionAction({
+            coords: { latitude: 0, longitude: meters / METERS_IN_A_LONGITUDE_DEGREE },
+            timestamp: Date.now()
+        } as unknown as GeolocationPosition));
+    }
+}
+
+/** How far along the equator the gps last was, so that a walk carries on from where the last one ended. */
+function walkedMeters(store: Store): number {
+    const position = store.selectSnapshot((state: ApplicationState) => state.gpsState).currentPosition;
+    return position == null ? 0 : position.coords.longitude * METERS_IN_A_LONGITUDE_DEGREE;
+}
+
+function resetStoreWithoutPosition(store: Store) {
+    store.reset({
+        gpsState: { currentPosition: null, tracking: "tracking" },
+        inMemoryState: { following: false }
+    });
+}
+
 describe("LocationService", () => {
     beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-01-01T08:00:00Z"));
         const geoLocationService = {
             backToForeground: new EventEmitter<number>(),
             bulkPositionChanged: {
@@ -286,6 +330,96 @@ describe("LocationService", () => {
             deviceOrientationService.orientationChanged.emit(1);
 
             expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should not give a remaining time before a pace was measured", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({
+                coords: { latitude: 0, longitude: 0 },
+                timestamp: Date.now()
+            } as unknown as GeolocationPosition));
+
+            expect(service.getRemainingTimeInSeconds(1000)).toBeNull();
+            expect(service.getRemainingTimeInSeconds(0)).toBeNull();
+        }
+    ));
+
+    it("Should use the speed the gps reported until the trail is long enough to measure a pace", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({
+                coords: { latitude: 0, longitude: 0, speed: 2 },
+                timestamp: Date.now()
+            } as unknown as GeolocationPosition));
+
+            expect(service.getRemainingTimeInSeconds(1000)).toBeCloseTo(500, -2);
+
+            walk(store, { speed: 1, duration: 300 });
+
+            expect(service.getRemainingTimeInSeconds(1000)).toBeCloseTo(1000, -2);
+        }
+    ));
+
+    it("Should follow the recent pace and forget the pace of an hour ago", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            // ten minutes of driving to the trailhead
+            walk(store, { speed: 10, duration: 600 });
+            const whileDriving = service.getRemainingTimeInSeconds(1000);
+            // then twenty minutes of walking, which is longer than the pace window
+            walk(store, { speed: 1, duration: 1200 });
+
+            expect(whileDriving).toBeCloseTo(100, -2);
+            expect(service.getRemainingTimeInSeconds(1000)).toBeCloseTo(1000, -2);
+        }
+    ));
+
+    it("Should hold the arrival time rather than lose it when the walk stops for a long rest", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            walk(store, { speed: 1, duration: 300 });
+            const whileWalking = service.getRemainingTimeInSeconds(1000);
+            // half an hour of standing still, which is longer than the pace window
+            walk(store, { speed: 0, duration: 1800 });
+            const afterRest = service.getRemainingTimeInSeconds(1000);
+            walk(store, { speed: 0, duration: 600 });
+
+            // the arrival time moves back while resting, and stops moving once the rest is all there is to measure
+            expect(afterRest).toBeGreaterThan(whileWalking);
+            expect(service.getRemainingTimeInSeconds(1000)).toBe(afterRest);
+        }
+    ));
+
+    it("Should start a new trail after the positions stopped arriving for a while", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            walk(store, { speed: 1, duration: 300 });
+            vi.advanceTimersByTime(60 * 60 * 1000);
+            // an hour later and a hundred kilometers away, so only the speed it reports is left to go by
+            store.dispatch(new SetCurrentPositionAction({
+                coords: { latitude: 0, longitude: 0.9, speed: 2 },
+                timestamp: Date.now()
+            } as unknown as GeolocationPosition));
+
+            expect(service.getRemainingTimeInSeconds(1000)).toBeCloseTo(500, -2);
+        }
+    ));
+
+    it("Should forget the measured pace when disabled", inject([LocationService, Store],
+        async (service: LocationService, store: Store) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            walk(store, { speed: 1, duration: 300 });
+            await service.disable();
+
+            expect(service.getRemainingTimeInSeconds(1000)).toBeNull();
         }
     ));
 });

@@ -13,7 +13,7 @@ import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
-import { SpatialService } from "../services/spatial.service";
+import { SpatialHelper } from "../services/spatial.helper";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
 import { MapService } from "../services/map.service";
@@ -134,6 +134,12 @@ export class LocationComponent {
             return;
         }
         // is active must be true
+        if (this.selectedRouteService.isEditingRoute()) {
+            // Following can't be turned on while editing, so the button can only center the map once.
+            this.locationService.moveMapToGpsPosition();
+            this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
+            return;
+        }
         if (!this.isFollowingLocation()) {
             this.store.dispatch(new SetFollowingAction(true));
             this.store.dispatch(new SetPannedAction(null));
@@ -222,11 +228,11 @@ export class LocationComponent {
             properties: { heading },
             geometry: {
                 type: "Point",
-                coordinates: SpatialService.toCoordinate(center)
+                coordinates: SpatialHelper.toCoordinate(center)
             }
         }];
         if (radius != null) {
-            features.push(SpatialService.getCirclePolygonFeature(center, radius));
+            features.push(SpatialHelper.getCirclePolygonFeature(center, radius));
         }
         this.locationFeatures.set({
             type: "FeatureCollection",
@@ -250,7 +256,7 @@ export class LocationComponent {
         }
 
         const center = this.mapComponent.mapInstance.getCenter();
-        const distance = SpatialService.getDistanceInMeters(center, gps);
+        const distance = SpatialHelper.getDistanceInMeters(center, gps);
         const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
         const factor = units === "metric" ? 1000.0 : 1609.344;
         this.distanceFeatures.set({
@@ -260,7 +266,7 @@ export class LocationComponent {
                 properties: {},
                 geometry: {
                     type: "LineString",
-                    coordinates: [SpatialService.toCoordinate(gps), SpatialService.toCoordinate(center)]
+                    coordinates: [SpatialHelper.toCoordinate(gps), SpatialHelper.toCoordinate(center)]
                 }
             },
             {
@@ -270,7 +276,7 @@ export class LocationComponent {
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: SpatialService.toCoordinate(center)
+                    coordinates: SpatialHelper.toCoordinate(center)
                 }
             }]
         });

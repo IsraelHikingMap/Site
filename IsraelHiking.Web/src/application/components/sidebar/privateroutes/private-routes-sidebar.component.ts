@@ -26,7 +26,7 @@ import { SidebarService } from "../../../services/sidebar.service";
 import { FileService } from "../../../services/file.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStatistics, RouteStatisticsService } from "../../../services/route-statistics.service";
-import { SpatialService } from "../../../services/spatial.service";
+import { SpatialHelper } from "../../../services/spatial.helper";
 import { MapService } from "../../../services/map.service";
 import { LogReaderService } from "../../../services/log-reader.service";
 import { ShareUrlsService } from "../../../services/share-urls.service";
@@ -137,7 +137,9 @@ export class PrivateRoutesSidebarComponent {
         if (file.name.endsWith(".txt") && file.name.includes("log")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             const fileContent = await file.text();
-            this.logReaderService.readLogFile(fileContent);
+            if (!this.logReaderService.readLogFile(fileContent)) {
+                this.toastService.warning(this.resources.unableToLoadFromFile);
+            }
             return;
         }
         try {
@@ -196,7 +198,7 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
-        const bounds = SpatialService.getBounds(latLngs);
+        const bounds = SpatialHelper.getBounds(latLngs);
         if (routeData.state === "Hidden") {
             this.toastService.warning(this.resources.routeIsHidden);
         }
@@ -237,6 +239,15 @@ export class PrivateRoutesSidebarComponent {
             },
             declineAction: () => { }
         });
+    }
+
+    public duplicateRoute(routeData: Immutable<RouteData>) {
+        const duplicatedRoute = this.routesFactory.createDuplicateRouteData(routeData,
+            this.selectedRouteService.createRouteName(routeData.name),
+            this.selectedRouteService.getLeastUsedColor(routeData.color));
+        duplicatedRoute.state = routeData.state === "Hidden" ? "ReadOnly" : routeData.state;
+        this.store.dispatch(new AddRouteAction(duplicatedRoute));
+        this.selectedRouteService.setSelectedRoute(duplicatedRoute.id);
     }
 
     public reverseRoute(routeData: Immutable<RouteData>) {

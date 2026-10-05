@@ -36,6 +36,9 @@ describe("DefaultStyleService", () => {
                 {
                     provide: ResourcesService,
                     useValue: {
+                        endOfBaseDrapedLayers: "endOfBaseDrapedLayers",
+                        endOfOverlaysDrapedLayers: "endOfOverlaysDrapedLayers",
+                        endOfDrapedLayers: "endOfDrapedLayers",
                         endOfBaseLayer: "endOfBaseLayer",
                         endOfOverlays: "endOfOverlays",
                         endOfClusters: "endOfClusters",
@@ -70,6 +73,9 @@ describe("DefaultStyleService", () => {
 
         expect(style.sources.dummy.type).toBe("geojson");
         expect(style.layers.map(l => l.id)).toEqual([
+            "endOfBaseDrapedLayers",
+            "endOfOverlaysDrapedLayers",
+            "endOfDrapedLayers",
             "endOfBaseLayer",
             "endOfOverlays",
             "endOfClusters",
@@ -219,31 +225,21 @@ describe("DefaultStyleService", () => {
         expect(source.tiles?.[0]).toBe("https://x/{z}/{x}/{y}.pbf");
     }));
 
-    it("should not try getting the local style for a built-in base layer for online mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
-        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({ version: 8, sources: {}, layers: [] }));
+    it("should tell which layer is a built in base layer",
+        inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
+            store.reset({
+                configuration: { units: "metric" },
+                inMemoryState: { effectiveTheme: "light" }
+            });
+            (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({ version: 8, sources: {}, layers: [] }));
 
-        await service.getSourcesAndLayers(createLayer({
-            key: builtInLayerKey,
-            address: "https://x/style.json"
-        }), true, "online-only");
+            await service.getSourcesAndLayers(createLayer({ key: builtInLayerKey, address: "https://x/style.json" }), true, "allow-offline");
+            expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://x/style.json", true);
 
-        expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://x/style.json", false);
-    }));
-
-    it("should try getting the local style for a built-in base layer for offline mode", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
-        store.reset({
-            configuration: { units: "metric" },
-            inMemoryState: { effectiveTheme: "light", downloadedTiles: { "76-51": [{ fileName: "IHM-schema+7-76-51.pmtiles", date: "2026-01-01" }] } }
-        });
-        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({ version: 8, sources: {}, layers: [] }));
-
-        await service.getSourcesAndLayers(createLayer({
-            key: builtInLayerKey,
-            address: "https://x/style.json"
-        }), true, "allow-offline");
-
-        expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://x/style.json", true);
-    }));
+            await service.getSourcesAndLayers(createLayer({ key: "custom", address: "https://y/style.json" }), true, "online-only");
+            expect(fileService.getStyleJsonContent).toHaveBeenCalledWith("https://y/style.json", false);
+        })
+    );
 
     it("should rewrite vector and raster-dem sources to the slice protocol when offline", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({

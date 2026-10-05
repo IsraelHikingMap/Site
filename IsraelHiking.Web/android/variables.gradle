@@ -18,8 +18,8 @@ ext {
     androidxCarAppVersion = '1.7.0'
     maplibreSdkVersion = '13.4.1'
     maplibreTurfVersion = '6.0.1'
-    maplibreContourVersion = '0.4.1'
+    maplibreContourVersion = '0.4.3'
     okhttpVersion = '5.4.0'
-    pmtilesMobileVersion = '0.3.2'
+    pmtilesMobileVersion = '0.3.5'
     playServicesLocationVersion = '21.4.0'
 }

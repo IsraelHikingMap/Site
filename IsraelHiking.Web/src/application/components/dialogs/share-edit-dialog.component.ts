@@ -125,6 +125,7 @@ export class ShareEditDialogComponent {
 
     public async mapLoaded(map: Map) {
         this.map = map;
+        this.mapService.setTransformRequest(map);
         this.mapService.addArrowToMap(map);
         if (this.shareUrl.dataContainer) {
             this.map.fitBounds([this.shareUrl.dataContainer.southWest, this.shareUrl.dataContainer.northEast], { duration: 0 });

@@ -78,6 +78,7 @@ public static class Languages
     public const string RUSSIAN = "ru";
     public const string ARABIC = "ar";
     public const string SPANISH = "es";
+    public const string GERMAN = "de";
 
     public const string DEFAULT = "default";
     public static readonly string[] Array =
@@ -86,7 +87,8 @@ public static class Languages
         ENGLISH,
         RUSSIAN,
         ARABIC,
-        SPANISH
+        SPANISH,
+        GERMAN
     ];
     public static readonly string[] ArrayWithDefault = new[] { DEFAULT }.Concat(Array).ToArray();
 }

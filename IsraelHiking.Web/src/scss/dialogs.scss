@@ -1,12 +1,12 @@
 [mat-dialog-title] [mat-dialog-close] {
     position: absolute;
     top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
-    right: 5px;
+    right: calc(5px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
 }
 
 [dir=rtl] [mat-dialog-title] [mat-dialog-close] {
     right: unset;
-    left: 5px;
+    left: calc(5px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
 }
 
 .mdc-dialog__title::before {
