@@ -16,7 +16,6 @@ using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 
 namespace IsraelHiking.API.Tests.Services;
 
@@ -454,7 +453,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         // The "full" response of a super relation does not contain the ways of its child relations
         gateway.GetCompleteRelation(1).Returns(new CompleteRelation
         {
@@ -482,7 +480,7 @@ public class PointsOfInterestProviderTests
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
         gateway.Received(1).GetCompleteRelation(2);
-        _wikimediaCommonGateway.Received(1).UploadImage("name.png", Arg.Any<string>(), user.DisplayName, Arg.Any<Stream>(), Arg.Is<Coordinate>(c => c.X == 2 && c.Y == 1));
+        _imageUploadGateway.Received(1).UploadImage("name.png", Arg.Any<string>(), user.DisplayName, Arg.Any<Stream>(), Arg.Is<Coordinate>(c => c.X == 2 && c.Y == 1));
         gateway.Received(1).UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Id == 1));
     }
 
