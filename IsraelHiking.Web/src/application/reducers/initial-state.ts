@@ -25,6 +25,11 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     label: "Español"
 },
 {
+    code: "de",
+    rtl: false,
+    label: "Deutsch"
+},
+{
     code: "he",
     rtl: true,
     label: "עברית"
