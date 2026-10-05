@@ -56,6 +56,8 @@ const END_COLOR = "red";
 @Service()
 export class SelectedRouteService {
     private static readonly MERGE_THRESHOLD = 50; // meter.
+    /** Above this number of points fetching the elevation data takes long enough to tell the user about it */
+    private static readonly POINTS_FOR_CONVERSION_TOAST = 1000;
 
     private routes: Immutable<RouteData[]> = [];
     private selectedRouteId: string;
@@ -583,6 +585,10 @@ export class SelectedRouteService {
         }
         const routes = this.geoJsonParser.toRoutes(fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
         const featureColor = GeoJSONUtils.getFeatureColor(fullFeature);
+        const pointsCount = routes.reduce((count, route) => count + route.latlngs.length, 0);
+        if (pointsCount > SelectedRouteService.POINTS_FOR_CONVERSION_TOAST) {
+            this.toastService.info(this.resources.convertingToRoutePleaseWait);
+        }
         for (let i = 0; i < routes.length; i++) {
             const route = routes[i];
             const name = this.createRouteName(route.name);

@@ -338,6 +338,7 @@ export class ResourcesService {
     public unableToDeleteSavedRoute: string;
     public preparingDataForIssueReport: string;
     public openingAFilePleaseWait: string;
+    public convertingToRoutePleaseWait: string;
     public finishedOpeningTheFile: string;
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
@@ -506,7 +507,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1790435600298");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1791234281036");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -807,6 +808,7 @@ export class ResourcesService {
         this.unableToDeleteSavedRoute = this.gettextCatalog.getString("Unable to delete the saved route...");
         this.preparingDataForIssueReport = this.gettextCatalog.getString("Preparing data for issue report...");
         this.openingAFilePleaseWait = this.gettextCatalog.getString("Opening file, this might take a while, please don't close the app...");
+        this.convertingToRoutePleaseWait = this.gettextCatalog.getString("Converting to a route, this might take a while...");
         this.finishedOpeningTheFile = this.gettextCatalog.getString("Finished opening file! :-)");
         this.areYouSureYouWantToStopRecording = this.gettextCatalog.getString("Are you sure you want to stop the current recording?");
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("Log in to see your traces - tap the frowning face icon at the top.");
