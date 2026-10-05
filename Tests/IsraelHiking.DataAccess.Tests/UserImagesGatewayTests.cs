@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using SkiaSharp;
 using System;
 using System.Net.Http;
 
@@ -13,6 +12,9 @@ namespace IsraelHiking.DataAccess.Tests;
 [TestClass]
 public class UserImagesGatewayTests
 {
+    /// <summary>A 1x1 JPEG, so that the test does not need an image library to make one</summary>
+    private const string ONE_PIXEL_JPEG = "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/wAALCAABAAEBAREA/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oACAEBAAA/AP1Tr//Z";
+
     private UserImagesGateway _gateway;
     private IOsmAccessTokenProvider _osmAccessTokenProvider;
 
@@ -45,10 +47,7 @@ public class UserImagesGatewayTests
     public void UploadImage()
     {
         _osmAccessTokenProvider.GetToken().Returns("TEST_TOKEN");
-        using var bitmap = new SKBitmap(1, 1);
-        using var image = SKImage.FromBitmap(bitmap);
-        using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
-        using var contentStream = data.AsStream();
+        using var contentStream = new System.IO.MemoryStream(Convert.FromBase64String(ONE_PIXEL_JPEG));
 
         var imageUrl = _gateway.UploadImage("test.jpg", "description", "me", contentStream,
             new Coordinate(35.2137, 31.7683)).Result;
