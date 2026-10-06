@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -38,9 +37,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     private readonly IElevationSetterExecutor _elevationSetterExecutor;
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
     private readonly IExternalSourcesRepository _externalSourcesRepository;
-    private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
+    private readonly IImageUploadGateway _imageUploadGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
     private readonly ILogger _logger;
 
     /// <summary>
@@ -50,9 +48,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// <param name="externalSourcesRepository"></param>
     /// <param name="elevationSetterExecutor"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-    /// <param name="wikimediaCommonGateway"></param>
+    /// <param name="imageUploadGateway"></param>
     /// <param name="base64ImageConverter"></param>
-    /// <param name="imageUrlStoreExecutor"></param>
     /// <param name="tagsHelper"></param>
     /// <param name="clientsFactory"></param>
     /// <param name="logger"></param>
@@ -60,9 +57,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         IExternalSourcesRepository externalSourcesRepository,
         IElevationSetterExecutor elevationSetterExecutor,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-        IWikimediaCommonGateway wikimediaCommonGateway,
+        IImageUploadGateway imageUploadGateway,
         IBase64ImageStringToFileConverter base64ImageConverter,
-        IImagesUrlsStorageExecutor imageUrlStoreExecutor,
         ITagsHelper tagsHelper,
         IClientsFactory clientsFactory,
         ILogger logger)
@@ -73,9 +69,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         _elevationSetterExecutor = elevationSetterExecutor;
         _pointsOfInterestRepository = pointsOfInterestRepository;
         _externalSourcesRepository = externalSourcesRepository;
-        _wikimediaCommonGateway = wikimediaCommonGateway;
+        _imageUploadGateway = imageUploadGateway;
         _base64ImageConverter = base64ImageConverter;
-        _imageUrlStoreExecutor = imageUrlStoreExecutor;
         _logger = logger;
     }
 
@@ -453,18 +448,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         {
             return imageUrl;
         }
-        using var md5 = MD5.Create();
-        var imageUrlFromDatabase = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
-        if (imageUrlFromDatabase != null)
-        {
-            return imageUrlFromDatabase;
-        }
-
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
-        var imageName = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
-        imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
-        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
-        return imageUrl;
+        return await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
     }
 }

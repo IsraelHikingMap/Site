@@ -34,12 +34,5 @@ public class OverpassTurboGatewayTests
         Assert.IsNotNull(list.First().Version);
     }
     
-    [TestMethod]
-    [Ignore]
-    public void GetImages()
-    {
-        var list = _gateway.GetImagesUrls().Result;
-        Assert.IsTrue(list.Count > 0);
-    }
 
 }

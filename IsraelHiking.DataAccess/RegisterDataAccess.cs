@@ -20,12 +20,11 @@ public static class RegisterDataAccess
         services.AddSingleton<IShareUrlsRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IUserLayersRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IImagesRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IExternalSourcesRepository>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IElevationGateway, ElevationGateway>();
         services.AddTransient<INakebGateway, NakebGateway>();
         services.AddSingleton<IWikidataGateway, WikidataGateway>();
-        services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();
+        services.AddTransient<IImageUploadGateway, UserImagesGateway>();
         services.AddTransient<IImgurGateway, ImgurGateway>();
         services.AddSingleton<IINatureGateway, INatureGateway>();
         services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
@@ -33,7 +32,6 @@ public static class RegisterDataAccess
         // Initializables
         services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IInitializable>(x => x.GetService<IINatureGateway>());
-        services.AddSingleton<IInitializable>(x => x.GetService<IWikimediaCommonGateway>());
 
         return services;
     }

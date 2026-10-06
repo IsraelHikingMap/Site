@@ -62,10 +62,23 @@ services:
     ports:
       - 5432:5000
     restart: always
+  user-images:
+    image: ghcr.io/mapeak-com/user-images
+    container_name: user-images
+    ports:
+      - 3001:3000
+    environment:
+      - PUBLIC_BASE_URL=http://localhost:3001
+      - STORAGE_DIR=/data/images
+    volumes:
+      - userimagesdata:/data/images
+    restart: always
 volumes:
   esdata:
     driver: local
   ghdata:
     driver: local
   tldata:
+    driver: local
+  userimagesdata:
     driver: local

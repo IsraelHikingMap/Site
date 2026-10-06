@@ -22,7 +22,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     IPointsOfInterestRepository,
     ISearchRepository,
     IUserLayersRepository,
-    IImagesRepository,
     IExternalSourcesRepository,
     IShareUrlsRepository
 {
@@ -35,7 +34,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     private const string SHARES = "shares";
     private const string CUSTOM_USER_LAYERS = "custom_user_layers";
     private const string EXTERNAL_POIS = "external_pois";
-    private const string IMAGES = "images";
     private const string REBUILD_LOG = "rebuild_log";
     private const string POINTS = "points";
     private const string BBOX = "bbox";
@@ -59,10 +57,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         if ((await _elasticClient.Indices.ExistsAsync(CUSTOM_USER_LAYERS)).Exists == false)
         {
             await _elasticClient.Indices.CreateAsync(CUSTOM_USER_LAYERS);
-        }
-        if ((await _elasticClient.Indices.ExistsAsync(IMAGES)).Exists == false)
-        {
-            await CreateImagesIndex();
         }
         logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
     }
@@ -440,19 +434,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         );
     }
 
-    private Task CreateImagesIndex()
-    {
-        return _elasticClient.Indices.CreateAsync(IMAGES, c =>
-            c.Map<ImageItem>(m =>
-                m.Properties(p =>
-                    p.Keyword(k => k.Name(ii => ii.Hash))
-                        .Keyword(s => s.Name(n => n.ImageUrls))
-                        .Binary(a => a.Name(i => i.Thumbnail))
-                )
-            )
-        );
-    }
-
     private Task CreateSharesIndex()
     {
         return _elasticClient.Indices.CreateAsync(SHARES,
@@ -538,49 +519,6 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     public Task DeleteUserLayer(MapLayerData layerData)
     {
         return _elasticClient.DeleteAsync<MapLayerData>(layerData.Id, d => d.Index(CUSTOM_USER_LAYERS));
-    }
-
-    public async Task<ImageItem> GetImageByUrl(string url)
-    {
-        var response = await _elasticClient.SearchAsync<ImageItem>(s =>
-            s.Index(IMAGES)
-                .Query(q => q.Match(m => m.Field(i => i.ImageUrls).Query(url)))
-        );
-        return response.Documents.FirstOrDefault();
-    }
-
-    public async Task<ImageItem> GetImageByHash(string hash)
-    {
-        var response = await _elasticClient.GetAsync<ImageItem>(hash, r => r.Index(IMAGES));
-        return response.Source;
-    }
-    public async Task<List<string>> GetAllUrls()
-    {
-        await _elasticClient.Indices.RefreshAsync(IMAGES);
-        var response = await _elasticClient.SearchAsync<ImageItem>(
-            s => s.Index(IMAGES)
-                .Size(10000)
-                .Scroll("10s")
-                .Source(sf => sf
-                    .Includes(i => i.Fields(f => f.ImageUrls, f => f.Hash))
-                ).Query(q => q.MatchAll())
-        );
-        var list = GetAllItemsByScrolling(response);
-        return list.SelectMany(i => i.Source.ImageUrls ?? []).ToList();
-    }
-
-    public Task StoreImage(ImageItem imageItem)
-    {
-        return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
-    }
-
-    public async Task DeleteImageByUrl(string url)
-    {
-        var imageItem = await GetImageByUrl(url);
-        if (imageItem != null)
-        {
-            await _elasticClient.DeleteAsync<IFeature>(imageItem.Hash, d => d.Index(IMAGES));
-        }
     }
 
     public Task StoreRebuildContext(RebuildContext context)

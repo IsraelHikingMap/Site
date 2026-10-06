@@ -31,7 +31,6 @@ public class DatabasesUpdaterServiceTests
     private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
     private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
-    private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private IElevationGateway _elevationGateway;
     private IOverpassTurboGateway _overpassTurboGateway;
         
@@ -49,14 +48,12 @@ public class DatabasesUpdaterServiceTests
         _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
         _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
         _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
-        _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
         _elevationGateway = Substitute.For<IElevationGateway>();
         _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
         _service = new DatabasesUpdaterService(_externalSourcesRepository,
             _pointsOfInterestRepository,
             _pointsOfInterestAdapterFactory,
             _pointsOfInterestFilesCreatorExecutor,
-            _imagesUrlsStorageExecutor,
             _externalSourceUpdaterExecutor, Substitute.For<IElevationSetterExecutor>(),
             _overpassTurboGateway,
             Substitute.For<ILogger>());
@@ -73,23 +70,6 @@ public class DatabasesUpdaterServiceTests
         _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
     }
         
-    [TestMethod]
-    public void TestRebuild_Images_ShouldRebuildImages()
-    {
-        const string imageUrl = "imageUrl";
-        var feature = new Feature(new Point(0, 0), new AttributesTable
-        {
-            {FeatureAttributes.IMAGE_URL, "imageUrl2"}
-        });
-        feature.SetLastModified(new DateTime(0));
-        _pointsOfInterestRepository.GetAllPointsOfInterest().Returns([feature]);
-        _overpassTurboGateway.GetImagesUrls().Returns([imageUrl]);
-            
-        _service.Rebuild(new UpdateRequest {Images = true}).Wait();
-
-        _imagesUrlsStorageExecutor.Received(1).DownloadAndStoreUrls(Arg.Is<List<string>>(l => l.All(i => i.StartsWith(imageUrl))));
-        _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
-    }
         
     [TestMethod]
     public void TestRebuild_SiteMap_ShouldRebuildSiteMap()

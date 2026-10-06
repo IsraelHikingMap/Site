@@ -56,7 +56,6 @@ public class UpdateController : ControllerBase
             }
             if (request == null || 
                 request.AllExternalSources == false &&
-                request.Images == false &&
                 request.SiteMap == false &&
                 request.OfflinePoisFile == false)
             {
@@ -64,7 +63,6 @@ public class UpdateController : ControllerBase
                 {
                     AllExternalSources = true,
                     SiteMap = true,
-                    Images = true,
                     OfflinePoisFile = true
                 };
                 _logger.LogInformation("No specific filters were applied, updating all databases.");

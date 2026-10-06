@@ -89,6 +89,7 @@ public class PointsOfInterestController : ControllerBase
     /// <summary>
     /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
     /// </summary>
+    /// <remarks>Creates a new POI, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
     /// <returns></returns>
@@ -129,6 +130,7 @@ public class PointsOfInterestController : ControllerBase
     /// <summary>
     /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
     /// </summary>
+    /// <remarks>Updates an existing POI by id, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="id">The feature ID</param>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>

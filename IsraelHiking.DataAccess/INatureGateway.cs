@@ -54,6 +54,12 @@ public class INatureGateway : IINatureGateway
         return features.ToList();
     }
 
+    private static string GetWikiName(string name)
+    {
+        var invalidCharacterRegularExpression = new Regex(@"[\\#<>\[\]\?|:{}/~\s+]");
+        return invalidCharacterRegularExpression.Replace(name, "_");
+    }
+
     private async Task<string> GetPageImageUrl(WikiPage page)
     {
         var match = Regex.Match(page.Content, @"תמונה=(.*)");
@@ -62,7 +68,7 @@ public class INatureGateway : IINatureGateway
             return null;
         }
 
-        var imagePage = new WikiPage(_wikiSite, "File:" + WikimediaCommonGateway.GetWikiName(match.Groups[1].Value));
+        var imagePage = new WikiPage(_wikiSite, "File:" + GetWikiName(match.Groups[1].Value));
         var retry = 0;
         while (retry < RETRIES && imagePage.LastFileRevision == null)
         {

@@ -81,13 +81,5 @@ public class OverpassTurboGateway(
         db.AddOrUpdate(list);
         return list.OfType<Way>().Select(w => w.CreateComplete(db)).ToList();
     }
-
-    public async Task<List<string>> GetImagesUrls()
-    {
-        var responseString = await GetQueryResponse("[out:csv('image';false)];\nnwr[~\"^image\"~\".\"](area:3606195356);\nout;");
-        var images = responseString.Split("\n", StringSplitOptions.RemoveEmptyEntries)
-            .Select(s => s.Trim().TrimStart('"').TrimEnd('"').Replace("\"\"", "\"")).ToList(); // CSV " cleaning
-        return images;
-    }
         
 }

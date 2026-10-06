@@ -20,7 +20,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
     private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
     private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
-    private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
     private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
     private readonly IElevationSetterExecutor _elevationSetterExecutor;
     private readonly IOverpassTurboGateway _overpassTurboGateway;
@@ -33,7 +32,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
     /// <param name="pointsOfInterestRepository"></param>
     /// <param name="pointsOfInterestAdapterFactory"></param>
     /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
-    /// <param name="imagesUrlsStorageExecutor"></param>
     /// <param name="externalSourceUpdaterExecutor"></param>
     /// <param name="elevationSetterExecutor"></param>
     /// <param name="overpassTurboGateway"></param>
@@ -42,7 +40,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         IPointsOfInterestRepository pointsOfInterestRepository,
         IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
         IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
-        IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
         IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
         IElevationSetterExecutor elevationSetterExecutor,
         IOverpassTurboGateway overpassTurboGateway,
@@ -52,7 +49,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
         _pointsOfInterestRepository = pointsOfInterestRepository;
         _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
         _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
-        _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
         _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
         _elevationSetterExecutor = elevationSetterExecutor;
         _overpassTurboGateway = overpassTurboGateway;
@@ -74,10 +70,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
             if (request.AllExternalSources)
             {
                 await UpdateExternalSources();
-            }
-            if (request.Images)
-            {
-                await RebuildImages();
             }
             if (request.SiteMap)
             {
@@ -101,19 +93,6 @@ public class DatabasesUpdaterService : IDatabasesUpdaterService
             
     }
 
-    private async Task RebuildImages()
-    {
-        _logger.LogInformation("Starting rebuilding images database.");
-        var features = await _pointsOfInterestRepository.GetAllPointsOfInterest();
-        var featuresUrls = features.SelectMany(f =>
-            f.Attributes.GetNames()
-                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                .Select(k => f.Attributes[k].ToString())
-        );
-        var urls = await _overpassTurboGateway.GetImagesUrls();
-        await _imagesUrlsStorageExecutor.DownloadAndStoreUrls(urls.Union(featuresUrls).ToList());
-        _logger.LogInformation("Finished rebuilding images database.");
-    }
 
     private async Task RebuildSiteMap()
     {

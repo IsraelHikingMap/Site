@@ -7,10 +7,6 @@ public class UpdateRequest
     /// </summary>
     public bool AllExternalSources { get; set; }
     /// <summary>
-    /// Updates images mirror
-    /// </summary>
-    public bool Images { get; set; }
-    /// <summary>
     /// Update site map xml file and offline points of interest file
     /// </summary>
     public bool SiteMap { get; set; }

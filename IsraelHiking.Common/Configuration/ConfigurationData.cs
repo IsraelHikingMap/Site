@@ -143,6 +143,10 @@ public class ConfigurationData
     /// A list of external sources - address and file name
     /// </summary>
     public Dictionary<string, string> CsvsDictionary { get; set; }
+    /// <summary>
+    /// The base address of the user-images service the site uploads points of interest pictures to
+    /// </summary>
+    public string UserImagesServerAddress { get; set; }
 
     public ConfigurationData()
     {
@@ -177,6 +181,7 @@ public class ConfigurationData
         OfflineFilesFolder = "./";
         ExternalFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";
+        UserImagesServerAddress = "https://images.mapeak.com/";
         ImageUrlsAllowList =
         [
             "wikimedia.org",
