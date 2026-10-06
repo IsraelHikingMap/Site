@@ -116,6 +116,14 @@ public class PointsOfInterestController : ControllerBase
             });
             return Ok();
         }
+        var icon = feature.Attributes.Exists(FeatureAttributes.POI_ICON)
+            ? feature.Attributes[FeatureAttributes.POI_ICON].ToString()
+            : string.Empty;
+        if (_tagsHelper.FindTagsForIcon(icon)?.Any() != true)
+        {
+            _logger.LogWarning($"Create request rejected, the icon does not translate to any OSM tag: {icon}");
+            return BadRequest("A point of interest must have a category, otherwise it is added to OSM without any tag...");
+        }
         if (!string.IsNullOrEmpty(_persistentCache.GetString(feature.GetId())))
         {
             return BadRequest("Feature creation was already requested, ignoring request.");

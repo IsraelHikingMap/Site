@@ -16,6 +16,7 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.IO.API;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,7 @@ public class PointsOfInterestControllerTests
     {
         _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
         _tagHelper = Substitute.For<ITagsHelper>();
+        _tagHelper.FindTagsForIcon(Arg.Any<string>()).Returns([[new KeyValuePair<string, string>("key", "value")]]);
         _osmGateway = Substitute.For<IAuthClient>();
         _persistentCache = Substitute.For<IDistributedCache>();
         _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
@@ -106,6 +108,41 @@ public class PointsOfInterestControllerTests
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(result);
+    }
+
+    [TestMethod]
+    public void CreatePointOfInterest_IconWithoutTags_ShouldReturnBadRequest()
+    {
+        _controller.SetupIdentity();
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.POI_ICON, "icon-with-no-tags" },
+            { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
+        });
+        poi.SetLocation(new Coordinate());
+        _tagHelper.FindTagsForIcon("icon-with-no-tags").Returns([]);
+
+        var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+        Assert.IsNotNull(result);
+        _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), Arg.Any<IAuthClient>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void CreatePointOfInterest_WithoutAnIcon_ShouldReturnBadRequest()
+    {
+        _controller.SetupIdentity();
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
+        });
+        poi.SetLocation(new Coordinate());
+        _tagHelper.FindTagsForIcon(string.Empty).Returns([]);
+
+        var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+        Assert.IsNotNull(result);
+        _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), Arg.Any<IAuthClient>(), Arg.Any<string>());
     }
 
     [TestMethod]
