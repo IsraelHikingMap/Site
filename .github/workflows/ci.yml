@@ -148,6 +148,9 @@ jobs:
             -project App.xcodeproj \
             -clonedSourcePackagesDirPath ../.spm-cache
 
+      - name: Verify the iOS lock file is up to date
+        run: git diff --exit-code -- IsraelHiking.Web/ios
+
       - name: Save Swift package cache
         if: steps.spm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6

@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rallista/valhalla-mobile.git",
       "state" : {
-        "revision" : "b47ad5a9aa5d907df329bd2a0bfcc9080220c9d8",
-        "version" : "0.6.3"
+        "revision" : "852dd75c356ecbcd0fa693dcbdd7178059013f4c",
+        "version" : "0.6.4"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rallista/valhalla-openapi-models-swift.git",
       "state" : {
-        "revision" : "3cee4950494f5cae20be4bcb7bc8f50dcd4741ea",
-        "version" : "0.5.4"
+        "revision" : "a6e37f5e2c0c6a5e5f29721dfd420ffd0d4fcbb4",
+        "version" : "0.6.0"
       }
     }
   ],
