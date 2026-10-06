@@ -50,8 +50,10 @@ export class MapService {
             return;
         }
         const maplibregl = await import("maplibre-gl");
+        // The worker file name has no content hash, so the version is added to bust a stale cached copy after an upgrade.
+        const workerUrl = `${this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"}?v=${maplibregl.getVersion()}`;
         // This is needs to be specific since capacitor is not http protocol
-        maplibregl.setWorkerUrl(this.getFullUrl(this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"));
+        maplibregl.setWorkerUrl(this.getFullUrl(workerUrl));
         maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
         maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
         maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));

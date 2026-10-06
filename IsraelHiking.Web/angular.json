@@ -34,11 +34,6 @@
                 "glob": "maplibre-gl-worker.mjs",
                 "input": "node_modules/maplibre-gl/dist",
                 "output": "./"
-              },
-              {
-                "glob": "maplibre-gl-shared.mjs",
-                "input": "node_modules/maplibre-gl/dist",
-                "output": "./"
               }
             ],
             "styles": [

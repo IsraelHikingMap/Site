@@ -57,7 +57,7 @@ export const appConfig: ApplicationConfig = {
             withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
         provideRouter(routes),
-        provideLottieOptions({ player: () => import("lottie-web") }),
+        provideLottieOptions({ player: () => import("lottie-web/build/player/lottie_light") }),
         provideMarkdown()
     ]
 }
