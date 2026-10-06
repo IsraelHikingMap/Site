@@ -39,7 +39,6 @@ public static class RegisterApi
         services.AddTransient<IOfflineFilesService, OfflineFilesService>();
         services.AddTransient<IExternalSourceUpdaterExecutor, ExternalSourceUpdaterExecutor>();
         services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
-        services.AddTransient<IUnauthorizedImageUrlsRemover, UnauthorizedImageUrlsRemover>();
         services.AddTransient<IElevationSetterExecutor, ElevationSetterExecutor>();
         services.AddHttpContextAccessor();
         services.AddTransient<IOsmAccessTokenProvider, HttpContextOsmAccessTokenProvider>();

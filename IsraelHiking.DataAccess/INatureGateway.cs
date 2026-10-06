@@ -48,10 +48,24 @@ public class INatureGateway : IINatureGateway
         {
             PaginationSize = 500
         };
-        var results = await allpagesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+        var results = await ToListAsync(allpagesGenerator.EnumItemsAsync()).ConfigureAwait(false);
         _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
         var features = await GetFeaturesFromTitles(results.Select(r => r.Title).ToArray());
         return features.ToList();
+    }
+
+    /// <summary>
+    /// Materializes an async sequence. Both .NET and the one System.Linq.Async that WikiClientLibrary pulls in
+    /// define ToListAsync, so calling it directly is ambiguous.
+    /// </summary>
+    private static async Task<List<T>> ToListAsync<T>(IAsyncEnumerable<T> source)
+    {
+        var list = new List<T>();
+        await foreach (var item in source.ConfigureAwait(false))
+        {
+            list.Add(item);
+        }
+        return list;
     }
 
     private static string GetWikiName(string name)
@@ -212,7 +226,7 @@ public class INatureGateway : IINatureGateway
             LastRevisionsOnly = true,
             TypeFilters = RecentChangesFilterTypes.Create | RecentChangesFilterTypes.Edit
         };
-        var titles = await recentChangesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+        var titles = await ToListAsync(recentChangesGenerator.EnumItemsAsync()).ConfigureAwait(false);
         _logger.LogInformation($"Got {titles.Count} updated pages from iNature, fetching their content and images");
         return await GetFeaturesFromTitles(titles.Select(i => i.Title).ToArray());
     }

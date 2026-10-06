@@ -134,10 +134,6 @@ public class ConfigurationData
     /// OSM server base address
     /// </summary>
     public List<string> OverpassAddresses { get; set; }
-    /// <summary>
-    /// A list of allowed image sites
-    /// </summary>
-    public List<string> ImageUrlsAllowList { get; set; }
         
     /// <summary>
     /// A list of external sources - address and file name
@@ -182,13 +178,6 @@ public class ConfigurationData
         ExternalFilesFolder = "./";
         OsmBaseAddress = "https://www.openstreetmap.org";
         UserImagesServerAddress = "https://images.mapeak.com/";
-        ImageUrlsAllowList =
-        [
-            "wikimedia.org",
-            "inature.info",
-            "nakeb.co.il",
-            "jeepolog.com"
-        ];
         OverpassAddresses = ["https://z.overpass-api.de/api/interpreter", "https://lz4.overpass-api.de/api/interpreter"];
         CsvsDictionary = new Dictionary<string, string>();
     }

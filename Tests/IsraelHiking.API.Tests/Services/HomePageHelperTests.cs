@@ -35,7 +35,7 @@ public class HomePageHelperTests
 
         void Check(string needle)
         {
-            StringAssert.Contains(s, needle, null, null);
+            StringAssert.Contains(s, needle);
         }
 
         Check("<title>@TITLE@");
@@ -51,7 +51,7 @@ public class HomePageHelperTests
 
         void Check(string needle)
         {
-            StringAssert.Contains(s, needle, null, null);
+            StringAssert.Contains(s, needle);
         }
 
         Check("<title>1&lt;&gt;&quot;2");

@@ -65,7 +65,6 @@ public class ReceiptValidationGateway(
         }
         var iapticResponse = JsonSerializer.Deserialize<IapticPurchaseResponse>(responseStr);
         var iapticEntitled = iapticResponse.Purchases.Values.Any(v => v.IsExpired == false);
-        logger.LogInformation("Is entitled with Iaptic for user: " + userId + " is: " + iapticEntitled);
         return iapticEntitled;
     }
 
@@ -79,7 +78,6 @@ public class ReceiptValidationGateway(
         var responseStr = await response.Content.ReadAsStringAsync();
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            logger.LogInformation("Is entitled with Revenuecat for user: " + userId + " is: false");
             return false;
         }
         if (response.StatusCode != HttpStatusCode.OK)
@@ -89,7 +87,6 @@ public class ReceiptValidationGateway(
             return false;
         }
         var hasEntitlements = JsonSerializer.Deserialize<RevenueCatEntitlementsResponse>(responseStr).Items.Any();
-        logger.LogInformation("Is entitled with Revenuecat for user: " + userId + " is: " + hasEntitlements);
         return hasEntitlements;
     }
 }

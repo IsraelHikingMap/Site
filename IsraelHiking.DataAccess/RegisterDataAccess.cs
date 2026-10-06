@@ -24,6 +24,7 @@ public static class RegisterDataAccess
         services.AddSingleton<IElevationGateway, ElevationGateway>();
         services.AddTransient<INakebGateway, NakebGateway>();
         services.AddSingleton<IWikidataGateway, WikidataGateway>();
+        services.AddTransient<IWikidataContentGateway, WikidataContentGateway>();
         services.AddTransient<IImageUploadGateway, UserImagesGateway>();
         services.AddTransient<IImgurGateway, ImgurGateway>();
         services.AddSingleton<IINatureGateway, INatureGateway>();

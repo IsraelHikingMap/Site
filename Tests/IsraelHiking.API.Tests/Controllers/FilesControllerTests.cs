@@ -180,7 +180,7 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Throws(new Exception("some text"));
 
-        Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
+        Assert.Throws<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
     }
 
     [TestMethod]

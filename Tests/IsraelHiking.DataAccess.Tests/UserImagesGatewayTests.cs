@@ -34,7 +34,7 @@ public class UserImagesGatewayTests
     {
         _osmAccessTokenProvider.GetToken().Returns((string)null);
 
-        Assert.ThrowsException<AggregateException>(() => _ = _gateway
+        Assert.ThrowsExactly<AggregateException>(() => _ = _gateway
             .UploadImage("test.jpg", "description", "me", new System.IO.MemoryStream(), new Coordinate(35.2137, 31.7683)).Result);
     }
 

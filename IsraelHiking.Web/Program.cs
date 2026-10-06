@@ -2,13 +2,13 @@
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
 using IsraelHiking.API.Swagger;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
@@ -138,7 +138,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
     services.AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = Branding.VERSION });
         c.SchemaFilter<FeatureExampleFilter>();
         c.SchemaFilter<FeatureCollectionExampleFilter>();
         c.AddSecurityDefinition("Bearer",
@@ -161,7 +161,7 @@ void InitializeServices(IServiceProvider serviceProvider)
 {
     var logger = serviceProvider.GetRequiredService<ILogger>();
     logger.LogInformation("-----------------------------------------------");
-    logger.LogInformation($"Version: {Assembly.GetExecutingAssembly().GetName().Version?.ToString()}");
+    logger.LogInformation($"Version: {Branding.VERSION}");
     logger.LogInformation("Initializing singleton services");
     var initializableServices = serviceProvider.GetServices<IInitializable>();
     foreach (var service in initializableServices)

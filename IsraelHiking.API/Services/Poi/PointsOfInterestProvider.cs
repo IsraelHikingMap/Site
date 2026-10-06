@@ -38,6 +38,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
     private readonly IExternalSourcesRepository _externalSourcesRepository;
     private readonly IImageUploadGateway _imageUploadGateway;
+    private readonly IWikidataContentGateway _wikidataContentGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
     private readonly ILogger _logger;
 
@@ -49,6 +50,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// <param name="elevationSetterExecutor"></param>
     /// <param name="osmGeoJsonPreprocessorExecutor"></param>
     /// <param name="imageUploadGateway"></param>
+    /// <param name="wikidataContentGateway"></param>
     /// <param name="base64ImageConverter"></param>
     /// <param name="tagsHelper"></param>
     /// <param name="clientsFactory"></param>
@@ -58,6 +60,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         IElevationSetterExecutor elevationSetterExecutor,
         IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
         IImageUploadGateway imageUploadGateway,
+        IWikidataContentGateway wikidataContentGateway,
         IBase64ImageStringToFileConverter base64ImageConverter,
         ITagsHelper tagsHelper,
         IClientsFactory clientsFactory,
@@ -70,6 +73,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         _pointsOfInterestRepository = pointsOfInterestRepository;
         _externalSourcesRepository = externalSourcesRepository;
         _imageUploadGateway = imageUploadGateway;
+        _wikidataContentGateway = wikidataContentGateway;
         _base64ImageConverter = base64ImageConverter;
         _logger = logger;
     }
@@ -102,26 +106,30 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         return features.Any() ? features.First() : null;
     }
 
+    /// <summary>
+    /// Sets the value of a tag for a specific language.
+    /// The language-less tag is updated too when it holds the value that was presented to the user,
+    /// i.e. when it was used as the fallback for the requested language, otherwise it is left as is.
+    /// </summary>
+    /// <param name="tags">The tags to update</param>
+    /// <param name="key">The tag key, without a language</param>
+    /// <param name="value">The new value, can be empty in order to remove the tag</param>
+    /// <param name="language">The language of the new value</param>
     private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
     {
         var keyWithLanguage = key + ":" + language;
-        var previousValue = string.Empty;
-        if (tags.ContainsKey(keyWithLanguage))
-        {
-            previousValue = tags[keyWithLanguage];
-            tags[keyWithLanguage] = value;
-        }
-        else
-        {
-            tags.Add(new Tag(keyWithLanguage, value));
-        }
-        if (tags.ContainsKey(key) && tags[key] == previousValue)
-        {
-            tags[key] = value;
-        }
-        else if (tags.ContainsKey(key) == false)
+        var previousValue = new[] { keyWithLanguage, key + ":" + Languages.ENGLISH, key }
+            .Where(tags.ContainsKey)
+            .Select(k => tags[k])
+            .FirstOrDefault(string.Empty);
+        tags.AddOrReplace(keyWithLanguage, value);
+        if (tags.ContainsKey(key) == false)
         {
             tags.Add(new Tag(key, value));
+        }
+        else if (tags[key] == previousValue)
+        {
+            tags[key] = value;
         }
     }
 
@@ -235,7 +243,8 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         {
             var client = _clientsFactory.CreateNonAuthClient();
             var osmElement = await client.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
-            feature = ConvertOsmToFeature(osmElement);    
+            feature = ConvertOsmToFeature(osmElement);
+            await EnrichWithWikidata(feature);
         }
         else
         {
@@ -258,10 +267,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
     /// <inheritdoc/>
     public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language)
     {
-        var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
         var location = feature.GetLocation();
-        var idString = feature.GetId();
-        _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
         var imagesList = await UploadImages(feature, language, osmGateway);
         var node = new Node
         {
@@ -278,6 +284,7 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
         AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
         RemoveEmptyTagsAndWhiteSpaces(node.Tags);
+        AddFixMeToTouristAttraction(node.Tags);
         await osmGateway.UploadToOsmWithRetries(
             $"Added {feature.GetTitle(language)} using {Branding.BASE_URL}",
             async changeSetId =>
@@ -451,5 +458,47 @@ public class PointsOfInterestProvider : IPointsOfInterestProvider
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
         return await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
+    }
+
+    /// <summary>
+    /// When the OSM feature links to a Wikidata entity, fill in a missing description/image from
+    /// Wikidata/Wikipedia - just enough for the crawler (title/description/single image).
+    /// </summary>
+    private async Task EnrichWithWikidata(IFeature feature)
+    {
+        if (feature == null || !feature.Attributes.Exists(FeatureAttributes.WIKIDATA))
+        {
+            return;
+        }
+        var hasImage = feature.Attributes.GetNames()
+            .Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL) && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        var hasDescription = feature.Attributes.GetNames()
+            .Any(n => (n == FeatureAttributes.DESCRIPTION || n.StartsWith(FeatureAttributes.POI_EXTERNAL_DESCRIPTION))
+                && !string.IsNullOrWhiteSpace(feature.Attributes[n]?.ToString()));
+        if (hasImage && hasDescription)
+        {
+            return;
+        }
+        var content = await _wikidataContentGateway.GetContent(feature.Attributes[FeatureAttributes.WIKIDATA].ToString());
+        if (!hasImage && !string.IsNullOrWhiteSpace(content.ImageUrl))
+        {
+            feature.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, content.ImageUrl);
+        }
+        foreach (var (language, description) in content.DescriptionByLanguage)
+        {
+            var key = FeatureAttributes.POI_EXTERNAL_DESCRIPTION + ":" + language;
+            if (!feature.Attributes.Exists(key))
+            {
+                feature.Attributes.AddOrUpdate(key, description);
+            }
+        }
+    }
+
+    private void AddFixMeToTouristAttraction(TagsCollectionBase tags)
+    {
+        if (tags.Contains(new Tag("tourism", "attraction")) && !tags.ContainsKey("fixme"))
+        {
+            tags.Add("fixme", "Consider adding more specific tags");
+        }
     }
 }

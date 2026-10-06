@@ -4,6 +4,7 @@ using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -58,7 +59,7 @@ public class OsmControllerTests
         _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
         _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
         _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
-            _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory());
+            _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory(), Substitute.For<ILogger>());
     }
 
     [TestMethod]

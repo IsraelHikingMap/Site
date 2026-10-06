@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Reflection;
 
 namespace IsraelHiking.Common;
 
@@ -128,4 +129,9 @@ public static class Branding
         "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)";
 
     public const string BASE_URL = "https://israelhiking.osm.org.il";
+
+    /// <summary>
+    /// The version of this server, as set when the assemblies were built
+    /// </summary>
+    public static readonly string VERSION = typeof(Branding).Assembly.GetName().Version?.ToString(3);
 }
