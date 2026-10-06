@@ -96,7 +96,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rallista/valhalla-mobile.git",
       "state" : {
-        "revision" : "9af68aabf699901f5897a3e55ad83c0136c0ff93",
+        "revision" : "852dd75c356ecbcd0fa693dcbdd7178059013f4c",
         "version" : "0.6.4"
       }
     },
