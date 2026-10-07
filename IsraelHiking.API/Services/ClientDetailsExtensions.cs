@@ -19,11 +19,17 @@ public static class ClientDetailsExtensions
     public const string CLIENT_VERSION_HEADER = "X-Client-Version";
 
     /// <summary>
-    /// These are user controlled values that end up in a public OSM changeset tag, so only the leading part
-    /// that looks like a platform or a version is kept, and the length is limited
+    /// The header the client uses to report the device it runs on
+    /// </summary>
+    public const string CLIENT_DEVICE_ID_HEADER = "X-Device-Id";
+
+    /// <summary>
+    /// These are user controlled values, the platform and the version even end up in a public OSM changeset
+    /// tag, so only the leading part that looks like each of them is kept and the length is limited
     /// </summary>
     private static readonly Regex PlatformPattern = new("^[a-z]{1,16}", RegexOptions.Compiled);
     private static readonly Regex VersionPattern = new(@"^[0-9A-Za-z.\-]{1,32}", RegexOptions.Compiled);
+    private static readonly Regex DeviceIdPattern = new(@"^[0-9A-Za-z.\-]{1,64}", RegexOptions.Compiled);
 
     /// <summary>
     /// Gets the details reported by the client that sent the given request
@@ -38,7 +44,8 @@ public static class ClientDetailsExtensions
         }
         return new ClientDetails(
             GetSanitizedHeader(request, CLIENT_PLATFORM_HEADER, PlatformPattern),
-            GetSanitizedHeader(request, CLIENT_VERSION_HEADER, VersionPattern));
+            GetSanitizedHeader(request, CLIENT_VERSION_HEADER, VersionPattern),
+            GetSanitizedHeader(request, CLIENT_DEVICE_ID_HEADER, DeviceIdPattern));
     }
 
     private static string GetSanitizedHeader(HttpRequest request, string headerName, Regex pattern)

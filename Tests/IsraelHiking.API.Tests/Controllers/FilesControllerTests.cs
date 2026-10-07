@@ -35,6 +35,7 @@ public class FilesControllerTests
     private IGpxDataContainerConverter _gpxDataContainerConverter;
     private IOfflineFilesService _offlineFilesService;
     private IReceiptValidationGateway _receiptValidationGateway;
+    private IUserDevicesGateway _userDevicesGateway;
 
     private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
@@ -65,7 +66,8 @@ public class FilesControllerTests
         _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider), Array.Empty<IConverterFlowItem>());
         _offlineFilesService = Substitute.For<IOfflineFilesService>();
         _receiptValidationGateway = Substitute.For<IReceiptValidationGateway>();
-        _controller = new FilesController(_remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
+        _userDevicesGateway = Substitute.For<IUserDevicesGateway>();
+        _controller = new FilesController(_remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, _userDevicesGateway, Substitute.For<ILogger>());
     }
 
     [TestMethod]
@@ -266,5 +268,42 @@ public class FilesControllerTests
         var results = _controller.IsSubscribed().Result;
 
         Assert.IsTrue(results);
+    }
+
+    [TestMethod]
+    public void IsSubscribed_SubscribedClientReportingItsDevice_ShouldStoreTheDevice()
+    {
+        _controller.SetupIdentity();
+        _controller.HttpContext.Request.Headers[ClientDetailsExtensions.CLIENT_PLATFORM_HEADER] = "ios";
+        _controller.HttpContext.Request.Headers[ClientDetailsExtensions.CLIENT_VERSION_HEADER] = "9.21.2";
+        _controller.HttpContext.Request.Headers[ClientDetailsExtensions.CLIENT_DEVICE_ID_HEADER] = "some-device";
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _controller.IsSubscribed().Wait();
+
+        _userDevicesGateway.Received(1).UpdateUserDevice("some-device", "ios", "9.21.2");
+    }
+
+    [TestMethod]
+    public void IsSubscribed_ClientNotReportingItsDevice_ShouldNotStoreADevice()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _controller.IsSubscribed().Wait();
+
+        _userDevicesGateway.DidNotReceive().UpdateUserDevice(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void IsSubscribed_NotSubscribed_ShouldNotStoreADevice()
+    {
+        _controller.SetupIdentity();
+        _controller.HttpContext.Request.Headers[ClientDetailsExtensions.CLIENT_DEVICE_ID_HEADER] = "some-device";
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+        _controller.IsSubscribed().Wait();
+
+        _userDevicesGateway.DidNotReceive().UpdateUserDevice(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
 }

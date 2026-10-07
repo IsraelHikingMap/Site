@@ -3,11 +3,13 @@ using System.Linq;
 namespace IsraelHiking.API.Services;
 
 /// <summary>
-/// The platform and version of the client that sent a request, as it reported them
+/// The platform, version and device of the client that sent a request, as it reported them
 /// </summary>
 /// <param name="Platform">The platform, i.e. web, android or ios, null when the client did not report it</param>
 /// <param name="Version">The client version, null when the client did not report it, which a browser never does</param>
-public record ClientDetails(string Platform, string Version)
+/// <param name="DeviceId">The device the client runs on, null when the client did not report it. It is only
+/// used to count the devices a subscription is used from, and is never published or logged.</param>
+public record ClientDetails(string Platform, string Version, string DeviceId)
 {
     private static readonly string[] MobilePlatforms = ["android", "ios"];
 
@@ -16,7 +18,7 @@ public record ClientDetails(string Platform, string Version)
     /// <summary>
     /// Nothing is known about the client, i.e. a background process or a client that predates these headers
     /// </summary>
-    public static readonly ClientDetails Unknown = new(null, null);
+    public static readonly ClientDetails Unknown = new(null, null, null);
 
     /// <summary>
     /// The client's details for the logs, i.e. "android 9.21.2"

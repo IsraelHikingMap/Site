@@ -22,6 +22,7 @@ public class FilesController : ControllerBase
     private readonly IDataContainerConverterService _dataContainerConverterService;
     private readonly IOfflineFilesService _offlineFilesService;
     private readonly IReceiptValidationGateway _receiptValidationGateway;
+    private readonly IUserDevicesGateway _userDevicesGateway;
     private readonly ILogger _logger;
 
     /// <summary>
@@ -31,17 +32,20 @@ public class FilesController : ControllerBase
     /// <param name="dataContainerConverterService"></param>
     /// <param name="offlineFilesService"></param>
     /// <param name="receiptValidationGateway"></param>
+    /// <param name="userDevicesGateway"></param>
     /// <param name="logger"></param>
     public FilesController(IRemoteFileFetcherGateway remoteFileFetcherGateway,
         IDataContainerConverterService dataContainerConverterService,
         IOfflineFilesService offlineFilesService,
         IReceiptValidationGateway receiptValidationGateway,
+        IUserDevicesGateway userDevicesGateway,
         ILogger logger)
     {
         _remoteFileFetcherGateway = remoteFileFetcherGateway;
         _dataContainerConverterService = dataContainerConverterService;
         _offlineFilesService = offlineFilesService;
         _receiptValidationGateway = receiptValidationGateway;
+        _userDevicesGateway = userDevicesGateway;
         _logger = logger;
     }
 
@@ -162,13 +166,23 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Check subscription
     /// </summary>
-    /// <remarks>Returns true when the current user has an active (entitled) subscription.</remarks>
+    /// <remarks>Returns true when the current user has an active (entitled) subscription. The client asks
+    /// this once per launch, which is also where the devices a subscription is used from are counted.</remarks>
     /// <returns>true if the user is subscribed, false otherwise</returns>
     [HttpGet]
     [Route("subscribed")]
     [Authorize]
     public async Task<bool> IsSubscribed()
     {
-        return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
+        var isEntitled = await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
+        if (isEntitled)
+        {
+            var clientDetails = HttpContext?.Request.GetClientDetails() ?? ClientDetails.Unknown;
+            if (clientDetails.DeviceId != null)
+            {
+                await _userDevicesGateway.UpdateUserDevice(clientDetails.DeviceId, clientDetails.Platform, clientDetails.Version);
+            }
+        }
+        return isEntitled;
     }
 }

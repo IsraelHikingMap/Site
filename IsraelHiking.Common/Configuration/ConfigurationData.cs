@@ -126,6 +126,10 @@ public class ConfigurationData
     /// </summary>
     public string ShareUrlApiAddress { get; set; }
     /// <summary>
+    /// The API address of the devices a subscription is used from
+    /// </summary>
+    public string UserDevicesApiAddress { get; set; }
+    /// <summary>
     /// OSM server base address
     /// </summary>
     public List<string> OverpassAddresses { get; set; }
@@ -170,6 +174,7 @@ public class ConfigurationData
         RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
+        UserDevicesApiAddress = "https://israelhiking.osm.org.il/api/UserDevices";
         UserImagesServerAddress = "http://localhost:3001/";
         ImageUrlsAllowList =
         [
