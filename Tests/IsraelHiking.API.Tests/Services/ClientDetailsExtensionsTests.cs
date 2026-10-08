@@ -7,7 +7,7 @@ namespace IsraelHiking.API.Tests.Services;
 [TestClass]
 public class ClientDetailsExtensionsTests
 {
-    private static HttpRequest CreateRequest(string platform = null, string version = null)
+    private static HttpRequest CreateRequest(string platform = null, string version = null, string deviceId = null)
     {
         var httpContext = new DefaultHttpContext();
         if (platform != null)
@@ -17,6 +17,10 @@ public class ClientDetailsExtensionsTests
         if (version != null)
         {
             httpContext.Request.Headers[ClientDetailsExtensions.CLIENT_VERSION_HEADER] = version;
+        }
+        if (deviceId != null)
+        {
+            httpContext.Request.Headers[ClientDetailsExtensions.CLIENT_DEVICE_ID_HEADER] = deviceId;
         }
         return httpContext.Request;
     }
@@ -60,6 +64,22 @@ public class ClientDetailsExtensionsTests
     }
 
     [TestMethod]
+    public void GetClientDetails_ClientReportingItsDevice_ShouldReturnItWithoutAddingItToTheDescriptions()
+    {
+        var details = CreateRequest("ios", "9.21.2", "3F2504E0-4F89-11D3-9A0C-0305E82C3301").GetClientDetails();
+
+        Assert.AreEqual("3f2504e0-4f89-11d3-9a0c-0305e82c3301", details.DeviceId);
+        Assert.AreEqual("ios 9.21.2", details.Info);
+        Assert.AreEqual("app 9.21.2", details.OsmInfo);
+    }
+
+    [TestMethod]
+    public void GetClientDetails_UnexpectedCharactersInTheDevice_ShouldRemoveThem()
+    {
+        Assert.AreEqual("some-device", CreateRequest(deviceId: "some-device <script>").GetClientDetails().DeviceId);
+    }
+
+    [TestMethod]
     public void GetClientDetails_UnexpectedCharacters_ShouldRemoveThem()
     {
         Assert.AreEqual("web 9.21.2", CreateRequest("web <script>", "9.21.2 <script>").GetClientDetails().Info);
@@ -74,9 +94,10 @@ public class ClientDetailsExtensionsTests
     [TestMethod]
     public void GetClientDetails_VeryLongValues_ShouldTruncateThem()
     {
-        var details = CreateRequest(new string('a', 100), new string('1', 100)).GetClientDetails();
+        var details = CreateRequest(new string('a', 100), new string('1', 100), new string('1', 100)).GetClientDetails();
 
         Assert.AreEqual(16, details.Platform.Length);
         Assert.AreEqual(32, details.Version.Length);
+        Assert.AreEqual(64, details.DeviceId.Length);
     }
 }

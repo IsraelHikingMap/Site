@@ -162,13 +162,21 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Check subscription
     /// </summary>
-    /// <remarks>Returns true when the current user has an active (entitled) subscription.</remarks>
+    /// <remarks>Returns true when the current user has an active (entitled) subscription. The client asks
+    /// this once per launch, so the log of a subscribed user and the device reported by the client is what
+    /// tells an account that is shared between people apart from one that is used from several devices.</remarks>
     /// <returns>true if the user is subscribed, false otherwise</returns>
     [HttpGet]
     [Route("subscribed")]
     [Authorize]
     public async Task<bool> IsSubscribed()
     {
-        return await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
+        var isEntitled = await _receiptValidationGateway.IsEntitled(User.Identity?.Name);
+        if (isEntitled)
+        {
+            var clientDetails = HttpContext?.Request.GetClientDetails() ?? ClientDetails.Unknown;
+            _logger.LogInformation($"Subscribed user: {User.Identity?.Name}, device: {clientDetails.DeviceId}, client: {clientDetails.Info}");
+        }
+        return isEntitled;
     }
 }
