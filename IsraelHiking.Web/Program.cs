@@ -27,11 +27,17 @@ using NeoSmart.Caching.Sqlite;
 using Scalar.AspNetCore;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NLog.Extensions.Logging;
 using NLog.Web;
 using OsmSharp.IO.API;
 
-NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
+var configFolder = Environment.GetEnvironmentVariable("CONFIG_FOLDER") ?? string.Empty;
 var builder = WebApplication.CreateBuilder(args);
+if (configFolder.Length > 0)
+{
+    builder.Configuration.AddJsonFile(Path.Combine(configFolder, "appsettings.json"), optional: false, reloadOnChange: true);
+}
+NLog.LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
 SetupServices(builder.Services, builder.Environment.IsDevelopment());
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
@@ -121,7 +127,6 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddCors();
     services.AddOptions();
 
-    var configFolder = Environment.GetEnvironmentVariable("CONFIG_FOLDER") ?? string.Empty;
     var config = new ConfigurationBuilder()
         .AddJsonFile(Path.Combine(configFolder, "appsettings.json"), optional: false, reloadOnChange: true)
         .Build();
