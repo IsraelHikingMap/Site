@@ -121,8 +121,9 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddCors();
     services.AddOptions();
 
+    var configFolder = Environment.GetEnvironmentVariable("CONFIG_FOLDER") ?? string.Empty;
     var config = new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(Path.Combine(configFolder, "appsettings.json"), optional: false, reloadOnChange: true)
         .Build();
     services.Configure<ConfigurationData>(config);
     var nonPublicConfiguration = new ConfigurationBuilder();
@@ -132,7 +133,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     }
     else
     {
-        nonPublicConfiguration.AddJsonFile("nonPublic.json");
+        nonPublicConfiguration.AddJsonFile(Path.Combine(configFolder, "nonPublic.json"));
     }
     services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
 

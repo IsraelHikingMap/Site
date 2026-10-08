@@ -4,15 +4,24 @@
 #    build: .
 #    environment:
 #      - ASPNETCORE_ENVIRONMENT=Development
+#      # Where appsettings.json and nonPublic.json are read from, see the volume below
+#      - CONFIG_FOLDER=config
 #    ports:
 #      - "5000:5000"
+#    # The folder is mounted rather than the files inside it, so that replacing a file on the host - what
+#    # "git pull", "cp" and most editors do - is picked up without recreating the container.
+#    # The folder holds:
+#    #   appsettings.json       - see ConfigurationData, and set "valhallaProfilesFilePath" in it to
+#    #                            "config/valhalla-profiles.json" so the mounted profiles are the ones used
+#    #   nonPublic.json         - the secrets, API keys and tokens, see NonPublicConfigurationData
+#    #   valhalla-profiles.json - read again whenever it changes, the rest are only read on startup, so
+#    #                            restart the container after changing them.
+#    #                            The routing profiles, the keys are the profile names, "default" is used
+#    #                            for any profile that is not listed, and "costingOptions" is sent to
+#    #                            Valhalla as-is, see
+#    #                            https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
 #    volumes:
-#      - ./IsraelHiking.Web/appsettings.json:/israelhiking/appsettings.json
-#      # The Valhalla routing profiles - the keys are the profile names, "default" is used for any profile
-#      # that is not listed, and "costingOptions" is sent to Valhalla as-is, see
-#      # https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
-#      # The file is read on startup, so restart the container after changing it.
-#      - ./IsraelHiking.Web/valhalla-profiles.json:/israelhiking/valhalla-profiles.json
+#      - ./config:/israelhiking/config:ro
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch

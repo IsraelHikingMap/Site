@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Api;
@@ -210,6 +210,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     ILogger logger) : IRoutingGateway, IInitializable
 {
     private Dictionary<string, ValhallaProfile> _profiles;
+    private DateTime _profilesLastWriteTime;
 
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private readonly ConfigurationData _options = options.Value;
@@ -217,13 +218,14 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
 
     public Task Initialize()
     {
-        _profiles = ReadProfiles();
+        EnsureProfilesAreUpToDate();
         return Task.CompletedTask;
     }
 
     public async Task<Feature> GetRouting(RoutingGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
+        EnsureProfilesAreUpToDate();
         var profile = _profiles[request.Profile.ToString()];
         var requestJson = new ValhallaRequest
         {
@@ -271,6 +273,7 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
     public async Task<Feature> GetMapMatch(MapMatchGatewayRequest request)
     {
         var httpClient = _httpClientFactory.CreateClient();
+        EnsureProfilesAreUpToDate();
         var profile = _profiles[request.Profile.ToString()];
         var traceRequest = new ValhallaTraceRouteRequest
         {
@@ -316,8 +319,18 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
         throw new Exception("Unable to map match the given points using Valhalla after 3 retries.");
     }
 
-    private Dictionary<string, ValhallaProfile> ReadProfiles()
+    /// <summary>
+    /// The profiles file is mounted into the container from the outside, so it can be updated while the
+    /// site is running - it is re-read whenever its write time changes instead of only once on startup.
+    /// </summary>
+    private void EnsureProfilesAreUpToDate()
     {
+        var lastWriteTime = File.GetLastWriteTimeUtc(_options.ValhallaProfilesFilePath);
+        if (_profiles != null && lastWriteTime == _profilesLastWriteTime)
+        {
+            return;
+        }
+        _profilesLastWriteTime = lastWriteTime;
         try
         {
             var content = File.ReadAllText(_options.ValhallaProfilesFilePath);
@@ -329,12 +342,12 @@ public class ValhallaGateway(IHttpClientFactory httpClientFactory,
             })
                 ?? throw new InvalidOperationException("The file is empty");
             _logger.LogInformation($"Loaded {profiles.Count} Valhalla profiles from {_options.ValhallaProfilesFilePath}");
-            return new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
+            _profiles = new Dictionary<string, ValhallaProfile>(profiles, StringComparer.OrdinalIgnoreCase);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Failed to read the Valhalla profiles from {_options.ValhallaProfilesFilePath}, falling back to Valhalla's default costing options");
-            return [];
+            _profiles = [];
         }
     }
 
