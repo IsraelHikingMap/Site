@@ -1,6 +1,6 @@
 import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Subject, mergeMap } from "rxjs";
+import { MapComponent, MapService } from "@maplibre/ngx-maplibre-gl";
+import { Subject, firstValueFrom, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
 
@@ -31,20 +31,18 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private readonly mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
     private readonly recreateQueue = new Subject<() => Promise<void>>();
+    private isDestroyed = false;
 
 
     private readonly mapComponent = inject(MapComponent);
+    private readonly mapService = inject(MapService);
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
     constructor() {
         this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
-        this.mapLoadedPromise = new Promise((resolve, _) => {
-            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
-                resolve();
-            }));
-        });
+        this.mapLoadedPromise = firstValueFrom(this.mapService.mapLoaded$);
     }
 
     public ngOnInit() {
@@ -68,6 +66,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     public ngOnDestroy() {
+        this.isDestroyed = true;
         this.addLayerRecreationQuqueItem(this.layerData(), null);
         this.recreateQueue.complete();
         for (const subscription of this.subscriptions) {
@@ -84,7 +83,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private updateSourcesAndLayers(layerData: LayerData, sources: Record<string, SourceSpecification>, layers: LayerSpecification[]) {
-        if (!this.visible()) {
+        if (!this.visible() || this.isDestroyed) {
             return;
         }
         for (let sourceKey of Object.keys(sources)) {
