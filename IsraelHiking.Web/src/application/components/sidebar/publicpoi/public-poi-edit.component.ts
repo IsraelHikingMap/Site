@@ -31,6 +31,13 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 
+    /**
+     * The icon a new point starts with, see ngOnInit.
+     * The server translates it to tourism=attraction, which says nothing on its own,
+     * so a new point may not be uploaded with this icon and nothing else.
+     */
+    private static readonly GENERIC_ICON = "icon-star";
+
     public readonly info = model<EditablePublicPointData>();
 
     public readonly isLoading = signal(false);
@@ -47,6 +54,24 @@ export class PublicPointOfInterestEditComponent implements OnInit {
 
     public readonly isPoint = computed(() => this.info != null && this.info().isPoint);
 
+    private readonly isNew = computed(() => !this.info().id || validateUuid(this.info().id));
+
+    /**
+     * A new point needs to say something beyond the icon it defaults to, otherwise it reaches
+     * OSM as a bare tourism=attraction, which carries no information - see GENERIC_ICON.
+     */
+    public readonly canUpload = computed(() => {
+        if (!this.isNew()) {
+            return true;
+        }
+        const info = this.info();
+        return info.icon !== PublicPointOfInterestEditComponent.GENERIC_ICON ||
+            !!info.title?.trim() ||
+            !!info.description?.trim() ||
+            info.imagesUrls.length > 0 ||
+            info.urls.some(url => url?.trim());
+    });
+
     @HostListener("window:keydown", ["$event"])
     public onEditShortcutKeys(event: KeyboardEvent): void {
         if (isTypingInTextField(event)) {
@@ -61,7 +86,7 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     }
 
     private saveOnCtrlEnter(event: KeyboardEvent): string | null {
-        if (event.key !== "Enter" || !isCtrlOrMeta(event) || this.isLoading()) {
+        if (event.key !== "Enter" || !isCtrlOrMeta(event) || this.isLoading() || !this.canUpload()) {
             return null;
         }
         this.save();
@@ -162,9 +187,5 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         } finally {
             this.isLoading.set(false);
         }
-    }
-
-    private isNew(): boolean {
-        return !this.info().id || validateUuid(this.info().id);
     }
 }
