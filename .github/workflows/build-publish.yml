@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -92,7 +92,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -128,14 +128,14 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
           path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
@@ -192,7 +192,7 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -249,7 +249,7 @@ jobs:
           FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 5
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
