@@ -1,6 +1,5 @@
 import { Component, HostListener, ElementRef, AfterViewInit, inject, viewChild, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
-import { NgStyle } from "@angular/common";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatFormField, MatLabel, MatSuffix } from "@angular/material/form-field";
@@ -45,7 +44,7 @@ interface PrivatePoiEditDialogData {
 @Component({
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html",
-    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatTooltip, NgStyle, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
+    imports: [Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MatAnchor, ImageCaptureDirective, AnalyticsDirective, MatTooltip, MatIconButton, MatSuffix, CoordinatesComponent, MatDialogActions, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class PrivatePoiEditDialogComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
