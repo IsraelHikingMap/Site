@@ -14,7 +14,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { DataContainer, ApplicationState, LayerData, RouteData, RouteDataWithoutState } from "../models";
+import type { DataContainer, ApplicationState, RouteData, RouteDataWithoutState } from "../models";
 
 @Service()
 export class DataContainerService {
@@ -89,8 +89,10 @@ export class DataContainerService {
         try {
             const data = await this.fileService.openFromUrl(url);
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
-            data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCapacitor);
+            if (baseLayer && this.runningContextService.isIFrame) {
+                this.layersService.selectBaseLayer(baseLayer.split("_").join(" "));
+            }
         } catch {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
@@ -113,21 +115,5 @@ export class DataContainerService {
             this.shareUrlsService.setShareUrl(null);
             this.toastService.error(ex, this.resources.unableToLoadFromUrl);
         }
-    }
-
-    private stringToBaseLayer(addressOrKey: string): LayerData {
-        if (!addressOrKey) {
-            return null;
-        }
-        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
-            return {
-                key: "",
-                address: addressOrKey
-            } as LayerData;
-        }
-        return {
-            key: addressOrKey.split("_").join(" "),
-            address: ""
-        } as LayerData;
     }
 }
