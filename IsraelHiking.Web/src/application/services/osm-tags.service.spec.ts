@@ -754,6 +754,30 @@ describe("OsmTagsService", () => {
         expect(poi.properties.poiCategory).toBe("Other");
     });
 
+    it("Should set icon color category for railway station", () => {
+        // Arrange
+        const feature = createFeature({ railway: "station" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-bus-stop");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
+    it("Should set icon color category for aerialway station and prefer it over wikidata", () => {
+        // Arrange
+        const feature = createFeature({ aerialway: "station", wikidata: "Q12345" });
+        const poi = createPoi();
+        // Act
+        OsmTagsService.setIconColorCategory(feature, poi);
+        // Assert
+        expect(poi.properties.poiIconColor).toBe("black");
+        expect(poi.properties.poiIcon).toBe("icon-bus-stop");
+        expect(poi.properties.poiCategory).toBe("Other");
+    });
+
     it("Should set icon color category for wikidata", () => {
         // Arrange
         const feature = createFeature({ wikidata: "Q12345" });
