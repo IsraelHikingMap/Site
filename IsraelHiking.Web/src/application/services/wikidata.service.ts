@@ -134,6 +134,14 @@ export class WikidataService implements ImageAttributionProvider {
         }
     }
 
+    /**
+     * Wikimedia appends utm tracking parameters to the image urls it returns, they are not part of the file name
+     * and break both the attribution lookup and the file extension checks, so they are removed
+     */
+    private removeTrackingParameters(imageUrl: string): string {
+        return imageUrl?.split("?")[0];
+    }
+
     private async getDescriptionAndImageByLanguageAndTitle(language: string, title: string): Promise<{ image?: string; description?: string }> {
         const wikipediaPage = await firstValueFrom(this.httpClient.get<WikiPage>(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`).pipe(timeout(3000)));
         const pagesIds = Object.keys(wikipediaPage.query.pages);
@@ -143,7 +151,7 @@ export class WikidataService implements ImageAttributionProvider {
         const page = wikipediaPage.query.pages[pagesIds[0]];
         return {
             description: page.extract,
-            image: page.original?.source
+            image: this.removeTrackingParameters(page.original?.source)
         };
     }
 
@@ -170,7 +178,7 @@ export class WikidataService implements ImageAttributionProvider {
         }
         const page = imagePage.query.pages[pagesIds[0]];
         if (page.imageinfo?.length > 0 && page.imageinfo[0].url) {
-            GeoJSONUtils.setPropertyUnique(feature, "image", page.imageinfo[0].url);
+            GeoJSONUtils.setPropertyUnique(feature, "image", this.removeTrackingParameters(page.imageinfo[0].url));
         }
     }
 
@@ -208,7 +216,7 @@ export class WikidataService implements ImageAttributionProvider {
      * @returns the attribution, or null when there's no author and the license does not allow using the image
      */
     public async getAttributionForImage(imageUrl: string): Promise<ImageAttribution> {
-        const imageName = imageUrl.split("/").pop().replace(/^File:/, "");
+        const imageName = this.removeTrackingParameters(imageUrl).split("/").pop().replace(/^File:/, "");
         let wikiPrefix: string = Urls.wikimediaCommons;
         const languageMatch = imageUrl.match(/https:\/\/upload\.wikimedia\.org\/wikipedia\/(.*?)\//);
         if (languageMatch && languageMatch[1] !== "commons") {
