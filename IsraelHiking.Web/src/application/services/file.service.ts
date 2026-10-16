@@ -53,6 +53,7 @@ export type HTMLElementInputChangeEvent = {
     dataTransfer: { files: File[] };
     target: HTMLInputElement | null;
     preventDefault(): void;
+    stopPropagation(): void;
 };
 
 /**

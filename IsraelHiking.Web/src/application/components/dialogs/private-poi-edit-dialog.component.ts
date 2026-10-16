@@ -181,6 +181,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
 
     public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
         event.preventDefault();
+        event.stopPropagation();
         const files = this.fileService.getFilesFromEvent(event);
         if (files.length !== 1) {
             return;

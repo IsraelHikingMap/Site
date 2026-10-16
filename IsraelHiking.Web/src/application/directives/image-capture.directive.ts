@@ -65,7 +65,8 @@ export class ImageCaptureDirective implements OnDestroy {
         const changeEvent: HTMLElementInputChangeEvent = {
             dataTransfer: { files },
             target: null,
-            preventDefault: () => { }
+            preventDefault: () => { },
+            stopPropagation: () => { }
         };
         this.ngZone.run(() => this.changed.emit(changeEvent));
     }
