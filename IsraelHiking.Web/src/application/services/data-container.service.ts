@@ -30,7 +30,7 @@ export class DataContainerService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
 
-    public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean) {
+    public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean, padding = 0) {
         let routesData: RouteData[] = [];
         for (const route of dataContainer.routes) {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
@@ -48,7 +48,7 @@ export class DataContainerService {
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, 0);
+            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, padding);
         }
     }
 
@@ -89,7 +89,7 @@ export class DataContainerService {
         try {
             const data = await this.fileService.openFromUrl(url);
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
-            this.setData(data, this.runningContextService.isCapacitor);
+            this.setData(data, this.runningContextService.isCapacitor, 100);
             if (baseLayer && this.runningContextService.isIFrame) {
                 this.layersService.selectBaseLayer(baseLayer.split("_").join(" "));
             }
