@@ -1,6 +1,8 @@
 # סרטונים
 
 - [התקנת מאפיק והורדת מפות אופליין](https://www.youtube.com/shorts/mv23JfyQlzw)
+- [מאפיק - סיור באפליקציה](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [תכנון ועריכה של מסלול טיול](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # תשובות לשאלות נפוצות
 

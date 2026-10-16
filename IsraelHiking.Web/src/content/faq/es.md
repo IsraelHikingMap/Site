@@ -1,6 +1,8 @@
 # Videos
 
-- [Introducción a Mapeak](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [Configuración de Mapeak y descarga de mapas sin conexión](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [Mapeak - Recorrido por la aplicación](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [Planificar y editar una ruta de senderismo](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # Preguntas frecuentes
 
