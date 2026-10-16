@@ -71,7 +71,6 @@ export class LegendDialogComponent {
 
     private removeMtbUnwantedLegend(sections: LegendSection[]) {
         remove(sections, sectionToRemove => sectionToRemove.title === this.resources.legendMarkedTrails);
-        remove(sections, sectionToRemove => sectionToRemove.title === this.resources.legendRegionalTrails);
 
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendChallenging4WDTrack);
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendBicyclePath);

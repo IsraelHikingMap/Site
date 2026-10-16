@@ -370,7 +370,6 @@ export class ResourcesService {
     public legendGreenMarkedTrail: string;
     public legendBlackMarkedTrail: string;
     public legendUnmarkedTrail: string;
-    public legendIsraelTrail: string;
     public legendTracksAndPaths: string;
     public legendPavedRoad: string;
     public legendAllVehicles: string;
@@ -462,10 +461,6 @@ export class ResourcesService {
     public legendAmenities: string;
     public legendBikeShop: string;
     public legendFirstAid: string;
-    public legendRegionalTrails: string;
-    public legendGolanTrail: string;
-    public legendKinneretTrail: string;
-    public legendHaifaWadisTrail: string;
     public legendPurpleRegionalTrail: string;
     public legendOrangeRegionalTrail: string;
     public legendCyclingDifficulty: string;
@@ -847,7 +842,6 @@ export class ResourcesService {
         this.legendGreenMarkedTrail = this.gettextCatalog.getString("Green Marked Trail");
         this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black Marked Trail");
         this.legendUnmarkedTrail = this.gettextCatalog.getString("Unmarked Trail");
-        this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
         this.legendTracksAndPaths = this.gettextCatalog.getString("Tracks and Paths");
         this.legendPavedRoad = this.gettextCatalog.getString("Paved Road");
         this.legendAllVehicles = this.gettextCatalog.getString("All Vehicles");
@@ -938,12 +932,8 @@ export class ResourcesService {
         this.legendAmenities = this.gettextCatalog.getString("Amenities");
         this.legendBikeShop = this.gettextCatalog.getString("Bike Shop");
         this.legendFirstAid = this.gettextCatalog.getString("First Aid");
-        this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
-        this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
-        this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
-        this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");
-        this.legendPurpleRegionalTrail = this.gettextCatalog.getString("Purple Regional Trail");
-        this.legendOrangeRegionalTrail = this.gettextCatalog.getString("Orange Regional Trail");
+        this.legendPurpleRegionalTrail = this.gettextCatalog.getString("Purple Trail");
+        this.legendOrangeRegionalTrail = this.gettextCatalog.getString("Orange Trail");
         this.legendCyclingDifficulty = this.gettextCatalog.getString("Cycling technical difficulty");
         this.legendUnknownScale = this.gettextCatalog.getString("Unknown Scale");
         this.legendEasyWithDirection = this.gettextCatalog.getString("Easy");
