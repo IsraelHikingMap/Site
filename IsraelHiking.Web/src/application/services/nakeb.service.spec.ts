@@ -53,7 +53,6 @@ describe("NakebService", () => {
         expect(properties.poiIcon).toBe("icon-hike");
         expect(properties.poiIconColor).toBe("black");
         expect(properties.poiSource).toBe("Nakeb");
-        expect(properties.poiSourceImageUrl).toBe("https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
         expect(properties.name).toBe("Some Title");
         expect(properties["name:he"]).toBe("Some Title");
         expect(properties.poiGeolocation).toEqual({ lat: 31.4, lng: 35.3 });

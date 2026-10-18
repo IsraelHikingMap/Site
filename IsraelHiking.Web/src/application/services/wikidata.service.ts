@@ -72,8 +72,7 @@ export class WikidataService implements ImageAttributionProvider {
                 poiId: "Wikidata_" + wikidataId,
                 poiIcon: "icon-wikipedia-w",
                 poiCategory: "Wikipedia",
-                poiIconColor: "black",
-                poiSourceImageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/120px-Wikidata-logo.svg.png"
+                poiIconColor: "black"
             },
             geometry: {
                 type: "Point",
@@ -123,8 +122,7 @@ export class WikidataService implements ImageAttributionProvider {
         if (!title) {
             return;
         }
-        const indexString = GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
-        feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/120px-Wikipedia-logo-v2.svg.png";
+        GeoJSONUtils.setProperty(feature, "website", `https://${language}.wikipedia.org/wiki/${title}`);
         const imageAndDescription = await this.getDescriptionAndImageByLanguageAndTitle(language, title);
         if (imageAndDescription?.image) {
             GeoJSONUtils.setPropertyUnique(feature, "image", imageAndDescription.image);

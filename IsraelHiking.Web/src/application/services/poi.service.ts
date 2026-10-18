@@ -654,7 +654,8 @@ export class PoiService {
             featureContainingOnlyChanges.properties.poiRemovedImages = removedImages;
             hasChages = true;
         }
-        const addedUrls = info.urls.filter(u => u && !editableDataBeforeChanges.urls.includes(u));
+        const addedUrls = info.urls.filter(u => u && !editableDataBeforeChanges.urls.includes(u))
+            .map(u => GeoJSONUtils.encodeUrl(u));
         if (addedUrls.length > 0) {
             featureContainingOnlyChanges.properties.poiAddedUrls = addedUrls;
             hasChages = true;
@@ -735,8 +736,9 @@ export class PoiService {
         for (const imageUrl of info.imagesUrls) {
             GeoJSONUtils.setProperty(feature, "image", imageUrl);
         }
-        for (const url of info.urls) {
-            GeoJSONUtils.setProperty(feature, "website", url);
+        const urls = info.urls.filter(u => u).map(u => GeoJSONUtils.encodeUrl(u));
+        if (urls.length > 0) {
+            feature.properties.website = urls.join(";");
         }
         const language = this.resources.getCurrentLanguageCodeSimplified();
         GeoJSONUtils.setDescription(feature, info.description, language);

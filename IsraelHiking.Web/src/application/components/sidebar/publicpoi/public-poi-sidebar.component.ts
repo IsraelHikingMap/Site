@@ -49,6 +49,19 @@ export type SourceImageUrlPair = {
     url: string;
 };
 
+/**
+ * The logos of the sources this site links to, since their favicon is either missing or too low quality.
+ * Any other domain falls back to its favicon.
+ */
+const SOURCE_IMAGE_URL_BY_DOMAIN = [
+    { domain: "kkl.org.il", imageUrl: "https://www.kkl.org.il/education/files/about/symbols/kkl_logo440.jpg" },
+    { domain: "inature.info", imageUrl: "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" },
+    { domain: "ibt.org.il", imageUrl: "https://ibt.org.il/images/logo.png" },
+    { domain: "nakeb.co.il", imageUrl: "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg" },
+    { domain: "wikidata.org", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Wikidata-logo.svg/120px-Wikidata-logo.svg.png" },
+    { domain: "wikipedia.org", imageUrl: "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/120px-Wikipedia-logo-v2.svg.png" }
+];
+
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
@@ -204,29 +217,14 @@ export class PublicPoiSidebarComponent implements OnDestroy {
     }
 
     private getSourceImageUrls(feature: Immutable<GeoJSON.Feature>): SourceImageUrlPair[] {
-        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
-            let url = feature.properties[k] as string;
-            let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
-            if (!imageUrl) {
-                if (url.includes("kkl.org.il")) {
-                    imageUrl = "https://www.kkl.org.il/education/files/about/symbols/kkl_logo440.jpg";
-                } else if (url.includes("inature.info")) {
-                    imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
-                } else if (url.includes("ibt.org.il")) {
-                    imageUrl = "https://ibt.org.il/images/logo.png";
-                } else {
-                    const domain = new URL(url).hostname;
-                    imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-                }
+        return GeoJSONUtils.getUrls(feature).filter(url => !this.isBadWikipediaUrl(url)).map(url => {
+            const knownSource = SOURCE_IMAGE_URL_BY_DOMAIN.find(s => url.includes(s.domain));
+            if (knownSource) {
+                return { url, imageUrl: knownSource.imageUrl } as SourceImageUrlPair;
             }
-            if (this.isBadWikipediaUrl(url)) {
-                url = null;
-            }
-            return {
-                imageUrl,
-                url
-            } as SourceImageUrlPair;
-        }).filter(iup => iup.url != null);
+            const domain = new URL(url).hostname;
+            return { url, imageUrl: `https://www.google.com/s2/favicons?domain=${domain}&sz=128` } as SourceImageUrlPair;
+        });
     }
 
     public setEditMode() {

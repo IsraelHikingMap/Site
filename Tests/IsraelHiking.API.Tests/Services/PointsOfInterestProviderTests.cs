@@ -223,6 +223,46 @@ public class PointsOfInterestProviderTests
     }
 
     [TestMethod]
+    public void AddFeature_MultipleWebsites_ShouldStoreThemInASingleSemicolonSeparatedTag()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://first.com;https://second.com");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "https://third.com");
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x =>
+            x.Tags[FeatureAttributes.WEBSITE].Equals("https://first.com;https://second.com;https://third.com") &&
+            x.Tags.All(t => t.Key != FeatureAttributes.WEBSITE + "1")
+        ));
+    }
+
+    [TestMethod]
+    public void AddFeature_WebsitesTooLongForASingleTag_ShouldStoreThemInNumberedWebsiteTags()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var longUrl = "https://" + string.Join("", Enumerable.Repeat("i", 200)) + ".com";
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, longUrl + ";" + longUrl + "1");
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x =>
+            x.Tags[FeatureAttributes.WEBSITE].Equals(longUrl) &&
+            x.Tags[FeatureAttributes.WEBSITE + ":1"].Equals(longUrl + "1")
+        ));
+    }
+
+    [TestMethod]
     public void AddFeature_WithExtraSpaces_ShouldRemoveExtraSpaces()
     {
         var user = new User { DisplayName = "DisplayName" };
@@ -730,6 +770,68 @@ public class PointsOfInterestProviderTests
 
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
             o.Tags.All(t => t.Key != "website1") && o.Tags.Any(t => t.Value == "url-to-keep")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_AddUrlToLegacyNumberedWebsites_ShouldMigrateToASingleSemicolonSeparatedTag()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+            { FeatureAttributes.POI_ADDED_URLS, new [] { "https://third.com" } }
+        });
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection {
+                { "website", "https://first.com" },
+                { "website1", "https://second.com" }
+            },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags["website"] == "https://first.com;https://second.com;https://third.com" &&
+            o.Tags.All(t => t.Key != "website1")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_RemoveUrlFromSemicolonSeparatedWebsites_ShouldUpdateInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+            { FeatureAttributes.POI_REMOVED_URLS, new [] { "url-to-remove" } }
+        });
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection {
+                { "website", "url-to-remove;url-to-keep" }
+            },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags["website"] == "url-to-keep"
         ));
     }
 
