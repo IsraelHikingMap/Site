@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ionic-team/ion-ios-filesystem.git",
       "state" : {
-        "revision" : "13848aab4f3447ff98dfdbe72ff8ef31bf333db0",
-        "version" : "2.0.0"
+        "revision" : "549c18ad9d9bb70d05df37cc3f6f7aa7f5d0ee52",
+        "version" : "2.0.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RevenueCat/purchases-hybrid-common.git",
       "state" : {
-        "revision" : "eee737f5d90ab332fed23104ea815466b2ecc290",
-        "version" : "19.5.0"
+        "revision" : "a3d5cc0cfd80d75f4e2eebb3012deb05c13a77f4",
+        "version" : "19.12.0"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RevenueCat/purchases-ios-spm",
       "state" : {
-        "revision" : "e45bb84b726885492ce4e7ee94ddb252d171a205",
-        "version" : "5.92.0"
+        "revision" : "95ad250230efa7fc3e811c158ed264832aed2e79",
+        "version" : "5.95.0"
       }
     },
     {
