@@ -74,6 +74,7 @@ export class LegendDialogComponent {
 
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendChallenging4WDTrack);
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendBicyclePath);
+        this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendLaddersAndRungs);
 
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendMotorway);
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendTrunk);
@@ -83,12 +84,9 @@ export class LegendDialogComponent {
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendUnclassified);
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendResidential);
 
-        this.removeItemInSection(sections, this.resources.legendPoi, this.resources.legendPowerLine);
-
         this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendMilitaryTraining);
-        this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendTheGreenLine);
-        this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendThePurpleLine);
 
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendAlpineHut);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendGuidepost);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBench);
 
@@ -111,11 +109,7 @@ export class LegendDialogComponent {
 
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBikeShop);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendFirstAid);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendCafe);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendRestaurant);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendConvenienceStore);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendLodging);
-        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendToilets);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendTravelInformation);
         this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendPlayground);
 

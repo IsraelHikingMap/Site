@@ -380,6 +380,7 @@ export class ResourcesService {
     public legendFootPath: string;
     public legendBicyclePath: string;
     public legendSteps: string;
+    public legendLaddersAndRungs: string;
     public legendWater: string;
     public legendStream: string;
     public legendWadi: string;
@@ -456,8 +457,6 @@ export class ResourcesService {
     public legendAreaA: string;
     public legendAreaB: string;
     public legendInternationalBorder: string;
-    public legendTheGreenLine: string;
-    public legendThePurpleLine: string;
     public legendAmenities: string;
     public legendBikeShop: string;
     public legendFirstAid: string;
@@ -502,7 +501,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1791234281036");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1792354622563");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -852,6 +851,7 @@ export class ResourcesService {
         this.legendFootPath = this.gettextCatalog.getString("Foot Path");
         this.legendBicyclePath = this.gettextCatalog.getString("Bicycle Path");
         this.legendSteps = this.gettextCatalog.getString("Steps");
+        this.legendLaddersAndRungs = this.gettextCatalog.getString("Ladders and Rungs");
         this.legendWater = this.gettextCatalog.getString("Water");
         this.legendStream = this.gettextCatalog.getString("Stream");
         this.legendWadi = this.gettextCatalog.getString("Wadi");
@@ -927,8 +927,6 @@ export class ResourcesService {
         this.legendAreaA = this.gettextCatalog.getString("Area A");
         this.legendAreaB = this.gettextCatalog.getString("Area B");
         this.legendInternationalBorder = this.gettextCatalog.getString("International Border");
-        this.legendTheGreenLine = this.gettextCatalog.getString("The Green Line");
-        this.legendThePurpleLine = this.gettextCatalog.getString("The Purple Line");
         this.legendAmenities = this.gettextCatalog.getString("Amenities");
         this.legendBikeShop = this.gettextCatalog.getString("Bike Shop");
         this.legendFirstAid = this.gettextCatalog.getString("First Aid");
