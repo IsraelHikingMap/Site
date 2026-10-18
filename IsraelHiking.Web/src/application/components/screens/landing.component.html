@@ -10,7 +10,8 @@
             class="absolute inset-0 h-full w-full object-cover object-center">
     </picture>
     <div class="absolute inset-0 bg-black/10"></div>
-    <div class="relative z-10 box-border flex min-h-dvh flex-col items-center justify-start px-4 pt-[10dvh] pb-16 text-center text-white">
+    <div
+        class="relative z-10 box-border flex min-h-dvh flex-col items-center justify-start px-4 pt-[10dvh] pb-16 text-center text-white">
         <h1 class="mb-3 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl">
             Built for <br />
             <span class="text-brand">Real Adventures</span>
@@ -139,7 +140,8 @@
         <p class="mb-12 text-lg text-gray-600">Plan for free. Upgrade to Pro for total independence.</p>
 
         <div class="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
-            <div class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
+            <div
+                class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
                 <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Mapeak Free</h3>
                 <p class="mt-2 text-sm text-gray-500">For home planning and online use.</p>
                 <div class="mt-6 flex items-baseline gap-1">
@@ -159,7 +161,8 @@
                 </ul>
             </div>
 
-            <div class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
+            <div
+                class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
                 <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Pro Monthly</h3>
                 <p class="mt-2 text-sm text-gray-500">Full offline power, month to month.</p>
                 <div class="mt-6 flex items-baseline gap-1">
@@ -294,6 +297,48 @@
     </div>
 </section>
 
+<section class="bg-white py-20">
+    <div class="mx-auto max-w-5xl px-4">
+        <div class="mb-12 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 md:text-4xl">Getting Started</h2>
+            <p class="mt-4 text-gray-600">Short video tutorials to get you up and running.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <a href="https://www.youtube.com/shorts/pseuA9EUXzA" target="_blank" rel="noopener"
+                analyticsLabel="Tutorial - setup and offline map download"
+                class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <div class="mb-4 text-3xl">▶️</div>
+                <h3 class="mb-2 text-lg font-bold">Setup and Offline Map Download</h3>
+                <p class="text-sm text-gray-600">Get the app ready and take your first region offline.</p>
+            </a>
+
+            <a href="https://www.youtube.com/watch?v=3ZeIEwj96tE" target="_blank" rel="noopener"
+                analyticsLabel="Tutorial - app tour"
+                class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <div class="mb-4 text-3xl">▶️</div>
+                <h3 class="mb-2 text-lg font-bold">App Tour</h3>
+                <p class="text-sm text-gray-600">A walk through the map, search, and the main tools.</p>
+            </a>
+
+            <a href="https://www.youtube.com/watch?v=I9j86k7go70" target="_blank" rel="noopener"
+                analyticsLabel="Tutorial - planning and editing a route"
+                class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <div class="mb-4 text-3xl">▶️</div>
+                <h3 class="mb-2 text-lg font-bold">Planning and Editing a Route</h3>
+                <p class="text-sm text-gray-600">Draw a hiking route, refine it, and save it for the trail.</p>
+            </a>
+        </div>
+
+        <div class="mt-12 text-center">
+            <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsLabel="FAQ"
+                class="inline-block rounded-full bg-brand px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
+                See our F.A.Q and videos page
+            </a>
+        </div>
+    </div>
+</section>
+
 <footer class="bg-black py-8 text-center text-sm text-gray-500">
 
     @if (isMobile()) {
@@ -309,11 +354,6 @@
         <span>|</span>
         <a routerLink="/attribution" analyticsLabel="Attribution" class="hover:text-white transition-colors">
             {{resources.attribution}}
-        </a>
-        <span>|</span>
-        <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsLabel="FAQ"
-            class="hover:text-white transition-colors">
-            {{resources.FAQ}}
         </a>
     </div>
 </footer>
