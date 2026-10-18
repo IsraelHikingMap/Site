@@ -1,13 +1,16 @@
-import { Service } from "@angular/core";
-import { load, dump, insert, GPSHelper, TagValues, type IExif } from "piexif-ts";
+import { inject, Service } from "@angular/core";
+import { load, dump, insert, setErrorByPass, GPSHelper, TagValues, type IExif } from "piexif-ts";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
+import { LoggingService } from "./logging.service";
 import type { LatLngAltTime, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models";
 
 @Service()
 export class ImageResizeService {
     public static readonly JPEG = "image/jpeg";
+
+    private readonly loggingService = inject(LoggingService);
 
     /**
      * Resizes an image to a maximum size while preserving EXIF data.
@@ -32,7 +35,7 @@ export class ImageResizeService {
         const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
         let exifData: IExif = null;
         if (file.type === ImageResizeService.JPEG) {
-            exifData = load(base64);
+            exifData = this.loadExifData(base64, file.name);
         }
         const latLng = this.getGeoLocation(exifData);
         if (latLng == null && throwIfNoLocation) {
@@ -46,10 +49,43 @@ export class ImageResizeService {
                 resolve(data);
             };
             image.onerror = () => {
+                this.loggingService.error(`[Image] Failed to load the image ${file.name} of type ${file.type}`);
                 reject(new Error("Failed to load image"));
             };
             image.src = base64;
         });
+    }
+
+    /**
+     * Reads the EXIF data of an image, without failing over tags it can't decode.
+     * Some cameras, the Pixel 10 for one, write GPSVersionID and GPSAltitudeRef as a signed byte,
+     * a type piexif doesn't support, and a single such tag used to fail the entire read - and with
+     * it the whole image - so these errors are bypassed to keep the rest of the data, the
+     * geolocation included. The tags that failed come back as null and are dropped since "dump"
+     * can't write them back.
+     */
+    private loadExifData(base64: string, name: string): IExif {
+        try {
+            setErrorByPass(true, (message: string) => this.loggingService.warning(
+                `[Image] Ignoring an EXIF error in ${name}: ${message}`));
+            const exifData = load(base64);
+            for (const ifd of Object.values(exifData)) {
+                if (ifd == null || typeof ifd !== "object") {
+                    continue;
+                }
+                for (const [tag, value] of Object.entries(ifd)) {
+                    if (value == null) {
+                        delete ifd[Number(tag)];
+                    }
+                }
+            }
+            return exifData;
+        } catch (ex) {
+            this.loggingService.error(`[Image] Failed to read the EXIF data of ${name}: ${(ex as Error).message}`);
+            return null;
+        } finally {
+            setErrorByPass(false);
+        }
     }
 
     private getGeoLocation(exifData: IExif): LatLngAltTime {

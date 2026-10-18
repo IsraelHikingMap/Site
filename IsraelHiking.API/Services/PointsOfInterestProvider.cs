@@ -43,6 +43,11 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     IShareUrlGateway shareUrlGateway,
     ILogger logger) : IPointsOfInterestProvider
 {
+    /// <summary>
+    /// The maximal length of an OSM tag's value
+    /// </summary>
+    private const int MAX_TAG_VALUE_LENGTH = 255;
+
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
     private readonly ITagsHelper _tagsHelper = tagsHelper;
     private readonly IClientsFactory _clientsFactory = clientsFactory;
@@ -186,20 +191,51 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             }
             nonWikipediaUrls.Add(url);
         }
-        SetMultipleValuesForTag(tags, FeatureAttributes.WEBSITE, nonWikipediaUrls.ToArray());
+        SetWebsiteTags(tags, nonWikipediaUrls);
+    }
+
+    /// <summary>
+    /// Sets the websites as a single semicolon separated tag, which is the OSM recommended way, or as
+    /// website, website:1, website:2... when they do not fit in a single tag.
+    /// Both replace the legacy website, website1, website2... tags when they exist.
+    /// </summary>
+    private void SetWebsiteTags(TagsCollectionBase tags, List<string> urls)
+    {
+        RemoveTagsStartingWith(tags, FeatureAttributes.WEBSITE);
+        var nonEmptyUrls = urls.Where(u => !string.IsNullOrWhiteSpace(u)).Select(u => u.Trim()).ToList();
+        if (nonEmptyUrls.Count == 0)
+        {
+            return;
+        }
+        var semicolonSeparatedUrls = string.Join(";", nonEmptyUrls);
+        if (semicolonSeparatedUrls.Length <= MAX_TAG_VALUE_LENGTH)
+        {
+            tags.AddOrReplace(FeatureAttributes.WEBSITE, semicolonSeparatedUrls);
+            return;
+        }
+        for (var index = 0; index < nonEmptyUrls.Count; index++)
+        {
+            var tagName = index == 0 ? FeatureAttributes.WEBSITE : FeatureAttributes.WEBSITE + ":" + index;
+            tags.AddOrReplace(tagName, nonEmptyUrls[index]);
+        }
     }
 
     private void SetMultipleValuesForTag(TagsCollectionBase tags, string tagKey, string[] values)
     {
-        foreach (var tag in tags.Where(t => t.Key.StartsWith(tagKey)))
-        {
-            tags.RemoveKey(tag.Key);
-        }
+        RemoveTagsStartingWith(tags, tagKey);
         for (var index = 0; index < values.Length; index++)
         {
             var value = values[index];
             var tagName = index == 0 ? tagKey : tagKey + index;
             tags.AddOrReplace(tagName, value);
+        }
+    }
+
+    private void RemoveTagsStartingWith(TagsCollectionBase tags, string tagKey)
+    {
+        foreach (var tag in tags.Where(t => t.Key.StartsWith(tagKey)).ToArray())
+        {
+            tags.RemoveKey(tag.Key);
         }
     }
 
@@ -297,10 +333,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             Longitude = location.X,
             Tags = new TagsCollection()
         };
-        SetWebsiteAndWikiTags(node.Tags, feature.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-            .Select(p => feature.Attributes[p].ToString())
-            .ToList());
+        SetWebsiteAndWikiTags(node.Tags, feature.GetWebsiteUrls());
         SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, imagesList);
         SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
         SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
@@ -385,10 +418,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     private async Task UpdateWebsitesAndImages(IFeature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
     {
         var featureAfterTagsUpdates = ConvertOsmToFeature(completeOsmGeo);
-        var existingUrls = featureAfterTagsUpdates.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-            .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
-            .ToList();
+        var existingUrls = featureAfterTagsUpdates.GetWebsiteUrls();
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
         {
             foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)

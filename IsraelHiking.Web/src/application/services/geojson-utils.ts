@@ -10,17 +10,16 @@ export class GeoJSONUtils {
         }
     }
 
-    public static setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
+    public static setProperty(feature: GeoJSON.Feature, key: string, value: string) {
         if (!feature.properties[key]) {
             feature.properties[key] = value;
-            return "";
+            return;
         }
         let index = 1;
         while (feature.properties[key + index]) {
             index++;
         }
         feature.properties[key + index] = value;
-        return `${index}`;
     }
 
     public static setLocation(feature: GeoJSON.Feature, value: LatLngAltTime) {
@@ -77,7 +76,23 @@ export class GeoJSONUtils {
     }
 
     public static getUrls(feature: Immutable<GeoJSON.Feature>): string[] {
-        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]);
+        return Object.keys(feature.properties).filter(k => k.startsWith("website"))
+            .flatMap(k => GeoJSONUtils.splitUrls(feature.properties[k]));
+    }
+
+    /**
+     * OSM's recommended way to store multiple values is a single tag with semicolon separated values,
+     * while the legacy way, which is still supported for backwards compatibility, is website, website1, website2...
+     */
+    private static splitUrls(value: string): string[] {
+        return (value ?? "").split(";").map(u => u.trim()).filter(u => u.length > 0);
+    }
+
+    /**
+     * Since a semicolon separates multiple values in OSM, it needs to be encoded inside a single url
+     */
+    public static encodeUrl(url: string): string {
+        return url.replace(/;/g, "%3B");
     }
 
     public static getFeatureColor(feature: Immutable<GeoJSON.Feature>): string | null {

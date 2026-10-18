@@ -8,6 +8,14 @@ import { ImageResizeService } from "./image-resize.service";
 const IMAGE_BASE_64 =
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf/CABEIAAEAAQMBIgACEQEDEQH/xAAUAAEAAAAAAAAAAAAAAAAAAAAK/9oACAEBAAAAAH8f/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAhAAAAB//8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAxAAAAB//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k=";
 
+/**
+ * The same image, with GPS data of 2 degrees south and 3 degrees east, in which GPSVersionID
+ * and GPSAltitudeRef are written as a signed byte - a type piexif can't decode - the way a
+ * Pixel 10 writes them. See https://github.com/IsraelHikingMap/Site/issues/2738
+ */
+const IMAGE_BASE_64_WITH_UNSUPPORTED_GPS_TAG_TYPE =
+    "data:image/jpeg;base64,/9j/4QCwRXhpZgAATU0AKgAAAAgAAYglAAQAAAABAAAAGgAAAAAABwAAAAYAAAAEAgIAAAABAAIAAAACUwAAAAACAAUAAAADAAAAcAADAAIAAAACVwAAAAAEAAUAAAADAAAAiAAFAAYAAAABAAAAAAAGAAUAAAABAAAAoAAAAAIAAAABAAAAAAAAAAEAAAAAAAAAAQAAAAMAAAABAAAAAAAAAAEAAAAAAAAAAQAAAqwAAAAB/+AAEEpGSUYAAQEBAGAAYAAA/9sAhAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wgARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACv/aAAgBAQAAAAB/H//EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIQAAAAf//EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMQAAAAf//EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAT8Af//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQIBAT8Af//EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQMBAT8Af//Z";
+
 function dataUrlToBlob(dataUrl: string): Blob {
     const base64Url = dataUrl.split(",")[1];
     const buffer = decode(base64Url);
@@ -63,6 +71,14 @@ describe("ImageResizeService", () => {
         const blob = dataUrlToBlob(dataUrl);
         await expect(service.resizeImageAndConvert(blob as File)).rejects.toThrow("Image does not contain geolocation information");
     }));
+
+    it("Should convert the image when the GPS data has tags with an unsupported type", inject([ImageResizeService],
+        async (service: ImageResizeService) => {
+            const blob = dataUrlToBlob(IMAGE_BASE_64_WITH_UNSUPPORTED_GPS_TAG_TYPE);
+            const dataContainer = await service.resizeImageAndConvert(blob as File);
+            expect(dataContainer.routes[0].markers[0].latlng.lat).toBe(-2);
+            expect(dataContainer.routes[0].markers[0].latlng.lng).toBe(-3);
+        }));
 
     it("Should convert the image with location data", inject([ImageResizeService], async (service: ImageResizeService) => {
         const exifData: IExif = {

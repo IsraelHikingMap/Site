@@ -38,7 +38,6 @@ public static class FeatureAttributes
     public const string POI_LAST_MODIFIED = POI_PREFIX + "LastModified";
     public const string POI_USER_NAME = POI_PREFIX + "UserName";
     public const string POI_USER_ADDRESS = POI_PREFIX + "UserAddress";
-    public const string POI_SOURCE_IMAGE_URL = POI_PREFIX + "SourceImageUrl";
     public const string POI_GEOLOCATION = POI_PREFIX + "Geolocation";
     public const string POI_ICON = POI_PREFIX + "Icon";
     public const string POI_ICON_COLOR = POI_PREFIX + "IconColor";

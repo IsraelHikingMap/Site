@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+import { ErrorHandler, inject, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
@@ -35,6 +35,7 @@ import type { ApplicationState } from "../models";
 export class ApplicationInitializeService {
 
     private readonly dialog = inject(MatDialog);
+    private readonly errorHandler = inject(ErrorHandler);
     private readonly resources = inject(ResourcesService);
     private readonly loggingService = inject(LoggingService);
     private readonly screenService = inject(ScreenService);
@@ -87,10 +88,25 @@ export class ApplicationInitializeService {
         }
     }
 
+    /**
+     * Angular's error handler only sees errors it is given, and running zoneless means a rejected
+     * promise - an async event handler that threw, mainly - isn't one of them, so such a failure
+     * would only reach the browser's console and never the log we ask users to send us.
+     */
+    private logUnhandledRejections() {
+        if (typeof window === "undefined") {
+            return;
+        }
+        window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+            this.errorHandler.handleError(event.reason);
+        });
+    }
+
     public async initialize() {
         try {
             const timeToBootstrap = Math.round(performance.now());
             await this.loggingService.initialize();
+            this.logUnhandledRejections();
             this.loggingService.info("---------------------------------------");
             this.loggingService.info(`Starting Mapeak Application Initialization, ${timeToBootstrap} ms after the page started loading`);
             await this.databaseService.initialize();

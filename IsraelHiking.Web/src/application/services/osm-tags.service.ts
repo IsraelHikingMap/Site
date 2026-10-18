@@ -294,6 +294,13 @@ export class OsmTagsService {
             return;
         }
 
+        if (feature.properties.railway === "station" || feature.properties.aerialway === "station") {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiIcon = "icon-bus-stop";
+            poi.properties.poiCategory = "Other";
+            return;
+        }
+
         if (feature.properties["ref:IL:inature"]) {
             poi.properties.poiIconColor = "#116C00";
             poi.properties.poiIcon = "icon-inature";

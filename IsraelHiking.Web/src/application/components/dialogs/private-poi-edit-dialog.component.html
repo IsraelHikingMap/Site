@@ -57,13 +57,14 @@
         <div>
           <br />
           @for (group of iconsGroups; track group) {
-          <div class="flex flex-row w-full" role="radiogroup" [attr.aria-label]="resources.selectIcon">
+          <div class="flex flex-row w-full gap-1" role="radiogroup" [attr.aria-label]="resources.selectIcon">
             @for (icon of group.icons; track icon) {
             <button type="button" role="radio" [attr.aria-checked]="icon === markerType()"
-              (click)="setMarkerType(icon)" class="cursor-pointer text-center"
-              [ngStyle]="{width:100/iconsGroups.length + '%'}" analyticsOn="click" analyticsCategory="Private POI"
+              (click)="setMarkerType(icon)"
+              class="flex-1 cursor-pointer appearance-none border-0 bg-transparent p-1 rounded text-inherit text-center"
+              [class.active]="icon === markerType()" analyticsOn="click" analyticsCategory="Private POI"
               analyticsLabel="Select icon {{icon}}">
-              <i class="fa icon-{{icon}} fa-lg p-1" [class.active]="icon === markerType()"></i>
+              <i class="fa icon-{{icon}} fa-lg"></i>
             </button>
             }
           </div>

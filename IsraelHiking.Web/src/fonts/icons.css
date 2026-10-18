@@ -106,6 +106,10 @@
   content: "\e912";
 }
 
+.icon-bus-stop:before {
+  content: "\e993";
+}
+
 .icon-cafe:before {
   content: "\e913";
 }

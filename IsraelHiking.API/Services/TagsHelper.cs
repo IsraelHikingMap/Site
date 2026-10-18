@@ -139,6 +139,10 @@ public class TagsHelper : ITagsHelper
             case "icon-food":
                 tagCombinations.Add([new("amenity", "restaurant")]);
                 return tagCombinations;
+            case "icon-bus-stop":
+                tagCombinations.Add([new("railway", "station")]);
+                tagCombinations.Add([new("aerialway", "station")]);
+                return tagCombinations;
             case "icon-map-signs":
                 tagCombinations.Add([new("highway", "*")]);
                 return tagCombinations;
@@ -537,6 +541,16 @@ public class TagsHelper : ITagsHelper
             {
                 Color = "#008000",
                 Icon = "icon-tree",
+                Category = Categories.OTHER
+            };
+        }
+
+        if ("station".Equals(GetString(attributes, "railway")) || "station".Equals(GetString(attributes, "aerialway")))
+        {
+            return new IconColorCategory
+            {
+                Color = "black",
+                Icon = "icon-bus-stop",
                 Category = Categories.OTHER
             };
         }

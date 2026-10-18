@@ -2,6 +2,7 @@
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using NetTopologySuite.IO.Converters;
@@ -109,6 +110,26 @@ public static class GeoJsonExtensions
 
         }
         return string.Empty;
+    }
+
+    /// <summary>
+    /// Gets all the websites of a feature, supporting both a single tag with semicolon separated
+    /// values (the OSM recommended way) and the legacy website, website1, website2... tags.
+    /// </summary>
+    public static List<string> GetWebsiteUrls(this IFeature feature)
+    {
+        return feature.Attributes.GetNames()
+            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+            .SelectMany(n => SplitValues(feature.Attributes[n]?.ToString()))
+            .ToList();
+    }
+
+    private static List<string> SplitValues(string value)
+    {
+        return (value ?? string.Empty).Split(';')
+            .Select(v => v.Trim())
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .ToList();
     }
 
     public static long GetOsmId(this IFeature feature)

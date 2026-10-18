@@ -251,48 +251,41 @@ export class OpenWithService {
         return SpatialHelper.toLatLng([+match[2], +match[1]]);
     }
 
+    /**
+     * Opens a link to the site itself inside the app. The route is taken from the first path segment
+     * rather than from the prefix of the path, so that `/shares`, the saved routes screen, is not
+     * read as a share whose id is the rest of the path.
+     */
     private handleMapeakUrl(url: URL) {
         this.logAndCloseDialogs(url);
-        const pathname = url.pathname;
-        if (pathname.startsWith(RouteStrings.ROUTE_SHARE)) {
-            const shareId = pathname.replace(RouteStrings.ROUTE_SHARE + "/", "");
+        const segments = url.pathname.split("/").filter(segment => segment.length > 0);
+        const route = `/${segments[0] ?? ""}`;
+        if (route === RouteStrings.ROUTE_SHARE && segments.length === 2) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
+                this.router.navigate([RouteStrings.ROUTE_SHARE, segments[1]]);
             });
-        } else if (pathname.startsWith(RouteStrings.ROUTE_POI)) {
-            const sourceAndId = pathname.replace(RouteStrings.ROUTE_POI + "/", "");
-            const source = sourceAndId.split("/")[0];
-            const id = sourceAndId.split("/")[1];
+        } else if (route === RouteStrings.ROUTE_POI && segments.length === 3) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_POI, source, id]);
+                this.router.navigate([RouteStrings.ROUTE_POI, segments[1], segments[2]]);
             });
-        } else if (pathname.startsWith(RouteStrings.ROUTE_URL)) {
-            const urlData = pathname.replace(RouteStrings.ROUTE_URL + "/", "");
-            const baseLayer = new URLSearchParams(url.search).get("baselayer");
+        } else if (route === RouteStrings.ROUTE_URL && segments.length >= 2) {
+            const urlData = url.pathname.replace(RouteStrings.ROUTE_URL + "/", "");
+            const baseLayer = url.searchParams.get(RouteStrings.BASE_LAYER);
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_URL, urlData],
-                    { queryParams: { baseLayer } });
+                    { queryParams: { [RouteStrings.BASE_LAYER]: baseLayer } });
             });
-        } else if (pathname.startsWith(RouteStrings.ROUTE_MAP)) {
-            const mapLocation = pathname.replace(RouteStrings.ROUTE_MAP + "/", "");
-            const zoom = mapLocation.split("/")[0];
-            const lat = mapLocation.split("/")[1];
-            const lng = mapLocation.split("/")[2];
+        } else if (route === RouteStrings.ROUTE_MAP && segments.length === 4) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
+                this.router.navigate([RouteStrings.ROUTE_MAP, segments[1], segments[2], segments[3]]);
             });
-        } else if (pathname.startsWith(RouteStrings.ROUTE_SETTINGS)) {
+        } else if (route === RouteStrings.ROUTE_SETTINGS || route === RouteStrings.ROUTE_LAYER) {
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_SETTINGS],
-                    { queryParams: Object.fromEntries(url.searchParams.entries()) });
-            });
-        } else if (pathname.startsWith(RouteStrings.ROUTE_LAYER)) {
-            this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_LAYER], { queryParams: Object.fromEntries(url.searchParams.entries()) });
+                this.router.navigate([route], { queryParams: Object.fromEntries(url.searchParams.entries()) });
             });
         } else {
             this.ngZone.run(() => {
-                this.router.navigateByUrl(pathname + url.search);
+                this.router.navigateByUrl(url.pathname + url.search);
             });
         }
     }

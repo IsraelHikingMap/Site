@@ -14,7 +14,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { DataContainer, ApplicationState, LayerData, RouteData, RouteDataWithoutState } from "../models";
+import type { DataContainer, ApplicationState, RouteData, RouteDataWithoutState } from "../models";
 
 @Service()
 export class DataContainerService {
@@ -30,7 +30,7 @@ export class DataContainerService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
 
-    public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean) {
+    public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean, padding = 0) {
         let routesData: RouteData[] = [];
         for (const route of dataContainer.routes) {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
@@ -48,7 +48,7 @@ export class DataContainerService {
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, 0);
+            this.mapService.fitBounds({ northEast: dataContainer.northEast, southWest: dataContainer.southWest }, padding);
         }
     }
 
@@ -89,8 +89,10 @@ export class DataContainerService {
         try {
             const data = await this.fileService.openFromUrl(url);
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
-            data.baseLayer = this.stringToBaseLayer(baseLayer);
-            this.setData(data, this.runningContextService.isCapacitor);
+            this.setData(data, this.runningContextService.isCapacitor, 100);
+            if (baseLayer && this.runningContextService.isIFrame) {
+                this.layersService.selectBaseLayer(baseLayer.split("_").join(" "));
+            }
         } catch {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
@@ -113,21 +115,5 @@ export class DataContainerService {
             this.shareUrlsService.setShareUrl(null);
             this.toastService.error(ex, this.resources.unableToLoadFromUrl);
         }
-    }
-
-    private stringToBaseLayer(addressOrKey: string): LayerData {
-        if (!addressOrKey) {
-            return null;
-        }
-        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
-            return {
-                key: "",
-                address: addressOrKey
-            } as LayerData;
-        }
-        return {
-            key: addressOrKey.split("_").join(" "),
-            address: ""
-        } as LayerData;
     }
 }

@@ -51,6 +51,34 @@ describe("GeoJsonUtils", () => {
         expect(results).toBe("name-en");
     });
 
+    it("should get urls from the legacy numbered website properties", () => {
+        const feature = { properties: { website: "url1", website1: "url2" } } as unknown as GeoJSON.Feature;
+        expect(GeoJSONUtils.getUrls(feature)).toEqual(["url1", "url2"]);
+    });
+
+    it("should get urls from a semicolon separated website property", () => {
+        const feature = { properties: { website: "url1;url2 ; url3;" } } as unknown as GeoJSON.Feature;
+        expect(GeoJSONUtils.getUrls(feature)).toEqual(["url1", "url2", "url3"]);
+    });
+
+    it("should get urls from both a semicolon separated and the legacy numbered website properties", () => {
+        const feature = { properties: { website: "url1;url2", website1: "url3" } } as unknown as GeoJSON.Feature;
+        expect(GeoJSONUtils.getUrls(feature)).toEqual(["url1", "url2", "url3"]);
+    });
+
+    it("should encode a semicolon inside a url", () => {
+        expect(GeoJSONUtils.encodeUrl("https://some.com/a;b")).toBe("https://some.com/a%3Bb");
+    });
+
+    it("should not encode an already encoded semicolon inside a url", () => {
+        expect(GeoJSONUtils.encodeUrl("https://some.com/a%3Bb")).toBe("https://some.com/a%3Bb");
+    });
+
+    it("should split a url with an encoded semicolon as a single url", () => {
+        const feature = { properties: { website: "https://some.com/a%3Bb;https://other.com" } } as unknown as GeoJSON.Feature;
+        expect(GeoJSONUtils.getUrls(feature)).toEqual(["https://some.com/a%3Bb", "https://other.com"]);
+    });
+
     it("should return color when colour property exists", () => {
         const feature = { properties: { colour: "red" } } as unknown as GeoJSON.Feature;
         const color = GeoJSONUtils.getFeatureColor(feature);

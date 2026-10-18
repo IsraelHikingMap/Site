@@ -58,7 +58,7 @@ describe("WikidataService", () => {
                 pages: {
                     "-1": {
                         imageinfo: [{
-                            url: "image-url"
+                            url: "image-url?utm_source=commons.wikimedia.org&utm_campaign=imageinfo"
                         }]
                     }
                 }
@@ -71,7 +71,7 @@ describe("WikidataService", () => {
                     "1": {
                         extract: "external descriptiopn",
                         original: {
-                            source: "image-url2"
+                            source: "image-url2?utm_source=he.wikipedia.org&utm_campaign=api"
                         }
                     }
                 }
@@ -292,6 +292,17 @@ describe("WikidataService", () => {
             const response = await promise;
             expect(response.author).toBe("Unknown");
             expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:Some_Image.jpeg");
+        }
+    ));
+
+    it("should ignore the utm tracking parameters wikimedia adds to an image url", inject([WikidataService, HttpTestingController],
+        async (service: WikidataService, mockBackend: HttpTestingController) => {
+            const promise = service.getAttributionForImage(IMAGE_URL + "?utm_source=commons.wikimedia.org&utm_campaign=api");
+            flushPage(mockBackend, pageWithArtist("hello"));
+
+            const response = await promise;
+            expect(response.author).toBe("hello");
+            expect(response.url).toBe("https://commons.wikimedia.org/wiki/File:IHM_Image.jpeg");
         }
     ));
 

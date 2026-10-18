@@ -37,7 +37,6 @@ export class NakebService implements ImageAttributionProvider {
     public static readonly USER_ID = "Nakeb";
     public static readonly USER_NAME = "נָאקֶבּ";
 
-    private readonly NAKEB_LOGO = `${Urls.nakeb}/static/images/hikes/logo_1000x667.jpg`;
 
     private readonly httpClient = inject(HttpClient);
 
@@ -61,7 +60,6 @@ export class NakebService implements ImageAttributionProvider {
                 poiIcon: "icon-hike",
                 poiIconColor: "black",
                 poiSource: "Nakeb",
-                poiSourceImageUrl: this.NAKEB_LOGO,
                 name: response.title,
                 "name:he": response.title,
                 poiGeolocation: {

@@ -76,21 +76,21 @@ export class HashService {
             this.store.dispatch(new SetUrlAction(this.router.url));
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
-            if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
+            if (this.router.url.startsWith(RouteStrings.ROUTE_MAP + "/")) {
                 if (segments.length >= 4) {
                     this.mapService.flyTo({
                         lng: +segments[segments.length - 1].path,
                         lat: +segments[segments.length - 2].path
                     }, +segments[segments.length - 3].path - 1);
                 }
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE + "/")) {
                 if (segments.length >= 2) {
                     this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
                 }
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL + "/")) {
                 this.dataContainerService.setFileUrlAfterNavigation(segments[1].path,
                     queryParams[RouteStrings.BASE_LAYER]);
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI + "/")) {
                 this.sidebarService.show("public-poi");
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_LAYER)) {
                 this.layersService.addLayerAfterNavigation(queryParams);

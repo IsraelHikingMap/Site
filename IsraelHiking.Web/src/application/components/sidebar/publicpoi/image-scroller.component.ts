@@ -81,6 +81,7 @@ export class ImageScrollerComponent implements OnChanges {
 
     public async onFileDrop(event: DragEvent | Event | HTMLElementInputChangeEvent) {
         event.preventDefault();
+        event.stopPropagation();
         if (this.canEdit() === false) {
             return;
         }
