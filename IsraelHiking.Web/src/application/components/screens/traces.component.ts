@@ -23,6 +23,7 @@ import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.co
 import { EditTraceDialogComponent } from "../dialogs/edit-trace-dialog.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { HighlightedTextComponent } from "../highlighted-text.component";
+import { ZoomComponent } from "../zoom.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -37,10 +38,10 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import { AnalyticsService } from "../../services/analytics.service";
+import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
+import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
 import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
-import { ZoomComponent } from "../zoom.component";
 
 @Component({
     selector: "traces",
@@ -57,7 +58,7 @@ export class TracesComponent implements OnInit {
     public readonly mapStyle: StyleSpecification;
     public readonly filteredTraces = signal<Immutable<Trace[]>>([]);
     public readonly searchTerm = signal("");
-    public readonly loadingTraces = signal(false);
+    public readonly loading = signal(false);
     public readonly selectedTrace = signal<Immutable<Trace> | undefined>(undefined);
     public readonly tracesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.Point> | undefined>({
         type: "FeatureCollection",
@@ -100,11 +101,14 @@ export class TracesComponent implements OnInit {
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.mapStyle.zoom = location.zoom;
         this.mapStyle.center = [location.longitude, location.latitude];
+        this.store.dispatch(new SetSearchTermAction(""));
         this.store.select((s: ApplicationState) => s.inMemoryState.searchTerm).pipe(takeUntilDestroyed()).subscribe(() => {
-            this.runFilter();
+            if (!this.loading()) {
+                this.runFilter();
+            }
         });
         this.store.select((state: ApplicationState) => state.tracesState.traces).pipe(takeUntilDestroyed()).subscribe(() => {
-            if (!this.loadingTraces()) {
+            if (!this.loading()) {
                 this.runFilter();
             }
         });
@@ -114,9 +118,9 @@ export class TracesComponent implements OnInit {
     }
 
     public async ngOnInit() {
-        this.loadingTraces.set(true);
+        this.loading.set(true);
         await this.tracesService.syncTraces();
-        this.loadingTraces.set(false);
+        this.loading.set(false);
         this.runFilter();
     }
 

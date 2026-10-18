@@ -76,16 +76,19 @@ export class SharesComponent implements OnInit {
         const locationState = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.mapStyle.zoom = locationState.zoom;
         this.mapStyle.center = [locationState.longitude, locationState.latitude];
-        this.runFilter();
-        this.destroyRef.onDestroy(() => {
-            this.mapService.unsetMap();
-        });
         this.store.dispatch(new SetSearchTermAction(""));
         this.store.select((state: ApplicationState) => state.inMemoryState.searchTerm).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.runFilter();
+            if (!this.loading()) {
+                this.runFilter();
+            }
         });
         this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.runFilter();
+            if (!this.loading()) {
+                this.runFilter();
+            }
+        });
+        this.destroyRef.onDestroy(() => {
+            this.mapService.unsetMap();
         });
     }
 
@@ -93,6 +96,7 @@ export class SharesComponent implements OnInit {
         this.loading.set(true);
         await this.shareUrlsService.syncShareUrls();
         this.loading.set(false);
+        this.runFilter();
     }
 
     public mapLoaded(map: Map) {
