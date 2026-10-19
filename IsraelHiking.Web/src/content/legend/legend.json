@@ -877,28 +877,6 @@
         "type": "Way",
         "osmTags": [ "boundary=administrative", "admin_level=2", "border_type=nation" ],
         "link": "osm-tag-link"
-      },
-      {
-        "key": "legendTheGreenLine",
-        "latlng": {
-          "lat": 31.372492,
-          "lng": 35.2131299
-        },
-        "zoom": 15,
-        "type": "Way",
-        "osmTags": [ "boundary=administrative", "admin_level=2", "border_type=armistice line" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendThePurpleLine",
-        "latlng": {
-          "lat": 33.20308,
-          "lng": 35.81725
-        },
-        "zoom": 19,
-        "type": "Way",
-        "osmTags": [ "boundary=administrative", "admin_level=2", "border_type=armistice line" ],
-        "link": "osm-tag-link"
       }
     ]
   },

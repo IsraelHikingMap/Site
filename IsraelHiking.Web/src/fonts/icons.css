@@ -346,6 +346,10 @@
   content: "\e949";
 }
 
+.icon-ladder:before {
+  content: "\e994";
+}
+
 .icon-language:before {
   content: "\e94a";
 }
