@@ -15,6 +15,20 @@ const config: CapacitorConfig = {
     CapacitorShareTarget: {
       appGroupId: "group.com.mapeak"
     }
+  },
+  // The firebase plugins pull the firebase-ios-sdk swift package in under their own name, which
+  // collides with the identity swift package manager derives for them; symlinking them is the
+  // workaround capawesome documents for it - see capawesome-team/capacitor-firebase#959.
+  experimental: {
+    ios: {
+      spm: {
+        packageOptions: {
+          "@capacitor-firebase/analytics": {
+            symlink: true
+          }
+        }
+      }
+    }
   }
 };
 
