@@ -74,7 +74,6 @@ export class LegendDialogComponent {
 
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendChallenging4WDTrack);
         this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendBicyclePath);
-        this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendLaddersAndRungs);
 
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendMotorway);
         this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendTrunk);

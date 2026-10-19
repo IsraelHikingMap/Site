@@ -209,17 +209,6 @@
         "type": "Way",
         "osmTags": [ "highway=steps" ],
         "link": "osm-tag-link"
-      },
-      {
-        "key": "legendLaddersAndRungs",
-        "latlng": {
-          "lat": 32.7345160,
-          "lng": 35.0705018
-        },
-        "zoom": 18,
-        "type": "POI",
-        "osmTags": [ "highway=ladder", "rungs=yes" ],
-        "link": "osm-tag-link"
       }
     ]
   },
