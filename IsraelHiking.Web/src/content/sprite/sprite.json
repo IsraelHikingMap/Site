@@ -244,6 +244,13 @@
     "x": 358,
     "y": 257
   },
+  "ladder": {
+    "height": 36,
+    "pixelRatio": 1,
+    "width": 24,
+    "x": 40,
+    "y": 132
+  },
   "monument": {
     "height": 38,
     "pixelRatio": 1,
@@ -395,8 +402,8 @@
     "height": 18,
     "pixelRatio": 1,
     "width": 18,
-    "x": 40,
-    "y": 132
+    "x": 238,
+    "y": 126
   },
   "square": {
     "height": 22,
@@ -458,8 +465,8 @@
     "height": 14,
     "pixelRatio": 1,
     "width": 16,
-    "x": 40,
-    "y": 150
+    "x": 238,
+    "y": 144
   },
   "viewpoint": {
     "height": 38,

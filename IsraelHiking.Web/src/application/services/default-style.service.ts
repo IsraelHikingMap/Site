@@ -176,8 +176,8 @@ export class DefaultStyleService {
         }
     }
 
-    private useContourProtocol(styleJson: StyleSpecification, units: "metric" | "imperial") {
-        if (styleJson.sources["Contour"]?.type !== "vector") {
+    private useContourProtocol(styleJson: StyleSpecification, units: "metric" | "imperial", isBuiltInBaseLayer: boolean) {
+        if (!isBuiltInBaseLayer || styleJson.sources["Contour"]?.type !== "vector") {
             return;
         }
         const contourSource = styleJson.sources["Contour"];
@@ -187,8 +187,8 @@ export class DefaultStyleService {
         contourSource.maxzoom = 16;
     }
 
-    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial") {
-        if (styleJson.sources["Contour"]?.type !== "vector") {
+    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial", isBuiltInBaseLayer: boolean) {
+        if (!isBuiltInBaseLayer || styleJson.sources["Contour"]?.type !== "vector") {
             return;
         }
         const contourSource = styleJson.sources["Contour"];
@@ -238,20 +238,20 @@ export class DefaultStyleService {
             const styleJson = JSON.parse(styleAsText) as StyleSpecification;
             switch (mode) {
                 case "online-only":
-                    this.useContourProtocol(styleJson, units);
+                    this.useContourProtocol(styleJson, units, isBuiltInBaseLayer);
                     this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "allow-offline":
                     if (isBuiltInBaseLayer) {
                         this.useSliceProtocol(styleJson);
                     }
-                    this.useContourProtocol(styleJson, units);
+                    this.useContourProtocol(styleJson, units, isBuiltInBaseLayer);
                     this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "car":
                     if (isBuiltInBaseLayer) {
                         this.useSliceQuery(styleJson);
-                        this.useContourQuery(styleJson, units);
+                        this.useContourQuery(styleJson, units, isBuiltInBaseLayer);
                     }
                     break;
             }
