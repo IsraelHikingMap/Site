@@ -110,7 +110,7 @@
           class="fa icon-area-chart fa-lg"></i></button>
     </div>
     <div class="absolute top-0 end-0 flex flex-col">
-      <button mat-button class="m-1" (click)="toggle()" analyticsCategory="Route statistics"
+      <button mat-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
         analyticsLabel="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
       @if (!isTable()) {
       <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"

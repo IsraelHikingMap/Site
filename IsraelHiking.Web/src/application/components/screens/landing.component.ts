@@ -2,6 +2,7 @@ import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { SearchComponent } from "../search.component";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -11,7 +12,7 @@ import { Urls } from "../../urls";
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
-    imports: [RouterLink, SearchComponent]
+    imports: [RouterLink, SearchComponent, AnalyticsDirective]
 })
 export class LandingComponent {
     public readonly androidAppUrl: string = Urls.ANDROID_APP_URL;

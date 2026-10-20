@@ -1,26 +1,31 @@
 ﻿<div [dir]="resources.direction">
   <div class="flex flex-row">
     <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]!" (click)="remove()" matTooltip="{{resources.deletePoint}}"
+      <button mat-button class="w-full min-w-[unset]!" (click)="remove()" analyticsOn="click"
+        analyticsCategory="Route point" analyticsLabel="Delete point" matTooltip="{{resources.deletePoint}}"
         matTooltipPosition="above"><i class="fa icon-trash"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button class="w-full min-w-[unset]!" (click)="hideCoordinates.set(!hideCoordinates())"
+        analyticsOn="click" analyticsCategory="Route point" analyticsLabel="Toggle coordinates"
         matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
     </div>
     @if (!isMiddle()) {
     <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]!" (click)="reverse()" matTooltip="{{resources.reverseRoute}}"
+      <button mat-button class="w-full min-w-[unset]!" (click)="reverse()" analyticsOn="click"
+        analyticsCategory="Route point" analyticsLabel="Reverse route" matTooltip="{{resources.reverseRoute}}"
         matTooltipPosition="above"><i class="fa icon-arrows-h"></i></button>
     </div>
     }
     <div class="flex-1">
       @if (isMiddle()) {
-      <button mat-button class="w-full min-w-[unset]!" (click)="split()" matTooltip="{{resources.split}}"
+      <button mat-button class="w-full min-w-[unset]!" (click)="split()" analyticsOn="click"
+        analyticsCategory="Route point" analyticsLabel="Split route" matTooltip="{{resources.split}}"
         matTooltipPosition="above"><i class="fa icon-cut"></i></button>
       } @else {
-      <button mat-button class="w-full min-w-[unset]!" [disabled]="!canMerge()" (click)="merge()"
-        matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
+      <button mat-button class="w-full min-w-[unset]!" [disabled]="!canMerge()" (click)="merge()" analyticsOn="click"
+        analyticsCategory="Route point" analyticsLabel="Merge routes" matTooltip="{{resources.merge}}"
+        matTooltipPosition="above"><i class="fa icon-merge"></i></button>
       }
     </div>
   </div>

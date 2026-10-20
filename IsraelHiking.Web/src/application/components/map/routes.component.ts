@@ -14,6 +14,7 @@ import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.comp
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { RoutesPathComponent } from "./routes-path.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
@@ -31,7 +32,7 @@ interface RoutePointViewData {
     selector: "routes",
     templateUrl: "./routes.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, AnalyticsDirective, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
 })
 export class RoutesComponent implements AfterViewInit {
 
