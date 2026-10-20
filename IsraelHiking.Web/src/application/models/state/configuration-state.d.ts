@@ -19,7 +19,6 @@ export type ConfigurationState = {
     isShowSlope: boolean;
     isShowKmMarker: boolean;
     isShowOnboarding: boolean;
-    /** Whether the event that tells the ad networks this install became a user was already sent, see AnalyticsService */
     isFirstActionReported: boolean;
     version: number;
     language: Language;
