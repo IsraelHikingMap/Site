@@ -1,9 +1,11 @@
 import { afterNextRender, DOCUMENT, inject, Injector, NgZone, RendererFactory2, Service } from "@angular/core";
+import { Store } from "@ngxs/store";
 import { FirebaseAnalytics } from "@capacitor-firebase/analytics";
 import { AppsFlyer } from "appsflyer-capacitor-plugin";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import type { ApplicationState } from "../models";
 
 declare let gtag: (event: string, action: string, params: { event_category: string }) => void;
 
@@ -24,6 +26,7 @@ export class AnalyticsService {
     private readonly injector = inject(Injector);
     private readonly runningContextService = inject(RunningContextService);
     private readonly loggingService = inject(LoggingService);
+    private readonly store = inject(Store);
 
     initialize() {
         // Analytics is not needed for the first paint, so it is loaded only once the page has
@@ -36,6 +39,7 @@ export class AnalyticsService {
         if (this.runningContextService.isCapacitor) {
             this.initializeFirebase();
             this.initializeAppsFlyer();
+            this.reportUserId();
         }
     }
 
@@ -117,6 +121,25 @@ export class AnalyticsService {
         } catch (ex) {
             this.loggingService.error(`[Analytics] Failed to initialize appsflyer: ${(ex as Error).message}`);
         }
+    }
+
+    /**
+     * Both sdks tie a session's events to an id the app hands them, which is what connects an install to
+     * the user it turned into. The osm user id is the only identifier sent - the sdks have their own
+     * setters for a name, an email and a phone, and none of them is ever called. Firebase takes a null to
+     * forget the user on logout, while appsflyer has no call that unsets an id it was already given.
+     */
+    private reportUserId() {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
+            try {
+                await FirebaseAnalytics.setUserId({ userId: userInfo?.id?.toString() ?? null });
+                if (userInfo != null) {
+                    await AppsFlyer.setCustomerUserId({ customerId: userInfo.id.toString() });
+                }
+            } catch (ex) {
+                this.loggingService.error(`[Analytics] Failed to report the user id: ${(ex as Error).message}`);
+            }
+        });
     }
 
     /** @see initializeAppsFlyer */
