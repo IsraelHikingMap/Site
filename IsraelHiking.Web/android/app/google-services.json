@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "427315475400",
-    "project_id": "mapeak-d5d37",
-    "storage_bucket": "mapeak-d5d37.firebasestorage.app"
+    "project_number": "507085886808",
+    "project_id": "mapeak-app",
+    "storage_bucket": "mapeak-app.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:427315475400:android:892b609b9ad4d83cf1c6fd",
+        "mobilesdk_app_id": "1:507085886808:android:84501f6f28319edb63812d",
         "android_client_info": {
           "package_name": "com.mapeak"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBDFsFdHt4xJT-mXIZmGWASKBXHinZOR-c"
+          "current_key": "AIzaSyDXi5Y9WBUor3WTj1_R8_cOhcfsfOeYeJU"
         }
       ],
       "services": {

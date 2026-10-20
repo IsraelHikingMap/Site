@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyA4YafvTAOGNlUkBZnI4gwGp2DuyXCY7i8</string>
+	<string>AIzaSyDos9H0xn-ZlMUMa9E4hcKuxlXYWGBMCHU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>427315475400</string>
+	<string>507085886808</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.mapeak</string>
 	<key>PROJECT_ID</key>
-	<string>mapeak-d5d37</string>
+	<string>mapeak-app</string>
 	<key>STORAGE_BUCKET</key>
-	<string>mapeak-d5d37.firebasestorage.app</string>
+	<string>mapeak-app.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:427315475400:ios:1a62cbf281d1bd9bf1c6fd</string>
+	<string>1:507085886808:ios:ee868e78f9cbef9663812d</string>
 </dict>
 </plist>
