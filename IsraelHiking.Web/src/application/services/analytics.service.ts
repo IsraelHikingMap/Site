@@ -5,6 +5,7 @@ import { AppsFlyer } from "appsflyer-capacitor-plugin";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { SetFirstActionReportedAction } from "../reducers/configuration.reducer";
 import type { ApplicationState } from "../models";
 
 declare let gtag: (event: string, action: string, params: { event_category: string }) => void;
@@ -124,6 +125,20 @@ export class AnalyticsService {
     }
 
     /**
+     * The first deliberate thing the user does with the app, reported once in the lifetime of the
+     * installation. The ad networks that brought the install in optimize against this event, so it has to
+     * be something an interested user does on the first day - a login or a saved route happen too late and
+     * too rarely for a campaign to learn from them, and are reported as events of their own instead.
+     */
+    public reportFirstAction() {
+        if (this.store.selectSnapshot((state: ApplicationState) => state.configuration).isFirstActionReported) {
+            return;
+        }
+        this.store.dispatch(new SetFirstActionReportedAction());
+        this.trackEvent("Application", "first_action");
+    }
+
+    /**
      * Both sdks tie a session's events to an id the app hands them, which is what connects an install to
      * the user it turned into. The osm user id is the only identifier sent - the sdks have their own
      * setters for a name, an email and a phone, and none of them is ever called. Firebase takes a null to
@@ -132,9 +147,10 @@ export class AnalyticsService {
     private reportUserId() {
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             try {
-                await FirebaseAnalytics.setUserId({ userId: userInfo?.id?.toString() ?? null });
-                if (userInfo != null) {
-                    await AppsFlyer.setCustomerUserId({ customerId: userInfo.id.toString() });
+                const id = userInfo?.id?.toString() ?? null;
+                await FirebaseAnalytics.setUserId({ userId: id });
+                if (id != null) {
+                    await AppsFlyer.setCustomerUserId({ customerId: id });
                 }
             } catch (ex) {
                 this.loggingService.error(`[Analytics] Failed to report the user id: ${(ex as Error).message}`);

@@ -5,6 +5,7 @@ import { MatTooltip } from "@angular/material/tooltip";
 
 
 import { CoordinatesComponent } from "../coordinates.component";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { LatLngAltTime } from "../../models";
@@ -12,7 +13,7 @@ import type { LatLngAltTime } from "../../models";
 @Component({
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html",
-    imports: [Dir, MatButton, MatTooltip, CoordinatesComponent]
+    imports: [Dir, MatButton, MatTooltip, AnalyticsDirective, CoordinatesComponent]
 })
 export class RoutePointOverlayComponent implements OnChanges {
     public readonly canMerge = signal(false);

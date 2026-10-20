@@ -26,14 +26,16 @@
             <span class="text-sm font-medium text-gray-200">Take the map offline &mdash; get the app</span>
             <div class="flex flex-row gap-4">
                 @if (!isMobile() || !isIos()) {
-                <a [href]="androidAppUrl" analyticsLabel="Download from google play store"
+                <a [href]="androidAppUrl" analyticsOn="click" analyticsCategory="Landing"
+                    analyticsLabel="Download from google play store"
                     class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                     <img src="content/google-play-badge.png" alt="Google Play" width="200" height="59">
                 </a>
                 }
 
                 @if (!isMobile() || isIos()) {
-                <a [href]="iosAppUrl" analyticsLabel="Download from app store"
+                <a [href]="iosAppUrl" analyticsOn="click" analyticsCategory="Landing"
+                    analyticsLabel="Download from app store"
                     class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                     <img src="content/app-store-badge.png" alt="App Store" width="200" height="59">
                 </a>
@@ -48,11 +50,11 @@
         </div>
 
         <div class="flex w-full max-w-xl flex-col justify-center gap-3 sm:flex-row md:mb-10">
-            <a routerLink="/map"
+            <a routerLink="/map" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Plan & Explore"
                 class="rounded-full bg-brand px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
                 {{resources.planAndExplore}}
             </a>
-            <a routerLink="/public-routes"
+            <a routerLink="/public-routes" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Find Routes"
                 class="rounded-full bg-white px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
                 {{resources.findRoutes}}
             </a>
@@ -194,7 +196,7 @@
                 </ul>
                 <div class="mt-8 border-t border-gray-200 pt-6 text-center">
                     @if (!isApp()) {
-                    <a href="#download"
+                    <a href="#download" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Get the App"
                         class="inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 no-underline shadow-md transition-transform hover:scale-105">
                         Get the App
                     </a>
@@ -203,7 +205,8 @@
                         Subscriptions are purchased in the iOS or Android app.
                     </p>
                     } @else {
-                    <button type="button" (click)="order()"
+                    <button type="button" (click)="order()" analyticsOn="click" analyticsCategory="Landing"
+                        analyticsLabel="Start subscription"
                         class="w-full rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 shadow-md transition-transform hover:scale-105">
                         Start Your Subscription
                     </button>
@@ -246,7 +249,7 @@
                 </ul>
                 <div class="mt-8 border-t border-gray-200 pt-6 text-center">
                     @if (!isApp()) {
-                    <a href="#download"
+                    <a href="#download" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Get the App"
                         class="inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 no-underline shadow-md transition-transform hover:scale-105">
                         Get the App
                     </a>
@@ -255,7 +258,8 @@
                         Subscriptions are purchased in the iOS or Android app.
                     </p>
                     } @else {
-                    <button type="button" (click)="order()"
+                    <button type="button" (click)="order()" analyticsOn="click" analyticsCategory="Landing"
+                        analyticsLabel="Start subscription"
                         class="w-full rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 shadow-md transition-transform hover:scale-105">
                         Start Your Subscription
                     </button>
@@ -305,24 +309,24 @@
         </div>
 
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <a href="https://www.youtube.com/shorts/pseuA9EUXzA" target="_blank" rel="noopener"
-                analyticsLabel="Tutorial - setup and offline map download"
+            <a href="https://www.youtube.com/shorts/pseuA9EUXzA" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - setup and offline map download"
                 class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
                 <div class="mb-4 text-3xl">▶️</div>
                 <h3 class="mb-2 text-lg font-bold">Setup and Offline Map Download</h3>
                 <p class="text-sm text-gray-600">Get the app ready and take your first region offline.</p>
             </a>
 
-            <a href="https://www.youtube.com/watch?v=3ZeIEwj96tE" target="_blank" rel="noopener"
-                analyticsLabel="Tutorial - app tour"
+            <a href="https://www.youtube.com/watch?v=3ZeIEwj96tE" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - app tour"
                 class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
                 <div class="mb-4 text-3xl">▶️</div>
                 <h3 class="mb-2 text-lg font-bold">App Tour</h3>
                 <p class="text-sm text-gray-600">A walk through the map, search, and the main tools.</p>
             </a>
 
-            <a href="https://www.youtube.com/watch?v=I9j86k7go70" target="_blank" rel="noopener"
-                analyticsLabel="Tutorial - planning and editing a route"
+            <a href="https://www.youtube.com/watch?v=I9j86k7go70" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - planning and editing a route"
                 class="group rounded-xl border border-gray-200 p-6 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
                 <div class="mb-4 text-3xl">▶️</div>
                 <h3 class="mb-2 text-lg font-bold">Planning and Editing a Route</h3>
@@ -331,7 +335,8 @@
         </div>
 
         <div class="mt-12 text-center">
-            <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsLabel="FAQ"
+            <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsOn="click" analyticsCategory="Landing"
+                analyticsLabel="FAQ"
                 class="inline-block rounded-full bg-brand px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
                 See our F.A.Q and videos page
             </a>
@@ -348,11 +353,13 @@
     }
 
     <div class="mb-4">
-        <a routerLink="/privacy-policy" analyticsLabel="Privacy policy" class="hover:text-white transition-colors">
+        <a routerLink="/privacy-policy" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Privacy policy"
+            class="hover:text-white transition-colors">
             {{resources.privacyPolicyTermsOfService}}
         </a>
         <span>|</span>
-        <a routerLink="/attribution" analyticsLabel="Attribution" class="hover:text-white transition-colors">
+        <a routerLink="/attribution" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Attribution"
+            class="hover:text-white transition-colors">
             {{resources.attribution}}
         </a>
     </div>

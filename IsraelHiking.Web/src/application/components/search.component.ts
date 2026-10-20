@@ -171,7 +171,12 @@ export class SearchComponent {
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id]);
     }
 
+    /**
+     * Picking a place out of the search results is the earliest deliberate thing most users do with the
+     * app, which is why the first action is reported from here, see AnalyticsService.reportFirstAction.
+     */
     private selectResults(searchResult: SearchResultsPointOfInterest) {
+        this.analyticsService.reportFirstAction();
         this.selectedSearchResults = searchResult;
         // Material focuses the input back right after a result is picked, blurring it once that is
         // done hides the mobile keyboard

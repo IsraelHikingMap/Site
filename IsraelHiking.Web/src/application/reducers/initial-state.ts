@@ -187,6 +187,7 @@ export const initialState =
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
             isShowOnboarding: true,
+            isFirstActionReported: false,
             isShowKmMarker: false,
             isShowSlope: false,
             version: 10,
