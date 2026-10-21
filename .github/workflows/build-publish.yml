@@ -64,21 +64,14 @@ jobs:
             echo "Branch: \`$GITHUB_REF_NAME\`"
             echo "Commit: [\`$(git rev-parse --short HEAD)\`]($commit_url) - $(git log -1 --pretty=%s)"
           } >> $GITHUB_STEP_SUMMARY
-      - name: Get all milestones
-        id: get_milestones
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: GET /repos/${{ github.repository }}/milestones?state=open
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Extract milestone ID
         id: extract
         run: |
-          echo '${{ steps.get_milestones.outputs.data }}' | jq '.[] | select(.title == "Next Release") | .number' > id.txt
-          milestone_id=$(cat id.txt)
+          milestone_id=$(gh api "repos/${{ github.repository }}/milestones?state=open" --jq '.[] | select(.title == "Next Release") | .number')
           echo "milestone_id=$milestone_id" >> $GITHUB_OUTPUT
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
       version_code: ${{ steps.version-code.outputs.version_code }}
       version_string: ${{ steps.version-code.outputs.version_string }}
@@ -305,20 +298,13 @@ jobs:
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: PATCH /repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }}
-          title: Version ${{ needs.version.outputs.version_string }}
-          state: closed
+        run: gh api -X PATCH repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }} -f title="Version ${{ needs.version.outputs.version_string }}" -f state=closed
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new "Next Release" milestone
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: POST /repos/${{ github.repository }}/milestones
-          title: Next Release
+        run: gh api -X POST repos/${{ github.repository }}/milestones -f title="Next Release"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:

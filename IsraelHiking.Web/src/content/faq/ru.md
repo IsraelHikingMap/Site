@@ -1,8 +1,11 @@
 # Видео
 
-- [Установка Mapeak и загрузка офлайн-карт](https://www.youtube.com/shorts/pseuA9EUXzA)
-- [Mapeak - обзор приложения](https://www.youtube.com/watch?v=3ZeIEwj96tE)
-- [Планирование и редактирование пешеходного маршрута](https://www.youtube.com/watch?v=I9j86k7go70)
+- [![Установка Mapeak и загрузка офлайн-карт](content/videos/pseuA9EUXzA.webp)](https://www.youtube.com/shorts/pseuA9EUXzA)
+  [Установка Mapeak и загрузка офлайн-карт](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [![Mapeak - обзор приложения](content/videos/3ZeIEwj96tE.webp)](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+  [Mapeak - обзор приложения](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [![Планирование и редактирование пешеходного маршрута](content/videos/I9j86k7go70.webp)](https://www.youtube.com/watch?v=I9j86k7go70)
+  [Планирование и редактирование пешеходного маршрута](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # Часто задаваемые вопросы
 

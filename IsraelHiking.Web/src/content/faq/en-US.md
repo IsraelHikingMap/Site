@@ -1,8 +1,11 @@
 # Videos
 
-- [Mapeak Setup and Offline Map Download](https://www.youtube.com/shorts/pseuA9EUXzA)
-- [Mapeak - App Tour](https://www.youtube.com/watch?v=3ZeIEwj96tE)
-- [Planning and Editing a Hiking Route](https://www.youtube.com/watch?v=I9j86k7go70)
+- [![Mapeak Setup and Offline Map Download](content/videos/pseuA9EUXzA.webp)](https://www.youtube.com/shorts/pseuA9EUXzA)
+  [Mapeak Setup and Offline Map Download](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [![Mapeak - App Tour](content/videos/3ZeIEwj96tE.webp)](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+  [Mapeak - App Tour](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [![Planning and Editing a Hiking Route](content/videos/I9j86k7go70.webp)](https://www.youtube.com/watch?v=I9j86k7go70)
+  [Planning and Editing a Hiking Route](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # Frequently Asked Questions
 

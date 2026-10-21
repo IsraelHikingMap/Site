@@ -1,8 +1,11 @@
 # Videos
 
-- [Mapeak einrichten und Offline-Karten herunterladen](https://www.youtube.com/shorts/pseuA9EUXzA)
-- [Mapeak - App-Rundgang](https://www.youtube.com/watch?v=3ZeIEwj96tE)
-- [Eine Wanderroute planen und bearbeiten](https://www.youtube.com/watch?v=I9j86k7go70)
+- [![Mapeak einrichten und Offline-Karten herunterladen](content/videos/pseuA9EUXzA.webp)](https://www.youtube.com/shorts/pseuA9EUXzA)
+  [Mapeak einrichten und Offline-Karten herunterladen](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [![Mapeak - App-Rundgang](content/videos/3ZeIEwj96tE.webp)](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+  [Mapeak - App-Rundgang](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [![Eine Wanderroute planen und bearbeiten](content/videos/I9j86k7go70.webp)](https://www.youtube.com/watch?v=I9j86k7go70)
+  [Eine Wanderroute planen und bearbeiten](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # Häufig gestellte Fragen
 

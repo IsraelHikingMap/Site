@@ -1,7 +1,7 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
-import { provideRouter } from "@angular/router";
+import { provideRouter, withInMemoryScrolling } from "@angular/router";
 import { provideStore, withNgxsNoopExecutionStrategy } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
@@ -56,7 +56,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
-        provideRouter(routes),
+        provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" })),
         provideLottieOptions({ player: () => import("lottie-web/build/player/lottie_light") }),
         provideMarkdown()
     ]
