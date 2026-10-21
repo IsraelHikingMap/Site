@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, ViewEncapsulation, inject, signal } from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
 import { skip } from "rxjs";
 
@@ -10,6 +10,8 @@ import { ApplicationState } from "../../models";
 @Component({
     selector: "faq",
     templateUrl: "./faq.component.html",
+    styleUrls: ["./faq.component.scss"],
+    encapsulation: ViewEncapsulation.None,
     imports: [MarkdownComponent]
 })
 export class FaqComponent {

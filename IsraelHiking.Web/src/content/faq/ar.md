@@ -1,8 +1,11 @@
 # فيديوهات
 
-- [إعداد Mapeak وتنزيل الخرائط دون اتصال](https://www.youtube.com/shorts/pseuA9EUXzA)
-- [Mapeak - جولة في التطبيق](https://www.youtube.com/watch?v=3ZeIEwj96tE)
-- [تخطيط مسار للمشي وتعديله](https://www.youtube.com/watch?v=I9j86k7go70)
+- [![إعداد Mapeak وتنزيل الخرائط دون اتصال](content/videos/pseuA9EUXzA.webp)](https://www.youtube.com/shorts/pseuA9EUXzA)
+  [إعداد Mapeak وتنزيل الخرائط دون اتصال](https://www.youtube.com/shorts/pseuA9EUXzA)
+- [![Mapeak - جولة في التطبيق](content/videos/3ZeIEwj96tE.webp)](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+  [Mapeak - جولة في التطبيق](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [![تخطيط مسار للمشي وتعديله](content/videos/I9j86k7go70.webp)](https://www.youtube.com/watch?v=I9j86k7go70)
+  [تخطيط مسار للمشي وتعديله](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # الأسئلة الشائعة
 

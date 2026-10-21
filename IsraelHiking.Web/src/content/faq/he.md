@@ -1,8 +1,11 @@
 # סרטונים
 
-- [התקנת מאפיק והורדת מפות אופליין](https://www.youtube.com/shorts/mv23JfyQlzw)
-- [מאפיק - סיור באפליקציה](https://www.youtube.com/watch?v=3ZeIEwj96tE)
-- [תכנון ועריכה של מסלול טיול](https://www.youtube.com/watch?v=I9j86k7go70)
+- [![התקנת מאפיק והורדת מפות אופליין](content/videos/mv23JfyQlzw.webp)](https://www.youtube.com/shorts/mv23JfyQlzw)
+  [התקנת מאפיק והורדת מפות אופליין](https://www.youtube.com/shorts/mv23JfyQlzw)
+- [![מאפיק - סיור באפליקציה](content/videos/3ZeIEwj96tE.webp)](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+  [מאפיק - סיור באפליקציה](https://www.youtube.com/watch?v=3ZeIEwj96tE)
+- [![תכנון ועריכה של מסלול טיול](content/videos/I9j86k7go70.webp)](https://www.youtube.com/watch?v=I9j86k7go70)
+  [תכנון ועריכה של מסלול טיול](https://www.youtube.com/watch?v=I9j86k7go70)
 
 # תשובות לשאלות נפוצות
 
