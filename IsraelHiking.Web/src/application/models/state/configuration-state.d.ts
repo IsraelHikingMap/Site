@@ -19,6 +19,7 @@ export type ConfigurationState = {
     isShowSlope: boolean;
     isShowKmMarker: boolean;
     isShowOnboarding: boolean;
+    isFirstActionReported: boolean;
     version: number;
     language: Language;
     units: "metric" | "imperial";
