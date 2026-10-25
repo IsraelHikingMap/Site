@@ -380,6 +380,7 @@ export class ResourcesService {
     public legendFootPath: string;
     public legendBicyclePath: string;
     public legendSteps: string;
+    public legendLaddersAndRungs: string;
     public legendWater: string;
     public legendStream: string;
     public legendWadi: string;
@@ -500,7 +501,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1792403766753");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1792960564112");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -850,6 +851,7 @@ export class ResourcesService {
         this.legendFootPath = this.gettextCatalog.getString("Foot Path");
         this.legendBicyclePath = this.gettextCatalog.getString("Bicycle Path");
         this.legendSteps = this.gettextCatalog.getString("Steps");
+        this.legendLaddersAndRungs = this.gettextCatalog.getString("Ladders and Rungs");
         this.legendWater = this.gettextCatalog.getString("Water");
         this.legendStream = this.gettextCatalog.getString("Stream");
         this.legendWadi = this.gettextCatalog.getString("Wadi");
