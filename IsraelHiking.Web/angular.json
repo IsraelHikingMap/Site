@@ -49,7 +49,8 @@
               "@mapbox/polyline",
               "lottie-web",
               "bowser",
-              "piexif-ts"
+              "piexif-ts",
+              "@appsflyer-sdk/js-core-plugin"
             ],
             "extractLicenses": false,
             "sourceMap": true,

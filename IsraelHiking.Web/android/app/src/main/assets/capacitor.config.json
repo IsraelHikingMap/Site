@@ -13,5 +13,16 @@
 		"CapacitorShareTarget": {
 			"appGroupId": "group.com.mapeak"
 		}
+	},
+	"experimental": {
+		"ios": {
+			"spm": {
+				"packageOptions": {
+					"@capacitor-firebase/analytics": {
+						"symlink": true
+					}
+				}
+			}
+		}
 	}
 }

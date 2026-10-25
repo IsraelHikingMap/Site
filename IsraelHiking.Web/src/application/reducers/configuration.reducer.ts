@@ -44,6 +44,10 @@ export class StopShowingOnboardingAction {
     public static readonly type = "[Configuration] StopShowingOnboardingAction";
 }
 
+export class SetFirstActionReportedAction {
+    public static readonly type = "[Configuration] SetFirstActionReportedAction";
+}
+
 export class SetUnitsAction {
     public static readonly type = "[Configuration] SetUnitsAction";
     constructor(public readonly units: "metric" | "imperial") { }
@@ -126,6 +130,14 @@ export class ConfigurationReducer {
     public stopShowingOnboarding(ctx: StateContext<ConfigurationState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.isShowOnboarding = false;
+            return lastState;
+        }));
+    }
+
+    @Action(SetFirstActionReportedAction)
+    public setFirstActionReported(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isFirstActionReported = true;
             return lastState;
         }));
     }

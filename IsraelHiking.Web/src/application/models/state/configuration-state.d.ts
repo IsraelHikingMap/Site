@@ -20,6 +20,7 @@ export type ConfigurationState = {
     isShowKmMarker: boolean;
     isKeepNorthUp: boolean;
     isShowOnboarding: boolean;
+    isFirstActionReported: boolean;
     version: number;
     language: Language;
     units: "metric" | "imperial";

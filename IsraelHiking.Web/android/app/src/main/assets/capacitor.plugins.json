@@ -8,6 +8,10 @@
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
 	{
+		"pkg": "@capacitor-firebase/analytics",
+		"classpath": "io.capawesome.capacitorjs.plugins.firebase.analytics.FirebaseAnalyticsPlugin"
+	},
+	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
@@ -74,5 +78,9 @@
 	{
 		"pkg": "@revenuecat/purchases-capacitor-ui",
 		"classpath": "com.revenuecat.purchases.capacitor.ui.RevenueCatUIPlugin"
+	},
+	{
+		"pkg": "appsflyer-capacitor-plugin",
+		"classpath": "capacitor.plugin.appsflyer.sdk.AppsFlyerPlugin"
 	}
 ]

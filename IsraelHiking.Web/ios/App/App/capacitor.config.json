@@ -14,9 +14,21 @@
 			"appGroupId": "group.com.mapeak"
 		}
 	},
+	"experimental": {
+		"ios": {
+			"spm": {
+				"packageOptions": {
+					"@capacitor-firebase/analytics": {
+						"symlink": true
+					}
+				}
+			}
+		}
+	},
 	"packageClassList": [
 		"KeepAwakePlugin",
 		"ScreenBrightnessPlugin",
+		"FirebaseAnalyticsPlugin",
 		"AppPlugin",
 		"CAPCameraPlugin",
 		"DevicePlugin",
@@ -31,6 +43,8 @@
 		"CapacitorShareTargetPlugin",
 		"SpeechSynthesisPlugin",
 		"PurchasesPlugin",
-		"RevenueCatUIPlugin"
+		"RevenueCatUIPlugin",
+		"AppsFlyerAttribution",
+		"AppsFlyerPlugin"
 	]
 }
