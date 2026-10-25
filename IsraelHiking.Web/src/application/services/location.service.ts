@@ -162,7 +162,7 @@ export class LocationService {
             return;
         }
         const center = this.locationWithBearing.center;
-        const bearing = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).keepNorthUp
+        const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
         this.mapService.moveToWithCurrentZoom(center, bearing);

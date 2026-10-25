@@ -11,6 +11,7 @@ import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
 import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { ApplicationState } from "../models";
 
 /** A degree of longitude at the equator, which is what lets the pace tests walk in meters. */
@@ -50,6 +51,7 @@ function walkedMeters(store: Store): number {
 
 function resetStoreWithoutPosition(store: Store) {
     store.reset({
+        configuration: { isKeepNorthUp: false },
         gpsState: { currentPosition: null, tracking: "tracking" },
         inMemoryState: { following: false }
     });
@@ -80,7 +82,7 @@ describe("LocationService", () => {
         };
         TestBed.configureTestingModule({
             providers: [
-                provideStore([InMemoryReducer, GpsReducer]),
+                provideStore([InMemoryReducer, GpsReducer, ConfigurationReducer]),
                 { provide: GeoLocationService, useValue: geoLocationService },
                 {
                     provide: DeviceOrientationService,
@@ -131,6 +133,7 @@ describe("LocationService", () => {
     it("Should move to gps position if a new valid position is received", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
@@ -148,6 +151,7 @@ describe("LocationService", () => {
     it("Should move to gps position with heading from gps", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
@@ -165,8 +169,9 @@ describe("LocationService", () => {
     it("Should move to gps position with heading 0 when keep north up", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: true },
                 gpsState: { currentPosition: null },
-                inMemoryState: { following: false, keepNorthUp: true }
+                inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
@@ -182,6 +187,7 @@ describe("LocationService", () => {
     it("Should not move to gps position when given invalid location", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
@@ -209,6 +215,7 @@ describe("LocationService", () => {
     it("Should not do anything on orientation change and not in active state", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "searching"
@@ -228,6 +235,7 @@ describe("LocationService", () => {
     it("Should not do anything on orientation change and last update time was recent", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -247,6 +255,7 @@ describe("LocationService", () => {
     it("Should fire orientation change when in active state", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -266,6 +275,7 @@ describe("LocationService", () => {
     it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, MapService, Store],
         async (service: LocationService, geolocationService: GeoLocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -284,6 +294,7 @@ describe("LocationService", () => {
     it("Should disable distance when centering", inject([LocationService, Store],
         async (service: LocationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -299,6 +310,7 @@ describe("LocationService", () => {
     it("Should not be following when panned", inject([LocationService, Store],
         async (service: LocationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -315,6 +327,7 @@ describe("LocationService", () => {
     it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
         async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"

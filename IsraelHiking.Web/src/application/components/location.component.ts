@@ -18,8 +18,8 @@ import { RecordedRouteService } from "../services/recorded-route.service";
 import { LocationService } from "../services/location.service";
 import { MapService } from "../services/map.service";
 import { RunningContextService } from "../services/running-context.service";
-import { ToggleDistanceAction, SetPannedAction, SetFollowingAction, ToggleKeepNorthUpAction } from "../reducers/in-memory.reducer";
-import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
+import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
+import { StopShowingBatteryConfirmationAction, ToggleKeepNorthUpAction } from "../reducers/configuration.reducer";
 import { ChangeRouteStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { LatLngAltTime, ApplicationState } from "../models";
@@ -46,11 +46,10 @@ export class LocationComponent {
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
     private readonly gpsState = this.store.selectSignal((s: ApplicationState) => s.gpsState);
-    private readonly inMemoryState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState);
     private readonly recordedRouteState = this.store.selectSignal((s: ApplicationState) => s.recordedRouteState);
     private readonly mapComponent = inject(MapComponent);
 
-    public readonly isKeepNorthUp = computed(() => this.inMemoryState().keepNorthUp);
+    public readonly isKeepNorthUp = this.store.selectSignal((s: ApplicationState) => s.configuration.isKeepNorthUp);
 
     public readonly getRotationAngle = computed(() => `rotate(${-this.bearing()}deg)`);
 

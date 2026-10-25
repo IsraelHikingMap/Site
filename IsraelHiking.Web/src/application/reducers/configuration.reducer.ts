@@ -32,6 +32,10 @@ export class ToggleIsShowKmMarkersAction {
     public static readonly type = "[Configuration] ToggleIsShowKmMarkersAction";
 }
 
+export class ToggleKeepNorthUpAction {
+    public static readonly type = "[Configuration] ToggleKeepNorthUpAction";
+}
+
 export class StopShowingBatteryConfirmationAction {
     public static readonly type = "[Configuration] StopShowingBatteryConfirmationAction";
 }
@@ -98,6 +102,14 @@ export class ConfigurationReducer {
     public toggleIsShowKmMarkers(ctx: StateContext<ConfigurationState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.isShowKmMarker = !lastState.isShowKmMarker;
+            return lastState;
+        }));
+    }
+
+    @Action(ToggleKeepNorthUpAction)
+    public toggleKeepNorthUp(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isKeepNorthUp = !lastState.isKeepNorthUp;
             return lastState;
         }));
     }

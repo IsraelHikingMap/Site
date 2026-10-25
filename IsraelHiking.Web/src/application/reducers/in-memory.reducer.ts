@@ -19,10 +19,6 @@ export class SetPannedAction {
     constructor(public readonly pannedTimestamp: Date) { }
 }
 
-export class ToggleKeepNorthUpAction {
-    public static readonly type = "[In Memory] ToggleKeepNorthUpAction";
-}
-
 export class SetShareUrlAction {
     public static readonly type = "[In Memory] SetShareUrlAction";
     constructor(public readonly shareUrl: ShareUrl) { }
@@ -90,14 +86,6 @@ export class InMemoryReducer {
     public setPanned(ctx: StateContext<InMemoryState>, action: SetPannedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.pannedTimestamp = action.pannedTimestamp;
-            return lastState;
-        }));
-    }
-
-    @Action(ToggleKeepNorthUpAction)
-    public toggleKeepNorthUp(ctx: StateContext<InMemoryState>) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.keepNorthUp = !lastState.keepNorthUp;
             return lastState;
         }));
     }
