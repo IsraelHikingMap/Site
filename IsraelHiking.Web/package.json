@@ -134,6 +134,7 @@
     "build:prod": "npm run generate-user-data-types && ng build --configuration production",
     "build:mobile": "npm run generate-user-data-types && ng build -c mobile",
     "build:mobile-watch": "ng build -c mobile-debug --watch",
+    "cap:update": "npx cap sync && xcodebuild -resolvePackageDependencies -workspace ios/App/App.xcworkspace -scheme App",
     "test": "ng test",
     "test-ci": "npm run generate-user-data-types && ng test --coverage",
     "lint": "ng lint --fix",
