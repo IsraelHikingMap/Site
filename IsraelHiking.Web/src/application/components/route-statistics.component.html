@@ -10,19 +10,19 @@
         <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain() | distance:'elevation'}}</span>
+            <span class="mx-1">{{gain() | distance:'elevation':'value'}} <span class="units">{{gain() | distance:'elevation':'unit'}}</span></span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss() | distance:'elevation'}}</span>
+            <span class="mx-1">{{loss() | distance:'elevation':'value'}} <span class="units">{{loss() | distance:'elevation':'unit'}}</span></span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{length() | distance}}</span>
+            <span class="mx-1">{{length() | distance:'distance':'value'}} <span class="units">{{length() | distance:'distance':'unit'}}</span></span>
           </div>
         </mat-grid-tile>
         } @else {
@@ -35,13 +35,13 @@
         <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-circle-right"></i>
-            <span class="mx-1">{{remainingDistance() | distance}}</span>
+            <span class="mx-1">{{remainingDistance() | distance:'distance':'value'}} <span class="units">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
           </div>
         </mat-grid-tile>
         <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
           <div class="flex flex-col items-center">
             <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{traveledDistance() | distance}}</span>
+            <span class="mx-1">{{traveledDistance() | distance:'distance':'value'}} <span class="units">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
           </div>
         </mat-grid-tile>
         }
