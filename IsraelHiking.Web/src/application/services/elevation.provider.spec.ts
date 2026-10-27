@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -53,9 +53,7 @@ describe("ElevationProvider", () => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
-            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
-
-            mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
+            (await vi.waitFor(() => mockBackend.expectOne(() => true))).flush(await getArrayBufferOfNonEmptyTile());
             await promise;
             expect(latlngs[0].alt).toBe(32512);
         }
@@ -81,8 +79,7 @@ describe("ElevationProvider", () => {
                 const promise = elevationProvider.updateHeights(latlngs);
 
                 for (let zoom = ElevationProvider.MAX_ELEVATION_ZOOM; zoom >= ElevationProvider.FALLBACK_ELEVATION_ZOOM; zoom--) {
-                    await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
-                    mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
+                    (await vi.waitFor(() => mockBackend.expectOne(() => true))).flush(null, { status: 500, statusText: "Server Error" });
                 }
                 await promise;
                 expect(latlngs[0].alt).toBe(0);
@@ -97,13 +94,11 @@ describe("ElevationProvider", () => {
 
                 const promise = elevationProvider.updateHeights(latlngs);
 
-                await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
-                const failed = mockBackend.match(() => true)[0];
+                const failed = await vi.waitFor(() => mockBackend.expectOne(() => true));
                 expect(failed.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM}/`);
                 failed.flush(null, { status: 500, statusText: "Server Error" });
 
-                await new Promise((resolve) => setTimeout(resolve, 0)); // Let the fallback http call be made
-                const fallback = mockBackend.match(() => true)[0];
+                const fallback = await vi.waitFor(() => mockBackend.expectOne(() => true));
                 expect(fallback.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM - 1}/`);
                 fallback.flush(await getArrayBufferOfNonEmptyTile());
 

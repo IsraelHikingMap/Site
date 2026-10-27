@@ -113,8 +113,7 @@ describe("LayersService", () => {
             { key: "overlay3", address: "https://overlay3", isOverlay: true }
         ]);
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetUserInfoAction);
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetUserInfoAction));
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(UpdateBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(AddBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateOverlayAction);
@@ -528,11 +527,9 @@ describe("LayersService", () => {
 
         backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateBaseLayerAction));
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateBaseLayerAction);
     }));
 
     it("should not add base layer if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -606,11 +603,9 @@ describe("LayersService", () => {
 
         backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateOverlayAction));
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddOverlayAction);
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SetOverlaysVisibilityAction);
-        expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {

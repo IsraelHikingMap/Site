@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
@@ -68,8 +68,7 @@ describe("INatureService", () => {
             const promise = service.createFeatureFromPageId(pageId);
             // Assert
             mockBackend.match(r => r.url.includes("https://inature.info/w/api.php"))[0].flush(response);
-            await new Promise(resolve => setTimeout(resolve, 0));
-            mockBackend.match(r => r.url.includes("42"))[0].flush({ features: [{ type: "Feature", geometry: { type: "LineString", coordinates: [[1, 1], [2, 2]] } }] });
+            (await vi.waitFor(() => mockBackend.expectOne(r => r.url.includes("42")))).flush({ features: [{ type: "Feature", geometry: { type: "LineString", coordinates: [[1, 1], [2, 2]] } }] });
 
             const result = await promise;
             expect(result.geometry).toEqual({

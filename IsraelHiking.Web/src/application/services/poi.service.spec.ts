@@ -487,8 +487,7 @@ describe("Poi Service", () => {
             databaseService.getPoiFromUploadQueue = () => Promise.resolve(null);
             const promise = poiService.initialize();
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0);
+            await vi.waitFor(() => expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0));
 
             return promise;
         }
@@ -508,12 +507,9 @@ describe("Poi Service", () => {
             databaseService.removePoiFromUploadQueue = () => Promise.resolve();
             const promise = poiService.initialize();
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            (await vi.waitFor(() => mockBackend.expectOne((r) => r.url.startsWith(Urls.poi)))).flush({ properties: {} });
 
-            mockBackend.expectOne((r) => r.url.startsWith(Urls.poi)).flush({ properties: {} });
-
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0);
+            await vi.waitFor(() => expect(store.selectSnapshot((state: ApplicationState) => state.offlineState).uploadPoiQueue.length).toBe(0));
 
             return promise;
         }

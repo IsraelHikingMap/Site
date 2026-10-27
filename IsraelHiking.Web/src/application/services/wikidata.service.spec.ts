@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { inject, TestBed } from "@angular/core/testing";
@@ -52,8 +52,7 @@ describe("WikidataService", () => {
                 }]
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://commons.wikimedia.org/w/api.php?action=query&titles=File:${imageName}`)).flush({
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://commons.wikimedia.org/w/api.php?action=query&titles=File:${imageName}`)))).flush({
             query: {
                 pages: {
                     "-1": {
@@ -64,8 +63,7 @@ describe("WikidataService", () => {
                 }
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)))).flush({
             query: {
                 pages: {
                     "1": {
@@ -113,8 +111,7 @@ describe("WikidataService", () => {
                 }]
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url === `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`).flush({
+        (await vi.waitFor(() => backend.expectOne(r => r.url === `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}&origin=*`))).flush({
             query: {
                 pages: {
                     "1": {
@@ -188,7 +185,6 @@ describe("WikidataService", () => {
                 }]
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
 
         const feature = await promise;
         expect(feature.properties.image).toBeUndefined();
@@ -237,14 +233,12 @@ describe("WikidataService", () => {
                 }]
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://commons.wikimedia.org/w/api.php?action=query&titles=File:${imageName}`)).flush({
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://commons.wikimedia.org/w/api.php?action=query&titles=File:${imageName}`)))).flush({
             query: {
                 pages: {}
             }
         });
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)).flush({
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://${language}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)))).flush({
             query: {
                 pages: {}
             }

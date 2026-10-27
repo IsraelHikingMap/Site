@@ -352,7 +352,7 @@ describe("FileService", () => {
             const abortController = new AbortController();
             const promise = service.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressSpy, abortController);
 
-            await new Promise((resolve) => setTimeout(resolve, 50));
+            await vi.waitFor(() => expect(progressSpy).toHaveBeenCalledTimes(1));
             abortController.abort();
 
             await promise;

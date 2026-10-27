@@ -64,15 +64,13 @@ async function initialize(service: OfflineFilesDownloadService, mockBackend: Htt
 
 async function flushStyles(mockBackend: HttpTestingController, hikeMinVersions: MinVersions, bikeMinVersions: MinVersions = {}) {
     for (const [url, minVersions] of [[Urls.HIKING_STYLE_ADDRESS, hikeMinVersions], [Urls.MTB_STYLE_ADDRESS, bikeMinVersions]] as [string, MinVersions][]) {
-        await new Promise(resolve => setTimeout(resolve));
-        mockBackend.expectOne(url).flush(JSON.stringify(createStyle(minVersions)));
+        (await vi.waitFor(() => mockBackend.expectOne(url))).flush(JSON.stringify(createStyle(minVersions)));
     }
 }
 
 /** Answers the request for the list of files that need to be downloaded, for the root files or for a tile */
 async function flushFilesToDownload(mockBackend: HttpTestingController, forTile: boolean, files: Record<string, string>): Promise<TestRequest> {
-    await new Promise(resolve => setTimeout(resolve));
-    const request = mockBackend.expectOne(r => r.url === Urls.offlineFiles && r.params.has("tileX") === forTile);
+    const request = await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.offlineFiles && r.params.has("tileX") === forTile));
     request.flush(files);
     return request;
 }
@@ -531,15 +529,14 @@ describe("OfflineFilesDownloadService", () => {
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
                 await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
-                await new Promise(resolve => setTimeout(resolve));
-                expect(stuckDownloads.length).toBe(1);
+                await vi.waitFor(() => expect(stuckDownloads.length).toBe(1));
 
                 service.abortCurrentDownload();
                 const secondPromise = service.downloadTile(76, 52);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
                 await flushFilesToDownload(mockBackend, true, { "IHM-schema+7-76-52.pmtiles": "2026-06-01" });
-                await new Promise(resolve => setTimeout(resolve));
+                await vi.waitFor(() => expect(stuckDownloads.length).toBe(2));
 
                 // The download that was aborted reports its progress before it returns, which is not the progress of the one going on
                 progressCallbacks[0](0.5);

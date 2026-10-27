@@ -95,15 +95,11 @@ describe("Share Urls Service", () => {
                     start: { lat: 1, lng: 1 }
                 }
             ]);
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
@@ -150,9 +146,7 @@ describe("Share Urls Service", () => {
                     id: "3"
                 }
             ]);
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 dataContainer: {
                     routes: [],
                     northEast: { lat: 1, lng: 1 },
@@ -160,17 +154,13 @@ describe("Share Urls Service", () => {
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 dataContainer: {
                     routes: [],
                     northEast: { lat: 1, lng: 1 },
@@ -178,18 +168,14 @@ describe("Share Urls Service", () => {
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
             await promise;
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(vi.mocked(spy).mock.calls.length).toBe(8);
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls.length).toBe(8));
             expect(vi.mocked(spy).mock.calls[5][0]).toBeInstanceOf(UpdateShareUrlAction);
             expect(vi.mocked(spy).mock.calls[5][0].shareUrl.start).toBeDefined();
             expect(vi.mocked(spy).mock.calls[6][0]).toBeInstanceOf(UpdateShareUrlAction);
@@ -223,9 +209,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("5");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date(0).toISOString());
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "5/timestamp"))).flush(new Date(0).toISOString());
 
             expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
             await promise;
@@ -238,9 +222,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
@@ -257,9 +239,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
@@ -278,9 +258,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 dataContainer: {
                     northEast: { lat: 0, lng: 0 },
                     southWest: { lat: 2, lng: 2 }
@@ -300,15 +278,11 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("7");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7/timestamp"))).flush(new Date(200).toISOString());
 
-            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
-
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush({
                 start: { lat: 1, lng: 1 }
-            })).not.toThrow();
+            });
             await promise;
         }
     ));
@@ -318,15 +292,11 @@ describe("Share Urls Service", () => {
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.expectOne(Urls.urls + "7").flush(null, { status: 500, statusText: "Internal Server Error" });
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7/timestamp"))).flush(new Date(200).toISOString());
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush(null, { status: 500, statusText: "Internal Server Error" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush({
                 start: { lat: 1, lng: 1 }
-            })).not.toThrow();
+            });
             await promise;
         }
     ));
@@ -422,8 +392,7 @@ describe("Share Urls Service", () => {
             osmUserId: 12,
             website: "https://website.com/"
         });
-        await new Promise(resolve => setTimeout(resolve, 0));
-        mockBackend.match(r => r.url.startsWith(`${Urls.osmApi}user/12`))[0].flush({
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url.startsWith(`${Urls.osmApi}user/12`)))).flush({
             user: {
                 display_name: "Osm User Name"
             }

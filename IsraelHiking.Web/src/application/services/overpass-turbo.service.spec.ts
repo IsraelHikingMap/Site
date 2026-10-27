@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -279,8 +279,7 @@ describe("OverpassTurboService", () => {
         };
         const promise = service.getFeature("relation", "1");
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
-        await new Promise(resolve => setTimeout(resolve, 10));
-        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json"))).flush(response2);
         const results = await promise;
         expect(results.geometry.type).toBe("LineString");
     }));
@@ -323,8 +322,7 @@ describe("OverpassTurboService", () => {
         };
         const promise = service.getFeature("relation", "1");
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
-        await new Promise(resolve => setTimeout(resolve, 10));
-        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json"))).flush(response2);
         const results = await promise;
         expect(results).toBeUndefined();
     }));

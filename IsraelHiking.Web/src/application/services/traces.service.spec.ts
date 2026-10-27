@@ -130,12 +130,9 @@ describe("Traces Service", () => {
 
             mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({ traces: [] });
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({ traces: [] });
-
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction));
             return promise;
         }
     ));
@@ -171,9 +168,7 @@ describe("Traces Service", () => {
 
             mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({
                 traces: [
                     {
                         id: 1,
@@ -186,19 +181,15 @@ describe("Traces Service", () => {
                 ]
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction));
             expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
-            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction);
 
             const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
             req[0].flush({});
             req[1].flush({});
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction));
             expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateTraceAction);
-            expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction);
 
             return promise;
         }
@@ -276,9 +267,7 @@ describe("Traces Service", () => {
             });
             const promise = tracesService.getTraceById("1");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.traceAsDataContainer + "1").flush({ id: "1" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.traceAsDataContainer + "1"))).flush({ id: "1" });
 
             const trace = await promise;
             expect(trace.id).toBe("1");
@@ -290,9 +279,7 @@ describe("Traces Service", () => {
             const file = new File([""], "file.txt");
             const promise = tracesService.uploadTrace(file);
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.osmGpx).flush({ id: "1" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.osmGpx))).flush({ id: "1" });
 
             const trace = await promise;
             expect(trace.id).toBe("1");
