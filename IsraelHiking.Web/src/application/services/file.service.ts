@@ -106,6 +106,15 @@ export class FileService {
      */
     private static readonly DOWNLOAD_WRITE_BUFFER_SIZE = 2 * 1024 * 1024;
 
+    /**
+     * How long a style is waited for when there is a copy of it on the device to draw instead - a network that
+     * takes longer than this to answer is not worth leaving the map empty for.
+     */
+    private static readonly STYLE_TIMEOUT_WITH_COPY_MS = 1500;
+
+    /** How long a style is waited for when there is nothing on the device to draw while waiting. */
+    private static readonly STYLE_TIMEOUT_WITHOUT_COPY_MS = 5000;
+
     private readonly httpClient = inject(HttpClient);
     private readonly runningContextService = inject(RunningContextService);
     private readonly imageResizeService = inject(ImageResizeService);
@@ -175,7 +184,8 @@ export class FileService {
     /**
      * Gets a style from the network, so that a style that changed online is never missed.
      * What is on the device - the built in base style an offline download wrote, the kept copy of every
-     * other style - is what is drawn when the network can not be reached.
+     * other style - is what is drawn when the network can not be reached, and the network is given less time
+     * to answer when there is such a copy.
      */
     public async getStyleJsonContent(url: string, isBuiltInBaseLayer: boolean): Promise<string> {
         if (this.runningContextService.isCapacitor && url.startsWith(".")) {
@@ -187,17 +197,18 @@ export class FileService {
             return styleOnDevice;
         }
         const startTime = performance.now();
+        const styleOnDevice = isBuiltInBaseLayer
+            ? await this.readStyleFile(last(url.split("/")), Directory.Data)
+            : await this.readStyleFile(FileService.getStyleCacheFileName(url), Directory.Cache);
+        const timeoutMs = styleOnDevice != null ? FileService.STYLE_TIMEOUT_WITH_COPY_MS : FileService.STYLE_TIMEOUT_WITHOUT_COPY_MS;
         try {
-            const styleText = await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(5000)));
+            const styleText = await firstValueFrom(this.httpClient.get(url, { responseType: "text" }).pipe(timeout(timeoutMs)));
             if (!isBuiltInBaseLayer) {
                 await this.keepStyleInCache(url, styleText);
             }
             return styleText;
         } catch (ex) {
             const failure = `after ${Math.round(performance.now() - startTime)} ms: ${(ex as Error).message}`;
-            const styleOnDevice = isBuiltInBaseLayer
-                ? await this.readStyleFile(last(url.split("/")), Directory.Data)
-                : await this.readStyleFile(FileService.getStyleCacheFileName(url), Directory.Cache);
             if (styleOnDevice != null) {
                 this.loggingService.info(`[Files] Drawing ${url} with the style on the device, it could not be fetched ${failure}`);
                 return styleOnDevice;

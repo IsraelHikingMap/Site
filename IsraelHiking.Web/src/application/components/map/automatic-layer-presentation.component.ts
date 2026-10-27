@@ -1,8 +1,8 @@
 import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
 import { MapComponent, MapService } from "@maplibre/ngx-maplibre-gl";
-import { Subject, firstValueFrom, mergeMap } from "rxjs";
+import { Subject, firstValueFrom, mergeMap, skip } from "rxjs";
 import { Store } from "@ngxs/store";
-import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
+import type { SourceSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 
 import { DefaultStyleService } from "../../services/default-style.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -54,13 +54,13 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.currentLanguageCode = language.code;
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedTiles).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedTiles).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.effectiveTheme).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.effectiveTheme).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
@@ -120,8 +120,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         }
     }
 
-    private async createLayer(layerData: EditableLayer) {
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, this.visible(), this.allowOffline() ? "allow-offline" : "online-only");
+    private createLayer(layerData: EditableLayer, styleLike: StyleSpecification) {
         this.updateSourcesAndLayers(layerData, styleLike.sources, styleLike.layers);
 
         if (this.isBaselayer()) {
@@ -143,6 +142,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     /**
      * This adds a recreate method to a queue that will run every time the previous recreate finishes.
      * This allows avoiding a race condition between the init and changes of this component.
+     * The new style is fetched before the old layer is removed, so the map keeps drawing while a slow network is waited on.
      * @param oldLayer - the old layer data to remove
      * @param newLayer - the new layer data to add
      */
@@ -151,11 +151,14 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             if (!this.mapComponent.mapInstance?.loaded()) {
                 await this.mapLoadedPromise;
             }
+            const styleLike = newLayer == null
+                ? null
+                : await this.defaultStyleService.getSourcesAndLayers(newLayer, this.visible(), this.allowOffline() ? "allow-offline" : "online-only");
             if (oldLayer != null) {
                 this.removeLayer();
             }
             if (newLayer != null) {
-                await this.createLayer(newLayer);
+                this.createLayer(newLayer, styleLike);
             }
         });
     }

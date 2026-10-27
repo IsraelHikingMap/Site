@@ -136,7 +136,7 @@ describe("FileService", () => {
         async (service: FileService, mockBackend: HttpTestingController) => {
             const promise = service.getStyleJsonContent("s.json", false);
 
-            mockBackend.expectOne("s.json").flush({});
+            (await vi.waitFor(() => mockBackend.expectOne("s.json"))).flush({});
 
             const response = await promise;
             expect(response).toEqual("{}");
@@ -149,11 +149,11 @@ describe("FileService", () => {
                 (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
 
                 const firstPromise = service.getStyleJsonContent("https://example.com/kept.json", false);
-                mockBackend.expectOne("https://example.com/kept.json").flush({ kept: true });
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/kept.json"))).flush({ kept: true });
                 await firstPromise;
 
                 const secondPromise = service.getStyleJsonContent("https://example.com/kept.json", false);
-                mockBackend.expectOne("https://example.com/kept.json").error(new ProgressEvent("error"));
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/kept.json"))).error(new ProgressEvent("error"));
 
                 expect(JSON.parse(await secondPromise)).toEqual({ kept: true });
             }
@@ -167,7 +167,7 @@ describe("FileService", () => {
                 await service.writeStyle("changed.json", "{\"old\": true}");
 
                 const promise = service.getStyleJsonContent("https://example.com/changed.json", true);
-                mockBackend.expectOne("https://example.com/changed.json").flush({ fresh: true });
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/changed.json"))).flush({ fresh: true });
 
                 expect(JSON.parse(await promise)).toEqual({ fresh: true });
             }
@@ -181,7 +181,7 @@ describe("FileService", () => {
                 await service.writeStyle("downloaded.json", "{\"downloaded\": true}");
 
                 const promise = service.getStyleJsonContent("https://example.com/downloaded.json", true);
-                mockBackend.expectOne("https://example.com/downloaded.json").error(new ProgressEvent("error"));
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/downloaded.json"))).error(new ProgressEvent("error"));
 
                 expect(JSON.parse(await promise)).toEqual({ downloaded: true });
             }
@@ -194,11 +194,11 @@ describe("FileService", () => {
                 (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
 
                 const firstPromise = service.getStyleJsonContent("https://example.com/built-in.json", true);
-                mockBackend.expectOne("https://example.com/built-in.json").flush({ builtIn: true });
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/built-in.json"))).flush({ builtIn: true });
                 await firstPromise;
 
                 const secondPromise = service.getStyleJsonContent("https://example.com/built-in.json", true);
-                mockBackend.expectOne("https://example.com/built-in.json").error(new ProgressEvent("error"));
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/built-in.json"))).error(new ProgressEvent("error"));
 
                 expect(JSON.parse(await secondPromise)).toEqual({ version: 8, layers: [], sources: {} });
             }
@@ -211,7 +211,7 @@ describe("FileService", () => {
                 (runningContextService as unknown as { isCapacitor: boolean }).isCapacitor = true;
 
                 const promise = service.getStyleJsonContent("https://example.com/never-fetched.json", false);
-                mockBackend.expectOne("https://example.com/never-fetched.json").error(new ProgressEvent("error"));
+                (await vi.waitFor(() => mockBackend.expectOne("https://example.com/never-fetched.json"))).error(new ProgressEvent("error"));
 
                 expect(JSON.parse(await promise)).toEqual({ version: 8, layers: [], sources: {} });
             }
