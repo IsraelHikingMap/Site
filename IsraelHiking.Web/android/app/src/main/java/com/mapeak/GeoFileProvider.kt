@@ -4,14 +4,21 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 
 /**
- * A [FileProvider] that knows the type of a gpx file. Android has no mime type for the gpx extension,
- * so a shared gpx file is reported as application/octet-stream and apps like WhatsApp label it BIN.
+ * A [FileProvider] that knows the types of the geo files the app shares. Android has no mime type for
+ * some of them, so a shared gpx file is reported as application/octet-stream and apps like WhatsApp
+ * label it BIN.
  */
 class GeoFileProvider : FileProvider() {
     override fun getType(uri: Uri): String? {
-        if (uri.path?.endsWith(".gpx", ignoreCase = true) == true) {
-            return "application/gpx+xml"
-        }
-        return super.getType(uri)
+        val extension = uri.path?.substringAfterLast('.', "")?.lowercase()
+        return MIME_TYPES[extension] ?: super.getType(uri)
+    }
+
+    companion object {
+        private val MIME_TYPES = mapOf(
+            "gpx" to "application/gpx+xml",
+            "kml" to "application/vnd.google-earth.kml+xml",
+            "kmz" to "application/vnd.google-earth.kmz"
+        )
     }
 }
