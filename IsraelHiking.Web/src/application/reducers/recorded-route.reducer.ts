@@ -22,15 +22,6 @@ export class AddRecordingRoutePointsAction {
     constructor(public readonly latlngs: LatLngAltTime[]) { }
 }
 
-export class AddPendingProcessingRoutePointAction {
-    public static readonly type = "[Recorded Route] AddPendingProcessingRoutePointAction";
-    constructor(public readonly position: GeolocationPosition) { }
-}
-
-export class ClearPendingProcessingRoutePointsAction {
-    public static readonly type = "[Recorded Route] ClearPendingProcessingRoutePointsAction";
-}
-
 export class AddRecordingPoiAction {
     public static readonly type = "[Recorded Route] AddRecordingPoiAction";
     constructor(public readonly markerData: MarkerData) { }
@@ -80,25 +71,6 @@ export class RecordedRouteReducer {
     public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingRoutePointsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.route.latlngs = [...lastState.route.latlngs, ...action.latlngs];
-            return lastState;
-        }));
-    }
-
-    @Action(AddPendingProcessingRoutePointAction)
-    public addPendingProcessingPoint(ctx: StateContext<RecordedRouteState>, action: AddPendingProcessingRoutePointAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            if (lastState.pendingProcessing == null) {
-                lastState.pendingProcessing = [];
-            }
-            lastState.pendingProcessing.push(action.position);
-            return lastState;
-        }));
-    }
-
-    @Action(ClearPendingProcessingRoutePointsAction)
-    public clearPendingProcessingPoints(ctx: StateContext<RecordedRouteState>) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.pendingProcessing = [];
             return lastState;
         }));
     }

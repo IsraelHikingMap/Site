@@ -193,7 +193,7 @@ export class LocationService {
         };
         this.updatePace(this.locationWithBearing.center, position.timestamp, position.coords.speed);
         this.changed.next(this.locationWithBearing);
-        if (!this.mapService.isMoving() && this.isFollowing()) {
+        if (this.isFollowing()) {
             this.moveMapToGpsPosition();
         }
     }

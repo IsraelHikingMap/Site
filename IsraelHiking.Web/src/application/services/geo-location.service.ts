@@ -14,11 +14,19 @@ import type { ApplicationState, LatLngAltTime } from "../models";
 
 @Service()
 export class GeoLocationService {
+    private static readonly LOCATION_LOG_READ_LIMIT = 10000;
+
     private isBackground = false;
     private wasInitialized = false;
-    private lastReceivedPosition: GeolocationPosition | null = null;
+    private lastLocationLogId: number | undefined;
+    private locationLogReads: Promise<GeolocationPosition[]> = Promise.resolve([]);
+    private isLocationLogReadWaiting = false;
 
-    public readonly positionWhileInBackground = new EventEmitter<GeolocationPosition>();
+    /**
+     * Emits every position the plugin logged, in the order it received them, including the ones that came while
+     * the app was in the background or killed. Nothing is logged in the browser, so it never emits there.
+     */
+    public readonly positionsReceived = new EventEmitter<GeolocationPosition[]>();
     public readonly backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
@@ -84,7 +92,7 @@ export class GeoLocationService {
             }
             if (!this.isBackground) {
                 this.ngZone.run(async () => {
-                    this.handlePositionChange(this.lastReceivedPosition);
+                    await this.readLocationLog();
                     this.backToForeground.next();
                 });
             }
@@ -133,7 +141,8 @@ export class GeoLocationService {
                 backgroundTitle: "Mapeak",
                 requestPermissions: true,
                 stale: true,
-                distanceFilter: 2
+                distanceFilter: 2,
+                locationLog: true
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
                     this.loggingService.debug(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`, "gps");
@@ -143,12 +152,14 @@ export class GeoLocationService {
                         this.toastService.info(this.resources.jammedPositionReceived);
                         return;
                     }
-                    this.lastReceivedPosition = position;
                     if (this.isBackground) {
-                        this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
-                    this.handlePositionChange(this.lastReceivedPosition);
+                    if (!this.runningContextService.isCapacitor) {
+                        this.handlePositionChange(position);
+                        return;
+                    }
+                    this.readLocationLog();
                     return;
                 } else if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
@@ -180,6 +191,54 @@ export class GeoLocationService {
             this.sendPlannedRouteToPluginIfNeeded();
         } catch {
             // ignore errors.
+        }
+    }
+
+    /**
+     * Reads the positions the plugin logged since the previous read, hands them to the listeners and clears them
+     * from the log, so the log only holds what the app has not seen yet. Reads run one after the other, as each
+     * one carries on from where the previous one left off, and a call made while a read is already waiting gets that
+     * read, so the burst of callbacks that arrives when the app returns from the background does not queue a read each.
+     * The current position moves once, to the newest one.
+     */
+    public readLocationLog(): Promise<GeolocationPosition[]> {
+        if (this.isLocationLogReadWaiting) {
+            return this.locationLogReads;
+        }
+        this.isLocationLogReadWaiting = true;
+        this.locationLogReads = this.locationLogReads.then(async () => {
+            this.isLocationLogReadWaiting = false;
+            const positions = await this.readAllLocationsFromLog();
+            if (positions.length > 0) {
+                this.positionsReceived.next(positions);
+                this.handlePositionChange(positions.at(-1));
+            }
+            return positions;
+        });
+        return this.locationLogReads;
+    }
+
+    private async readAllLocationsFromLog(): Promise<GeolocationPosition[]> {
+        let positions: GeolocationPosition[] = [];
+        try {
+            const { entries } = await BackgroundGeolocation.getLocationLog({
+                afterId: this.lastLocationLogId,
+                limit: GeoLocationService.LOCATION_LOG_READ_LIMIT
+            });
+            if (entries.length === 0) {
+                return positions;
+            }
+            this.lastLocationLogId = entries.at(-1).id;
+            positions = entries.map(e => this.locationToPosition(e))
+                .filter(p => !SpatialHelper.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
+            await BackgroundGeolocation.clearLocationLog({ upToId: this.lastLocationLogId });
+            if (entries.length < GeoLocationService.LOCATION_LOG_READ_LIMIT) {
+                return positions;
+            }
+            return [...positions, ...await this.readAllLocationsFromLog()];
+        } catch (ex) {
+            this.loggingService.error(`[GeoLocation] Failed to read the location log: ${(ex as Error).message}`);
+            return positions;
         }
     }
 

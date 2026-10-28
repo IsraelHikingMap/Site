@@ -12,7 +12,7 @@ import { TracesService } from "./traces.service";
 import { SpatialHelper } from "./spatial.helper";
 import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction, AddPendingProcessingRoutePointAction, ClearPendingProcessingRoutePointsAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
@@ -47,26 +47,17 @@ export class RecordedRouteService {
 
     public readonly isRecording = computed(() => this.recordedRouteStateSignal().isRecording);
 
-    public initialize() {
+    public async initialize() {
         if (this.isRecording()) {
             const recordingInterruptedMessage = "[Record] Recording was interrupted";
             this.loggingService.info(recordingInterruptedMessage);
             this.loggingService.info(recordingInterruptedMessage, "gps");
-            this.updateRecordingRoute(null); // This will add the last position to the route that might have not been processed.
+            this.addPositionsToRecording(await this.geoLocationService.readLocationLog());
             this.stopRecording(false);
             this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
-
-        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
-            this.updateRecordingRoute(position);
-        });
-        this.geoLocationService.positionWhileInBackground.subscribe((position: GeolocationPosition) => {
-            if (this.isRecording()) {
-                this.store.dispatch(new AddPendingProcessingRoutePointAction(position));
-            }
-        });
-        this.geoLocationService.backToForeground.subscribe(() => {
-            this.updateRecordingRoute(null);
+        this.geoLocationService.positionsReceived.subscribe((positions: GeolocationPosition[]) => {
+            this.addPositionsToRecording(positions);
         });
     }
 
@@ -149,36 +140,35 @@ export class RecordedRouteService {
         await this.tracesService.uploadLocalTracesIfNeeded();
     }
 
-    private updateRecordingRoute(position: GeolocationPosition) {
+    /**
+     * Adds the received positions that are newer than the last one recorded, as the positions of a recording
+     * interrupted by the app being killed can be received again when it starts.
+     */
+    private addPositionsToRecording(positions: GeolocationPosition[]) {
         if (!this.isRecording()) {
             return;
         }
-        const readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
-        const positions = [...readOnlyPositions];
-        if (positions.length > 0) {
-            this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`, "gps");
-            this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
+        if (positions.length > 1) {
+            this.loggingService.debug(`[Record] Processing ${positions.length} positions`, "gps");
         }
-        if (position != null) {
-            positions.push(position);
-        }
-        if (positions.length === 0) {
-            return;
-        }
-        const validPositions = [];
         const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
-        let lastValidLocation = routeLatLngs[routeLatLngs.length - 1];
+        const lastLatLng = routeLatLngs[routeLatLngs.length - 1];
+        const newPositions = positions.filter(p => p.timestamp > new Date(lastLatLng.timestamp).getTime());
+        const locations = this.getValidLocations(newPositions, lastLatLng);
+        if (locations.length > 0) {
+            this.store.dispatch(new AddRecordingRoutePointsAction(locations));
+        }
+    }
+
+    private getValidLocations(positions: GeolocationPosition[], lastValidLocation: LatLngAltTime): LatLngAltTime[] {
+        const locations = [];
         for (const position of positions) {
             if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
-                validPositions.push(position);
                 lastValidLocation = GeoLocationService.positionToLatLngTime(position);
+                locations.push(lastValidLocation);
             }
         }
-        if (validPositions.length === 0) {
-            return;
-        }
-        const locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
-        this.store.dispatch(new AddRecordingRoutePointsAction(locations));
+        return locations;
     }
 
     private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>, lastValidLocation: LatLngAltTime): boolean {
