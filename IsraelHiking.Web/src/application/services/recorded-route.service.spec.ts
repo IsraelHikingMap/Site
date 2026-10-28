@@ -247,7 +247,7 @@ describe("Recorded Route Service", () => {
             await service.initialize();
             service.startRecording();
             geoService.positionsReceived.next([createPosition(60000), createPosition(120000), createPosition(180000)]);
-            const spy = vi.spyOn(loggingService, "debug");
+            const spy = vi.spyOn(loggingService, "info");
 
             geoService.positionsReceived.next([createPosition(120000), createPosition(180000)]);
 
@@ -260,8 +260,8 @@ describe("Recorded Route Service", () => {
         async (service: RecordedRouteService, geoService: GeoLocationService, loggingService: LoggingService, store: Store) => {
             resetToRecordingStartPosition(store);
             await service.initialize();
-            const spy = vi.spyOn(loggingService, "debug");
             service.startRecording();
+            const spy = vi.spyOn(loggingService, "info");
 
             geoService.positionsReceived.next([
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(150000).getTime() } as GeolocationPosition,

@@ -113,7 +113,7 @@ export class PmTilesService {
         try {
             await this.getSource(fileName);
         } catch (ex) {
-            this.loggingService.debug(`Failed to open file ${fileName} for tile ${PmTilesService.toTileKey(tileX, tileY)} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
+            this.loggingService.warning(`Failed to open file ${fileName} for tile ${PmTilesService.toTileKey(tileX, tileY)} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
             return false;
         }
         return true;

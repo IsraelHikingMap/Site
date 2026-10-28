@@ -72,7 +72,9 @@ export class GeoLocationService {
 
         App.addListener("appStateChange", (state) => {
             this.isBackground = !state.isActive;
-            this.loggingService.info(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
+            const appStateMessage = `[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`;
+            this.loggingService.info(appStateMessage);
+            this.loggingService.info(appStateMessage, "gps");
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
                 return;
             }
@@ -131,7 +133,7 @@ export class GeoLocationService {
     private async startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
         if (this.wasInitialized) {
-            this.loggingService.debug("[GeoLocation] Background tracking already started, skipping...");
+            this.loggingService.warning("[GeoLocation] Background tracking already started, skipping...");
             return;
         }
         this.loggingService.info("[GeoLocation] Starting background tracking");
@@ -145,7 +147,7 @@ export class GeoLocationService {
                 locationLog: true
             }, (location?: Location, error?: CallbackError) => {
                 if (location) {
-                    this.loggingService.debug(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`, "gps");
+                    this.loggingService.info(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`, "gps");
                     const position = this.locationToPosition(location);
                     const latLng = GeoLocationService.positionToLatLngTime(position);
                     if (SpatialHelper.isJammingTarget(latLng)) {
@@ -246,7 +248,7 @@ export class GeoLocationService {
         this.store.dispatch(new SetTrackingStateAction("disabled"));
         this.store.dispatch(new SetCurrentPositionAction(null));
         if (this.wasInitialized) {
-            this.loggingService.debug("[GeoLocation] Stopping background tracking");
+            this.loggingService.info("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.stop();
             this.wasInitialized = false;
         }

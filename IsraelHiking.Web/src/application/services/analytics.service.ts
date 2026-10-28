@@ -193,7 +193,7 @@ export class AnalyticsService {
             await FirebaseAnalytics.logEvent({ name: eventName, params: { event_category: category } });
             await AppsFlyer.logEvent({ eventName, eventValues: { event_category: category } });
         } catch (ex) {
-            this.loggingService.debug(`[Analytics] Failed to track ${eventName}: ${(ex as Error).message}`);
+            this.loggingService.warning(`[Analytics] Failed to track ${eventName}: ${(ex as Error).message}`);
         }
     }
 }

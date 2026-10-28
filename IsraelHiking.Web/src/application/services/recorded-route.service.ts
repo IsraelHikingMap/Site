@@ -149,7 +149,7 @@ export class RecordedRouteService {
             return;
         }
         if (positions.length > 1) {
-            this.loggingService.debug(`[Record] Processing ${positions.length} positions`, "gps");
+            this.loggingService.info(`[Record] Processing ${positions.length} positions`, "gps");
         }
         const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
         const lastLatLng = routeLatLngs[routeLatLngs.length - 1];
@@ -179,26 +179,26 @@ export class RecordedRouteService {
         }
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("[Record] Valid position, updating. " +
+            this.loggingService.info("[Record] Valid position, updating. " +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
             this.rejectedPosition = null;
             return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason} ` +
+            this.loggingService.info(`[Record] Rejecting position, reason: ${nonValidReason} ` +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("[Record] Validating a rejected position: " +
+            this.loggingService.info("[Record] Validating a rejected position: " +
                 JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
             this.rejectedPosition = null;
             return true;
         }
         this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("[Record] Rejecting position for rejected: " +
+        this.loggingService.info("[Record] Rejecting position for rejected: " +
             JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason, "gps");
         return false;
     }

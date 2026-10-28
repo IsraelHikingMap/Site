@@ -102,19 +102,6 @@ export class LoggingService {
         this.writeToStorage(logLine, channel);
     }
 
-    public debug(message: string, channel: LogChannel = "general") {
-        const logLine = {
-            date: new Date(),
-            level: "debug",
-            message
-        } as LogLine;
-        if (!environment.production && this.logToConsole) {
-             
-            console.debug(this.logLineToString(logLine));
-        }
-        this.writeToStorage(logLine, channel);
-    }
-
     public error(message: string, channel: LogChannel = "general") {
         const logLine = {
             date: new Date(),
