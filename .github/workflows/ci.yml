@@ -68,7 +68,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/android
           bundler-cache: true
 
@@ -118,7 +118,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/ios/App
           bundler-cache: true
 

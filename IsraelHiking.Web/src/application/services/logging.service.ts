@@ -2,8 +2,6 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Service } from "@angular/core";
 import Dexie from "dexie";
 
-import { environment } from "../../environments/environment";
-
 type LogLevel = "debug" | "info" | "error" | "warn";
 
 /**
@@ -99,19 +97,6 @@ export class LoggingService {
             message
         } as LogLine;
         if (this.logToConsole) console.log(this.logLineToString(logLine));
-        this.writeToStorage(logLine, channel);
-    }
-
-    public debug(message: string, channel: LogChannel = "general") {
-        const logLine = {
-            date: new Date(),
-            level: "debug",
-            message
-        } as LogLine;
-        if (!environment.production && this.logToConsole) {
-             
-            console.debug(this.logLineToString(logLine));
-        }
         this.writeToStorage(logLine, channel);
     }
 

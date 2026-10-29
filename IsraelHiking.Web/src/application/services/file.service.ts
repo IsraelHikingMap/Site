@@ -658,7 +658,7 @@ export class FileService {
                 directory: Directory.Cache
             });
         } catch (ex) {
-            this.loggingService.debug(`[Files] Did not delete the partial file: ${fileName}, ${(ex as Error).message}`);
+            this.loggingService.warning(`[Files] Did not delete the partial file: ${fileName}, ${(ex as Error).message}`);
         }
     }
 

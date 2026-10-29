@@ -63,17 +63,9 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should log debug and returned logged data", async () => {
-        await service.debug("Hello!");
-
-        const logs = await service.getLog();
-
-        expect(logs.split("\n").length).toBe(1);
-    });
-
     it("Should keep the gps channel apart from the general log", async () => {
-        await service.debug("General!");
-        await service.debug("Position!", "gps");
+        await service.info("General!");
+        await service.info("Position!", "gps");
 
         const logs = await service.getLog();
         const gpsLogs = await service.getLog("gps");

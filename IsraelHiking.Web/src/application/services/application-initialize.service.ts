@@ -124,7 +124,7 @@ export class ApplicationInitializeService {
             this.openStartupDialog();
             this.selectedRouteService.initialize();
             this.poiService.initialize(); // do not wait for it to complete
-            this.recordedRouteService.initialize();
+            await this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
