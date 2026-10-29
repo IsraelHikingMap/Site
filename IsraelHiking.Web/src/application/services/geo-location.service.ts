@@ -94,7 +94,10 @@ export class GeoLocationService {
             }
             if (!this.isBackground) {
                 this.ngZone.run(async () => {
-                    await this.readLocationLog();
+                    const positions = await this.readLocationLog();
+                    if (positions.length > 0) {
+                        this.handlePositionChange(positions.at(-1));
+                    }
                     this.backToForeground.next();
                 });
             }
@@ -145,7 +148,7 @@ export class GeoLocationService {
                 stale: true,
                 distanceFilter: 2,
                 locationLog: true
-            }, (location?: Location, error?: CallbackError) => {
+            }, async (location?: Location, error?: CallbackError) => {
                 if (location) {
                     this.loggingService.info(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`, "gps");
                     const position = this.locationToPosition(location);
@@ -157,11 +160,10 @@ export class GeoLocationService {
                     if (this.isBackground) {
                         return;
                     }
-                    if (!this.runningContextService.isCapacitor) {
-                        this.handlePositionChange(position);
-                        return;
+                    if (this.runningContextService.isCapacitor) {
+                        await this.readLocationLog();
                     }
-                    this.readLocationLog();
+                    this.handlePositionChange(position);
                     return;
                 } else if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
@@ -201,7 +203,6 @@ export class GeoLocationService {
      * from the log, so the log only holds what the app has not seen yet. Reads run one after the other, as each
      * one carries on from where the previous one left off, and a call made while a read is already waiting gets that
      * read, so the burst of callbacks that arrives when the app returns from the background does not queue a read each.
-     * The current position moves once, to the newest one.
      */
     public readLocationLog(): Promise<GeolocationPosition[]> {
         if (this.isLocationLogReadWaiting) {
@@ -213,7 +214,6 @@ export class GeoLocationService {
             const positions = await this.readAllLocationsFromLog();
             if (positions.length > 0) {
                 this.positionsReceived.next(positions);
-                this.handlePositionChange(positions.at(-1));
             }
             return positions;
         });
