@@ -2,8 +2,6 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Service } from "@angular/core";
 import Dexie from "dexie";
 
-import { environment } from "../../environments/environment";
-
 type LogLevel = "debug" | "info" | "error" | "warn";
 
 /**
