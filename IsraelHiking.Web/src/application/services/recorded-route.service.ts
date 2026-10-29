@@ -179,28 +179,31 @@ export class RecordedRouteService {
         }
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.info("[Record] Valid position, updating. " +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
+            this.loggingService.info("[Record] Valid position, updating. " + this.positionToLogString(position), "gps");
             this.rejectedPosition = null;
             return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-            this.loggingService.info(`[Record] Rejecting position, reason: ${nonValidReason} ` +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
+            this.loggingService.info(`[Record] Rejecting position, reason: ${nonValidReason} ` + this.positionToLogString(position), "gps");
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
-            this.loggingService.info("[Record] Validating a rejected position: " +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)), "gps");
+            this.loggingService.info("[Record] Validating a rejected position: " + this.positionToLogString(position), "gps");
             this.rejectedPosition = null;
             return true;
         }
         this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-        this.loggingService.info("[Record] Rejecting position for rejected: " +
-            JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason, "gps");
+        this.loggingService.info(`[Record] Rejecting position for rejected, reason: ${nonValidReason} ` + this.positionToLogString(position), "gps");
         return false;
+    }
+
+    /**
+     * The position as the gps log records it for LogReaderService, which reads it back from the json at the end of the line.
+     */
+    private positionToLogString(position: Immutable<GeolocationPosition>): string {
+        return JSON.stringify({ ...GeoLocationService.positionToLatLngTime(position), accuracy: position.coords.accuracy });
     }
 
     private isValid(test: LatLngAltTime, position: Immutable<GeolocationPosition>): string {
