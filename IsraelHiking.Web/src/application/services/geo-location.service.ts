@@ -220,27 +220,31 @@ export class GeoLocationService {
         return this.locationLogReads;
     }
 
+    /**
+     * A page is only returned once it was cleared from the log, so a page that fails is read again by the next read
+     * instead of being handed out while it is still in the log, where it would be handed out again after a restart.
+     */
     private async readAllLocationsFromLog(): Promise<GeolocationPosition[]> {
-        let positions: GeolocationPosition[] = [];
         try {
             const { entries } = await BackgroundGeolocation.getLocationLog({
                 afterId: this.lastLocationLogId,
                 limit: GeoLocationService.LOCATION_LOG_READ_LIMIT
             });
             if (entries.length === 0) {
-                return positions;
+                return [];
             }
-            this.lastLocationLogId = entries.at(-1).id;
-            positions = entries.map(e => this.locationToPosition(e))
+            const lastId = entries.at(-1).id;
+            await BackgroundGeolocation.clearLocationLog({ upToId: lastId });
+            this.lastLocationLogId = lastId;
+            const positions = entries.map(e => this.locationToPosition(e))
                 .filter(p => !SpatialHelper.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
-            await BackgroundGeolocation.clearLocationLog({ upToId: this.lastLocationLogId });
             if (entries.length < GeoLocationService.LOCATION_LOG_READ_LIMIT) {
                 return positions;
             }
             return [...positions, ...await this.readAllLocationsFromLog()];
         } catch (ex) {
             this.loggingService.error(`[GeoLocation] Failed to read the location log: ${(ex as Error).message}`);
-            return positions;
+            return [];
         }
     }
 

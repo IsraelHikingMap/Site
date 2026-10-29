@@ -183,8 +183,7 @@ describe("Recorded Route Service", () => {
                         userInfo: null
                     }
                 });
-                // The first position was already added to the recording before the app was killed.
-                vi.spyOn(geoService, "readLocationLog").mockResolvedValue([createPosition(0), createPosition(1000), createPosition(2000)]);
+                vi.spyOn(geoService, "readLocationLog").mockResolvedValue([createPosition(1000), createPosition(2000)]);
                 const spy = vi.spyOn(store, "dispatch");
 
                 await service.initialize();
@@ -238,21 +237,6 @@ describe("Recorded Route Service", () => {
             geoService.positionsReceived.next([createPosition(60000), createPosition(120000), createPosition(180000), createPosition(240000)]);
 
             expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(5);
-        }
-    ));
-
-    it("Should not add the same location twice when it is received again", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
-        async (service: RecordedRouteService, geoService: GeoLocationService, loggingService: LoggingService, store: Store) => {
-            resetToRecordingStartPosition(store);
-            await service.initialize();
-            service.startRecording();
-            geoService.positionsReceived.next([createPosition(60000), createPosition(120000), createPosition(180000)]);
-            const spy = vi.spyOn(loggingService, "info");
-
-            geoService.positionsReceived.next([createPosition(120000), createPosition(180000)]);
-
-            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
-            expect(vi.mocked(spy).mock.calls.some((c) => c[0].startsWith("[Record] Rejecting position"))).toBeFalsy();
         }
     ));
 

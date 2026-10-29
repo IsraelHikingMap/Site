@@ -140,10 +140,6 @@ export class RecordedRouteService {
         await this.tracesService.uploadLocalTracesIfNeeded();
     }
 
-    /**
-     * Adds the received positions that are newer than the last one recorded, as the positions of a recording
-     * interrupted by the app being killed can be received again when it starts.
-     */
     private addPositionsToRecording(positions: GeolocationPosition[]) {
         if (!this.isRecording()) {
             return;
@@ -153,8 +149,7 @@ export class RecordedRouteService {
         }
         const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
         const lastLatLng = routeLatLngs[routeLatLngs.length - 1];
-        const newPositions = positions.filter(p => p.timestamp > new Date(lastLatLng.timestamp).getTime());
-        const locations = this.getValidLocations(newPositions, lastLatLng);
+        const locations = this.getValidLocations(positions, lastLatLng);
         if (locations.length > 0) {
             this.store.dispatch(new AddRecordingRoutePointsAction(locations));
         }
