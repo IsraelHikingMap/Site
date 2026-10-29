@@ -39,6 +39,8 @@ export class TracesService {
     private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
 
+    private isUploadingLocalTraces = false;
+
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
         return firstValueFrom(this.httpClient.post<GeoJSON.FeatureCollection<GeoJSON.LineString>>(Urls.missingParts + "?traceId=" + traceId, null));
@@ -48,7 +50,15 @@ export class TracesService {
         await this.uploadLocalTracesIfNeeded();
     }
 
+    /**
+     * Skips the upload while another one is running, as a recording interrupted by the app being killed is uploaded
+     * when it is stopped at startup while initialize uploads it too, and both would see it as local. A trace that is
+     * skipped is uploaded the next time a recording stops or the app starts.
+     */
     public async uploadLocalTracesIfNeeded(): Promise<void> {
+        if (this.isUploadingLocalTraces) {
+            return;
+        }
         const state = this.store.selectSnapshot((s: ApplicationState) => s);
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
@@ -61,9 +71,14 @@ export class TracesService {
             return;
         }
         this.loggingService.info(`[Traces] There are ${localTraces.length} local traces that are about to be uploaded`);
-        for (const localTrace of localTraces) {
-            await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
-            await this.deleteTrace(localTrace);
+        this.isUploadingLocalTraces = true;
+        try {
+            for (const localTrace of localTraces) {
+                await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
+                await this.deleteTrace(localTrace);
+            }
+        } finally {
+            this.isUploadingLocalTraces = false;
         }
         this.loggingService.info(`[Traces] Finished uploading ${localTraces.length} local traces to server`);
         await this.syncTraces();

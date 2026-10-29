@@ -9,7 +9,7 @@ import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
-import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
+import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction, TracesReducer } from "../reducers/traces.reducer";
 import type { Trace } from "../models";
 
 describe("Traces Service", () => {
@@ -20,7 +20,7 @@ describe("Traces Service", () => {
         };
         TestBed.configureTestingModule({
             providers: [
-                provideStore([]),
+                provideStore([TracesReducer]),
                 TracesService,
                 {
                     provide: ResourcesService,
@@ -134,6 +134,31 @@ describe("Traces Service", () => {
 
             await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction));
             return promise;
+        }
+    ));
+
+    it("Should upload a local trace once when uploading is requested again before the first upload ends", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true
+                },
+                userState: {
+                    userInfo: {}
+                },
+                tracesState: {
+                    traces: [{ id: "42", visibility: "local", dataContainer: { routes: [{}] } }]
+                }
+            });
+            // This is what happens at startup when an interrupted recording is stopped while initialize runs.
+            const first = tracesService.uploadLocalTracesIfNeeded();
+            const second = tracesService.initialize();
+
+            mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({ traces: [] });
+            await Promise.all([first, second]);
+
+            mockBackend.expectNone(u => u.url.startsWith(Urls.uploadDataContainer));
         }
     ));
 
