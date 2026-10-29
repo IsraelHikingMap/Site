@@ -27,14 +27,10 @@ final class CarPaceCalculator {
     private(set) var speed: Double?
 
     /// Adds a position to the trail the `speed` is measured from. A position that did not move counts
-    /// towards the time but not the distance, so that a stop is measured as a stop, and a position
-    /// that arrived after a gap starts a new trail - where the speed it reports carries the estimate
-    /// until that trail has one of its own.
+    /// towards the time but not the distance, so that a stop is measured as a stop, and the trail is
+    /// kept short so that a stop is forgotten soon after the car moves again.
     func updatePace(_ location: CLLocation) {
         let time = location.timestamp.timeIntervalSince1970
-        if isAfterGap(time) {
-            clear()
-        }
         let distance = lastCountedLocation?.distance(from: location) ?? 0
         if lastCountedLocation == nil || distance >= Self.minimalMovementMeters {
             countedDistance += distance
@@ -55,29 +51,12 @@ final class CarPaceCalculator {
         }
     }
 
-    /// Whether the given position arrived too long after the last one for the two to be part of the
-    /// same trail - see `maximalGapSeconds`.
-    private func isAfterGap(_ time: TimeInterval) -> Bool {
-        guard let lastInTrail = trail.last else { return false }
-        return time - lastInTrail.time > Self.maximalGapSeconds
-    }
-
-    private func clear() {
-        trail.removeAll()
-        lastCountedLocation = nil
-        countedDistance = 0
-        speed = nil
-    }
-
     /// The length of the trail of positions the speed is measured over.
-    private static let paceWindowSeconds: TimeInterval = 15 * 60
+    private static let paceWindowSeconds: TimeInterval = 2 * 60
 
     /// How far a position has to be from the last counted one to count, so GPS wander is not movement.
     private static let minimalMovementMeters = 10.0
 
     /// Below this speed, in meters per second, the car is stopped rather than moving slowly.
     private static let minimalMovingSpeed = 0.5
-
-    /// A gap in the positions longer than this ends the trail instead of extending it.
-    private static let maximalGapSeconds: TimeInterval = 2 * 60
 }

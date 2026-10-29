@@ -38,15 +38,17 @@ object CarRouteCalculator {
     /**
      * Distance, in meters, from the start of [route] to where [location] projects onto it. The GPS
      * heading is taken into account so a self-overlapping route matches the leg actually being
-     * driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
-     * degenerate route (fewer than two points).
+     * driven rather than whichever overlapping leg is geometrically nearest. Null when the driver
+     * is not on the route, by the same measure as [computeStatistics], since off the route the
+     * nearest point of it is no indication of which turn comes next.
      */
-    fun distanceAlongRoute(route: CarRouteData, location: Location): Double =
-            distanceAlongRoute(route, LatLng(location.latitude, location.longitude), headingOf(location))
-
-    /** [distanceAlongRoute] for a position that does not come from the framework. */
-    fun distanceAlongRoute(route: CarRouteData, position: LatLng, headingDeg: Double?): Double =
-            project(route, position, headingDeg)?.distanceAlongRouteM ?: 0.0
+    fun distanceAlongRoute(route: CarRouteData, location: Location): Double? =
+            findClosestRoute(
+                            listOf(route),
+                            LatLng(location.latitude, location.longitude),
+                            headingOf(location)
+                    )
+                    ?.distanceAlongRouteM
 
     /**
      * Picks the route the driver is most likely on (perpendicular distance + heading penalty), then

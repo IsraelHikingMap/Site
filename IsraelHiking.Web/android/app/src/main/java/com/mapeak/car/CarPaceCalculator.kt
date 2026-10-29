@@ -31,14 +31,10 @@ class CarPaceCalculator {
 
     /**
      * Adds a position to the trail the [speed] is measured from. A position that did not move counts
-     * towards the time but not the distance, so that a stop is measured as a stop, and a position
-     * that arrived after a gap starts a new trail - where the speed it reports carries the estimate
-     * until that trail has one of its own.
+     * towards the time but not the distance, so that a stop is measured as a stop, and the trail is
+     * kept short so that a stop is forgotten soon after the car moves again.
      */
     fun updatePace(location: Location) {
-        if (isAfterGap(location.time)) {
-            clear()
-        }
         val lastCounted = lastCountedLocation
         val distance = if (lastCounted == null) 0.0 else lastCounted.distanceTo(location).toDouble()
         if (lastCounted == null || distance >= MINIMAL_MOVEMENT_METERS) {
@@ -61,25 +57,9 @@ class CarPaceCalculator {
         }
     }
 
-    /**
-     * Whether the given position arrived too long after the last one for the two to be part of the
-     * same trail - see [MAXIMAL_GAP_MILLISECONDS].
-     */
-    private fun isAfterGap(time: Long): Boolean {
-        val lastInTrail = trail.lastOrNull() ?: return false
-        return time - lastInTrail.time > MAXIMAL_GAP_MILLISECONDS
-    }
-
-    private fun clear() {
-        trail.clear()
-        lastCountedLocation = null
-        countedDistance = 0.0
-        speed = null
-    }
-
     companion object {
         /** The length of the trail of positions the speed is measured over. */
-        private const val PACE_WINDOW_MILLISECONDS = 15 * 60 * 1000L
+        private const val PACE_WINDOW_MILLISECONDS = 2 * 60 * 1000L
 
         /**
          * How far a position has to be from the last counted one to count, so GPS wander is not
@@ -89,8 +69,5 @@ class CarPaceCalculator {
 
         /** Below this speed, in meters per second, the car is stopped rather than moving slowly. */
         private const val MINIMAL_MOVING_SPEED = 0.5f
-
-        /** A gap in the positions longer than this ends the trail instead of extending it. */
-        private const val MAXIMAL_GAP_MILLISECONDS = 2 * 60 * 1000L
     }
 }
