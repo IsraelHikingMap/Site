@@ -24,8 +24,9 @@
         @for (row of downloadedTileRows(); track row.tileKey) {
         <div class="cursor-pointer border-b pb-2" (click)="showOnMap(row)" analyticsOn="click"
             analyticsCategory="Offline Management" analyticsLabel="Show tile on map">
-            <h4 class="m-2 flex flex-row items-center">
-                <button mat-button [matMenuTriggerFor]="tileMenu" (click)="$event.stopPropagation()"
+            <div class="m-2 flex flex-row items-center">
+                <button mat-button [matMenuTriggerFor]="tileMenu" [matMenuTriggerRestoreFocus]="false"
+                    (click)="$event.stopPropagation()"
                     analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Open tile menu">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
@@ -56,30 +57,38 @@
                     </button>
                     }
                 </mat-menu>
-                @if (editedTileKey() === row.tileKey) {
-                <mat-form-field class="flex-1" subscriptSizing="dynamic" (click)="$event.stopPropagation()">
-                    <mat-label>{{resources.name}}</mat-label>
-                    <input matInput #nameInput type="text" [value]="row.name"
-                        (keydown.enter)="setTileName(row.tileKey, nameInput.value)"
-                        (keydown.escape)="editedTileKey.set(null)"
-                        (blur)="setTileName(row.tileKey, nameInput.value)" />
-                </mat-form-field>
-                } @else {
-                <span class="font-bold">{{row.name}}</span>
-                }
-            </h4>
-            <div class="ms-2 opacity-70">
-                @if (isDownloading(row)) {
-                {{downloadingTile().progress.toFixed(0)}}%
-                } @else {
-                {{row.downloadedDate | date:resources.getDateFormat()}}
-                }
+                <div class="flex-1 min-w-0">
+                    @if (editedTileKey() === row.tileKey) {
+                    <div class="flex flex-row items-center" (click)="$event.stopPropagation()">
+                        <mat-form-field class="flex-1" subscriptSizing="dynamic">
+                            <mat-label>{{resources.name}}</mat-label>
+                            <input matInput #nameInput type="text" [value]="row.name"
+                                (keydown.enter)="setTileName(row.tileKey, nameInput.value)"
+                                (keydown.escape)="editedTileKey.set(null)"
+                                (blur)="setTileName(row.tileKey, nameInput.value)" />
+                        </mat-form-field>
+                        <button mat-button (mousedown)="$event.preventDefault()"
+                            (click)="setTileName(row.tileKey, nameInput.value)" analyticsOn="click"
+                            analyticsCategory="Offline Management" analyticsLabel="Save tile name">
+                            <i class="fa fa-lg icon-check"></i>
+                        </button>
+                    </div>
+                    } @else {
+                    <div class="font-bold">{{row.name}}</div>
+                    }
+                    @if (isDownloading(row)) {
+                    <mat-progress-bar class="my-2" mode="determinate" [value]="downloadingTile().progress">
+                    </mat-progress-bar>
+                    } @else {
+                    <div>{{row.downloadedDate | date:resources.getDateFormat()}}</div>
+                    }
+                    @if (row.compatibility !== 'compatible') {
+                    <div [style.color]="getTileColor(row)">
+                        {{row.compatibility === 'unusable' ? resources.needsToBeDownloadedAgain : resources.updateNeededForNewFeatures}}
+                    </div>
+                    }
+                </div>
             </div>
-            @if (row.compatibility !== 'compatible') {
-            <div class="ms-2" [style.color]="getTileColor(row)">
-                {{row.compatibility === 'unusable' ? resources.needsToBeDownloadedAgain : resources.updateNeededForNewFeatures}}
-            </div>
-            }
         </div>
         } @empty {
         <p class="p-2">{{resources.clickTheMapToSelectATile}}</p>

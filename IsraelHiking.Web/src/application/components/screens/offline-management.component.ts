@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, viewChild, type ElementRef } from "@angular/core";
+import { Component, ChangeDetectorRef, inject, signal, computed, viewChild, type ElementRef } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
@@ -6,6 +6,7 @@ import { MatButton } from "@angular/material/button";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
+import { MatProgressBar } from "@angular/material/progress-bar";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { DatePipe, NgClass } from "@angular/common";
@@ -39,7 +40,7 @@ export type DownloadedTileRow = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, MatFormField, MatLabel, MatInput, Dir]
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, MatFormField, MatLabel, MatInput, MatProgressBar, Dir]
 })
 export class OfflineManagementComponent {
     /**
@@ -80,6 +81,7 @@ export class OfflineManagementComponent {
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
+    private readonly changeDetectorRef = inject(ChangeDetectorRef);
     private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
     private readonly tileNames = this.store.selectSignal((s: ApplicationState) => s.offlineState.tileNames);
     public readonly resources = inject(ResourcesService);
@@ -378,10 +380,14 @@ export class OfflineManagementComponent {
         };
     }
 
-    /** Starts editing the name of a tile, waiting for the menu to give the focus back before taking it */
+    /**
+     * Starts editing the name of a tile. The input is rendered and focused while still handling the click,
+     * since a mobile browser only brings up the keyboard for a focus that comes from the user's touch.
+     */
     public editTileName(tileKey: string) {
         this.editedTileKey.set(tileKey);
-        setTimeout(() => this.nameInput()?.nativeElement.select(), 100);
+        this.changeDetectorRef.detectChanges();
+        this.nameInput()?.nativeElement.select();
     }
 
     public setTileName(tileKey: string, name: string) {
