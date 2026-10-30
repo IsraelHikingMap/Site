@@ -6,7 +6,7 @@ import type { GetResourceResponse } from "maplibre-gl";
 
 import { SpatialHelper } from "./spatial.helper";
 import { Urls } from "../urls";
-import type { LatLngAltTime } from "../models";
+import type { Bounds, LatLngAltTime } from "../models";
 
 type OsmResponse = {
     elements: { type: string, id: string }[];
@@ -143,5 +143,18 @@ export class OverpassTurboService {
         `;
         const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(3000)));
         return osmtogeojson(json, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection<GeoJSON.Point>;
+    }
+
+    /**
+     * The tags of the named cities, towns, seas and oceans in an area, which is what an area can be named
+     * after. Villages are left out, a large area has thousands of them and none of them would be its name.
+     */
+    public async getNamedPlacesInArea(bounds: Bounds): Promise<Record<string, string>[]> {
+        const { southWest, northEast } = bounds;
+        const query = `[out:json][timeout:25];
+        node["place"~"^(city|town|sea|ocean)$"]["name"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+        out tags;`;
+        const json = await firstValueFrom(this.httpClient.post<{ elements: { tags: Record<string, string> }[] }>(Urls.overpassApi, query).pipe(timeout(30000)));
+        return json.elements.map(e => e.tags);
     }
 }

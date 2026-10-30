@@ -4,13 +4,13 @@ import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
-import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatError, MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatProgressBar } from "@angular/material/progress-bar";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { DatePipe, NgClass } from "@angular/common";
-import { FormsModule } from "@angular/forms";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -20,6 +20,7 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
+import { OfflineTileNamesService } from "../../services/offline-tile-names.service";
 import { SpatialHelper } from "../../services/spatial.helper";
 import { SetTileNameAction } from "../../reducers/offline.reducer";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
@@ -40,7 +41,7 @@ export type DownloadedTileRow = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, MatFormField, MatLabel, MatInput, MatProgressBar, Dir]
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir]
 })
 export class OfflineManagementComponent {
     /**
@@ -72,6 +73,11 @@ export class OfflineManagementComponent {
     public readonly showMap = signal(false);
     /** The tile whose name is being edited in the list */
     public readonly editedTileKey = signal<string>(null);
+    /** The name being edited, which is invalid when another tile already has it */
+    public readonly nameControl = new FormControl("", {
+        nonNullable: true,
+        validators: control => this.isNameInUse(control.value) ? { nameInUse: true } : null
+    });
     private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>("nameInput");
 
     private map: Map;
@@ -80,6 +86,7 @@ export class OfflineManagementComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
+    private readonly offlineTileNamesService = inject(OfflineTileNamesService);
     private readonly store = inject(Store);
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
     private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
@@ -242,6 +249,7 @@ export class OfflineManagementComponent {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
         this.showMap.set(this.downloadedTileRows().length === 0);
+        this.nameUnnamedTiles();
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {
             type: "FeatureCollection",
@@ -295,6 +303,7 @@ export class OfflineManagementComponent {
 
     public async downloadTile(tileX: number, tileY: number) {
         this.toastService.info(this.resources.dontSwitchApps);
+        this.offlineTileNamesService.nameTile(tileX, tileY);
         this.map.flyTo({
             center: SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
@@ -367,6 +376,16 @@ export class OfflineManagementComponent {
         this.selectTile(row.tileX, row.tileY);
     }
 
+    /**
+     * Names the tiles that were downloaded before tiles had names, or whose naming failed, one at a time
+     * so that opening the screen does not send a burst of queries.
+     */
+    private async nameUnnamedTiles() {
+        for (const row of this.downloadedTileRows()) {
+            await this.offlineTileNamesService.nameTile(row.tileX, row.tileY);
+        }
+    }
+
     private toRow(tileX: number, tileY: number, downloadedDate: Date, compatibility: TileCompatibility): DownloadedTileRow {
         const tileKey = PmTilesService.toTileKey(tileX, tileY);
         const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM));
@@ -386,13 +405,34 @@ export class OfflineManagementComponent {
      */
     public editTileName(tileKey: string) {
         this.editedTileKey.set(tileKey);
+        this.nameControl.reset(this.downloadedTileRows().find(row => row.tileKey === tileKey)?.name ?? "");
         this.changeDetectorRef.detectChanges();
         this.nameInput()?.nativeElement.select();
     }
 
-    public setTileName(tileKey: string, name: string) {
-        this.store.dispatch(new SetTileNameAction(tileKey, name.trim()));
+    /** Saves the typed name, unless another tile has it, in which case the editing goes on */
+    public saveTileName(tileKey: string) {
+        if (this.nameControl.invalid) {
+            return;
+        }
+        this.store.dispatch(new SetTileNameAction(tileKey, this.nameControl.value.trim()));
         this.editedTileKey.set(null);
+    }
+
+    /**
+     * Ends the editing when the input loses the focus, dropping a name another tile has rather than
+     * leaving an input open that the user already moved away from.
+     */
+    public endTileNameEditing(tileKey: string) {
+        if (this.nameControl.invalid) {
+            this.editedTileKey.set(null);
+            return;
+        }
+        this.saveTileName(tileKey);
+    }
+
+    private isNameInUse(name: string): boolean {
+        return this.downloadedTileRows().some(row => row.tileKey !== this.editedTileKey() && row.name === name.trim());
     }
 
     public isDownloading(row: DownloadedTileRow): boolean {
