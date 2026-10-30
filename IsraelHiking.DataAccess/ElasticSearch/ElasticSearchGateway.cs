@@ -204,9 +204,13 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
     }
 
     /// <summary>
-    /// A single coordinate is sent as a point, several as the envelope bounding them - GeoJSON, in
+    /// A single coordinate is sent as a point, several as a line through them - GeoJSON, in
     /// [longitude, latitude] order.
     /// </summary>
+    /// <remarks>
+    /// An envelope would stick out of a small irregular area that holds every point, and a multipoint
+    /// fails past 1024 points on the max clause count, while a line of thousands of points does not.
+    /// </remarks>
     private static Dictionary<string, object> ToShapeParameter(Coordinate[] coordinates)
     {
         if (coordinates.Length == 1)
@@ -219,12 +223,8 @@ public class ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger l
         }
         return new Dictionary<string, object>
         {
-            ["type"] = "envelope",
-            ["coordinates"] = new[]
-            {
-                new[] { coordinates.Min(c => c.X), coordinates.Max(c => c.Y) },
-                new[] { coordinates.Max(c => c.X), coordinates.Min(c => c.Y) }
-            }
+            ["type"] = "linestring",
+            ["coordinates"] = coordinates.Select(c => new[] { c.X, c.Y }).ToArray()
         };
     }
 
