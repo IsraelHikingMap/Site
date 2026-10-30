@@ -68,12 +68,12 @@ enum CarRouteCalculator {
 
     /// Distance, in meters, from the start of `route` to where `location` projects onto it. The GPS
     /// heading is taken into account so a self-overlapping route matches the leg actually being
-    /// driven rather than whichever overlapping leg is geometrically nearest. Returns 0 for a
-    /// degenerate route (fewer than two points). Mirrors `distanceAlongRoute` in Kotlin, which the
-    /// turn-by-turn navigation reads to know which maneuver is the current one.
-    static func distanceAlongRoute(_ route: CarRouteData, location: CLLocation) -> Double {
+    /// driven rather than whichever overlapping leg is geometrically nearest. Nil when the driver is
+    /// not on the route, by the same measure as `computeStatistics`, since off the route the nearest
+    /// point of it is no indication of which turn comes next. Mirrors `distanceAlongRoute` in Kotlin.
+    static func distanceAlongRoute(_ route: CarRouteData, location: CLLocation) -> Double? {
         let heading = location.course >= 0 ? location.course : nil
-        return project(route, target: location.coordinate, headingDeg: heading)?.distanceAlongRouteM ?? 0
+        return findClosestRoute([route], position: location.coordinate, heading: heading)?.distanceAlongRouteM
     }
 
     private static func findClosestRoute(_ routes: [CarRouteData],

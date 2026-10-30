@@ -133,10 +133,11 @@ final class CarNavigation: CapacitorStore.Listener {
 
     /// Places the driver on the route and works out which turn is next. While that is the same turn as
     /// before, only its distance is reported, so the turn card is not handed new maneuvers and does
-    /// not animate itself back in on every fix.
+    /// not animate itself back in on every fix. Off the route there is no next turn, so none is shown.
     private func onLocationChanged() {
         guard let route = route, !maneuvers.isEmpty,
-              let location: CLLocation = store.getTransient(CarStoreKeys.location)
+              let location: CLLocation = store.getTransient(CarStoreKeys.location),
+              let traveled = CarRouteCalculator.distanceAlongRoute(route, location: location)
         else {
             if !upcomingManeuvers.isEmpty {
                 upcomingManeuvers = []
@@ -145,7 +146,6 @@ final class CarNavigation: CapacitorStore.Listener {
             }
             return
         }
-        let traveled = CarRouteCalculator.distanceAlongRoute(route, location: location)
         let index = maneuvers.firstIndex { $0.distanceAlongRouteM > traveled + Self.epsilonMeters }
             ?? maneuvers.count - 1
         distanceToCurrentManeuverMeters = max(0, maneuvers[index].distanceAlongRouteM - traveled)

@@ -212,13 +212,16 @@ class CarNavigation(
         val route = this.route
         if (!navigating || route == null || maneuvers.isEmpty()) return
         val location: Location = store.getTransient(CarStoreKeys.LOCATION) ?: return
-
+        paceCalculator.updatePace(location)
         val traveled = CarRouteCalculator.distanceAlongRoute(route, location)
+        if (traveled == null) {
+            clearGuidance()
+            return
+        }
         val currentIndex = maneuvers.indexOfFirst { it.distanceAlongRouteM > traveled + EPSILON_M }
         val current = if (currentIndex >= 0) maneuvers[currentIndex] else maneuvers.last()
         val next = if (currentIndex >= 0) maneuvers.getOrNull(currentIndex + 1) else null
         val distanceToStep = (current.distanceAlongRouteM - traveled).coerceAtLeast(0.0)
-        paceCalculator.updatePace(location)
         val speed = paceCalculator.speed
 
         val currentStep = step(current)
@@ -247,6 +250,19 @@ class CarNavigation(
                 formatDistance(distanceToStep),
                 maneuverIcon(current.type)
         )
+    }
+
+    /**
+     * Takes the turns off the screen, the cluster and the notification while the driver is off the
+     * route, where the turn the nearest point of it leads to is no turn the driver can take.
+     */
+    private fun clearGuidance() {
+        notification.cancel()
+        navigationManager.updateTrip(Trip.Builder().setLoading(true).build())
+        if (navigationInfo != null) {
+            navigationInfo = null
+            onNavigationInfoChanged?.invoke()
+        }
     }
 
     private fun step(maneuver: CarManeuver): Step {

@@ -24,7 +24,7 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialHelper } from "../services/spatial.helper";
 import { GeoLocationService } from "../services/geo-location.service";
-import { LocationService } from "../services/location.service";
+import { PaceCalculatorService } from "../services/pace-calculator.service";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../models";
 
@@ -130,7 +130,7 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
-    private readonly locationService = inject(LocationService);
+    private readonly paceCalculatorService = inject(PaceCalculatorService);
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
@@ -196,7 +196,7 @@ export class RouteStatisticsComponent implements OnInit {
     }
 
     private updateETAString() {
-        const remainingTimeInSeconds = this.locationService.getRemainingTimeInSeconds(this.statistics.remainingDistance);
+        const remainingTimeInSeconds = this.paceCalculatorService.getRemainingTimeInSeconds(this.statistics.remainingDistance);
         if (remainingTimeInSeconds == null) {
             this.ETA.set("--:--");
             return;
