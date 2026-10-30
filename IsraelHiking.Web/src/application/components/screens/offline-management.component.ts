@@ -3,6 +3,10 @@ import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
+import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { DatePipe, NgClass } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -16,10 +20,21 @@ import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
 
+/** A downloaded tile as the list shows it */
+export type DownloadedTileRow = {
+    tileKey: string;
+    tileX: number;
+    tileY: number;
+    /** The coordinates of the center of the tile, which is what tells the tiles apart in the list */
+    centerLabel: string;
+    downloadedDate: Date;
+    compatibility: TileCompatibility;
+};
+
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent]
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule]
 })
 export class OfflineManagementComponent {
     /**
@@ -33,10 +48,22 @@ export class OfflineManagementComponent {
         unusable: "red"
     };
 
+    /** The order the list shows the tiles in, the ones that need to be downloaded again first */
+    private static readonly COMPATIBILITY_ORDER: Record<TileCompatibility, number> = {
+        unusable: 0,
+        outdated: 1,
+        compatible: 2
+    };
+
     public readonly offlineMapStyle: StyleSpecification;
     public readonly currentLocation: GeoJSON.FeatureCollection;
     public readonly baseLayerData: EditableLayer;
     public readonly selectedTileXY = signal<{ tileX: number; tileY: number }>(null);
+    /**
+     * Whether a narrow screen shows the map rather than the list. It starts on the map when nothing was
+     * downloaded yet, since the map is where a tile is selected to be downloaded.
+     */
+    public readonly showMap = signal(false);
 
     private map: Map;
 
@@ -70,6 +97,29 @@ export class OfflineManagementComponent {
             .filter(tileKey => PmTilesService.fromTileKey(tileKey) != null)
             .filter(tileKey => this.offlineFilesDownloadService.getTileCompatibility(tileKey, downloadedTiles[tileKey]) !== "compatible")
             .sort();
+    });
+
+    /** The downloaded tiles, the root files are not of a specific tile and are not listed */
+    public readonly downloadedTileRows = computed<DownloadedTileRow[]>(() => {
+        const downloadedTiles = this.downloadedTilesState();
+        const rows: DownloadedTileRow[] = [];
+        for (const [tileKey, files] of Object.entries(downloadedTiles)) {
+            const tile = PmTilesService.fromTileKey(tileKey);
+            if (tile == null) {
+                continue;
+            }
+            const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tile.tileX + 0.5, y: tile.tileY + 0.5 }, TILES_ZOOM));
+            rows.push({
+                tileKey,
+                ...tile,
+                centerLabel: `${center[1].toFixed(2)}, ${center[0].toFixed(2)}`,
+                downloadedDate: this.offlineFilesDownloadService.getLastModifiedDate(files),
+                compatibility: this.offlineFilesDownloadService.getTileCompatibility(tileKey, files)
+            });
+        }
+        return rows.sort((a, b) =>
+            OfflineManagementComponent.COMPATIBILITY_ORDER[a.compatibility] - OfflineManagementComponent.COMPATIBILITY_ORDER[b.compatibility] ||
+            b.downloadedDate.getTime() - a.downloadedDate.getTime());
     });
 
     public readonly isSelectedIncompatible = computed(() => {
@@ -177,6 +227,7 @@ export class OfflineManagementComponent {
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
+        this.showMap.set(this.downloadedTileRows().length === 0);
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {
             type: "FeatureCollection",
@@ -223,9 +274,13 @@ export class OfflineManagementComponent {
         });
     }
 
-    public async downloadSelected() {
-        this.toastService.info(this.resources.dontSwitchApps);
+    public downloadSelected() {
         const { tileX, tileY } = this.selectedTileXY();
+        return this.downloadTile(tileX, tileY);
+    }
+
+    public async downloadTile(tileX: number, tileY: number) {
+        this.toastService.info(this.resources.dontSwitchApps);
         this.map.flyTo({
             center: SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM)),
             zoom: TILES_ZOOM - 1
@@ -285,6 +340,16 @@ export class OfflineManagementComponent {
         this.selectTile(tileX, tileY);
     }
 
+    /** Shows a tile of the list on the map, which on a narrow screen means switching to the map */
+    public showOnMap(row: DownloadedTileRow) {
+        this.showMap.set(true);
+        this.selectTile(row.tileX, row.tileY);
+    }
+
+    public getTileColor(row: DownloadedTileRow): string {
+        return OfflineManagementComponent.TILE_COLOR[row.compatibility];
+    }
+
     private selectTile(tileX: number, tileY: number) {
         this.selectedTileXY.set({ tileX, tileY });
         this.map.flyTo({
@@ -319,16 +384,23 @@ export class OfflineManagementComponent {
         this.initializeCenterAndZoomFromDownloadingTile();
     }
 
-    public async deleteSelected() {
+    public deleteSelected() {
         if (!this.selectedTileXY()) {
             return;
         }
+        this.deleteTile(PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY));
+    }
+
+    public deleteTile(tileKey: string) {
         this.toastService.confirm({
             message: this.resources.areYouSure,
             type: "YesNo",
             confirmAction: async () => {
-                await this.offlineFilesDownloadService.deleteTile(PmTilesService.toTileKey(this.selectedTileXY().tileX, this.selectedTileXY().tileY));
-                this.selectedTileXY.set(null);
+                await this.offlineFilesDownloadService.deleteTile(tileKey);
+                const selectedTileXY = this.selectedTileXY();
+                if (selectedTileXY != null && PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY) === tileKey) {
+                    this.selectedTileXY.set(null);
+                }
             }
         });
     }

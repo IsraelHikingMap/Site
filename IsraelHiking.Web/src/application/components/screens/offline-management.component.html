@@ -1,151 +1,214 @@
-<div class="w-full h-screen relative" [dir]="resources.direction">
-    <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
-        [attributionControl]="false">
-        <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [allowOffline]="false"
-            [before]="resources.endOfBaseLayer">
-        </auto-layer>
-        <mgl-geojson-source id="download-tiles" [data]="downloadedTiles()">
-        </mgl-geojson-source>
-        <mgl-geojson-source id="currnet-location" [data]="currentLocation">
-        </mgl-geojson-source>
-        <mgl-layer id="download-tiles-border" type="line" source="download-tiles"
-            [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
-              'line-cap': 'round',
-              'line-join': 'round'
-          }" [paint]="{
-              'line-color': ['get', 'color'],
-              'line-width': 3
-          }">
-        </mgl-layer>
-        <mgl-layer id="download-tiles-border-incompatible" type="line" source="download-tiles"
-            [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
-              'line-cap': 'butt',
-              'line-join': 'round'
-          }" [paint]="{
-              'line-color': ['get', 'color'],
-              'line-width': 3,
-              'line-dasharray': [2, 1]
-          }">
-        </mgl-layer>
-        <mgl-layer id="download-tiles-text" type="symbol" source="download-tiles" [minzoom]="4" [layout]="{
-              'text-field': ['get', 'label'],
-              'text-font': ['Noto Sans Regular'],
-              'text-size': ['get', 'textSize'],
-          }" [paint]="{
-              'text-color': ['get', 'color'],
-              'text-halo-color' : 'white',
-              'text-halo-width': 2
-          }">
-        </mgl-layer>
-        <mgl-geojson-source id="selected-tile" [data]="selectedTile()">
-        </mgl-geojson-source>
-        <mgl-layer id="selected-tile-border" type="line" source="selected-tile" [layout]="{
-              'line-cap': 'round', 
-              'line-join': 'round'
-          }" [paint]="{
-              'line-color': 'green',
-              'line-width': 3
-          }">
-        </mgl-layer>
-        <mgl-layer id="currnet-location-circle" type="circle" source="currnet-location" [paint]="{
-              'circle-radius': 7,
-              'circle-color': 'magenta'
+<div class="flex flex-row relative h-dvh" [dir]="resources.direction">
+    <div class="hidden max-md:block absolute bottom-safe left-1/2 -translate-x-1/2 z-10">
+        <mat-button-toggle-group [(ngModel)]="showMap">
+            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Offline Management"
+                analyticsLabel="Open list view">
+                <i class="fa icon-list"></i>
+                {{resources.list}}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Offline Management"
+                analyticsLabel="Open map view">
+                <i class="fa icon-map-o"></i>
+                {{resources.map}}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+    <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
+        class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
+        @if (isStatusWarning()) {
+        <div class="sticky top-0 z-10 bg-surface p-2 flex flex-row items-center gap-2 text-warning">
+            <i class="fa fa-lg icon-exclamation-triangle"></i>
+            <span>{{statusMessage()}}</span>
+        </div>
+        }
+        @for (row of downloadedTileRows(); track row.tileKey) {
+        <div class="flex flex-row items-center gap-2 p-2 border-b cursor-pointer" (click)="showOnMap(row)"
+            analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Show tile on map">
+            <i class="fa fa-lg" [style.color]="getTileColor(row)"
+                [class.icon-check-circle]="row.compatibility === 'compatible'"
+                [class.icon-exclamation-triangle]="row.compatibility !== 'compatible'"></i>
+            <div class="flex-1">
+                <div class="text-lg">{{row.centerLabel}}</div>
+                <div>
+                    @if (downloadingTile()?.tileX === row.tileX && downloadingTile()?.tileY === row.tileY) {
+                    {{downloadingTile().progress.toFixed(0)}}%
+                    } @else {
+                    {{row.downloadedDate | date:resources.getDateFormat()}}
+                    }
+                </div>
+            </div>
+            <button mat-button [matMenuTriggerFor]="tileMenu" (click)="$event.stopPropagation()" analyticsOn="click"
+                analyticsCategory="Offline Management" analyticsLabel="Open tile menu">
+                <i class="fa icon-ellipsis-v"></i>
+            </button>
+            <mat-menu #tileMenu="matMenu">
+                <button mat-menu-item [disabled]="downloadingTile() !== null"
+                    (click)="downloadTile(row.tileX, row.tileY)" analyticsOn="click"
+                    analyticsCategory="Offline Management"
+                    [analyticsLabel]="row.compatibility === 'unusable' ? 'Download Again from list' : 'Update from list'">
+                    <i class="fa icon-download"></i>
+                    {{row.compatibility === 'unusable' ? resources.download : resources.update}}
+                </button>
+                <button mat-menu-item [disabled]="downloadingTile() !== null" (click)="deleteTile(row.tileKey)"
+                    analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Delete from list">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+            </mat-menu>
+        </div>
+        } @empty {
+        <p class="p-2">{{resources.clickTheMapToSelectATile}}</p>
+        }
+    </div>
+    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="w-2/3 relative">
+        <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
+            [attributionControl]="false">
+            <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [allowOffline]="false"
+                [before]="resources.endOfBaseLayer">
+            </auto-layer>
+            <mgl-geojson-source id="download-tiles" [data]="downloadedTiles()">
+            </mgl-geojson-source>
+            <mgl-geojson-source id="currnet-location" [data]="currentLocation">
+            </mgl-geojson-source>
+            <mgl-layer id="download-tiles-border" type="line" source="download-tiles"
+                [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
+                  'line-cap': 'round',
+                  'line-join': 'round'
+              }" [paint]="{
+                  'line-color': ['get', 'color'],
+                  'line-width': 3
+              }">
+            </mgl-layer>
+            <mgl-layer id="download-tiles-border-incompatible" type="line" source="download-tiles"
+                [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
+                  'line-cap': 'butt',
+                  'line-join': 'round'
+              }" [paint]="{
+                  'line-color': ['get', 'color'],
+                  'line-width': 3,
+                  'line-dasharray': [2, 1]
+              }">
+            </mgl-layer>
+            <mgl-layer id="download-tiles-text" type="symbol" source="download-tiles" [minzoom]="4" [layout]="{
+                  'text-field': ['get', 'label'],
+                  'text-font': ['Noto Sans Regular'],
+                  'text-size': ['get', 'textSize'],
+              }" [paint]="{
+                  'text-color': ['get', 'color'],
+                  'text-halo-color' : 'white',
+                  'text-halo-width': 2
+              }">
+            </mgl-layer>
+            <mgl-geojson-source id="selected-tile" [data]="selectedTile()">
+            </mgl-geojson-source>
+            <mgl-layer id="selected-tile-border" type="line" source="selected-tile" [layout]="{
+                  'line-cap': 'round', 
+                  'line-join': 'round'
+              }" [paint]="{
+                  'line-color': 'green',
+                  'line-width': 3
+              }">
+            </mgl-layer>
+            <mgl-layer id="currnet-location-circle" type="circle" source="currnet-location" [paint]="{
+                  'circle-radius': 7,
+                  'circle-color': 'magenta'
 
-          }">
-        </mgl-layer>
-        <mgl-layer id="selected-tile-text" type="symbol" source="selected-tile" [minzoom]="4" [layout]="{
-              'text-field': ['get', 'label'],
-              'text-font': ['Noto Sans Regular'],
-              'text-size': 30,
-              'text-allow-overlap': true
-          }" [paint]="{
-              'text-color': 'green',
-              'text-halo-color' : 'white',
-              'text-halo-width': 2
-          }">
-        </mgl-layer>
-        <mgl-geojson-source id="in-progress-tile" [data]="inProgressTile()">
-        </mgl-geojson-source>
-        <mgl-layer id="in-progress-tile-border" type="line" source="in-progress-tile" [layout]="{
-              'line-cap': 'round', 
-              'line-join': 'round'
-          }" [paint]="{
-              'line-color': 'blue',
-              'line-width': 3
-          }">
-        </mgl-layer>
-        <mgl-layer id="in-progress-tile-text" type="symbol" source="in-progress-tile" [minzoom]="4"
-            [filter]="['==', ['get', 'stroke'], 'true']" [layout]="{
-              'text-field': ['get', 'label'],
-              'text-font': ['Noto Sans Regular'],
-              'text-size': 30,
-              'text-allow-overlap': true
-          }" [paint]="{
-              'text-color': 'blue',
-              'text-halo-color' : 'white',
-              'text-halo-width': 2
-          }">
-        </mgl-layer>
-        <mgl-layer id="in-progress-tile-fill" type="fill" source="in-progress-tile"
-            [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
-              'fill-color': 'rgba(0, 128, 128, 0.5)'
-          }">
-        </mgl-layer>
-    </mgl-map>
-</div>
-<div class="absolute bottom-safe w-full text-lg text-center" [dir]="resources.direction">
-    <div class="flex flex-row">
-        @if (selectedTileXY() && !isSelectedAvailableForOffline() && !downloadingTile()) {
-        <div class="flex-1 m-1">
-            <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                analyticsCategory="Offline Management" analyticsLabel="Download">
-                <i class="fa fa-lg icon-download"></i>
-                {{resources.startDownload}}
-            </button>
+              }">
+            </mgl-layer>
+            <mgl-layer id="selected-tile-text" type="symbol" source="selected-tile" [minzoom]="4" [layout]="{
+                  'text-field': ['get', 'label'],
+                  'text-font': ['Noto Sans Regular'],
+                  'text-size': 30,
+                  'text-allow-overlap': true
+              }" [paint]="{
+                  'text-color': 'green',
+                  'text-halo-color' : 'white',
+                  'text-halo-width': 2
+              }">
+            </mgl-layer>
+            <mgl-geojson-source id="in-progress-tile" [data]="inProgressTile()">
+            </mgl-geojson-source>
+            <mgl-layer id="in-progress-tile-border" type="line" source="in-progress-tile" [layout]="{
+                  'line-cap': 'round', 
+                  'line-join': 'round'
+              }" [paint]="{
+                  'line-color': 'blue',
+                  'line-width': 3
+              }">
+            </mgl-layer>
+            <mgl-layer id="in-progress-tile-text" type="symbol" source="in-progress-tile" [minzoom]="4"
+                [filter]="['==', ['get', 'stroke'], 'true']" [layout]="{
+                  'text-field': ['get', 'label'],
+                  'text-font': ['Noto Sans Regular'],
+                  'text-size': 30,
+                  'text-allow-overlap': true
+              }" [paint]="{
+                  'text-color': 'blue',
+                  'text-halo-color' : 'white',
+                  'text-halo-width': 2
+              }">
+            </mgl-layer>
+            <mgl-layer id="in-progress-tile-fill" type="fill" source="in-progress-tile"
+                [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
+                  'fill-color': 'rgba(0, 128, 128, 0.5)'
+              }">
+            </mgl-layer>
+        </mgl-map>
+        <div class="absolute bottom-safe w-full text-lg text-center max-md:mb-12">
+            <div class="flex flex-row">
+                @if (selectedTileXY() && !isSelectedAvailableForOffline() && !downloadingTile()) {
+                <div class="flex-1 m-1">
+                    <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Download">
+                        <i class="fa fa-lg icon-download"></i>
+                        {{resources.startDownload}}
+                    </button>
+                </div>
+                }
+                @if (selectedTileXY() && isSelectedAvailableForOffline() && !downloadingTile()) {
+                <div class="flex-1 m-1">
+                    <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
+                        analyticsCategory="Offline Management"
+                        [analyticsLabel]="isSelectedIncompatible() ? 'Download Again' : 'Update'">
+                        <i class="fa fa-lg icon-download"></i>
+                        {{isSelectedIncompatible() ? resources.download : resources.update}}
+                    </button>
+                </div>
+                <div class="flex-1 m-1">
+                    <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Delete">
+                        <i class="fa fa-lg icon-trash"></i>
+                        {{resources.delete}}
+                    </button>
+                </div>
+                }
+                @if (downloadingTile()) {
+                <div class="flex-1 m-1">
+                    <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Cancel">
+                        <i class="fa fa-lg icon-close"></i>
+                        {{resources.cancel}}
+                    </button>
+                </div>
+                }
+            </div>
+            @if (statusMessage()) {
+            <div class="bg-surface p-2 flex flex-row items-center justify-center gap-2"
+                [class.text-warning]="isStatusWarning()">
+                @if (isStatusWarning()) {
+                <i class="fa fa-lg icon-exclamation-triangle"></i>
+                }
+                <span>{{statusMessage()}}</span>
+                @if (isStatusWarning()) {
+                <button mat-button (click)="selectNextIncompatible()" analyticsOn="click"
+                    analyticsCategory="Offline Management" analyticsLabel="Next Incompatible">
+                    <i class="fa fa-lg" [class.icon-chevron-left]="resources.direction === 'rtl'"
+                        [class.icon-chevron-right]="resources.direction !== 'rtl'"></i>
+                    {{resources.next}}
+                </button>
+                }
+            </div>
+            }
         </div>
-        }
-        @if (selectedTileXY() && isSelectedAvailableForOffline() && !downloadingTile()) {
-        <div class="flex-1 m-1">
-            <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                analyticsCategory="Offline Management"
-                [analyticsLabel]="isSelectedIncompatible() ? 'Download Again' : 'Update'">
-                <i class="fa fa-lg icon-download"></i>
-                {{isSelectedIncompatible() ? resources.download : resources.update}}
-            </button>
-        </div>
-        <div class="flex-1 m-1">
-            <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
-                analyticsCategory="Offline Management" analyticsLabel="Delete">
-                <i class="fa fa-lg icon-trash"></i>
-                {{resources.delete}}
-            </button>
-        </div>
-        }
-        @if (downloadingTile()) {
-        <div class="flex-1 m-1">
-            <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
-                analyticsCategory="Offline Management" analyticsLabel="Cancel">
-                <i class="fa fa-lg icon-close"></i>
-                {{resources.cancel}}
-            </button>
-        </div>
-        }
     </div>
-    @if (statusMessage()) {
-    <div class="bg-surface p-2 flex flex-row items-center justify-center gap-2"
-        [class.text-warning]="isStatusWarning()">
-        @if (isStatusWarning()) {
-        <i class="fa fa-lg icon-exclamation-triangle"></i>
-        }
-        <span>{{statusMessage()}}</span>
-        @if (isStatusWarning()) {
-        <button mat-button (click)="selectNextIncompatible()" analyticsOn="click"
-            analyticsCategory="Offline Management" analyticsLabel="Next Incompatible">
-            <i class="fa fa-lg" [class.icon-chevron-left]="resources.direction === 'rtl'"
-                [class.icon-chevron-right]="resources.direction !== 'rtl'"></i>
-            {{resources.next}}
-        </button>
-        }
-    </div>
-    }
 </div>
