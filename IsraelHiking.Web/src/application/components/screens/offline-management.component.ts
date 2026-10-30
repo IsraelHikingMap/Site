@@ -10,7 +10,9 @@ import { MatProgressBar } from "@angular/material/progress-bar";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { DatePipe, NgClass } from "@angular/common";
-import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { FormsModule } from "@angular/forms";
+import { form, FormField, validate } from "@angular/forms/signals";
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from "@angular/material/core";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -41,7 +43,8 @@ export type DownloadedTileRow = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir]
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, FormField, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir],
+    providers: [{ provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }]
 })
 export class OfflineManagementComponent {
     /**
@@ -73,10 +76,10 @@ export class OfflineManagementComponent {
     public readonly showMap = signal(false);
     /** The tile whose name is being edited in the list */
     public readonly editedTileKey = signal<string>(null);
+    public readonly editedName = signal("");
     /** The name being edited, which is invalid when another tile already has it */
-    public readonly nameControl = new FormControl("", {
-        nonNullable: true,
-        validators: control => this.isNameInUse(control.value) ? { nameInUse: true } : null
+    public readonly nameForm = form(this.editedName, path => {
+        validate(path, ({ value }) => this.isNameInUse(value()) ? { kind: "nameInUse" } : null);
     });
     private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>("nameInput");
 
@@ -405,17 +408,17 @@ export class OfflineManagementComponent {
      */
     public editTileName(tileKey: string) {
         this.editedTileKey.set(tileKey);
-        this.nameControl.reset(this.downloadedTileRows().find(row => row.tileKey === tileKey)?.name ?? "");
+        this.nameForm().reset(this.downloadedTileRows().find(row => row.tileKey === tileKey)?.name ?? "");
         this.changeDetectorRef.detectChanges();
         this.nameInput()?.nativeElement.select();
     }
 
     /** Saves the typed name, unless another tile has it, in which case the editing goes on */
     public saveTileName(tileKey: string) {
-        if (this.nameControl.invalid) {
+        if (this.nameForm().invalid()) {
             return;
         }
-        this.store.dispatch(new SetTileNameAction(tileKey, this.nameControl.value.trim()));
+        this.store.dispatch(new SetTileNameAction(tileKey, this.editedName().trim()));
         this.editedTileKey.set(null);
     }
 
@@ -424,7 +427,7 @@ export class OfflineManagementComponent {
      * leaving an input open that the user already moved away from.
      */
     public endTileNameEditing(tileKey: string) {
-        if (this.nameControl.invalid) {
+        if (this.nameForm().invalid()) {
             this.editedTileKey.set(null);
             return;
         }

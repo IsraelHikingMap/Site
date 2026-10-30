@@ -62,15 +62,15 @@
                     <div class="flex flex-row items-center" (click)="$event.stopPropagation()">
                         <mat-form-field class="flex-1" subscriptSizing="dynamic">
                             <mat-label>{{resources.name}}</mat-label>
-                            <input matInput #nameInput type="text" [formControl]="nameControl"
+                            <input matInput #nameInput type="text" [formField]="nameForm"
                                 (keydown.enter)="saveTileName(row.tileKey)"
                                 (keydown.escape)="editedTileKey.set(null)"
                                 (blur)="endTileNameEditing(row.tileKey)" />
-                            @if (nameControl.hasError('nameInUse')) {
+                            @if (nameForm().invalid()) {
                             <mat-error>{{resources.nameIsAlreadyInUse}}</mat-error>
                             }
                         </mat-form-field>
-                        <button mat-button [disabled]="nameControl.invalid" (mousedown)="$event.preventDefault()"
+                        <button mat-button [disabled]="nameForm().invalid()" (mousedown)="$event.preventDefault()"
                             (click)="saveTileName(row.tileKey)" analyticsOn="click"
                             analyticsCategory="Offline Management" analyticsLabel="Save tile name">
                             <i class="fa fa-lg icon-check"></i>
