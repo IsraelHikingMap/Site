@@ -25,6 +25,12 @@ export class SetLastOfflineDetectedDate {
     constructor(public readonly lastOfflineDetectedDate: Date | null) { }
 }
 
+/** Names a downloaded tile, an empty name or null removes the name the tile had */
+export class SetTileNameAction {
+    public static readonly type = "[Offline] SetTileNameAction";
+    constructor(public readonly tileKey: string, public readonly name: string | null) { }
+}
+
 @State<OfflineState>({
     name: "offlineState",
     defaults: initialState.offlineState
@@ -60,6 +66,17 @@ export class OfflineReducer {
     setLastOfflineDetectedDate(ctx: StateContext<OfflineState>, action: SetLastOfflineDetectedDate) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastOfflineDetectedDate = action.lastOfflineDetectedDate;
+        }));
+    }
+
+    @Action(SetTileNameAction)
+    setTileName(ctx: StateContext<OfflineState>, action: SetTileNameAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            if (action.name) {
+                lastState.tileNames[action.tileKey] = action.name;
+            } else {
+                delete lastState.tileNames[action.tileKey];
+            }
         }));
     }
 }

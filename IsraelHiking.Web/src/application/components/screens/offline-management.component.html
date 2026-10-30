@@ -22,39 +22,64 @@
         </div>
         }
         @for (row of downloadedTileRows(); track row.tileKey) {
-        <div class="flex flex-row items-center gap-2 p-2 border-b cursor-pointer" (click)="showOnMap(row)"
-            analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Show tile on map">
-            <i class="fa fa-lg" [style.color]="getTileColor(row)"
-                [class.icon-check-circle]="row.compatibility === 'compatible'"
-                [class.icon-exclamation-triangle]="row.compatibility !== 'compatible'"></i>
-            <div class="flex-1">
-                <div class="text-lg">{{row.centerLabel}}</div>
-                <div>
-                    @if (downloadingTile()?.tileX === row.tileX && downloadingTile()?.tileY === row.tileY) {
-                    {{downloadingTile().progress.toFixed(0)}}%
+        <div class="cursor-pointer border-b pb-2" (click)="showOnMap(row)" analyticsOn="click"
+            analyticsCategory="Offline Management" analyticsLabel="Show tile on map">
+            <h4 class="m-2 flex flex-row items-center">
+                <button mat-button [matMenuTriggerFor]="tileMenu" (click)="$event.stopPropagation()"
+                    analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Open tile menu">
+                    <i class="fa icon-ellipsis-v"></i>
+                </button>
+                <mat-menu #tileMenu="matMenu" overlapTrigger="false">
+                    <button mat-menu-item (click)="editTileName(row.tileKey)" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Edit tile name">
+                        <i class="fa icon-pencil"></i>
+                        {{resources.edit}}
+                    </button>
+                    @if (isDownloading(row)) {
+                    <button mat-menu-item (click)="cancelDownload()" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Cancel from list">
+                        <i class="fa icon-close"></i>
+                        {{resources.cancel}}
+                    </button>
                     } @else {
-                    {{row.downloadedDate | date:resources.getDateFormat()}}
+                    <button mat-menu-item [disabled]="downloadingTile() !== null"
+                        (click)="downloadTile(row.tileX, row.tileY)" analyticsOn="click"
+                        analyticsCategory="Offline Management"
+                        [analyticsLabel]="row.compatibility === 'unusable' ? 'Download Again from list' : 'Update from list'">
+                        <i class="fa icon-download"></i>
+                        {{row.compatibility === 'unusable' ? resources.download : resources.update}}
+                    </button>
+                    <button mat-menu-item [disabled]="downloadingTile() !== null" (click)="deleteTile(row.tileKey)"
+                        analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Delete from list">
+                        <i class="fa icon-trash"></i>
+                        {{resources.delete}}
+                    </button>
                     }
-                </div>
+                </mat-menu>
+                @if (editedTileKey() === row.tileKey) {
+                <mat-form-field class="flex-1" subscriptSizing="dynamic" (click)="$event.stopPropagation()">
+                    <mat-label>{{resources.name}}</mat-label>
+                    <input matInput #nameInput type="text" [value]="row.name"
+                        (keydown.enter)="setTileName(row.tileKey, nameInput.value)"
+                        (keydown.escape)="editedTileKey.set(null)"
+                        (blur)="setTileName(row.tileKey, nameInput.value)" />
+                </mat-form-field>
+                } @else {
+                <span class="font-bold">{{row.name}}</span>
+                }
+            </h4>
+            <div class="ms-2 opacity-70">
+                @if (isDownloading(row)) {
+                {{downloadingTile().progress.toFixed(0)}}%
+                } @else {
+                {{row.downloadedDate | date:resources.getDateFormat()}}
+                }
             </div>
-            <button mat-button [matMenuTriggerFor]="tileMenu" (click)="$event.stopPropagation()" analyticsOn="click"
-                analyticsCategory="Offline Management" analyticsLabel="Open tile menu">
-                <i class="fa icon-ellipsis-v"></i>
-            </button>
-            <mat-menu #tileMenu="matMenu">
-                <button mat-menu-item [disabled]="downloadingTile() !== null"
-                    (click)="downloadTile(row.tileX, row.tileY)" analyticsOn="click"
-                    analyticsCategory="Offline Management"
-                    [analyticsLabel]="row.compatibility === 'unusable' ? 'Download Again from list' : 'Update from list'">
-                    <i class="fa icon-download"></i>
-                    {{row.compatibility === 'unusable' ? resources.download : resources.update}}
-                </button>
-                <button mat-menu-item [disabled]="downloadingTile() !== null" (click)="deleteTile(row.tileKey)"
-                    analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Delete from list">
-                    <i class="fa icon-trash"></i>
-                    {{resources.delete}}
-                </button>
-            </mat-menu>
+            @if (row.compatibility !== 'compatible') {
+            <div class="ms-2" [style.color]="getTileColor(row)">
+                {{row.compatibility === 'unusable' ? resources.needsToBeDownloadedAgain : resources.updateNeededForNewFeatures}}
+            </div>
+            }
         </div>
         } @empty {
         <p class="p-2">{{resources.clickTheMapToSelectATile}}</p>

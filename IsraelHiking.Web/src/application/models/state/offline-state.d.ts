@@ -17,4 +17,9 @@ export type OfflineState = {
      * The last time the app detected that the user is offline
      */
     lastOfflineDetectedDate: Date | null;
+    /**
+     * The names the user gave to downloaded tiles, by tile key. A tile with no name here is shown by
+     * the coordinates of its center.
+     */
+    tileNames: Record<string, string>;
 };

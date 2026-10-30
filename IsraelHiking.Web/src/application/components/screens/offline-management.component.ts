@@ -1,9 +1,12 @@
-import { Component, inject, signal, computed } from "@angular/core";
+import { Component, inject, signal, computed, viewChild, type ElementRef } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { type Map, type MapMouseEvent, MercatorCoordinate, type StyleSpecification } from "maplibre-gl";
 import { MatButton } from "@angular/material/button";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
+import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatInput } from "@angular/material/input";
+import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { DatePipe, NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -17,6 +20,7 @@ import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialHelper } from "../../services/spatial.helper";
+import { SetTileNameAction } from "../../reducers/offline.reducer";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer } from "../../models";
 
@@ -25,8 +29,9 @@ export type DownloadedTileRow = {
     tileKey: string;
     tileX: number;
     tileY: number;
-    /** The coordinates of the center of the tile, which is what tells the tiles apart in the list */
-    centerLabel: string;
+    /** The name the user gave the tile, falling back to the coordinates of its center */
+    name: string;
+    /** When the tile was last downloaded, null while it is downloaded for the first time */
     downloadedDate: Date;
     compatibility: TileCompatibility;
 };
@@ -34,7 +39,7 @@ export type DownloadedTileRow = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule]
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, MatFormField, MatLabel, MatInput, Dir]
 })
 export class OfflineManagementComponent {
     /**
@@ -64,6 +69,9 @@ export class OfflineManagementComponent {
      * downloaded yet, since the map is where a tile is selected to be downloaded.
      */
     public readonly showMap = signal(false);
+    /** The tile whose name is being edited in the list */
+    public readonly editedTileKey = signal<string>(null);
+    private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>("nameInput");
 
     private map: Map;
 
@@ -73,6 +81,7 @@ export class OfflineManagementComponent {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
     private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+    private readonly tileNames = this.store.selectSignal((s: ApplicationState) => s.offlineState.tileNames);
     public readonly resources = inject(ResourcesService);
 
     /** The tile that is being downloaded right now and how far it got, null when there is no download */
@@ -99,7 +108,11 @@ export class OfflineManagementComponent {
             .sort();
     });
 
-    /** The downloaded tiles, the root files are not of a specific tile and are not listed */
+    /**
+     * The downloaded tiles, the root files are not of a specific tile and are not listed. A tile that is
+     * downloaded for the first time is listed from the moment its download starts, at the top, so that
+     * its progress shows in the list and not only on the map.
+     */
     public readonly downloadedTileRows = computed<DownloadedTileRow[]>(() => {
         const downloadedTiles = this.downloadedTilesState();
         const rows: DownloadedTileRow[] = [];
@@ -108,18 +121,17 @@ export class OfflineManagementComponent {
             if (tile == null) {
                 continue;
             }
-            const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tile.tileX + 0.5, y: tile.tileY + 0.5 }, TILES_ZOOM));
-            rows.push({
-                tileKey,
-                ...tile,
-                centerLabel: `${center[1].toFixed(2)}, ${center[0].toFixed(2)}`,
-                downloadedDate: this.offlineFilesDownloadService.getLastModifiedDate(files),
-                compatibility: this.offlineFilesDownloadService.getTileCompatibility(tileKey, files)
-            });
+            rows.push(this.toRow(tile.tileX, tile.tileY, this.offlineFilesDownloadService.getLastModifiedDate(files),
+                this.offlineFilesDownloadService.getTileCompatibility(tileKey, files)));
         }
-        return rows.sort((a, b) =>
+        rows.sort((a, b) =>
             OfflineManagementComponent.COMPATIBILITY_ORDER[a.compatibility] - OfflineManagementComponent.COMPATIBILITY_ORDER[b.compatibility] ||
             b.downloadedDate.getTime() - a.downloadedDate.getTime());
+        const downloadingTile = this.downloadingTile();
+        if (downloadingTile != null && downloadedTiles[PmTilesService.toTileKey(downloadingTile.tileX, downloadingTile.tileY)] == null) {
+            rows.unshift(this.toRow(downloadingTile.tileX, downloadingTile.tileY, null, "compatible"));
+        }
+        return rows;
     });
 
     public readonly isSelectedIncompatible = computed(() => {
@@ -340,10 +352,45 @@ export class OfflineManagementComponent {
         this.selectTile(tileX, tileY);
     }
 
-    /** Shows a tile of the list on the map, which on a narrow screen means switching to the map */
-    public showOnMap(row: DownloadedTileRow) {
+    /**
+     * Shows a tile of the list on the map, which on a narrow screen means switching to the map. The map
+     * is only resized once it is shown, and moving it before that centers the tile on the old size.
+     */
+    public async showOnMap(row: DownloadedTileRow) {
+        if (this.editedTileKey() === row.tileKey) {
+            return;
+        }
         this.showMap.set(true);
+        await new Promise((resolve) => setTimeout(resolve, 100));
         this.selectTile(row.tileX, row.tileY);
+    }
+
+    private toRow(tileX: number, tileY: number, downloadedDate: Date, compatibility: TileCompatibility): DownloadedTileRow {
+        const tileKey = PmTilesService.toTileKey(tileX, tileY);
+        const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM));
+        return {
+            tileKey,
+            tileX,
+            tileY,
+            name: this.tileNames()[tileKey] ?? `${center[1].toFixed(2)}, ${center[0].toFixed(2)}`,
+            downloadedDate,
+            compatibility
+        };
+    }
+
+    /** Starts editing the name of a tile, waiting for the menu to give the focus back before taking it */
+    public editTileName(tileKey: string) {
+        this.editedTileKey.set(tileKey);
+        setTimeout(() => this.nameInput()?.nativeElement.select(), 100);
+    }
+
+    public setTileName(tileKey: string, name: string) {
+        this.store.dispatch(new SetTileNameAction(tileKey, name.trim()));
+        this.editedTileKey.set(null);
+    }
+
+    public isDownloading(row: DownloadedTileRow): boolean {
+        return this.downloadingTile()?.tileX === row.tileX && this.downloadingTile()?.tileY === row.tileY;
     }
 
     public getTileColor(row: DownloadedTileRow): string {
@@ -397,6 +444,7 @@ export class OfflineManagementComponent {
             type: "YesNo",
             confirmAction: async () => {
                 await this.offlineFilesDownloadService.deleteTile(tileKey);
+                this.store.dispatch(new SetTileNameAction(tileKey, null));
                 const selectedTileXY = this.selectedTileXY();
                 if (selectedTileXY != null && PmTilesService.toTileKey(selectedTileXY.tileX, selectedTileXY.tileY) === tileKey) {
                     this.selectedTileXY.set(null);
