@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -57,18 +56,13 @@ public class OfflineFilesService : IOfflineFilesService
     private static readonly TimeSpan STYLE_FETCH_RETRY_DELAY = TimeSpan.FromSeconds(1);
 
     /// <summary>
-    /// The DEM (jaxa) is the only source that is not generated on the fly but sliced in advance and served from the
-    /// file system. It only exists at the tile level, and its file name in the style might be an alias to the file
-    /// name on disk, in which case the alias is the name reported to and used by the client.
+    /// The DEM, which is sliced on the fly by its own service. It only exists at the tile level.
     /// </summary>
-    private const string DEM_FILE_NAME = "jaxa_terrarium0-11_v2";
-
-    /// <inheritdoc cref="DEM_FILE_NAME"/>
-    private const string DEM_ALIAS_FILE_NAME = "raster-dem";
+    private const string DEM_FILE_NAME = "raster-dem";
 
     /// <summary>
     /// The offline routing (valhalla) tiles of a slice, a gzipped tar that is sliced on the fly like the
-    /// other non-DEM files - the client unpacks it, so it is served compressed rather than as a plain tar. It is not a part of the style, and it is only listed for clients that ask for it since
+    /// other files - the client unpacks it, so it is served compressed rather than as a plain tar. It is not a part of the style, and it is only listed for clients that ask for it since
     /// older clients do not know how to handle it.
     /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
@@ -86,7 +80,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// <summary>
     /// The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
     /// </summary>
-    private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z", CultureInfo.InvariantCulture).UtcDateTime;
+    private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-11-07T00:00:00Z", CultureInfo.InvariantCulture).UtcDateTime;
 
     /// <summary>
     /// The files that are needed for offline usage but are not sliced per tile - the profiles the offline
@@ -98,7 +92,6 @@ public class OfflineFilesService : IOfflineFilesService
         VALHALLA_PROFILES_FILE_NAME
     ];
 
-    private readonly IFileProvider _fileProvider;
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private readonly ILogger _logger;
     private readonly ConfigurationData _options;
@@ -108,26 +101,16 @@ public class OfflineFilesService : IOfflineFilesService
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="fileSystemHelper"></param>
     /// <param name="remoteFileFetcherGateway"></param>
     /// <param name="options"></param>
     /// <param name="logger"></param>
-    public OfflineFilesService(IFileSystemHelper fileSystemHelper,
-        IRemoteFileFetcherGateway remoteFileFetcherGateway,
+    public OfflineFilesService(IRemoteFileFetcherGateway remoteFileFetcherGateway,
         IOptions<ConfigurationData> options,
         ILogger logger)
     {
         _remoteFileFetcherGateway = remoteFileFetcherGateway;
         _logger = logger;
         _options = options.Value;
-        if (string.IsNullOrEmpty(_options.OfflineFilesFolder))
-        {
-            logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
-        }
-        else
-        {
-            _fileProvider = fileSystemHelper.CreateFileProvider(options.Value.OfflineFilesFolder);
-        }
     }
 
     /// <inheritdoc/>
@@ -170,9 +153,8 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <inheritdoc/>
     /// <remarks>
-    /// The DEM might be requested by its alias name, but it is stored on disk under its original name.
-    /// The valhalla profiles are read from this server's own files, the routing tiles are served by their
-    /// own service, and everything else by the on-the-fly one.
+    /// The valhalla profiles are read from this server's own files, the routing tiles and the DEM are served by
+    /// their own services, and everything else by the on-the-fly one.
     /// </remarks>
     public async Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY)
     {
@@ -186,16 +168,11 @@ public class OfflineFilesService : IOfflineFilesService
         {
             return await _remoteFileFetcherGateway.GetFileStream(_options.RoutingTilesAddress + fileName);
         }
-        if (!IsDem(sourceName))
+        if (IsDem(sourceName))
         {
-            return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyFilesAddress + fileName);
+            return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyDemAddress + fileName);
         }
-        var demFileName = DEM_FILE_NAME + fileName[sourceName.Length..];
-        var relativePath = tileX.HasValue && tileY.HasValue
-            ? $"{SLICE_TILE_ZOOM}/{tileX}/{tileY}/{demFileName}"
-            : demFileName;
-        var fileInfo = _fileProvider.GetFileInfo(relativePath);
-        return (fileInfo.CreateReadStream(), fileInfo.Length);
+        return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyFilesAddress + fileName);
     }
 
     /// <summary>
@@ -285,11 +262,11 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <summary>
-    /// Whether the given source or layer name is the DEM, either by its file name or by its alias.
+    /// Whether the given source or layer name is the DEM.
     /// </summary>
     private static bool IsDem(string name)
     {
-        return name is DEM_FILE_NAME or DEM_ALIAS_FILE_NAME;
+        return name == DEM_FILE_NAME;
     }
 
     /// <summary>

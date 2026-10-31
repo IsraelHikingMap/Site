@@ -106,13 +106,13 @@ public class ConfigurationData
     /// </summary>
     public string ImageCreatorServerAddress { get; set; }
     /// <summary>
-    /// A location where offline files are saved in order to allow them to be downloaded
-    /// </summary>
-    public string OfflineFilesFolder { get; set; }
-    /// <summary>
     /// The base address of the "on-the-fly" service that generates and serves offline files
     /// </summary>
     public string OnTheFlyFilesAddress { get; set; }
+    /// <summary>
+    /// The base address of the "on-the-fly" service that generates and serves the offline DEM files
+    /// </summary>
+    public string OnTheFlyDemAddress { get; set; }
     /// <summary>
     /// The base address of the service that slices and serves the offline routing (valhalla) tiles
     /// </summary>
@@ -165,7 +165,6 @@ public class ConfigurationData
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
-        OfflineFilesFolder = "./";
         OnTheFlyFilesAddress = "https://mapeak.com/serve-extract/";
         RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
         OsmBaseAddress = "https://www.openstreetmap.org";
