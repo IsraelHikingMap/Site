@@ -7,7 +7,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,6 +18,7 @@ namespace IsraelHiking.API.Tests.Services;
 public class OfflineFilesServiceTests
 {
     private const string OnTheFlyAddress = "https://mapeak.com/serve-extract/";
+    private const string OnTheFlyDemAddress = "http://go-pmtiles-extract-dem:8080/";
     private const string RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
     private const string StylesAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
     private const string StyleAddress = StylesAddress + "mapeak-hike.json";
@@ -27,39 +27,20 @@ public class OfflineFilesServiceTests
         "sources": {
             "IHM": { "url": "https://mapeak.com/vector/data/IHM-schema.json" },
             "IHM-code": { "url": "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": { "url": "https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2.json" },
-            "Contour": { "url": "https://global.israelhikingmap.workers.dev/JAXA_AW3D30_2024_contour_z5-Z12_vector.json" }
-        }
-    }
-    """;
-    // A future version of the style, where the DEM source is only an alias to the same file system file.
-    private const string StyleWithAliasedDem = """
-    {
-        "sources": {
-            "IHM": { "url": "https://mapeak.com/vector/data/IHM-schema.json" },
-            "IHM-code": { "url": "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": {
-                "url": "https://mapeak.com/vector/data/raster-dem",
-                "tiles": [ "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp" ]
-            },
+            "DEM": { "url": "https://mapeak.com/vector/data/raster-dem.json" },
             "Contour": { "url": "https://global.israelhikingmap.workers.dev/JAXA_AW3D30_2024_contour_z5-Z12_vector.json" }
         }
     }
     """;
 
     private OfflineFilesService _service;
-    private IFileSystemHelper _fileSystemHelper;
-    private IFileProvider _fileProvider;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private string _valhallaProfilesFilePath;
 
     [TestInitialize]
     public void TestInitialize()
     {
-        _fileSystemHelper = Substitute.For<IFileSystemHelper>();
-        _fileProvider = Substitute.For<IFileProvider>();
         _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-        _fileSystemHelper.CreateFileProvider(Arg.Any<string>()).Returns(_fileProvider);
         SetupStyleResponse(Style);
         _valhallaProfilesFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         File.WriteAllText(_valhallaProfilesFilePath, "{ \"foot\": {} }");
@@ -67,10 +48,11 @@ public class OfflineFilesServiceTests
         options.Value.Returns(new ConfigurationData
         {
             OnTheFlyFilesAddress = OnTheFlyAddress,
+            OnTheFlyDemAddress = OnTheFlyDemAddress,
             RoutingTilesAddress = RoutingTilesAddress,
             ValhallaProfilesFilePath = _valhallaProfilesFilePath
         });
-        _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options, Substitute.For<ILogger>());
+        _service = new OfflineFilesService(_remoteFileFetcherGateway, options, Substitute.For<ILogger>());
     }
 
     [TestCleanup]
@@ -89,17 +71,6 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public void ConstructWithoutFolder_ShouldNotCreateFileProviderAgain()
-    {
-        var options = Substitute.For<IOptions<ConfigurationData>>();
-        options.Value.Returns(new ConfigurationData { OfflineFilesFolder = string.Empty });
-        _service = new OfflineFilesService(_fileSystemHelper, _remoteFileFetcherGateway, options,
-            Substitute.For<ILogger>());
-
-        _fileSystemHelper.Received(1).CreateFileProvider(Arg.Any<string>());
-    }
-
-    [TestMethod]
     public async Task GetUpdatedFilesList_Root_ShouldReturnOnlyOnTheFlyFilesWithTodaysDate()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
@@ -111,7 +82,7 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_Tile_ShouldReturnOnTheFlyAndJaxaFiles()
+    public async Task GetUpdatedFilesList_Tile_ShouldReturnOnTheFlyAndDemFiles()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
@@ -119,7 +90,7 @@ public class OfflineFilesServiceTests
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema+7-52-75.pmtiles"]);
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code+7-52-75.pmtiles"]);
         Assert.AreEqual(DateTime.UtcNow.Date, results["global_points+7-52-75.pmtiles"]);
-        Assert.IsTrue(results.ContainsKey("jaxa_terrarium0-11_v2+7-52-75.pmtiles"));
+        Assert.IsTrue(results.ContainsKey("raster-dem+7-52-75.pmtiles"));
     }
 
     [TestMethod]
@@ -227,39 +198,28 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_JaxaFiles_ShouldUseFixedDates()
+    public async Task GetUpdatedFilesList_DemFile_ShouldUseFixedDate()
     {
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
 
-        Assert.AreEqual(DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z").UtcDateTime,
-            results["jaxa_terrarium0-11_v2+7-52-75.pmtiles"].ToUniversalTime());
+        Assert.AreEqual(DateTimeOffset.Parse("2026-11-07T00:00:00Z").UtcDateTime,
+            results["raster-dem+7-52-75.pmtiles"].ToUniversalTime());
     }
 
     [TestMethod]
     public async Task GetUpdatedFilesList_EverythingUpToDate_ShouldReturnEmptyList()
     {
-        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddDays(1), 52, 75, false);
+        var results = await _service.GetUpdatedFilesList(DateTime.UtcNow.AddYears(1), 52, 75, false);
 
         Assert.IsEmpty(results);
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_OnlyJaxaUpToDate_ShouldReturnOnlyOnTheFlyFiles()
+    public async Task GetUpdatedFilesList_DemUpToDate_ShouldNotReturnTheDemFile()
     {
-        // A last-modified between the fixed jaxa dates and today filters out jaxa but keeps the on-the-fly files.
-        var results = await _service.GetUpdatedFilesList(new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc), 52, 75, false);
+        var results = await _service.GetUpdatedFilesList(DateTimeOffset.Parse("2026-11-07T00:00:00Z").UtcDateTime, 52, 75, false);
 
-        Assert.HasCount(3, results);
-        Assert.IsTrue(results.ContainsKey("IHM-schema+7-52-75.pmtiles"));
-        Assert.IsFalse(results.ContainsKey("jaxa_terrarium0-11_v2+7-52-75.pmtiles"));
-    }
-
-    [TestMethod]
-    public async Task GetUpdatedFilesList_ShouldNotReadFileSystem()
-    {
-        await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
-
-        _fileProvider.DidNotReceive().GetDirectoryContents(Arg.Any<string>());
+        Assert.IsFalse(results.ContainsKey("raster-dem+7-52-75.pmtiles"));
     }
 
     [TestMethod]
@@ -295,23 +255,8 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetUpdatedFilesList_AliasedDemSource_ShouldReturnTheAliasNameWithTheFileSystemDate()
+    public async Task GetUpdatedFilesList_DemSourceForRoot_ShouldNotReturnIt()
     {
-        SetupStyleResponse(StyleWithAliasedDem);
-
-        var results = await _service.GetUpdatedFilesList(DateTime.MinValue, 52, 75, false);
-
-        Assert.HasCount(4, results);
-        Assert.IsFalse(results.ContainsKey("jaxa_terrarium0-11_v2+7-52-75.pmtiles"));
-        Assert.AreEqual(DateTimeOffset.Parse("2026-04-09T10:36:08.8024764Z").UtcDateTime,
-            results["raster-dem+7-52-75.pmtiles"].ToUniversalTime());
-    }
-
-    [TestMethod]
-    public async Task GetUpdatedFilesList_AliasedDemSourceForRoot_ShouldNotReturnIt()
-    {
-        SetupStyleResponse(StyleWithAliasedDem);
-
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
@@ -319,15 +264,13 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public async Task GetFileContent_AliasedDemFile_ShouldReadTheOriginalFileFromFileSystemAndNotProxy()
+    public async Task GetFileContent_DemFile_ShouldBeFetchedFromTheDemServer()
     {
-        var fileInfo = Substitute.For<IFileInfo>();
-        _fileProvider.GetFileInfo("7/1/2/jaxa_terrarium0-11_v2+7-1-2.pmtiles").Returns(fileInfo);
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
 
         await _service.GetFileContent("raster-dem+7-1-2.pmtiles", 1, 2);
 
-        fileInfo.Received(1).CreateReadStream();
-        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyDemAddress + "raster-dem+7-1-2.pmtiles");
     }
 
     [TestMethod]
@@ -348,29 +291,5 @@ public class OfflineFilesServiceTests
         await _service.GetFileContent("global_points-6.pmtiles", null, null);
 
         await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "global_points-6.pmtiles");
-    }
-
-    [TestMethod]
-    public async Task GetFileContent_JaxaTileFile_ShouldReadFromFileSystemAndNotProxy()
-    {
-        var fileInfo = Substitute.For<IFileInfo>();
-        _fileProvider.GetFileInfo("7/1/2/jaxa_terrarium0-11_v2+7-1-2.pmtiles").Returns(fileInfo);
-
-        await _service.GetFileContent("jaxa_terrarium0-11_v2+7-1-2.pmtiles", 1, 2);
-
-        fileInfo.Received(1).CreateReadStream();
-        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
-    }
-
-    [TestMethod]
-    public async Task GetFileContent_JaxaRootFile_ShouldReadFromFileSystemAndNotProxy()
-    {
-        var fileInfo = Substitute.For<IFileInfo>();
-        _fileProvider.GetFileInfo("jaxa_terrarium0-11_v2-6.pmtiles").Returns(fileInfo);
-
-        await _service.GetFileContent("jaxa_terrarium0-11_v2-6.pmtiles", null, null);
-
-        fileInfo.Received(1).CreateReadStream();
-        await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());
     }
 }
