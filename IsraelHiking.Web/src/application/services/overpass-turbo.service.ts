@@ -148,11 +148,14 @@ export class OverpassTurboService {
     /**
      * The tags of the named cities, towns, seas and oceans in an area, which is what an area can be named
      * after. Villages are left out, a large area has thousands of them and none of them would be its name.
+     * Each kind of place is queried by its exact value, which Overpass answers from its index, while a
+     * regular expression on the value takes more than twice as long.
      */
     public async getNamedPlacesInArea(bounds: Bounds): Promise<Record<string, string>[]> {
         const { southWest, northEast } = bounds;
+        const bbox = `(${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng})`;
         const query = `[out:json][timeout:25];
-        node["place"~"^(city|town|sea|ocean)$"]["name"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+        (${["city", "town", "sea", "ocean"].map(place => `node["place"="${place}"]["name"]${bbox};`).join("")});
         out tags;`;
         const json = await firstValueFrom(this.httpClient.post<{ elements: { tags: Record<string, string> }[] }>(Urls.overpassApi, query).pipe(timeout(30000)));
         return json.elements.map(e => e.tags);
