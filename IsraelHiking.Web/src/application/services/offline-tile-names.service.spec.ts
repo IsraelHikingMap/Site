@@ -37,71 +37,56 @@ describe("OfflineTileNamesService", () => {
         store = TestBed.inject(Store);
     });
 
-    it("should name a tile after its two most important settlements", async () => {
+    it("should name a tile after the region its center is in", async () => {
         const promise = service.nameTile(76, 52);
-        await respondWithPlaces([
-            { place: "town", name: "Big Town", population: "900000" },
-            { place: "city", name: "Small City", population: "1000" },
-            { place: "city", name: "Regional Capital", capital: "4", population: "10" },
-            { place: "city", name: "ירושלים", "name:en": "Jerusalem", capital: "yes" }
+        await respondWithRegions([
+            { name: "مأدبا", "name:en": "Madaba", bounds: [31.0, 35.5, 32.0, 36.0] },
+            { name: "מחוז ירושלים", "name:en": "Jerusalem District", bounds: [30.5, 34.8, 31.0, 35.3] }
         ]);
         await promise;
 
-        expect(getTileName("76-52")).toBe("Jerusalem – Regional Capital");
+        expect(getTileName("76-52")).toBe("Jerusalem District");
     });
 
-    it("should prefer the larger of two settlements of the same kind", async () => {
+    it("should prefer the smaller of two regions the center is in", async () => {
         const promise = service.nameTile(76, 52);
-        await respondWithPlaces([
-            { place: "city", name: "Smaller", population: "12,000" },
-            { place: "city", name: "Larger", population: "120000 (2020)" }
+        await respondWithRegions([
+            { name: "Large", bounds: [29.0, 33.0, 34.0, 38.0] },
+            { name: "Small", bounds: [30.5, 34.8, 31.0, 35.3] }
         ]);
         await promise;
 
-        expect(getTileName("76-52")).toBe("Larger – Smaller");
+        expect(getTileName("76-52")).toBe("Small");
     });
 
-    it("should name a tile with no settlements after the sea in it", async () => {
-        const promise = service.nameTile(75, 51);
-        await respondWithPlaces([{ place: "sea", name: "Levantine Sea" }]);
-        await promise;
-
-        expect(getTileName("75-51")).toBe("Levantine Sea");
-    });
-
-    it("should name an empty tile after a sea around it before a settlement around it", async () => {
-        const promise = service.nameTile(75, 51);
-        await respondWithPlaces([]);
-        await respondWithPlaces([
-            { place: "city", name: "Cairo", capital: "yes" },
-            { place: "sea", name: "Levantine Sea" }
+    it("should name a tile whose center is in no region as near the closest region", async () => {
+        const promise = service.nameTile(75, 52);
+        await respondWithRegions([
+            { name: "Far", bounds: [30.0, 34.6, 31.0, 35.0] },
+            { name: "Close", bounds: [30.0, 33.5, 31.0, 34.0] }
         ]);
         await promise;
 
-        expect(getTileName("75-51")).toBe("Levantine Sea");
+        expect(getTileName("75-52")).toBe("Near Close");
     });
 
-    it("should name an empty tile with no sea around it as near the most important settlement around it", async () => {
-        const promise = service.nameTile(80, 50);
-        await respondWithPlaces([]);
-        await respondWithPlaces([
-            { place: "town", name: "Oasis" },
-            { place: "city", name: "Desert City" }
-        ]);
+    it("should leave a tile without regions without a name", async () => {
+        const promise = service.nameTile(75, 52);
+        await respondWithRegions([]);
         await promise;
 
-        expect(getTileName("80-50")).toBe("Near Desert City");
+        expect(getTileName("75-52")).toBeUndefined();
     });
 
     it("should number a default name another tile already has", async () => {
-        store.dispatch(new SetTileNameAction("75-51", "Levantine Sea"));
-        store.dispatch(new SetTileNameAction("74-51", "Levantine Sea (2)"));
+        store.dispatch(new SetTileNameAction("75-52", "Region"));
+        store.dispatch(new SetTileNameAction("74-52", "Region (2)"));
 
-        const promise = service.nameTile(75, 50);
-        await respondWithPlaces([{ place: "sea", name: "Levantine Sea" }]);
+        const promise = service.nameTile(76, 52);
+        await respondWithRegions([{ name: "Region", bounds: [29.0, 33.0, 34.0, 38.0] }]);
         await promise;
 
-        expect(getTileName("75-50")).toBe("Levantine Sea (3)");
+        expect(getTileName("76-52")).toBe("Region (3)");
     });
 
     it("should leave a tile without a name when the places can not be fetched", async () => {
@@ -122,9 +107,13 @@ describe("OfflineTileNamesService", () => {
         expect(getTileName("76-52")).toBe("My tile");
     });
 
-    async function respondWithPlaces(places: Record<string, string>[]) {
+    /** Each region's bounds are south, west, north, east, the way Overpass orders a box */
+    async function respondWithRegions(regions: ({ bounds: number[] } & Record<string, string | number[]>)[]) {
         await flushMicrotasks();
-        mockBackend.expectOne(Urls.overpassApi).flush({ elements: places.map(tags => ({ type: "node", tags })) });
+        mockBackend.expectOne(Urls.overpassApi).flush({
+            elements: regions.map(({ bounds: [minlat, minlon, maxlat, maxlon], ...tags }) =>
+                ({ type: "relation", tags, bounds: { minlat, minlon, maxlat, maxlon } }))
+        });
     }
 
     function flushMicrotasks(): Promise<void> {

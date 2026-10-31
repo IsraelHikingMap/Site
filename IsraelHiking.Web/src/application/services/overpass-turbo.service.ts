@@ -12,6 +12,16 @@ type OsmResponse = {
     elements: { type: string, id: string }[];
 }
 
+type OsmRegionElement = {
+    tags: Record<string, string>;
+    bounds: { minlat: number, minlon: number, maxlat: number, maxlon: number };
+}
+
+export type AdminRegion = {
+    tags: Record<string, string>;
+    bounds: Bounds;
+}
+
 
 @Service()
 export class OverpassTurboService {
@@ -146,18 +156,21 @@ export class OverpassTurboService {
     }
 
     /**
-     * The tags of the named cities, towns, seas and oceans in an area, which is what an area can be named
-     * after. Villages are left out, a large area has thousands of them and none of them would be its name.
-     * Each kind of place is queried by its exact value, which Overpass answers from its index, while a
-     * regular expression on the value takes more than twice as long.
+     * The states, provinces and districts that touch an area, along with the box around each. Overpass
+     * finds them in about a second, while looking up the places in an area as large as a tile takes several.
      */
-    public async getNamedPlacesInArea(bounds: Bounds): Promise<Record<string, string>[]> {
+    public async getAdminRegionsInArea(bounds: Bounds): Promise<AdminRegion[]> {
         const { southWest, northEast } = bounds;
-        const bbox = `(${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng})`;
         const query = `[out:json][timeout:25];
-        (${["city", "town", "sea", "ocean"].map(place => `node["place"="${place}"]["name"]${bbox};`).join("")});
-        out tags;`;
-        const json = await firstValueFrom(this.httpClient.post<{ elements: { tags: Record<string, string> }[] }>(Urls.overpassApi, query).pipe(timeout(30000)));
-        return json.elements.map(e => e.tags);
+        rel["boundary"="administrative"]["admin_level"="4"]["name"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
+        out tags bb;`;
+        const json = await firstValueFrom(this.httpClient.post<{ elements: OsmRegionElement[] }>(Urls.overpassApi, query).pipe(timeout(30000)));
+        return json.elements.map(e => ({
+            tags: e.tags,
+            bounds: {
+                northEast: { lat: e.bounds.maxlat, lng: e.bounds.maxlon },
+                southWest: { lat: e.bounds.minlat, lng: e.bounds.minlon }
+            }
+        }));
     }
 }
