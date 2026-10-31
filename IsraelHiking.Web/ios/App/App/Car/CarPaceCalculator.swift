@@ -1,61 +1,32 @@
 import CoreLocation
 import Foundation
 
-/// A position in the trail: when it arrived, and the distance in meters counted up to it.
-private struct PacePoint {
-    let time: TimeInterval
-    let distance: Double
-}
-
-/// Mirrors `CarPaceCalculator.kt`: how fast the car is going, measured from the positions of the
-/// last `paceWindowSeconds` rather than read off `CLLocation.speed`. A remaining time taken off a
-/// single reading jumps between fixes and drops to nothing at every red light, while a trail of
-/// positions gives one that is steady enough to show and holds still while the car is stopped.
-/// Mirrors the way the app measures the pace behind its own ETA, in LocationService.
+/// Mirrors `CarPaceCalculator.kt`: how fast the car is going, the average of the last `maximalSpeeds`
+/// speeds the location reported while moving. A single reading jumps between fixes, and readings
+/// taken while stopped are left out so that a stop holds the arrival time instead of pushing it
+/// towards never. Mirrors the way the app measures the pace behind its own ETA, in PaceCalculatorService.
 ///
 /// One instance follows one stream of locations, so every consumer keeps its own.
 final class CarPaceCalculator {
 
-    private var trail: [PacePoint] = []
-    private var lastCountedLocation: CLLocation?
-    private var countedDistance = 0.0
+    private var speeds: [Double] = []
 
-    /// The speed, in meters per second, measured the last time the car was moving, or nil before it
-    /// moved at all. A stop is not allowed to overwrite it, so waiting at a light holds the arrival
-    /// time where it is instead of pushing it towards never. Until the trail is long enough to
-    /// measure a speed, the one the location reported.
+    /// The speed, in meters per second, or nil before the car moved at all.
     private(set) var speed: Double?
 
-    /// Adds a position to the trail the `speed` is measured from. A position that did not move counts
-    /// towards the time but not the distance, so that a stop is measured as a stop, and the trail is
-    /// kept short so that a stop is forgotten soon after the car moves again.
+    /// A negative `CLLocation.speed`, which is how CoreLocation says it has none, falls below
+    /// `minimalMovingSpeed` and is left out with the readings taken while stopped.
     func updatePace(_ location: CLLocation) {
-        let time = location.timestamp.timeIntervalSince1970
-        let distance = lastCountedLocation?.distance(from: location) ?? 0
-        if lastCountedLocation == nil || distance >= Self.minimalMovementMeters {
-            countedDistance += distance
-            lastCountedLocation = location
+        guard location.speed > Self.minimalMovingSpeed else { return }
+        speeds.append(location.speed)
+        if speeds.count > Self.maximalSpeeds {
+            speeds.removeFirst()
         }
-        trail.append(PacePoint(time: time, distance: countedDistance))
-        while trail.count > 2 && time - trail[1].time >= Self.paceWindowSeconds {
-            trail.removeFirst()
-        }
-        guard let first = trail.first, let latest = trail.last else { return }
-        let duration = latest.time - first.time
-        let measured = duration > 0 ? (latest.distance - first.distance) / duration : 0
-        if measured > Self.minimalMovingSpeed {
-            speed = measured
-        } else if speed == nil, location.speed > Self.minimalMovingSpeed {
-            // A negative speed is how CoreLocation says it does not have one
-            speed = location.speed
-        }
+        speed = speeds.reduce(0, +) / Double(speeds.count)
     }
 
-    /// The length of the trail of positions the speed is measured over.
-    private static let paceWindowSeconds: TimeInterval = 2 * 60
-
-    /// How far a position has to be from the last counted one to count, so GPS wander is not movement.
-    private static let minimalMovementMeters = 10.0
+    /// How many of the latest speeds are averaged.
+    private static let maximalSpeeds = 10
 
     /// Below this speed, in meters per second, the car is stopped rather than moving slowly.
     private static let minimalMovingSpeed = 0.5
