@@ -313,18 +313,17 @@ describe("LocationService", () => {
         }
     ));
 
-    it("Should hand every position to the pace calculator", inject([LocationService, Store, PaceCalculatorService],
+    it("Should hand the speed of every position to the pace calculator", inject([LocationService, Store, PaceCalculatorService],
         async (service: LocationService, store: Store, paceCalculatorService: PaceCalculatorService) => {
             resetStoreWithoutPosition(store);
             await service.initialize();
             const updatePace = vi.spyOn(paceCalculatorService, "updatePace");
-            const timestamp = Date.now();
             store.dispatch(new SetCurrentPositionAction({
                 coords: { latitude: 1, longitude: 2, speed: 3 },
-                timestamp
+                timestamp: Date.now()
             } as unknown as GeolocationPosition));
 
-            expect(updatePace).toHaveBeenCalledWith(expect.objectContaining({ lat: 1, lng: 2 }), timestamp, 3);
+            expect(updatePace).toHaveBeenCalledWith(3);
         }
     ));
 

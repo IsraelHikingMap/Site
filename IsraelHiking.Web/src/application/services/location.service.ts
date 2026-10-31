@@ -154,7 +154,7 @@ export class LocationService {
             bearing,
             accuracy: position.coords.accuracy
         };
-        this.paceCalculatorService.updatePace(this.locationWithBearing.center, position.timestamp, position.coords.speed);
+        this.paceCalculatorService.updatePace(position.coords.speed);
         this.changed.next(this.locationWithBearing);
         if (this.isFollowing()) {
             this.moveMapToGpsPosition();
