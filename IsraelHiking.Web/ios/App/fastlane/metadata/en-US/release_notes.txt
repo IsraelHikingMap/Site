@@ -1,3 +1,6 @@
-- Improve translations
-- Add turn-by-turn instructions to car-play
+- Faster map loading
+- More reliable recording when interrupted
+- Better ETA and turn instructions
+- Remember the "North Up" choice
+- Add ladders and rungs
 - Various bug fixes and performance improvements
