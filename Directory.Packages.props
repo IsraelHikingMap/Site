@@ -10,14 +10,14 @@
     <PackageVersion Include="coverlet.msbuild" Version="10.1.0" />
     <PackageVersion Include="JunitXml.TestLogger" Version="8.1.0" />
     <PackageVersion Include="LazyCache.AspNetCore" Version="2.4.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.14" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.1" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.5.1" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.2" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.2" />
     <PackageVersion Include="NEST" Version="7.17.5" />
     <PackageVersion Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.3" />
     <PackageVersion Include="NetTopologySuite" Version="2.6.0" />
@@ -29,8 +29,8 @@
     <PackageVersion Include="OsmSharp.IO.API" Version="1.1.0" />
     <PackageVersion Include="ProjNet" Version="2.1.0" />
     <PackageVersion Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.18.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.18.7" />
     <PackageVersion Include="Wangkanai.Detection" Version="8.20.0" />
   </ItemGroup>
 
