@@ -20,7 +20,7 @@ public class OfflineFilesServiceTests
     private const string OnTheFlyAddress = "https://mapeak.com/serve-extract/";
     private const string OnTheFlyDemAddress = "http://go-pmtiles-extract-dem:8080/";
     private const string RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
-    private const string StylesAddress = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
+    private const string StylesAddress = "https://mapeak.com/styles/";
     private const string StyleAddress = StylesAddress + "mapeak-hike.json";
     private const string Style = """
     {

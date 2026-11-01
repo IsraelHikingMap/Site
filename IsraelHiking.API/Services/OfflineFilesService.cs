@@ -28,7 +28,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// <summary>
     /// The location of the styles the map is drawn with, which the client reads them from by itself.
     /// </summary>
-    private const string STYLES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/";
+    private const string STYLES_ADDRESS = "https://mapeak.com/styles/";
 
     private const string HIKE_STYLE_FILE_NAME = "mapeak-hike.json";
 

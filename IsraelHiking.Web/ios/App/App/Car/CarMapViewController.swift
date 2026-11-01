@@ -565,7 +565,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate, Capacito
         static let defaultLat = 51.5074
         static let defaultLng = -0.1278
         static let defaultStyleUrl =
-            "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"
+            "https://mapeak.com/styles/mapeak-hike.json"
     }
 }
 
