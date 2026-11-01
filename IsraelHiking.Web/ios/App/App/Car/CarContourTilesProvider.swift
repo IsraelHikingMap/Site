@@ -21,7 +21,7 @@ final class CarContourTilesProvider {
             "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice"
         config.demMaxZoom = 11
         config.overzoom = 1
-        config.thresholds = parseThresholdSpec(spec: "11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100")
+        config.thresholds = parseThresholdSpec(spec: "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50")
         config.layerName = "contours"
         config.elevationKey = "ele"
         config.levelKey = "level"
