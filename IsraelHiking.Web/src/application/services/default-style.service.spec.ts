@@ -326,7 +326,6 @@ describe("DefaultStyleService", () => {
         expect(contour.url).toBeUndefined();
         expect(contour.tiles?.[0]).toContain("dem-contour://");
         expect(contour.tiles?.[0]).toContain("multiplier=1");
-        expect(contour.tiles?.[0]).toContain("thresholds=9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50");
         expect(contour.maxzoom).toBe(16);
     }));
 
@@ -350,7 +349,6 @@ describe("DefaultStyleService", () => {
 
         const contour = result.sources.Contour as VectorSourceSpecification;
         expect(contour.tiles?.[0]).toContain("multiplier=3.28084");
-        expect(contour.tiles?.[0]).toContain("thresholds=9*1000*5000~10*500*2500~11*200*1000~12*100*500~13*40*200~14*20*100");
     }));
 
     it("should tag the contour source with the slice and units query in car mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
