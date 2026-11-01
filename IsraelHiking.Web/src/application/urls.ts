@@ -59,10 +59,10 @@ export class Urls {
     public static readonly googleMaps = "https://www.google.com/maps/search/?api=1&query=";
     public static readonly tranlation = Urls.apiBase + "translation/translate";
 
-    public static readonly HIKING_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
-    public static readonly MTB_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json";
-    public static readonly HEATMAP_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-traces.json";
-    public static readonly SATELLITE_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-satellite.json";
+    public static readonly HIKING_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-hike.json";
+    public static readonly MTB_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-bike.json";
+    public static readonly HEATMAP_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-traces.json";
+    public static readonly SATELLITE_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-satellite.json";
 
     public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
