@@ -329,7 +329,7 @@ describe("DefaultStyleService", () => {
         expect(contour.maxzoom).toBe(16);
     }));
 
-    it("should use the imperial multiplier and thresholds for the contour source when units are imperial", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
+    it("should use the imperial multiplier for the contour source when units are imperial", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
         store.reset({
             configuration: { units: "imperial" },
             inMemoryState: { effectiveTheme: "light", downloadedTiles: {} }
