@@ -16,8 +16,8 @@ import okhttp3.Request
  * [SliceProtocolInterceptor] is what routes contour tile requests here, passing the units carried
  * in the tile URL.
  *
- * Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached
- * per units string; the managers are thread-safe and shared across requests.
+ * Units (metric/imperial) change the elevation multiplier and the contour thresholds, so a manager
+ * is built and cached per units string; the managers are thread-safe and shared across requests.
  */
 class CarContourTilesProvider internal constructor(private val okHttpClient: OkHttpClient) {
 
@@ -30,10 +30,6 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                                     "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice",
                             demMaxZoom = 11.toUByte(),
                             overzoom = 1.toUByte(),
-                            thresholds =
-                                    parseThresholdSpec(
-                                            "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50"
-                                    ),
                             layerName = "contours",
                             elevationKey = "ele",
                             levelKey = "level",
@@ -57,7 +53,13 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
     fun getTile(z: Int, x: Int, y: Int, units: String): ByteArray {
         val manager =
                 managers.computeIfAbsent(units) {
-                    DemManager(fetcher, config.copy(multiplier = multiplierForUnits(it)))
+                    DemManager(
+                            fetcher,
+                            config.copy(
+                                    multiplier = multiplierForUnits(it),
+                                    thresholds = thresholdsForUnits(it),
+                            )
+                    )
                 }
         return manager.tile(z.toUByte(), x.toUInt(), y.toUInt())
     }
@@ -66,8 +68,15 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
         private const val UNIT_IMPERIAL = "imperial"
         private const val METRIC_MULTIPLIER = 1.0f
         private const val IMPERIAL_MULTIPLIER = 3.28084f
+        private const val METRIC_THRESHOLDS = "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50"
+        private const val IMPERIAL_THRESHOLDS = "9*1000*5000~10*500*2500~11*200*1000~12*100*500~13*40*200~14*20*100"
 
         private fun multiplierForUnits(units: String): Float =
                 if (units == UNIT_IMPERIAL) IMPERIAL_MULTIPLIER else METRIC_MULTIPLIER
+
+        private fun thresholdsForUnits(units: String) =
+                parseThresholdSpec(
+                        if (units == UNIT_IMPERIAL) IMPERIAL_THRESHOLDS else METRIC_THRESHOLDS
+                )
     }
 }

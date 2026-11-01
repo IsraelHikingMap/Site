@@ -5,8 +5,8 @@ import MaplibreContour
 /// maplibre-contour-rs library does the heavy lifting: we hand it a `DemTileFetcher` that downloads a
 /// DEM tile and it returns a ready-to-render MVT for any z/x/y.
 ///
-/// Units (metric/imperial) only change the elevation multiplier, so a manager is built and cached per
-/// units string; the managers are thread-safe and shared across requests.
+/// Units (metric/imperial) change the elevation multiplier and the contour thresholds, so a manager is
+/// built and cached per units string; the managers are thread-safe and shared across requests.
 final class CarContourTilesProvider {
 
     private let baseConfig: ContourConfig
@@ -21,7 +21,6 @@ final class CarContourTilesProvider {
             "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice"
         config.demMaxZoom = 11
         config.overzoom = 1
-        config.thresholds = parseThresholdSpec(spec: "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50")
         config.layerName = "contours"
         config.elevationKey = "ele"
         config.levelKey = "level"
@@ -29,7 +28,7 @@ final class CarContourTilesProvider {
         fetcher = ContourDemTileFetcher()
     }
 
-    /// Returns the contour MVT for the tile, generated with the multiplier matching `units`.
+    /// Returns the contour MVT for the tile, generated with the multiplier and thresholds matching `units`.
     func getTile(z: Int, x: Int, y: Int, units: String) throws -> Data {
         try manager(for: units).tile(z: UInt8(z), x: UInt32(x), y: UInt32(y))
     }
@@ -40,6 +39,7 @@ final class CarContourTilesProvider {
         if let cached = managers[units] { return cached }
         var config = baseConfig
         config.multiplier = Self.multiplier(for: units)
+        config.thresholds = parseThresholdSpec(spec: Self.thresholdSpec(for: units))
         let manager = DemManager(fetcher: fetcher, config: config)
         managers[units] = manager
         return manager
@@ -49,9 +49,15 @@ final class CarContourTilesProvider {
         units == unitImperial ? imperialMultiplier : metricMultiplier
     }
 
+    private static func thresholdSpec(for units: String) -> String {
+        units == unitImperial ? imperialThresholds : metricThresholds
+    }
+
     private static let unitImperial = "imperial"
     private static let metricMultiplier: Float = 1.0
     private static let imperialMultiplier: Float = 3.28084
+    private static let metricThresholds = "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50"
+    private static let imperialThresholds = "9*1000*5000~10*500*2500~11*200*1000~12*100*500~13*40*200~14*20*100"
 }
 
 /// Downloads the raw DEM tile bytes for a fully-resolved URL. The `use=slice` marker in the DEM URL
