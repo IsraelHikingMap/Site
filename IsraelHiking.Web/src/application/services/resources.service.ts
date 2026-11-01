@@ -38,6 +38,7 @@ export class ResourcesService {
     public end: string;
     public readonly endOfBaseDrapedLayers = "end-of-base-draped-layers";
     public readonly endOfOverlaysDrapedLayers = "end-of-overlays-draped-layers";
+    public readonly endOfRoutesDrapedLayers = "end-of-routes-draped-layers";
     public readonly endOfDrapedLayers = "end-of-draped-layers";
     public readonly endOfBaseLayer = "end-of-base-layer";
     public readonly endOfOverlays = "end-of-overlays";

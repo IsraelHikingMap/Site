@@ -97,6 +97,7 @@ export class DefaultStyleService {
         styleWithPlaceholder.layers = [
             this.createPlaceholder(this.resources.endOfBaseDrapedLayers),
             this.createPlaceholder(this.resources.endOfOverlaysDrapedLayers),
+            this.createPlaceholder(this.resources.endOfRoutesDrapedLayers),
             this.createPlaceholder(this.resources.endOfDrapedLayers),
             this.createPlaceholder(this.resources.endOfBaseLayer),
             this.createPlaceholder(this.resources.endOfOverlays),
