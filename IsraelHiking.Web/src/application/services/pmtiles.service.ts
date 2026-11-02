@@ -11,6 +11,8 @@ import { LoggingService } from "./logging.service";
 import type { ApplicationState, OfflineArea } from "../models";
 
 export const TILES_ZOOM = 7;
+/** The zoom up to which the root files hold the whole world, every downloaded area holds the zooms above it */
+export const ROOT_ZOOM = 4;
 
 class CapacitorSource implements Source {
 
@@ -82,23 +84,28 @@ export class PmTilesService {
     }
 
     /**
-     * The file a tile is in: the root file below the zoom of the downloaded tiles, then the file of the downloaded
-     * tile it is a part of, and then the file of a downloaded area its middle is in. Null when none of them has it.
+     * The file a tile is in: the root file up to its zoom, then the file of the downloaded tile it is a part of, and
+     * then the file of a downloaded area its middle is in. The tiles that came before areas start at zoom 7, so the
+     * zoom 6 root they came with fills the zooms below that while it is kept, see LEGACY_ROOT_KEY.
      */
     private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
-        if (z < TILES_ZOOM) {
-            const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
-            return downloadedTiles[PmTilesService.toTileKey()] == null ? null : `${type}-${TILES_ZOOM - 1}.pmtiles`;
-        }
-        const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
-        const tileKey = PmTilesService.toTileKey(tileX, tileY);
         const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
-        if (downloadedTiles[tileKey] != null) {
-            return `${type}+${tileKey}.pmtiles`;
+        if (z <= ROOT_ZOOM && downloadedTiles[PmTilesService.toTileKey()] != null) {
+            return `${type}-${ROOT_ZOOM}.pmtiles`;
+        }
+        if (z >= TILES_ZOOM) {
+            const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
+            const tileKey = PmTilesService.toTileKey(tileX, tileY);
+            if (downloadedTiles[tileKey] != null) {
+                return `${type}+${tileKey}.pmtiles`;
+            }
         }
         const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: x + 0.5, y: y + 0.5 }, z));
         const areaId = this.findDownloadedAreaId(center);
-        return areaId == null ? null : `${type}+${areaId}.pmtiles`;
+        if (areaId != null) {
+            return `${type}+${areaId}.pmtiles`;
+        }
+        return z < TILES_ZOOM && downloadedTiles[PmTilesService.LEGACY_ROOT_KEY] != null ? `${type}-${TILES_ZOOM - 1}.pmtiles` : null;
     }
 
     /**
@@ -146,6 +153,14 @@ export class PmTilesService {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         return (await pmTilesProvider.getMetadata() as { version?: string })?.version;
+    }
+
+    /** The key of the zoom 6 root files, which are only kept as long as a tile that came before areas is */
+    public static readonly LEGACY_ROOT_KEY = "legacy-root";
+
+    /** Whether a key is of root files, which are of no area */
+    public static isRootKey(key: string): boolean {
+        return key === PmTilesService.toTileKey() || key === PmTilesService.LEGACY_ROOT_KEY;
     }
 
     /**

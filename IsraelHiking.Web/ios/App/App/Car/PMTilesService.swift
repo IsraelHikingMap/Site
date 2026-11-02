@@ -3,12 +3,13 @@ import Foundation
 import PMTiles
 
 /// Reads offline vector tiles from the PMTiles archives the app downloads into its Documents
-/// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: `{type}-6.pmtiles`
-/// below zoom 7, and above it the zoom 7 tile's `{type}+{x}-{y}.pmtiles`, otherwise the `{type}+{id}.pmtiles` of the
-/// downloaded area the tile's center is in.
+/// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: `{type}-4.pmtiles`
+/// up to zoom 4, the zoom 7 tile's `{type}+{x}-{y}.pmtiles`, the `{type}+{id}.pmtiles` of the downloaded area the
+/// tile's center is in, and below zoom 7 the `{type}-6.pmtiles` the tiles that came before areas were downloaded with.
 final class PMTilesService {
 
     static let tilesZoom = 7
+    static let rootZoom = 4
     private static let areaFileSuffix = ".area.json"
     private static let areasRefreshInterval: TimeInterval = 30
 
@@ -40,23 +41,23 @@ final class PMTilesService {
         return try? reader.getTile(z: UInt8(z), x: UInt32(x), y: UInt32(y))
     }
 
-    /// The "+7-" name is what a tile was kept as before areas, until the app renames it on its next start,
-    /// which the car can come before.
     private func fileName(z: Int, x: Int, y: Int, type: String) -> String? {
-        if z < Self.tilesZoom {
-            return existing("\(type)-\(Self.tilesZoom - 1).pmtiles")
+        if z <= Self.rootZoom, let rootFile = existing("\(type)-\(Self.rootZoom).pmtiles") {
+            return rootFile
         }
-        let scale = 1 << (z - Self.tilesZoom)
-        if let tileFile = existing("\(type)+\(x / scale)-\(y / scale).pmtiles")
-            ?? existing("\(type)+\(Self.tilesZoom)-\(x / scale)-\(y / scale).pmtiles") {
-            return tileFile
+        if z >= Self.tilesZoom {
+            let scale = 1 << (z - Self.tilesZoom)
+            if let tileFile = existing("\(type)+\(x / scale)-\(y / scale).pmtiles") {
+                return tileFile
+            }
         }
         let lng = Self.tileCenterLng(x: x, z: z)
         let lat = Self.tileCenterLat(y: y, z: z)
-        return downloadedAreas()
+        let areaFile = downloadedAreas()
             .filter { area in area.polygons.contains { Self.contains($0, lng: lng, lat: lat) } }
             .lazy.compactMap { self.existing("\(type)+\($0.id).pmtiles") }
             .first
+        return areaFile ?? (z < Self.tilesZoom ? existing("\(type)-\(Self.tilesZoom - 1).pmtiles") : nil)
     }
 
     private func existing(_ name: String) -> String? {

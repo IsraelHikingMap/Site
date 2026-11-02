@@ -40,22 +40,22 @@ class PmTilesService(context: Context) : AutoCloseable {
     }
 
     /**
-     * The file a tile is read from, mirroring getFileNameByType of pmtiles.service.ts: the zoom 7 tile it is in,
-     * otherwise the downloaded area its center is in. The "+7-" name is what a tile was kept as before areas, until
-     * the app renames it on its next start, which the car can come before.
+     * The file a tile is read from, mirroring getFileNameByType of pmtiles.service.ts: the root file up to its zoom,
+     * the zoom 7 tile it is in, the downloaded area its center is in, and below zoom 7 the zoom 6 root file the tiles
+     * that came before areas were downloaded with.
      */
     private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String? {
-        if (z < TILES_ZOOM) {
-            return existing(type + "-" + (TILES_ZOOM - 1) + ".pmtiles")
+        if (z <= ROOT_ZOOM) {
+            existing("$type-$ROOT_ZOOM.pmtiles")?.let { return it }
         }
-        val scale = 1 shl (z - TILES_ZOOM)
-        val tileX = x / scale
-        val tileY = y / scale
-        return existing("$type+$tileX-$tileY.pmtiles")
-            ?: existing("$type+$TILES_ZOOM-$tileX-$tileY.pmtiles")
-            ?: getDownloadedAreas()
-                .filter { area -> area.polygons.any { contains(it, tileCenterLng(x, z), tileCenterLat(y, z)) } }
-                .firstNotNullOfOrNull { existing("$type+${it.id}.pmtiles") }
+        if (z >= TILES_ZOOM) {
+            val scale = 1 shl (z - TILES_ZOOM)
+            existing("$type+${x / scale}-${y / scale}.pmtiles")?.let { return it }
+        }
+        return getDownloadedAreas()
+            .filter { area -> area.polygons.any { contains(it, tileCenterLng(x, z), tileCenterLat(y, z)) } }
+            .firstNotNullOfOrNull { existing("$type+${it.id}.pmtiles") }
+            ?: if (z < TILES_ZOOM) existing("$type-${TILES_ZOOM - 1}.pmtiles") else null
     }
 
     private fun existing(fileName: String): String? = if (File(baseDir, fileName).exists()) fileName else null
@@ -147,6 +147,7 @@ class PmTilesService(context: Context) : AutoCloseable {
 
     companion object {
         const val TILES_ZOOM: Int = 7
+        const val ROOT_ZOOM: Int = 4
         private const val AREA_FILE_SUFFIX = ".area.json"
         private const val AREAS_REFRESH_MILLIS = 30_000L
     }

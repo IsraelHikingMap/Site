@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed } from "@angular/core/testing";
 import { provideStore, Store } from "@ngxs/store";
 
-import { PmTilesService } from "./pmtiles.service";
+import { PmTilesService, ROOT_ZOOM } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { OfflineAreasService } from "./offline-areas.service";
 import { InMemoryReducer, SetDownloadedAreasAction, SetDownloadedTilesAction } from "../reducers/in-memory.reducer";
@@ -51,4 +51,29 @@ describe("PmTilesService", () => {
 
         expect(service.findDownloadedAreaId([35, 32])).toBeNull();
     });
+
+    it("should read the root files up to their zoom and the area a tile is in above it", () => {
+        store.dispatch(new SetDownloadedAreasAction({ [area.properties.id]: area }));
+        store.dispatch(new SetDownloadedTilesAction({ [PmTilesService.toTileKey()]: [{ fileName: "IHM-schema-4.pmtiles", date: "2026-11-01" }], [area.properties.id]: [file] }));
+
+        expect(getFileName(ROOT_ZOOM, 9, 6)).toBe("IHM-schema-4.pmtiles");
+        // A tile whose middle is in the area, and one in the middle of the ocean
+        expect(getFileName(8, 152, 103)).toBe("IHM-schema+israel-and-palestine.pmtiles");
+        expect(getFileName(8, 10, 103)).toBeNull();
+    });
+
+    it("should read a tile that came before areas from its own file, and fill the zooms below it from the zoom 6 root files", () => {
+        store.dispatch(new SetDownloadedTilesAction({
+            [PmTilesService.LEGACY_ROOT_KEY]: [{ fileName: "IHM-schema-6.pmtiles", date: "2025-01-01" }],
+            "76-51": [{ fileName: "IHM-schema+76-51.pmtiles", date: "2025-01-01" }]
+        }));
+
+        expect(getFileName(9, 305, 205)).toBe("IHM-schema+76-51.pmtiles");
+        expect(getFileName(6, 38, 25)).toBe("IHM-schema-6.pmtiles");
+        expect(getFileName(ROOT_ZOOM, 9, 6)).toBe("IHM-schema-6.pmtiles");
+    });
+
+    function getFileName(z: number, x: number, y: number): string | null {
+        return service["getFileNameByType"](z, x, y, "IHM-schema");
+    }
 });

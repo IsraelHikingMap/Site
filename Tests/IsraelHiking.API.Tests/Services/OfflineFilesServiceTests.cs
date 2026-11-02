@@ -105,9 +105,9 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-6.pmtiles"]);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code-6.pmtiles"]);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["global_points-6.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-4.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code-4.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["global_points-4.pmtiles"]);
     }
 
     [TestMethod]
@@ -315,7 +315,7 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
-        Assert.IsFalse(results.ContainsKey("raster-dem-6.pmtiles"));
+        Assert.IsFalse(results.ContainsKey("raster-dem-4.pmtiles"));
     }
 
     [TestMethod]
@@ -345,9 +345,9 @@ public class OfflineFilesServiceTests
     {
         _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
 
-        await _service.GetFileContent("global_points-6.pmtiles", null, null);
+        await _service.GetFileContent("global_points-4.pmtiles", null, null);
 
-        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "global_points-6.pmtiles");
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "global_points-4.pmtiles");
     }
 
     [TestMethod]
@@ -372,9 +372,9 @@ public class OfflineFilesServiceTests
     public async Task GetFileContent_JaxaRootFile_ShouldReadFromFileSystemAndNotProxy()
     {
         var fileInfo = Substitute.For<IFileInfo>();
-        _fileProvider.GetFileInfo("jaxa_terrarium0-11_v2-6.pmtiles").Returns(fileInfo);
+        _fileProvider.GetFileInfo("jaxa_terrarium0-11_v2-4.pmtiles").Returns(fileInfo);
 
-        await _service.GetFileContent("jaxa_terrarium0-11_v2-6.pmtiles", null, null);
+        await _service.GetFileContent("jaxa_terrarium0-11_v2-4.pmtiles", null, null);
 
         fileInfo.Received(1).CreateReadStream();
         await _remoteFileFetcherGateway.DidNotReceive().GetFileStream(Arg.Any<string>());

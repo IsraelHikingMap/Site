@@ -28,7 +28,7 @@ const ROUTING_TILES_FILE = "valhalla+76-51.tgz";
 /** The files of the tile as the server names them */
 const SERVER_MAP_FILE = "IHM-schema+7-76-51.pmtiles";
 const SERVER_ROUTING_TILES_FILE = "valhalla+7-76-51.tgz";
-const ROOT_MAP_FILE = "IHM-schema-6.pmtiles";
+const ROOT_MAP_FILE = "IHM-schema-4.pmtiles";
 const DOWNLOAD_DATE = new Date("2026-01-01T10:00:00.000Z");
 const FILE_SIZE = 1024 * 1024;
 
@@ -745,7 +745,7 @@ describe("OfflineFilesDownloadService", () => {
                     MAP_FILE,
                     "a-removed-source+76-51.pmtiles",
                     "a-removed-source+75-50.pmtiles",
-                    "a-removed-source-6.pmtiles"
+                    "a-removed-source-4.pmtiles"
                 ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
@@ -764,7 +764,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source+75-50.pmtiles");
                 // The styles on the device are the ones that were just downloaded, so 75-50 can not be drawn
                 // from that source either way and nothing is left that the root file could serve
-                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-6.pmtiles");
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-4.pmtiles");
             }
         )
     );
@@ -776,7 +776,7 @@ describe("OfflineFilesDownloadService", () => {
                     MAP_FILE,
                     "global_points+76-51.pmtiles",
                     "a-removed-source+76-51.pmtiles",
-                    "a-removed-source-6.pmtiles"
+                    "a-removed-source-4.pmtiles"
                 ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
@@ -791,7 +791,7 @@ describe("OfflineFilesDownloadService", () => {
 
                 expect(await promise).toBe("up-to-date");
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+76-51.pmtiles");
-                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-6.pmtiles");
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-4.pmtiles");
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(MAP_FILE);
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("global_points+76-51.pmtiles");
             }
@@ -814,6 +814,29 @@ describe("OfflineFilesDownloadService", () => {
                 expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([]);
                 const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
                 expect(downloadedTiles[TILE_KEY]).toBeUndefined();
+            }
+        )
+    );
+
+    it("Should keep the zoom 6 root files of the tiles that came before areas apart, and delete them along with the last of those tiles",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                const legacyRootFile = "IHM-schema-6.pmtiles";
+                const areaFile = "IHM-schema+israel-and-palestine.pmtiles";
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
+                    [MAP_FILE, legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                await initialize(service, mockBackend, store, {});
+                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+                expect(downloadedTiles[PmTilesService.LEGACY_ROOT_KEY].map(f => f.fileName)).toEqual([legacyRootFile]);
+                expect(downloadedTiles[ROOT_TILE_KEY].map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
+
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
+                    [legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                await service.deleteArea(TILE_KEY);
+
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(legacyRootFile);
+                // The area still uses the new root files
+                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(ROOT_MAP_FILE);
             }
         )
     );

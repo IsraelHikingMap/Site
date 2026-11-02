@@ -119,7 +119,7 @@ export class OfflineManagementComponent {
     public readonly incompatibleAreaIds = computed<string[]>(() => {
         const downloadedTiles = this.downloadedTilesState();
         return Object.keys(downloadedTiles)
-            .filter(id => id !== PmTilesService.toTileKey())
+            .filter(id => !PmTilesService.isRootKey(id))
             .filter(id => this.offlineFilesDownloadService.getTileCompatibility(id, downloadedTiles[id]) !== "compatible")
             .sort();
     });
@@ -132,7 +132,7 @@ export class OfflineManagementComponent {
     public readonly downloadedAreaRows = computed<DownloadedAreaRow[]>(() => {
         const downloadedTiles = this.downloadedTilesState();
         const rows = Object.entries(downloadedTiles)
-            .filter(([id]) => id !== PmTilesService.toTileKey())
+            .filter(([id]) => !PmTilesService.isRootKey(id))
             .map(([id, files]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
                 this.offlineFilesDownloadService.getTileCompatibility(id, files)));
         rows.sort((a, b) =>

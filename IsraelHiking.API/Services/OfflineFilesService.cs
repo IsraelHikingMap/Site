@@ -22,9 +22,10 @@ public class OfflineFilesService : IOfflineFilesService
     private const int SLICE_TILE_ZOOM = 7;
 
     /// <summary>
-    /// The zoom level of the root (non-tiled) overview files.
+    /// The zoom level up to which the root (non-tiled) overview files hold the whole world. It is kept low so they
+    /// stay small, every downloaded area holds the zooms above it.
     /// </summary>
-    private const int ROOT_ZOOM = 6;
+    private const int ROOT_ZOOM = 4;
 
     /// <summary>
     /// The location of the styles the map is drawn with, which the client reads them from by itself.
@@ -297,7 +298,7 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// Extracts the layer name from an offline file name, dropping the zoom/tile suffix.
-    /// Tile files look like "name+7-x-y.pmtiles" and root files look like "name-6.pmtiles",
+    /// Tile files look like "name+7-x-y.pmtiles" and root files look like "name-4.pmtiles",
     /// where the layer name itself may contain '-'.
     /// </summary>
     private static string FileNameToSourceName(string fileName)
