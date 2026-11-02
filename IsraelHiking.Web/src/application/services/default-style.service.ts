@@ -97,6 +97,7 @@ export class DefaultStyleService {
         styleWithPlaceholder.layers = [
             this.createPlaceholder(this.resources.endOfBaseDrapedLayers),
             this.createPlaceholder(this.resources.endOfOverlaysDrapedLayers),
+            this.createPlaceholder(this.resources.endOfRoutesDrapedLayers),
             this.createPlaceholder(this.resources.endOfDrapedLayers),
             this.createPlaceholder(this.resources.endOfBaseLayer),
             this.createPlaceholder(this.resources.endOfOverlays),
@@ -182,8 +183,9 @@ export class DefaultStyleService {
         }
         const contourSource = styleJson.sources["Contour"];
         const multiplier = units === "metric" ? 1 : 3.28084;
+        const thresholds = units === "metric" ? "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50" : "9*1000*5000~10*500*2500~11*200*1000~12*100*500~13*40*200~14*20*100";
         delete contourSource.url;
-        contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
+        contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=${thresholds}`
         contourSource.maxzoom = 16;
     }
 

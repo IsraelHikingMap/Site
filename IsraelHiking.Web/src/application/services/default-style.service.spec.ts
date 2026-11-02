@@ -38,6 +38,7 @@ describe("DefaultStyleService", () => {
                     useValue: {
                         endOfBaseDrapedLayers: "endOfBaseDrapedLayers",
                         endOfOverlaysDrapedLayers: "endOfOverlaysDrapedLayers",
+                        endOfRoutesDrapedLayers: "endOfRoutesDrapedLayers",
                         endOfDrapedLayers: "endOfDrapedLayers",
                         endOfBaseLayer: "endOfBaseLayer",
                         endOfOverlays: "endOfOverlays",
@@ -75,6 +76,7 @@ describe("DefaultStyleService", () => {
         expect(style.layers.map(l => l.id)).toEqual([
             "endOfBaseDrapedLayers",
             "endOfOverlaysDrapedLayers",
+            "endOfRoutesDrapedLayers",
             "endOfDrapedLayers",
             "endOfBaseLayer",
             "endOfOverlays",

@@ -116,8 +116,8 @@ async function createImages(style: string, type: string) {
         console.log(err);
     }
 }
-for (const style of ["https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json", 
-    "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json"]) {
+for (const style of ["https://mapeak.com/styles/mapeak-hike.json", 
+    "https://mapeak.com/styles/mapeak-bike.json"]) {
 
     const response = await fetch(style);
     const text = await response.text();
