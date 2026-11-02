@@ -198,6 +198,9 @@ public class OfflineFilesService : IOfflineFilesService
         return (fileInfo.CreateReadStream(), fileInfo.Length);
     }
 
+    /// <inheritdoc/>
+    public string AreasFilePath => Path.GetFullPath(_options.OfflineAreasFilePath);
+
     /// <summary>
     /// Opens a file this server holds, which is not a part of the offline files folder, in order to serve it.
     /// </summary>

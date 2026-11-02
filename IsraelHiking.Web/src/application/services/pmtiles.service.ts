@@ -3,10 +3,12 @@ import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
+import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
+import type { Immutable } from "immer";
 
 import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
-import type { ApplicationState } from "../models";
+import type { ApplicationState, OfflineArea } from "../models";
 
 export const TILES_ZOOM = 7;
 
@@ -73,16 +75,43 @@ export class PmTilesService {
 
     public async getTileByType(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
         const fileName = this.getFileNameByType(z, x, y, type);
+        if (fileName == null) {
+            return new ArrayBuffer(0);
+        }
         return await this.getTileFromFile(fileName, z, x, y);
     }
 
-    private getFileNameByType(z: number, x: number, y: number, type: string): string {
-        if (z >= TILES_ZOOM) {
-            const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
-            return `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
-        } else {
-            return `${type}-${TILES_ZOOM - 1}.pmtiles`;
+    /**
+     * The file a tile is in: the root file below the zoom of the downloaded tiles, then the file of the downloaded
+     * tile it is a part of, and then the file of a downloaded area its middle is in. Null when none of them has it.
+     */
+    private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
+        if (z < TILES_ZOOM) {
+            const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
+            return downloadedTiles[PmTilesService.toTileKey()] == null ? null : `${type}-${TILES_ZOOM - 1}.pmtiles`;
         }
+        const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
+        const tileKey = PmTilesService.toTileKey(tileX, tileY);
+        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
+        if (downloadedTiles[tileKey] != null) {
+            return `${type}+${tileKey}.pmtiles`;
+        }
+        const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: x + 0.5, y: y + 0.5 }, z));
+        const areaId = this.findDownloadedAreaId(center);
+        return areaId == null ? null : `${type}+${areaId}.pmtiles`;
+    }
+
+    /**
+     * The downloaded area a point is in, that is not a tile, since the files of a tile are found by the tile itself.
+     * Where downloaded areas overlap, any of them has the point, since an area reaches a few kilometers past its border.
+     */
+    public findDownloadedAreaId(point: GeoJSON.Position): string | null {
+        const state = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const area = Object.values(state.downloadedAreas).find(downloadedArea =>
+            PmTilesService.fromTileKey(downloadedArea.properties.id) == null &&
+            state.downloadedTiles[downloadedArea.properties.id] != null &&
+            booleanPointInPolygon(point, downloadedArea as Immutable<OfflineArea> as OfflineArea));
+        return area?.properties.id ?? null;
     }
 
     /**
@@ -100,20 +129,14 @@ export class PmTilesService {
         if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed === false) {
             return false;
         }
-        let tileX = undefined;
-        let tileY = undefined;
-        if (z >= TILES_ZOOM) {
-            ({ tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
-        }
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
-        if (downloadedTiles[PmTilesService.toTileKey(tileX, tileY)] == null) {
+        const fileName = this.getFileNameByType(z, x, y, type);
+        if (fileName == null) {
             return false;
         }
-        const fileName = this.getFileNameByType(z, x, y, type);
         try {
             await this.getSource(fileName);
         } catch (ex) {
-            this.loggingService.warning(`Failed to open file ${fileName} for tile ${PmTilesService.toTileKey(tileX, tileY)} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
+            this.loggingService.warning(`Failed to open file ${fileName} for type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
             return false;
         }
         return true;
@@ -133,13 +156,10 @@ export class PmTilesService {
     }
 
     /**
-     * The tile a key was made of, null for the root key, which is not of a specific tile.
+     * The tile a key was made of, null for the root key and for the id of an area, which are not of a tile.
      */
     public static fromTileKey(tileKey: string): { tileX: number, tileY: number } | null {
-        const [tileX, tileY] = tileKey.split("-").map(Number);
-        if (!Number.isInteger(tileX) || !Number.isInteger(tileY)) {
-            return null;
-        }
-        return { tileX, tileY };
+        const match = tileKey.match(/^(\d+)-(\d+)$/);
+        return match == null ? null : { tileX: +match[1], tileY: +match[2] };
     }
 }

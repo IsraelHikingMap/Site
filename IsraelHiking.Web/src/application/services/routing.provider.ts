@@ -11,6 +11,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
+import { PmTilesService } from "./pmtiles.service";
 import { Valhalla } from "./valhalla.plugin";
 import { Urls } from "../urls";
 import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
@@ -49,6 +50,7 @@ export class RoutingProvider {
     private readonly runningContextService = inject(RunningContextService);
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
+    private readonly pmTilesService = inject(PmTilesService);
 
     public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         if (routinType === "None") {
@@ -100,9 +102,9 @@ export class RoutingProvider {
     }
 
     /**
-     * Whether the slices holding the given points were downloaded along with their routing tiles.
-     * A slice that was downloaded before offline routing existed holds no routing tiles, so it
-     * needs to be downloaded again.
+     * Whether the slices holding the given points were downloaded along with their routing tiles, or the points
+     * are in downloaded areas that were. A slice that was downloaded before offline routing existed holds no
+     * routing tiles, so it needs to be downloaded again.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
@@ -114,7 +116,8 @@ export class RoutingProvider {
                 tiles.add(`${x}-${y}`);
             }
         }
-        return Array.from(tiles).every(tile => downloadedRoutingTiles.includes(tile));
+        return Array.from(tiles).every(tile => downloadedRoutingTiles.includes(tile)) ||
+            [start, end].every(point => downloadedRoutingTiles.includes(this.pmTilesService.findDownloadedAreaId([point.lng, point.lat])));
     }
 
     /**

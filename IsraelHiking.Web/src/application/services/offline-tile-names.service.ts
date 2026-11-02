@@ -1,94 +1,64 @@
 import { inject, Service } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
-import { OverpassTurboService, type AdminRegion } from "./overpass-turbo.service";
-import { ResourcesService } from "./resources.service";
+import { OfflineAreasService } from "./offline-areas.service";
 import { LoggingService } from "./logging.service";
-import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
-import { SpatialHelper } from "./spatial.helper";
-import { SetTileNameAction } from "../reducers/offline.reducer";
-import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
+import { PmTilesService } from "./pmtiles.service";
+import { Urls } from "../urls";
+import type { ApplicationState, OfflineArea } from "../models";
 
 /**
- * Gives a downloaded tile a default name, after the region its center is in, so that the list of downloaded
- * tiles reads as places rather than coordinates. The name is stored like one the user typed, so it is looked
- * up once and does not change under the user afterwards.
+ * Gives a downloaded tile the names the server has for it, so that the list of downloaded areas reads as places
+ * rather than coordinates. The names are kept with the tile like the names of any other area, so they are looked
+ * up once and do not change under the user afterwards.
  */
 @Service()
 export class OfflineTileNamesService {
 
-    private readonly overpassTurboService = inject(OverpassTurboService);
-    private readonly resources = inject(ResourcesService);
+    private readonly httpClient = inject(HttpClient);
+    private readonly offlineAreasService = inject(OfflineAreasService);
     private readonly loggingService = inject(LoggingService);
     private readonly store = inject(Store);
 
     /**
-     * Names a tile that has no name yet. Failing to look the regions up, offline for example, leaves the
-     * tile without a name, to be tried again the next time.
+     * Names a downloaded tile that has no name yet. Failing to get its names, offline for example, leaves the tile
+     * without a name, to be tried again the next time.
      */
-    public async nameTile(tileX: number, tileY: number): Promise<void> {
-        const tileKey = PmTilesService.toTileKey(tileX, tileY);
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.tileNames)[tileKey] != null) {
+    public async nameTile(area: Immutable<OfflineArea>): Promise<void> {
+        const id = area.properties.id;
+        const tile = PmTilesService.fromTileKey(id);
+        if (tile == null || area.properties.name != null) {
             return;
         }
-        let regions: AdminRegion[];
+        let names: Record<string, string>;
         try {
-            regions = await this.overpassTurboService.getAdminRegionsInArea({
-                northEast: SpatialHelper.fromTile({ x: tileX + 1, y: tileY }, TILES_ZOOM),
-                southWest: SpatialHelper.fromTile({ x: tileX, y: tileY + 1 }, TILES_ZOOM)
-            });
+            names = await firstValueFrom(this.httpClient.get<Record<string, string>>(Urls.offlineTileName, { params: { tileX: tile.tileX, tileY: tile.tileY } }));
         } catch (ex) {
-            this.loggingService.warning(`[Offline Tile Names] Failed to get the regions of tile ${tileKey}: ${(ex as Error).message}`);
+            this.loggingService.warning(`[Offline Tile Names] Failed to get the name of tile ${id}: ${(ex as Error).message}`);
             return;
         }
-        const name = this.getRegionName(regions, SpatialHelper.fromTile({ x: tileX + 0.5, y: tileY + 0.5 }, TILES_ZOOM));
-        const tileNames = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.tileNames);
-        if (name != null && tileNames[tileKey] == null) {
-            this.store.dispatch(new SetTileNameAction(tileKey, OfflineTileNamesService.toUniqueName(name, Object.values(tileNames))));
+        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+        if (names?.name == null || downloadedAreas[id] == null || downloadedAreas[id].properties.name != null) {
+            return;
         }
+        const namesInUse = Object.values(downloadedAreas).filter(other => other.properties.id !== id).map(other => this.offlineAreasService.getName(other));
+        const suffix = OfflineTileNamesService.getUniqueSuffix(this.offlineAreasService.getName({ ...area, properties: { ...names, id } }), namesInUse);
+        const properties = Object.fromEntries(Object.entries(names).map(([key, name]) => [key, name + suffix]));
+        await this.offlineAreasService.saveDownloadedArea({ ...downloadedAreas[id], properties: { ...properties, id } });
     }
 
     /**
-     * The smallest region whose box has the center in it, or the closest one to a center that is out at
-     * sea. Only the box of a region is known, so a region next to the right one is picked now and then,
-     * which is good enough for a name the user can change.
+     * What a name another area already goes by is numbered with, which neighboring tiles can get, so that the list
+     * never shows two areas the user can not tell apart. The same number is given to the name in every language.
      */
-    private getRegionName(regions: AdminRegion[], center: LatLngAltTime): string | null {
-        const closest = regions
-            .map(region => ({ region, distance: OfflineTileNamesService.getDistanceFromBounds(center, region.bounds) }))
-            .sort((a, b) => a.distance - b.distance ||
-                OfflineTileNamesService.getArea(a.region.bounds) - OfflineTileNamesService.getArea(b.region.bounds))[0];
-        if (closest == null) {
-            return null;
+    private static getUniqueSuffix(name: string, namesInUse: string[]): string {
+        let suffix = "";
+        for (let number = 2; namesInUse.includes(name + suffix); number++) {
+            suffix = ` (${number})`;
         }
-        const name = this.getLocalName(closest.region.tags);
-        return closest.distance === 0 ? name : this.resources.nearPlace.replace("{{place}}", name);
-    }
-
-    /** The distance in degrees from a point to a box, zero when the point is in it */
-    private static getDistanceFromBounds(point: LatLngAltTime, bounds: Bounds): number {
-        const latDistance = Math.max(bounds.southWest.lat - point.lat, 0, point.lat - bounds.northEast.lat);
-        const lngDistance = Math.max(bounds.southWest.lng - point.lng, 0, point.lng - bounds.northEast.lng);
-        return Math.hypot(latDistance, lngDistance);
-    }
-
-    private static getArea(bounds: Bounds): number {
-        return (bounds.northEast.lat - bounds.southWest.lat) * (bounds.northEast.lng - bounds.southWest.lng);
-    }
-
-    /**
-     * Numbers a name another tile already has, which tiles of the same region get, so that the list
-     * never shows two tiles the user can not tell apart.
-     */
-    private static toUniqueName(name: string, namesInUse: string[]): string {
-        let uniqueName = name;
-        for (let number = 2; namesInUse.includes(uniqueName); number++) {
-            uniqueName = `${name} (${number})`;
-        }
-        return uniqueName;
-    }
-
-    private getLocalName(tags: Record<string, string>): string {
-        return tags[`name:${this.resources.getCurrentLanguageCodeSimplified()}`] ?? tags.name;
+        return suffix;
     }
 }

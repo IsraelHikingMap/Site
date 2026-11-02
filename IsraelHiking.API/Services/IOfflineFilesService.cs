@@ -35,4 +35,9 @@ public interface IOfflineFilesService
     /// </remarks>
     /// <returns>A list of file names</returns>
     Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile);
+
+    /// <summary>
+    /// The full path of the file holding the areas that can be downloaded for offline usage
+    /// </summary>
+    string AreasFilePath { get; }
 }

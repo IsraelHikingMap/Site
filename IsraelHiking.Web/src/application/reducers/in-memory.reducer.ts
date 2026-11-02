@@ -1,9 +1,9 @@
 import { State, Action, StateContext } from "@ngxs/store";
 import { Injectable } from "@angular/core";
-import { produce } from "immer";
+import { castDraft, produce, type Immutable } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, FileNameDateVersion } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, FileNameDateVersion, OfflineArea } from "../models";
 
 export class ToggleDistanceAction {
     public static readonly type = "[In Memory] ToggleDistanceAction";
@@ -57,6 +57,11 @@ export class SetDownloadedTilesAction {
 export class SetDownloadedRoutingTilesAction {
     public static readonly type = "[In Memory] SetDownloadedRoutingTilesAction";
     constructor(public readonly downloadedRoutingTiles: string[]) { }
+}
+
+export class SetDownloadedAreasAction {
+    public static readonly type = "[In Memory] SetDownloadedAreasAction";
+    constructor(public readonly downloadedAreas: Immutable<Record<string, OfflineArea>>) { }
 }
 
 @State({
@@ -151,6 +156,14 @@ export class InMemoryReducer {
     public setDownloadedRoutingTiles(ctx: StateContext<InMemoryState>, action: SetDownloadedRoutingTilesAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.downloadedRoutingTiles = action.downloadedRoutingTiles;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDownloadedAreasAction)
+    public setDownloadedAreas(ctx: StateContext<InMemoryState>, action: SetDownloadedAreasAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.downloadedAreas = castDraft(action.downloadedAreas);
             return lastState;
         }));
     }

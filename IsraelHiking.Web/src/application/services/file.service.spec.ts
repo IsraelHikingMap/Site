@@ -291,6 +291,27 @@ describe("FileService", () => {
         }
     ));
 
+    it("Should ask for a file that is sent with a body with a POST of that body", inject([FileService],
+        async (service: FileService) => {
+            const mockResponse = {
+                ok: true,
+                body: { getReader: vi.fn().mockReturnValue({ read: vi.fn().mockResolvedValue({ done: true }) }) },
+                headers: { get: vi.fn().mockReturnValue("") }
+            };
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
+            const area = { type: "Feature", properties: { id: "area" } };
+
+            await service.downloadFileToCacheAuthenticated("https://example.com/area/file.pmtiles", "file.pmtiles", "token", vi.fn(), new AbortController(), area);
+
+            expect(fetchSpy).toHaveBeenCalledWith("https://example.com/area/file.pmtiles", expect.objectContaining({
+                method: "POST",
+                body: JSON.stringify(area),
+                headers: { Authorization: "Bearer token", "Content-Type": "application/json" }
+            }));
+            fetchSpy.mockRestore();
+        }
+    ));
+
     it("Should write every byte of the chunks it gathered", inject([FileService],
         async (service: FileService) => {
             const url = "http://123.pmtiles";

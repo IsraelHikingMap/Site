@@ -246,12 +246,11 @@ export class ResourcesService {
     public notYet: string;
     public imageUploadWaiver: string;
     public noDescriptionAvailableInYourLanguage: string;
-    public clickTheMapToSelectATile: string;
-    public clickBelow: string;
-    public oneTileNeedsToBeDownloadedAgain: string;
-    public tilesNeedToBeDownloadedAgain: string;
+    public clickTheMapToSelectAnArea: string;
+    public downloadingThisAreaDeletesOldTiles: string;
+    public oneAreaNeedsToBeDownloadedAgain: string;
+    public areasNeedToBeDownloadedAgain: string;
     public updateNeededForNewFeatures: string;
-    public nearPlace: string;
     public needsToBeDownloadedAgain: string;
     public download: string;
     public translatedBy: string;
@@ -504,7 +503,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1793373291207");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1793617311900");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -702,12 +701,11 @@ export class ResourcesService {
         this.notYet = this.gettextCatalog.getString("Not yet...");
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
-        this.clickTheMapToSelectATile = this.gettextCatalog.getString("Click the map to select a tile");
-        this.clickBelow = this.gettextCatalog.getString("Click below");
-        this.oneTileNeedsToBeDownloadedAgain = this.gettextCatalog.getString("One tile needs to be downloaded again");
-        this.tilesNeedToBeDownloadedAgain = this.gettextCatalog.getString("{{count}} tiles need to be downloaded again");
+        this.clickTheMapToSelectAnArea = this.gettextCatalog.getString("Click the map to select an area");
+        this.downloadingThisAreaDeletesOldTiles = this.gettextCatalog.getString("Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?");
+        this.oneAreaNeedsToBeDownloadedAgain = this.gettextCatalog.getString("One area needs to be downloaded again");
+        this.areasNeedToBeDownloadedAgain = this.gettextCatalog.getString("{{count}} areas need to be downloaded again");
         this.updateNeededForNewFeatures = this.gettextCatalog.getString("Update needed for new features");
-        this.nearPlace = this.gettextCatalog.getString("Near {{place}}");
         this.needsToBeDownloadedAgain = this.gettextCatalog.getString("Needs to be downloaded again");
         this.download = this.gettextCatalog.getString("Download");
         this.translatedBy = this.gettextCatalog.getString("Translated by LTEngine, click to view original text");

@@ -363,6 +363,12 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
+    public void AreasFilePath_ShouldBeTheFullPathOfTheConfiguredFile()
+    {
+        Assert.AreEqual(Path.GetFullPath("./offline-areas.json"), _service.AreasFilePath);
+    }
+
+    [TestMethod]
     public async Task GetFileContent_JaxaRootFile_ShouldReadFromFileSystemAndNotProxy()
     {
         var fileInfo = Substitute.For<IFileInfo>();

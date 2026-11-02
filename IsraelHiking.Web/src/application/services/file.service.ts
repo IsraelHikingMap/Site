@@ -449,17 +449,22 @@ export class FileService {
      * A download that failed is logged with the file it died on and how far it got, neither of which is in
      * the error itself - without them a log only says that the download of the tile failed, and every file
      * of it is a suspect.
+     * A file that is asked for with a body, like the file of an area that is sent along, is asked for with a POST.
      */
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback,
+        abortController: AbortController, body?: unknown): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         await this.ensureOfflineCacheDirectory();
         const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
         const path = FileService.offlineCachePath(partialFileName);
         let previousPercentage = 0;
         const response = await fetch(url, {
+            method: body == null ? "GET" : "POST",
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                ...(body == null ? {} : { "Content-Type": "application/json" })
             },
+            body: body == null ? undefined : JSON.stringify(body),
             signal: abortController.signal
         });
         if (!response.ok) {
@@ -677,6 +682,32 @@ export class FileService {
         return results.files
             .filter(f => f.type === "file" && f.name.endsWith(FileService.OFFLINE_FILE_EXTENSION))
             .map(f => ({ fileName: f.name, modifiedDate: new Date(f.mtime), size: f.size }));
+    }
+
+    /** The names of the files in the data directory that end with the given suffix, like ".area.json" */
+    public async listFileNamesInDataDirectory(suffix: string): Promise<string[]> {
+        const results = await Filesystem.readdir({
+            path: "",
+            directory: Directory.Data
+        });
+        return results.files.filter(f => f.type === "file" && f.name.endsWith(suffix)).map(f => f.name);
+    }
+
+    public async writeFileInDataDirectory(fileName: string, content: string): Promise<void> {
+        await Filesystem.writeFile({
+            path: fileName,
+            data: content,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
+    }
+
+    public async renameFileInDataDirectory(fileName: string, newFileName: string): Promise<void> {
+        await Filesystem.rename({
+            from: fileName,
+            to: newFileName,
+            directory: Directory.Data
+        });
     }
 
     public async deleteFileInDataDirectory(fileName: string): Promise<void> {

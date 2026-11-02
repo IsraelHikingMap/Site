@@ -6,20 +6,10 @@ import type { GetResourceResponse } from "maplibre-gl";
 
 import { SpatialHelper } from "./spatial.helper";
 import { Urls } from "../urls";
-import type { Bounds, LatLngAltTime } from "../models";
+import type { LatLngAltTime } from "../models";
 
 type OsmResponse = {
     elements: { type: string, id: string }[];
-}
-
-type OsmRegionElement = {
-    tags: Record<string, string>;
-    bounds: { minlat: number, minlon: number, maxlat: number, maxlon: number };
-}
-
-export type AdminRegion = {
-    tags: Record<string, string>;
-    bounds: Bounds;
 }
 
 
@@ -153,24 +143,5 @@ export class OverpassTurboService {
         `;
         const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(3000)));
         return osmtogeojson(json, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection<GeoJSON.Point>;
-    }
-
-    /**
-     * The states, provinces and districts that touch an area, along with the box around each. Overpass
-     * finds them in about a second, while looking up the places in an area as large as a tile takes several.
-     */
-    public async getAdminRegionsInArea(bounds: Bounds): Promise<AdminRegion[]> {
-        const { southWest, northEast } = bounds;
-        const query = `[out:json][timeout:25];
-        rel["boundary"="administrative"]["admin_level"="4"]["name"](${southWest.lat},${southWest.lng},${northEast.lat},${northEast.lng});
-        out tags bb;`;
-        const json = await firstValueFrom(this.httpClient.post<{ elements: OsmRegionElement[] }>(Urls.overpassApi, query).pipe(timeout(30000)));
-        return json.elements.map(e => ({
-            tags: e.tags,
-            bounds: {
-                northEast: { lat: e.bounds.maxlat, lng: e.bounds.maxlon },
-                southWest: { lat: e.bounds.minlat, lng: e.bounds.minlon }
-            }
-        }));
     }
 }

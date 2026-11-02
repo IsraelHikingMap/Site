@@ -245,6 +245,7 @@ export const initialState =
         inMemoryState: {
             effectiveTheme: "light",
             downloadedTiles: {},
+            downloadedAreas: {},
             downloadedRoutingTiles: [],
             distance: false,
             following: true,
@@ -266,8 +267,7 @@ export const initialState =
         offlineState: {
             isSubscribed: false,
             uploadPoiQueue: [],
-            lastOfflineDetectedDate: null,
-            tileNames: {}
+            lastOfflineDetectedDate: null
         },
         paywallState: {
             lastPaywallShownDate: null,

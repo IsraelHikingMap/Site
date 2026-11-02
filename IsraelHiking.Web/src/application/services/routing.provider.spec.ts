@@ -13,6 +13,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
+import { PmTilesService } from "./pmtiles.service";
 import { SpatialHelper } from "./spatial.helper";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
@@ -39,6 +40,7 @@ describe("RoutingProvider", () => {
                 { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
                 { provide: RunningContextService, useValue: { isCapacitor: false } },
                 { provide: ElevationProvider, useValue: { updateHeights: () => Promise.resolve() } },
+                { provide: PmTilesService, useValue: { findDownloadedAreaId: vi.fn((): string => null) } },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -220,6 +222,26 @@ describe("RoutingProvider", () => {
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
+            }
+        )
+    );
+
+    it("Should only say that routing failed when the points are in a downloaded area with its routing tiles",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService, PmTilesService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService, pmTilesService: PmTilesService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                vi.mocked(pmTilesService.findDownloadedAreaId).mockReturnValue("israel-and-palestine");
+                store.reset({
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedRoutingTiles: ["israel-and-palestine"] }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 await promise;

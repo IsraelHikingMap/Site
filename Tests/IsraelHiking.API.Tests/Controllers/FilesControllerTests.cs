@@ -179,6 +179,18 @@ public class FilesControllerTests
     }
 
     [TestMethod]
+    public void GetOfflineAreas_ShouldServeTheAreasFile()
+    {
+        _offlineFilesService.AreasFilePath.Returns("/config/offline-areas.json");
+
+        var results = _controller.GetOfflineAreas() as PhysicalFileResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreEqual("/config/offline-areas.json", results.FileName);
+        Assert.AreEqual("application/json", results.ContentType);
+    }
+
+    [TestMethod]
     public void GetOfflineFiles_ShouldGetTheList()
     {
         _controller.SetupIdentity();
