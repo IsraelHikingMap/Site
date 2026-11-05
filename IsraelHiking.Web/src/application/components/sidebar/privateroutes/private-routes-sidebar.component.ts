@@ -34,7 +34,8 @@ import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction, BulkReplaceRoutesAction } from "../../../reducers/routes.reducer";
 import { SetOpacityAction, SetSelectedRouteAction, SetWeightAction } from "../../../reducers/route-editing.reducer";
-import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
+import { editableCopy } from "../../../reducers/editable-copy";
+import type { ApplicationState, LatLngAltTime, RouteData } from "../../../models";
 
 @Component({
     selector: "private-routes-sidebar",
@@ -188,7 +189,7 @@ export class PrivateRoutesSidebarComponent {
             return;
         }
         this.dialog.open<FileSaveDialogComponent, RouteData>(FileSaveDialogComponent, {
-            data: structuredClone(routeData) as RouteData
+            data: editableCopy(routeData)
         });
     }
 
@@ -218,7 +219,7 @@ export class PrivateRoutesSidebarComponent {
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                fullShareUrl: editableCopy(this.shareUrlsService.getSelectedShareUrl()),
                 dataContainer,
                 hasHiddenRoutes: this.routes().some(r => r.state === "Hidden")
             }

@@ -29,7 +29,8 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { RoutingType, ApplicationState, RouteData, ShareUrl } from "../models";
+import { editableCopy } from "../reducers/editable-copy";
+import type { RoutingType, ApplicationState } from "../models";
 
 const ROUTING_TYPE_BY_DIGIT: Record<string, RoutingType> = {
     "1": "Hike",
@@ -203,8 +204,8 @@ export class DrawingComponent {
     public deleteAllRoutes() {
         const presentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
         if (presentRoutes.length < 2) {
-            const history = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes.past)) as RouteData[][];
-            history.push(structuredClone(presentRoutes) as RouteData[]);
+            const history = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.routes.past));
+            history.push(editableCopy(presentRoutes));
             this.deleteAllRoutesInternal();
             this.toastService.undo(this.resources.routesDeleted, () => {
                 this.store.dispatch(new RestoreHistoryAction(history));
@@ -250,7 +251,7 @@ export class DrawingComponent {
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                fullShareUrl: editableCopy(this.shareUrlsService.getSelectedShareUrl()),
                 dataContainer: dataContainer,
                 hasHiddenRoutes: relevantRoutes.some(r => r.state === "Hidden")
             }

@@ -2,7 +2,7 @@ import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, Appli
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
 import { provideRouter, withInMemoryScrolling } from "@angular/router";
-import { provideStore, withNgxsNoopExecutionStrategy } from "@ngxs/store";
+import { provideStore, withNgxsNoopExecutionStrategy, withNgxsPlugin } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
 import { provideMarkdown } from "ngx-markdown";
@@ -27,6 +27,7 @@ import { InMemoryReducer } from "./reducers/in-memory.reducer";
 import { GpsReducer } from "./reducers/gps.reducer";
 import { OfflineReducer } from "./reducers/offline.reducer";
 import { PaywallReducer } from "./reducers/paywall.reducer";
+import { cloneActionPlugin } from "./reducers/clone-action.plugin";
 import { routes } from "./app.routes";
 
 export const appConfig: ApplicationConfig = {
@@ -50,7 +51,7 @@ export const appConfig: ApplicationConfig = {
             GpsReducer,
             OfflineReducer,
             PaywallReducer
-        ], withNgxsNoopExecutionStrategy()),
+        ], withNgxsNoopExecutionStrategy(), withNgxsPlugin(cloneActionPlugin)),
         Title,
         { provide: ErrorHandler, useClass: GlobalErrorHandler },
         provideHttpClient(

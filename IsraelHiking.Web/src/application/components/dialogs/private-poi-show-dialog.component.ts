@@ -18,6 +18,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import type { ApplicationState, LinkData, MarkerData } from "../../models";
 
 interface IPrivatePoiShowDialogData {
@@ -56,7 +57,7 @@ export class PrivatePoiShowDialogComponent {
 
     constructor() {
 
-        this.marker = structuredClone(this.data.marker) as MarkerData;
+        this.marker = editableCopy(this.data.marker);
         this.routeId = this.data.routeId;
         this.index = this.data.index;
         this.title = this.marker.title;
@@ -120,7 +121,7 @@ export class PrivatePoiShowDialogComponent {
     }
 
     public addToActiveRoute() {
-        this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteService.getSelectedRoute().id, structuredClone(this.marker)));
+        this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteService.getSelectedRoute().id, this.marker));
     }
 
     public isShowAddToActiveRoute(): boolean {

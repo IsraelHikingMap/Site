@@ -15,6 +15,7 @@ import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, RemoveShareUrlAction, AddShareUrlAction, SetShareUrlsLastModifiedDateAction } from "../reducers/share-urls.reducer";
 import { SpatialHelper } from "./spatial.helper";
+import { editableCopy } from "../reducers/editable-copy";
 import { Urls } from "../urls";
 import type { ImageAttribution, ImageAttributionProvider } from "./image-attribution.service";
 import type { ShareUrl, ApplicationState, UserPermissions, ActivityType } from "../models";
@@ -162,7 +163,7 @@ export class ShareUrlsService implements ImageAttributionProvider {
             }
             try {
                 if (fullShareUrl != null) {
-                    const shareToUpdate = structuredClone(shareUrl) as ShareUrl;
+                    const shareToUpdate = editableCopy(shareUrl);
                     shareToUpdate.start = fullShareUrl.dataContainer.routes?.[0]?.segments?.[0]?.latlngs?.[0];
                     shareToUpdate.start = shareToUpdate.start ?? SpatialHelper.getLatlngInterpolatedValue(fullShareUrl.dataContainer.northEast, fullShareUrl.dataContainer.southWest, 0.5);
                     this.store.dispatch(new UpdateShareUrlAction(shareToUpdate));

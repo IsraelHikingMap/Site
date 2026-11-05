@@ -14,6 +14,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { editableCopy } from "../reducers/editable-copy";
 import type { DataContainer, ApplicationState, RouteData, RouteDataWithoutState } from "../models";
 
 @Service()
@@ -38,7 +39,7 @@ export class DataContainerService {
         }
         const selectedRouteId = routesData.length > 0 ? routesData[0].id : null; // the default is the first newly added route
         if (keepCurrentRoutes) {
-            const currentRoutes = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes).present) as RouteData[];
+            const currentRoutes = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.routes).present);
             routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);
@@ -57,7 +58,7 @@ export class DataContainerService {
 
         const bounds = this.mapService.getMapBounds();
         const container: DataContainer = {
-            routes: structuredClone(routes) as RouteDataWithoutState[],
+            routes: editableCopy(routes),
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,

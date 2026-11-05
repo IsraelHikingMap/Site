@@ -10,7 +10,8 @@ import { ResourcesService } from "../services/resources.service";
 import { OsmUserService } from "../services/osm-user.service";
 import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
 import { initialState } from "../reducers/initial-state";
-import type { ApplicationState, CategoryType, Difficulty, PublicRoutesFilter } from "../models";
+import { editableCopy } from "../reducers/editable-copy";
+import type { ApplicationState, CategoryType, Difficulty } from "../models";
 
 @Component({
     selector: "public-routes-filter",
@@ -49,7 +50,7 @@ export class PublicRoutesFilterComponent {
     }
 
     public onFilterCategoryChange(value: CategoryType) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         if (filters.categories.includes(value)) {
             filters.categories = filters.categories.filter((x) => x !== value);
         } else {
@@ -59,7 +60,7 @@ export class PublicRoutesFilterComponent {
     }
 
     public onFilterDifficultyChange(value: Difficulty) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         if (filters.difficulty.includes(value)) {
             filters.difficulty = filters.difficulty.filter((x) => x !== value);
         } else {
@@ -77,14 +78,14 @@ export class PublicRoutesFilterComponent {
     }
 
     public onFilterLengthStartChange(value: string) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         filters.lengthRange[0] = +value;
         this.filterLengthStart.set(+value);
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }
 
     public onFilterLengthEndChange(value: string) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         filters.lengthRange[1] = +value;
         this.filterLengthEnd.set(+value);
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
@@ -95,7 +96,7 @@ export class PublicRoutesFilterComponent {
     }
 
     public clearUserFilter() {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         filters.userId = null;
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }

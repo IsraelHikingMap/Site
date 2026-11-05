@@ -11,6 +11,7 @@ import { SnappingService, SnappingPointResponse } from "../../services/snapping.
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import type { ApplicationState, MarkerData, LatLngAltTime } from "../../models";
 
 @Service()
@@ -53,13 +54,13 @@ export class RouteEditPoiInteraction {
     public handleDragEnd(latlng: LatLngAltTime, index: number) {
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
-            const markerData = structuredClone(recordedRouteState.route.markers[index]) as MarkerData;
+            const markerData = editableCopy(recordedRouteState.route.markers[index]);
             markerData.id = uuidv4();
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
             const routeData = this.selectedRouteService.getSelectedRoute();
-            const markerData = structuredClone(routeData.markers[index]) as MarkerData;
+            const markerData = editableCopy(routeData.markers[index]);
             markerData.latlng = latlng;
             this.store.dispatch(new UpdatePrivatePoiAction(routeData.id, index, markerData));
         }
@@ -81,7 +82,7 @@ export class RouteEditPoiInteraction {
 
         const snapping = this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
-            markerData = structuredClone(snapping.markerData) as MarkerData;
+            markerData = editableCopy(snapping.markerData);
         }
         this.addToSelectedRoute(markerData);
     }

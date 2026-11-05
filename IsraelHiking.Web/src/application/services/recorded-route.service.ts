@@ -16,7 +16,8 @@ import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsActio
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models";
+import { editableCopy } from "../reducers/editable-copy";
+import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute } from "../models";
 
 @Service()
 export class RecordedRouteService {
@@ -98,7 +99,7 @@ export class RecordedRouteService {
         const name = "Recorded using Mapeak at " + dateString;
         const routeData = this.routesFactory.createRouteData(name);
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        routeData.markers = structuredClone(route.markers) as MarkerData[];
+        routeData.markers = editableCopy(route.markers);
         for (const marker of routeData.markers) {
             marker.id = uuidv4();
         }
