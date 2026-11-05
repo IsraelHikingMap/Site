@@ -390,22 +390,18 @@ export class OfflineFilesDownloadService {
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
             const isRootFile = fileNameIndex < rootFilesCount;
             const fileDownloadUrl = isRootFile ? `${Urls.offlineFiles}/${serverFileName}` : OfflineFilesDownloadService.getFileUrl(area, serverFileName);
-            const body = isRootFile || PmTilesService.fromTileKey(key) != null ? null : area;
             fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
-                value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController, body)));
+                value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
         }
         await Promise.all(fileDownloadPromises);
         this.loggingService.info(`[Offline Download] Finished downloading offline files of ${key}`);
     }
 
-    /**
-     * Where the server serves a file of an area from, see FilesController. The file of an area is asked for with
-     * the area itself, while the file of a tile is asked for by the tile, which the server knows.
-     */
+    /** Where the server serves a file of an area from, see FilesController, a tile is asked for by its coordinates */
     private static getFileUrl(area: Immutable<OfflineArea>, serverFileName: string): string {
         const tile = PmTilesService.fromTileKey(area.properties.id);
         return tile == null
-            ? `${Urls.offlineArea}/${serverFileName}`
+            ? `${Urls.offlineArea}/${area.properties.id}/${serverFileName}`
             : `${Urls.offlineFiles}/${serverFileName}?tileX=${tile.tileX}&tileY=${tile.tileY}`;
     }
 
@@ -498,14 +494,15 @@ export class OfflineFilesDownloadService {
             params.lastModified = lastModifiedString;
         }
         const tile = area == null ? null : PmTilesService.fromTileKey(key);
+        if (area == null || tile != null) {
+            params.routingTile = "true";
+        }
         if (tile != null) {
             params.tileX = tile.tileX.toString();
             params.tileY = tile.tileY.toString();
         }
-        params.routingTile = "true";
-        const request = area != null && tile == null
-            ? this.httpClient.post<Record<string, string>>(Urls.offlineArea, area, { params: params })
-            : this.httpClient.get<Record<string, string>>(Urls.offlineFiles, { params: params });
+        const url = area != null && tile == null ? `${Urls.offlineArea}/${key}` : Urls.offlineFiles;
+        const request = this.httpClient.get<Record<string, string>>(url, { params: params });
         const fileNames = await firstValueFrom(request.pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded ` +
             `for ${key === PmTilesService.toTileKey() ? "the root files" : key}, ` +

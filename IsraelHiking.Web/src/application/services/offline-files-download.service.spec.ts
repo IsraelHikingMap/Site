@@ -570,7 +570,7 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should send the area along with every request for its files and keep it on the device after them",
+    it("Should ask for the files of an area by its id, routing tiles included, and keep the area on the device after them",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
                 offlineAreasService: OfflineAreasService) => {
@@ -589,15 +589,15 @@ describe("OfflineFilesDownloadService", () => {
                 const promise = service.downloadArea(area);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
-                const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.offlineArea));
+                const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`));
                 expect(service.downloadInProgress()).toEqual({ area, progress: 0 });
                 areaRequest.flush({ [areaFile]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
-                expect(areaRequest.request.method).toBe("POST");
-                expect(areaRequest.request.body).toEqual(area);
+                expect(areaRequest.request.method).toBe("GET");
+                expect(areaRequest.request.params.has("routingTile")).toBe(false);
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    `${Urls.offlineArea}/${areaFile}`, areaFile, "token", expect.any(Function), expect.any(AbortController), area);
+                    `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, areaFile, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(area);
                 expect(vi.mocked(offlineAreasService.saveDownloadedArea).mock.invocationCallOrder[0])
@@ -625,7 +625,7 @@ describe("OfflineFilesDownloadService", () => {
                 const promise = service.downloadArea(area);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, false, {});
-                (await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.offlineArea))).flush({ "IHM-schema+israel-and-palestine.pmtiles": "2026-06-01" });
+                (await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`))).flush({ "IHM-schema+israel-and-palestine.pmtiles": "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
@@ -707,7 +707,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(await promise).toBe("downloaded");
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledTimes(1);
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    expect.stringContaining(SERVER_ROUTING_TILES_FILE), ROUTING_TILES_FILE, "token", expect.any(Function), expect.any(AbortController), null);
+                    expect.stringContaining(SERVER_ROUTING_TILES_FILE), ROUTING_TILES_FILE, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(MAP_FILE);
             }
         )

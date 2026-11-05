@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Features;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -177,18 +176,17 @@ public class FilesController : ControllerBase
     /// <summary>
     /// List outdated offline files of an area
     /// </summary>
-    /// <remarks>Like the list of the files of a tile, for an area the client sends, where the files are cut out of the
-    /// whole map along its polygon. The area is sent rather than referred to, since the areas of offline/areas can
-    /// change after it was downloaded and an area the user marked is not one of them. Requires an entitled
-    /// (subscribed) user. Not implemented yet.</remarks>
-    /// <param name="area">The area, its polygon and its "id"</param>
+    /// <remarks>Like the list of the files of a tile, for one of the areas of offline/areas, routing tiles included.
+    /// An area that is changed gets a new id, so an id that is no longer in offline/areas can not be updated, and the
+    /// client has the user delete it and download another area instead. Requires an entitled (subscribed) user.
+    /// Not implemented yet.</remarks>
+    /// <param name="areaId">The id of the area, as offline/areas has it</param>
     /// <param name="lastModified">The last time this area was downloaded</param>
-    /// <param name="routingTile">Whether the client can handle the offline routing files</param>
     /// <returns>The names of the files that changed since then, and when they did</returns>
-    [HttpPost]
-    [Route("offline/area")]
+    [HttpGet]
+    [Route("offline/area/{areaId}")]
     [Authorize]
-    public IActionResult GetOfflineAreaFiles([FromBody] IFeature area, [FromQuery] DateTime lastModified, [FromQuery] bool routingTile = false)
+    public IActionResult GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified)
     {
         return StatusCode(StatusCodes.Status501NotImplemented);
     }
@@ -196,15 +194,15 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Download an offline file of an area
     /// </summary>
-    /// <remarks>Returns the content stream of one of the files listed for an area, which is sent again along with it.
-    /// Requires an entitled (subscribed) user. Not implemented yet.</remarks>
-    /// <param name="id">The name of the file</param>
-    /// <param name="area">The area, its polygon and its "id"</param>
+    /// <remarks>Returns the content stream of one of the files listed for an area. Requires an entitled (subscribed)
+    /// user. Not implemented yet.</remarks>
+    /// <param name="areaId">The id of the area, as offline/areas has it</param>
+    /// <param name="fileName">The name of the file</param>
     /// <returns>A file stream</returns>
-    [HttpPost]
-    [Route("offline/area/{id}")]
+    [HttpGet]
+    [Route("offline/area/{areaId}/{fileName}")]
     [Authorize]
-    public IActionResult GetOfflineAreaFile(string id, [FromBody] IFeature area)
+    public IActionResult GetOfflineFileForArea(string areaId, string fileName)
     {
         return StatusCode(StatusCodes.Status501NotImplemented);
     }

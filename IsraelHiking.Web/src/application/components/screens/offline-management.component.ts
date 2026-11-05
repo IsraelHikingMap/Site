@@ -41,8 +41,11 @@ export type DownloadedAreaRow = {
     /** When the area was last downloaded, null while it is downloaded for the first time */
     downloadedDate: Date;
     compatibility: TileCompatibility;
-    /** Whether this is a tile that was downloaded before areas existed, which can no longer be updated, only replaced by an area */
-    isTile: boolean;
+    /**
+     * Whether the server still offers the area, an area whose shape changed got a new id and a tile that was downloaded
+     * before areas existed never had one, so either can only be deleted and replaced by an area the server offers.
+     */
+    canBeUpdated: boolean;
 };
 
 @Component({
@@ -75,6 +78,7 @@ export class OfflineManagementComponent {
     public readonly baseLayerData: EditableLayer;
     /** The areas that can be downloaded, fetched every time the screen is opened, so that the ones shown are the ones the server offers now */
     public readonly areas = signal<OfflineArea[]>([]);
+    private readonly offeredAreaIds = computed(() => new Set(this.areas().map(area => area.properties.id)));
     /** The area the user selected, one the server offers or one that was downloaded */
     public readonly selectedArea = signal<Immutable<OfflineArea>>(null);
     /**
@@ -145,8 +149,8 @@ export class OfflineManagementComponent {
         return rows;
     });
 
-    public readonly isSelectedTile = computed(() =>
-        this.selectedArea() != null && PmTilesService.fromTileKey(this.selectedArea().properties.id) != null);
+    public readonly isSelectedUpdatable = computed(() =>
+        this.selectedArea() != null && this.offeredAreaIds().has(this.selectedArea().properties.id));
 
     public readonly isSelectedIncompatible = computed(() =>
         this.selectedArea() != null && this.incompatibleAreaIds().includes(this.selectedArea().properties.id));
@@ -367,7 +371,7 @@ export class OfflineManagementComponent {
             name: (area == null ? null : this.offlineAreasService.getName(area)) ?? this.getDefaultName(id),
             downloadedDate,
             compatibility,
-            isTile: PmTilesService.fromTileKey(id) != null
+            canBeUpdated: this.offeredAreaIds().has(id)
         };
     }
 

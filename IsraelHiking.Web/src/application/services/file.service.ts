@@ -449,22 +449,17 @@ export class FileService {
      * A download that failed is logged with the file it died on and how far it got, neither of which is in
      * the error itself - without them a log only says that the download of the tile failed, and every file
      * of it is a suspect.
-     * A file that is asked for with a body, like the file of an area that is sent along, is asked for with a POST.
      */
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback,
-        abortController: AbortController, body?: unknown): Promise<void> {
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
         await this.ensureOfflineCacheDirectory();
         const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
         const path = FileService.offlineCachePath(partialFileName);
         let previousPercentage = 0;
         const response = await fetch(url, {
-            method: body == null ? "GET" : "POST",
             headers: {
-                Authorization: `Bearer ${token}`,
-                ...(body == null ? {} : { "Content-Type": "application/json" })
+                Authorization: `Bearer ${token}`
             },
-            body: body == null ? undefined : JSON.stringify(body),
             signal: abortController.signal
         });
         if (!response.ok) {

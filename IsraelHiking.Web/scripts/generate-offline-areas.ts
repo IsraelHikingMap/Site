@@ -1,6 +1,7 @@
 "use strict";
 
 import fs from "fs";
+import { createHash } from "crypto";
 import { bbox } from "@turf/bbox";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
 import { simplify } from "@turf/simplify";
@@ -57,7 +58,7 @@ const features = areas.map(region => {
         console.log(`No OSM boundary for ${region.properties.id}, it is named "${getEnglishName(region.properties.name)}" in every language`);
     }
     return toArea(region, relations);
-}).sort((a, b) => a.properties.id.localeCompare(b.properties.id));
+}).sort((a, b) => a.properties.name.localeCompare(b.properties.name));
 
 fs.writeFileSync(OUTPUT_FILE_PATH, `{"type":"FeatureCollection","features":[\n${features.map(feature => JSON.stringify(feature)).join(",\n")}\n]}\n`);
 console.log(`Wrote ${features.length} areas to ${OUTPUT_FILE_PATH}, ${Math.round(fs.statSync(OUTPUT_FILE_PATH).size / 1024)} KB`);
@@ -219,13 +220,16 @@ function isOverlapping(bounds: GeoJSON.BBox, otherBounds: GeoJSON.BBox): boolean
 /**
  * An area as the client gets it: its names in the languages of the app, where "name" is the English one, and
  * a region of a few countries is named after all of them, in the order the Geofabrik name lists them.
- * The id of a region that is a part of a country, like "us/texas", is made into one that can be a file name.
+ * The id is a hash of the polygon, so an area whose shape changes gets a new id and the client stops offering to
+ * update the old one, which the server can no longer cut the same way, see GetOfflineFilesForArea.
  */
 function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feature<GeoJSON.Geometry, Record<string, string>> {
     const englishName = getEnglishName(region.properties.name);
     const ordered = [...relations].sort((a, b) => getNamePosition(englishName, a) - getNamePosition(englishName, b));
+    const geometry = simplify(region, { tolerance: SIMPLIFY_TOLERANCE, highQuality: true }).geometry;
+    const roundedGeometry = { ...geometry, coordinates: roundCoordinates(geometry.coordinates) };
     const properties: Record<string, string> = {
-        id: region.properties.id.replace("/", "-"),
+        id: createHash("sha256").update(JSON.stringify(roundedGeometry)).digest("hex").substring(0, 16),
         name: ordered.length === 0 ? englishName : ordered.map(relation => relation.tags["name:en"] ?? relation.tags.name).join(" – ")
     };
     for (const language of LANGUAGES.filter(language => language !== "en")) {
@@ -233,8 +237,7 @@ function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feat
             properties[`name:${language}`] = ordered.map(relation => relation.tags[`name:${language}`] ?? relation.tags["name:en"] ?? relation.tags.name).join(" – ");
         }
     }
-    const geometry = simplify(region, { tolerance: SIMPLIFY_TOLERANCE, highQuality: true }).geometry;
-    return { type: "Feature", properties, geometry: { ...geometry, coordinates: roundCoordinates(geometry.coordinates) } };
+    return { type: "Feature", properties, geometry: roundedGeometry };
 }
 
 function getNamePosition(englishName: string, relation: OsmRelation): number {
