@@ -66,7 +66,7 @@ each one, writes `__MISSING__` into every language but `en-US` for a string it h
 and bumps the `?sign=` timestamp in `resources.service.ts` so clients reload the new files.
 
 To add or change a string, edit `resources.service.ts`, run `npm run extract` and then fill in the
-`__MISSING__` values in `ar.json`, `es.json`, `he.json` and `ru.json`. Never add a key straight to a
+`__MISSING__` values in every other language file in `src/translations`. Never add a key straight to a
 json file - a key with no `getString` behind it is dropped on the next run.
 
 The English string is also the lookup key, so rewording one is a rename: the old key disappears from
