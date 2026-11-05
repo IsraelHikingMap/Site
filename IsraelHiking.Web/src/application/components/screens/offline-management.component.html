@@ -112,11 +112,23 @@
                   'line-width': 1
               }">
             </mgl-layer>
-            <mgl-geojson-source id="download-tiles" [data]="downloadedAreasFeatures()">
+            <mgl-geojson-source id="downloaded-areas" [data]="downloadedAreasFeatures()">
             </mgl-geojson-source>
             <mgl-geojson-source id="currnet-location" [data]="currentLocation">
             </mgl-geojson-source>
-            <mgl-layer id="download-tiles-border" type="line" source="download-tiles"
+            <mgl-layer id="downloaded-areas-fill" type="fill" source="downloaded-areas" [paint]="{
+                  'fill-color': ['get', 'color'],
+                  'fill-opacity': 0.2
+              }">
+            </mgl-layer>
+            <mgl-layer id="downloaded-areas-casing" type="line" source="downloaded-areas" [layout]="{
+                  'line-join': 'round'
+              }" [paint]="{
+                  'line-color': 'white',
+                  'line-width': 7
+              }">
+            </mgl-layer>
+            <mgl-layer id="downloaded-areas-border" type="line" source="downloaded-areas"
                 [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
                   'line-cap': 'round',
                   'line-join': 'round'
@@ -125,7 +137,7 @@
                   'line-width': 3
               }">
             </mgl-layer>
-            <mgl-layer id="download-tiles-border-incompatible" type="line" source="download-tiles"
+            <mgl-layer id="downloaded-areas-border-incompatible" type="line" source="downloaded-areas"
                 [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
                   'line-cap': 'butt',
                   'line-join': 'round'
@@ -135,7 +147,7 @@
                   'line-dasharray': [2, 1]
               }">
             </mgl-layer>
-            <mgl-layer id="download-tiles-text" type="symbol" source="download-tiles" [minzoom]="4" [layout]="{
+            <mgl-layer id="downloaded-areas-text" type="symbol" source="downloaded-areas" [minzoom]="4" [layout]="{
                   'text-field': ['get', 'label'],
                   'text-font': ['Noto Sans Regular'],
                   'text-size': ['get', 'textSize'],
@@ -176,9 +188,9 @@
                   'text-halo-width': 2
               }">
             </mgl-layer>
-            <mgl-geojson-source id="in-progress-tile" [data]="inProgress()">
+            <mgl-geojson-source id="in-progress-area" [data]="inProgress()">
             </mgl-geojson-source>
-            <mgl-layer id="in-progress-tile-border" type="line" source="in-progress-tile" [layout]="{
+            <mgl-layer id="in-progress-area-border" type="line" source="in-progress-area" [layout]="{
                   'line-cap': 'round', 
                   'line-join': 'round'
               }" [paint]="{
@@ -186,7 +198,7 @@
                   'line-width': 3
               }">
             </mgl-layer>
-            <mgl-layer id="in-progress-tile-text" type="symbol" source="in-progress-tile" [minzoom]="4"
+            <mgl-layer id="in-progress-area-text" type="symbol" source="in-progress-area" [minzoom]="4"
                 [filter]="['has', 'label']" [layout]="{
                   'text-field': ['get', 'label'],
                   'text-font': ['Noto Sans Regular'],
@@ -198,7 +210,7 @@
                   'text-halo-width': 2
               }">
             </mgl-layer>
-            <mgl-layer id="in-progress-tile-fill" type="fill" source="in-progress-tile"
+            <mgl-layer id="in-progress-area-fill" type="fill" source="in-progress-area"
                 [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
                   'fill-color': 'rgba(0, 128, 128, 0.5)'
               }">
