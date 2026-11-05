@@ -170,7 +170,7 @@ public class FilesController : ControllerBase
     [Route("offline/areas")]
     public IActionResult GetOfflineAreas()
     {
-        return PhysicalFile(_offlineFilesService.AreasFilePath, "application/json");
+        return File(_offlineFilesService.GetAreasContent(), "application/json");
     }
 
     /// <summary>

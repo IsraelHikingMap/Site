@@ -36,6 +36,7 @@ public class OfflineFilesServiceTests
     private OfflineFilesService _service;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private string _valhallaProfilesFilePath;
+    private string _offlineAreasFilePath;
 
     [TestInitialize]
     public void TestInitialize()
@@ -44,13 +45,16 @@ public class OfflineFilesServiceTests
         SetupStyleResponse(Style);
         _valhallaProfilesFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         File.WriteAllText(_valhallaProfilesFilePath, "{ \"foot\": {} }");
+        _offlineAreasFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllText(_offlineAreasFilePath, "{ \"type\": \"FeatureCollection\", \"features\": [] }");
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData
         {
             OnTheFlyFilesAddress = OnTheFlyAddress,
             OnTheFlyDemAddress = OnTheFlyDemAddress,
             RoutingTilesAddress = RoutingTilesAddress,
-            ValhallaProfilesFilePath = _valhallaProfilesFilePath
+            ValhallaProfilesFilePath = _valhallaProfilesFilePath,
+            OfflineAreasFilePath = _offlineAreasFilePath
         });
         _service = new OfflineFilesService(_remoteFileFetcherGateway, options, Substitute.For<ILogger>());
     }
@@ -59,6 +63,7 @@ public class OfflineFilesServiceTests
     public void TestCleanup()
     {
         File.Delete(_valhallaProfilesFilePath);
+        File.Delete(_offlineAreasFilePath);
     }
 
     private void SetupStyleResponse(string style)
@@ -294,8 +299,10 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
-    public void AreasFilePath_ShouldBeTheFullPathOfTheConfiguredFile()
+    public void GetAreasContent_ShouldBeReadFromTheConfiguredPath()
     {
-        Assert.AreEqual(Path.GetFullPath("./offline-areas.json"), _service.AreasFilePath);
+        using var reader = new StreamReader(_service.GetAreasContent());
+
+        Assert.AreEqual(File.ReadAllText(_offlineAreasFilePath), reader.ReadToEnd());
     }
 }
