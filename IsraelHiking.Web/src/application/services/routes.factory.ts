@@ -3,6 +3,7 @@ import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
 
+import { editableCopy } from "../reducers/editable-copy";
 import type { RouteDataWithoutState, ApplicationState, RouteData } from "../models";
 
 @Service()
@@ -49,7 +50,7 @@ export class RoutesFactory {
 
     public createRouteDataAddMissingFields(routeData: Immutable<RouteDataWithoutState>, color: string): RouteData {
         const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
-        const route = structuredClone(routeData) as RouteData;
+        const route = editableCopy(routeData) as RouteData;
         route.color = route.color || color;
         route.opacity = route.opacity || routeEditingState.opacity;
         route.weight = route.weight || routeEditingState.weight;
@@ -71,7 +72,7 @@ export class RoutesFactory {
      * The route and every one of its markers get a new id, since both are used to tell them apart.
      */
     public createDuplicateRouteData(routeData: Immutable<RouteData>, name: string, color: string): RouteData {
-        const route = structuredClone(routeData) as RouteData;
+        const route = editableCopy(routeData);
         route.id = this.generateRandomId();
         route.name = name;
         route.color = color;

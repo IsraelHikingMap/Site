@@ -12,6 +12,7 @@ import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import type {
     ApplicationState,
     LatLngAltTime,
@@ -304,14 +305,14 @@ export class RouteEditRouteInteraction {
         const index = this.getPointIndex();
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
+        const segment = editableCopy(routeData.segments[index]);
         if (routeData.segments.length === 1) {
             segment.latlngs = [latlng, latlng];
             segment.routePoint = latlng;
             segment.routingType = routingType;
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [segment]));
         } else if (index === 0) {
-            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            const nextSegment = editableCopy(routeData.segments[index + 1]);
             nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
             const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
@@ -331,7 +332,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = latlng;
             segment.routingType = routingType;
             await this.runRouting(previousSegment.routePoint, segment);
-            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            const nextSegment = editableCopy(routeData.segments[index + 1]);
             nextSegment.routingType = routingType;
             await this.runRouting(segment.routePoint, nextSegment);
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
@@ -341,7 +342,7 @@ export class RouteEditRouteInteraction {
     private async updateRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
+        const segment = editableCopy(routeData.segments[index]);
         const middleSegment = this.createRouteSegment(latlng, []);
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
@@ -351,7 +352,7 @@ export class RouteEditRouteInteraction {
     private splitRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
+        const segment = editableCopy(routeData.segments[index]);
         const newLatlngs = SpatialHelper.splitLine(latlng, segment.latlngs);
         segment.latlngs = newLatlngs.end;
         const middleSegment = this.createRouteSegment(latlng, newLatlngs.start);

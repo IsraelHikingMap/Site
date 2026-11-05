@@ -28,6 +28,7 @@ import { isDeleteKey, isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATE
 import { AnalyticsService } from "../../services/analytics.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import { Urls } from "../../urls";
 import type { LinkData, MarkerDataWithoutId, ApplicationState, MarkerData } from "../../models";
 
@@ -99,7 +100,7 @@ export class PrivatePoiEditDialogComponent implements AfterViewInit {
         }
         this.routeId = this.data.routeId;
         this.markerIndex = this.data.index;
-        this.marker = structuredClone(this.data.marker) as MarkerData;
+        this.marker = editableCopy(this.data.marker) as MarkerData;
         this.markerType.set(this.marker.type);
         this.title.set(this.marker.title);
         this.description.set(this.marker.description);

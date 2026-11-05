@@ -28,6 +28,7 @@ import {
     AddPrivatePoiAction,
     ChangeRouteStateAction
 } from "../reducers/routes.reducer";
+import { editableCopy } from "../reducers/editable-copy";
 import type {
     RouteData,
     ApplicationState,
@@ -339,8 +340,8 @@ export class SelectedRouteService {
         if (SpatialHelper.getDistanceInMeters(closestRouteLatLngToCheck, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
-        const firstPart = structuredClone(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments) as RouteSegmentData[];
-        const secondPart = structuredClone(isSelectedRouteSecond ? selectedRoute.segments : closestRoute.segments) as RouteSegmentData[];
+        const firstPart = editableCopy(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments);
+        const secondPart = editableCopy(isSelectedRouteSecond ? selectedRoute.segments : closestRoute.segments);
 
         // remove first segment (which is a signle point):
         secondPart.splice(0, 1);
@@ -357,7 +358,7 @@ export class SelectedRouteService {
     private reverseRouteInternal(route: Immutable<RouteData>): RouteData {
         let segments = [];
         if (route.segments.length === 0) {
-            return structuredClone(route) as RouteData;
+            return editableCopy(route);
         }
         for (let segmentIndex = 0; segmentIndex < route.segments.length - 1; segmentIndex++) {
             const currentSegment = { ...route.segments[segmentIndex] };

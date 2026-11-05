@@ -6,7 +6,8 @@ import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ImageAttribution, ImageAttributionService } from "../services/image-attribution.service";
 import { ResourcesService } from "../services/resources.service";
 import { SetPublicRoutesFilterAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState, PublicRoutesFilter } from "../models";
+import { editableCopy } from "../reducers/editable-copy";
+import type { ApplicationState } from "../models";
 
 @Component({
     selector: "image-attribution",
@@ -38,7 +39,7 @@ export class ImageAttributionComponent implements OnInit, OnChanges {
     }
 
     filterByUserId(userId: string) {
-        const filters = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter)) as PublicRoutesFilter;
+        const filters = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter));
         filters.userId = userId;
         this.store.dispatch(new SetPublicRoutesFilterAction(filters));
     }

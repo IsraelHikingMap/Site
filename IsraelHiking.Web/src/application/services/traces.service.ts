@@ -10,6 +10,7 @@ import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
+import { editableCopy } from "../reducers/editable-copy";
 import type { Trace, ApplicationState, DataContainer, RouteDataWithoutState } from "../models";
 
 type OsmTrace = {
@@ -104,7 +105,7 @@ export class TracesService {
                     lng: traceJson.lon
                 }
             } as Trace));
-            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local").map(t => structuredClone(t) as Trace));
+            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local").map(t => editableCopy(t)));
             const serverTracesMap = serverTraces.reduce((acc, trace) => {
                 acc[trace.id] = trace;
                 return acc;
@@ -147,7 +148,7 @@ export class TracesService {
             this.loggingService.info(`[Traces] Got trace from state: ${traceId}`);
             return {
                 ...trace,
-                dataContainer: structuredClone(traceFromState.dataContainer) as DataContainer
+                dataContainer: editableCopy(traceFromState.dataContainer)
             };
         }
 
