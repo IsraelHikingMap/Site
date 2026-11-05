@@ -6,13 +6,13 @@ import { switchMap, map, filter, take, catchError } from "rxjs/operators";
 import { AsyncPipe } from "@angular/common";
 
 @Component({
-    selector: "secured-image",
+    selector: "trace-thumbnail",
     template: `
-    <img [src]="dataUrl$|async" loading="lazy" alt="" class="float-end w-1/6 h-auto object-cover block ps-2 rounded-2xl"/>
+    <img [src]="dataUrl$|async" loading="lazy" alt="" class="w-full h-full object-cover block"/>
   `,
     imports: [AsyncPipe]
 })
-export class SecuredImageComponent implements OnChanges, AfterViewInit {
+export class TraceThumbnailComponent implements OnChanges, AfterViewInit {
     // This code block just creates an rxjs stream from the src
     // this makes sure that we can handle source changes
     // or even when the component gets destroyed

@@ -43,68 +43,73 @@
         </div>
         @for (trace of filteredTraces(); track trace.id) {
         <div [id]="'trace-' + trace.id">
-            <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
-            <h4 class="m-2">
-                <button mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click" analyticsCategory="Traces"
-                    analyticsLabel="Open trace menu">
+            <div (click)="traceMenuTrigger.openMenu()" analyticsOn="click" analyticsCategory="Traces"
+                analyticsLabel="Open trace menu"
+                class="flex flex-row items-center gap-3 p-2 text-on-surface border-b border-outline-variant hover:bg-on-surface/5 cursor-pointer">
+                <trace-thumbnail [src]="trace.imageUrl"
+                    class="block shrink-0 size-20 rounded-xl overflow-hidden"></trace-thumbnail>
+                <div class="flex flex-col flex-1 min-w-0 gap-1">
+                    <div class="font-medium break-words">
+                        <highlighted-text [text]="getTraceDisplayName(trace)" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    <div class="text-sm">
+                        {{trace.timeStamp | date:resources.getDateFormat()}} · {{getVisibilityTranslation(trace.visibility)}}
+                    </div>
+                    @if (trace.tagsString) {
+                    <div class="text-sm break-words">
+                        <highlighted-text [text]="trace.tagsString" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    }
+                </div>
+                <button mat-icon-button type="button" [matMenuTriggerFor]="traceMenu" #traceMenuTrigger="matMenuTrigger"
+                    class="shrink-0" [attr.aria-label]="resources.more">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
-                <mat-menu #shareMenu="matMenu">
-                    @if (canUploadToOsm(trace)) {
-                    <button mat-menu-item (click)="uploadRecordingToOsm(trace)" analyticsOn="click"
-                        analyticsCategory="Traces" analyticsLabel="Upload locally recorded trace">
-                        <i class="fa icon-cloud-upload"></i>
-                        {{resources.uploadTrace}}
-                    </button>
-                    }
-                    <button mat-menu-item (click)="moveToTrace(trace.id)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Move to trace">
-                        <i class="fa icon-crosshairs"></i>
-                        {{resources.moveToRoute}}
-                    </button>
-                    <button mat-menu-item (click)="editTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Edit OSM trace properties">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.editProperties}}
-                    </button>
-                    @if (!isMobile()) {
-                    <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="editInOsm(trace)"
-                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Edit OSM trace in OSM">
-                        <i class="fa icon-map-editing fa-lg"></i>
-                        {{resources.editThisMapUsingOsm}}
-                    </button>
-                    }
-                    <button mat-menu-item (click)="addTraceToRoutes(trace)" analyticsOn="click"
-                        analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes">
-                        <i class="fa icon-plus"></i>
-                        {{resources.addToRoutes}}
-                    </button>
-                    <button mat-menu-item (click)="deleteTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Delete OSM trace">
-                        <i class="fa icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                    <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="findUnmappedRoutes(trace)"
-                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts">
-                        <i class="fa icon-search"></i>
-                        {{resources.findUnmappedRoutes}}
-                    </button>
-                </mat-menu>
-                <highlighted-text [text]="getTraceDisplayName(trace)" [searchTerm]="searchTerm()"></highlighted-text>
-            </h4>
-            <div class="ms-2">
-                {{trace.timeStamp | date:resources.getDateFormat()}}
             </div>
-            <div class="ms-2">
-                {{getVisibilityTranslation(trace.visibility)}}
-            </div>
-            <div class="ms-2">
-                <highlighted-text [text]="trace.tagsString" [searchTerm]="searchTerm()"></highlighted-text>
-            </div>
+            <mat-menu #traceMenu="matMenu" xPosition="before">
+                @if (canUploadToOsm(trace)) {
+                <button mat-menu-item (click)="uploadRecordingToOsm(trace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Upload locally recorded trace">
+                    <i class="fa icon-cloud-upload"></i>
+                    {{resources.uploadTrace}}
+                </button>
+                }
+                <button mat-menu-item (click)="moveToTrace(trace.id)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Move to trace">
+                    <i class="fa icon-crosshairs"></i>
+                    {{resources.moveToRoute}}
+                </button>
+                <button mat-menu-item (click)="editTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Edit OSM trace properties">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+                @if (!isMobile()) {
+                <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="editInOsm(trace)"
+                    analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Edit OSM trace in OSM">
+                    <i class="fa icon-map-editing fa-lg"></i>
+                    {{resources.editThisMapUsingOsm}}
+                </button>
+                }
+                <button mat-menu-item (click)="addTraceToRoutes(trace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+                <button mat-menu-item (click)="deleteTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Delete OSM trace">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+                <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="findUnmappedRoutes(trace)"
+                    analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts">
+                    <i class="fa icon-search"></i>
+                    {{resources.findUnmappedRoutes}}
+                </button>
+            </mat-menu>
         </div>
-        <div class="clear-both"></div>
         } @empty {
-        <p>{{resources.noTraces}}</p>
+        <p class="mx-2">{{resources.noTraces}}</p>
         }
         @if (loading()) {
         <mat-spinner></mat-spinner>

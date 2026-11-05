@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { ClusterPointDirective, ControlComponent, GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
-import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { DatePipe, NgClass } from "@angular/common";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
@@ -16,7 +16,7 @@ import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/
 import type { Immutable } from "immer";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
-import { SecuredImageComponent } from "../secured-image.component";
+import { TraceThumbnailComponent } from "../trace-thumbnail.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { MissingPartOverlayComponent } from "../overlays/missing-part-overlay.component";
@@ -48,7 +48,7 @@ import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "..
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, AnalyticsDirective, SecuredImageComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent]
+    imports: [Dir, MatButton, MatAnchor, MatIconButton, AnalyticsDirective, TraceThumbnailComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent]
 })
 export class TracesComponent implements OnInit {
 
