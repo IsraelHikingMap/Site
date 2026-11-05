@@ -118,10 +118,85 @@
         </div>
         @for (shareUrl of filteredShareUrls(); track shareUrl.id) {
         <div [id]="'share-url-' + shareUrl.id">
-            <share-item [shareUrl]="shareUrl" [showMenu]="true" [searchTerm]="searchTerm()"
-                (delete)="deleteShareUrl(shareUrl)" (editProperties)="openEditShareUrlDialog(shareUrl)"
-                (open)="openShareUrl(shareUrl)" (addToRoutes)="addShareUrlToRoutes(shareUrl)"
-                (moveToRoute)="moveToShare(shareUrl)"></share-item>
+            <div (click)="shareMenuTrigger.openMenu()" analyticsOn="click" analyticsCategory="Shares"
+                analyticsLabel="Open share menu"
+                class="flex flex-row items-center gap-3 p-2 text-on-surface border-b border-outline-variant hover:bg-on-surface/5 cursor-pointer">
+                <img #shareImage [src]="getImageUrl(shareUrl)" loading="lazy" alt=""
+                    (error)="shareImage.src='content/logo.png'"
+                    class="block shrink-0 size-20 rounded-xl object-cover">
+                <div class="flex flex-col flex-1 min-w-0 gap-1">
+                    <div class="font-medium break-words">
+                        <highlighted-text [text]="shareUrl.title" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    @if (shareUrl.description) {
+                    <div class="text-sm whitespace-pre-line break-words" [ngClass]="resources.getTextAlignment(shareUrl.description)">
+                        <highlighted-text [text]="shareUrl.description" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    }
+                    <div class="text-sm">
+                        @switch (shareUrl.difficulty) {
+                        @case ("Easy") {
+                        <span class="rounded-full bg-green-500 px-2"><i class="fa {{getIconFromType(shareUrl)}}"></i> {{resources.easy}}</span>
+                        }
+                        @case ("Moderate") {
+                        <span class="rounded-full bg-yellow-500 px-2"><i class="fa {{getIconFromType(shareUrl)}}"></i> {{resources.legendModerate}}</span>
+                        }
+                        @case ("Hard") {
+                        <span class="rounded-full bg-red-500 px-2 text-white"><i class="fa {{getIconFromType(shareUrl)}}"></i> {{resources.legendAdvanced}}</span>
+                        }
+                        @case ("Very Hard") {
+                        <span class="rounded-full bg-black px-2 text-white"><i class="fa {{getIconFromType(shareUrl)}}"></i> {{resources.veryHard}}</span>
+                        }
+                        }
+                    </div>
+                    @if (shareUrl.length > 0) {
+                    <div class="flex flex-row gap-3 text-sm whitespace-nowrap">
+                        <span class="whitespace-nowrap"><i class="fa icon-arrow-right"></i> {{shareUrl.length | distance}}</span>
+                        <span class="whitespace-nowrap"><i class="fa icon-arrow-up"></i> {{shareUrl.gain | distance:'elevation'}}</span>
+                        <span class="whitespace-nowrap"><i class="fa icon-arrow-down"></i> {{shareUrl.loss | distance:'elevation'}}</span>
+                    </div>
+                    }
+                    <div class="text-sm">
+                        {{shareUrl.lastModifiedDate | date:resources.getDateFormat()}}@if (shareUrl.public) { · {{resources.public}}}
+                    </div>
+                </div>
+                <button mat-icon-button type="button" [matMenuTriggerFor]="shareMenu" #shareMenuTrigger="matMenuTrigger"
+                    class="shrink-0" [attr.aria-label]="resources.more">
+                    <i class="fa icon-ellipsis-v"></i>
+                </button>
+            </div>
+            <mat-menu #shareMenu="matMenu" xPosition="before">
+                <button mat-menu-item (click)="moveToShare(shareUrl)" analyticsOn="click" analyticsCategory="Shares"
+                    analyticsLabel="Share move to route">
+                    <i class="fa icon-crosshairs"></i>
+                    {{resources.moveToRoute}}
+                </button>
+                <button mat-menu-item (click)="openEditShareUrlDialog(shareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Share edit properties">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+                <button mat-menu-item (click)="openShareUrl(shareUrl)" analyticsOn="click" analyticsCategory="Shares"
+                    analyticsLabel="Share open">
+                    <i class="fa icon-external-link-square"></i>
+                    {{resources.openSavedRoute}}
+                </button>
+                <button mat-menu-item (click)="addShareUrlToRoutes(shareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Share add to routes">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+                <button mat-menu-item (click)="openShareDialog(shareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Share open share dialog">
+                    <i class="fa icon-share-alt"></i>
+                    {{resources.share}}
+                </button>
+                <button mat-menu-item (click)="deleteShareUrl(shareUrl)" analyticsOn="click"
+                    analyticsCategory="Shares" analyticsLabel="Share delete">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+            </mat-menu>
         </div>
         } @empty {
         <p class="mx-2">{{resources.noSavedRoutes}}</p>

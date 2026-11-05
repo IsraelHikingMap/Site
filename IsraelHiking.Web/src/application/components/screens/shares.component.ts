@@ -1,9 +1,9 @@
 import { Component, DestroyRef, inject, OnInit, ViewEncapsulation, signal } from "@angular/core";
-import { NgClass } from "@angular/common";
+import { DatePipe, NgClass } from "@angular/common";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
-import { MatButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
@@ -18,13 +18,16 @@ import { ControlComponent, MapComponent, MarkerComponent } from "@maplibre/ngx-m
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
-import { ShareItemComponent } from "../share-item.component";
+import { HighlightedTextComponent } from "../highlighted-text.component";
+import { ShareShowDialogComponent } from "../dialogs/share-show-dialog.component";
 import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
+import { DistancePipe } from "../../pipes/distance.pipe";
 import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
@@ -41,7 +44,7 @@ import type { ApplicationState, ShareUrl } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, ShareItemComponent, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);
@@ -54,7 +57,7 @@ export class SharesComponent implements OnInit {
     public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly filter: Record<string, string[]> = {
-        difficulty: ["Easy", "Moderate", "Hard", "Unknown"],
+        difficulty: ["Easy", "Moderate", "Hard", "Very Hard", "Unknown"],
         type: ["Biking", "Hiking", "4x4", "Unknown"]
     };
 
@@ -178,6 +181,17 @@ export class SharesComponent implements OnInit {
 
     public getIconFromType(shareUrl: Immutable<ShareUrl>) {
         return this.shareUrlsService.getIconFromType(shareUrl.type);
+    }
+
+    public getImageUrl(shareUrl: Immutable<ShareUrl>) {
+        return this.shareUrlsService.getImageUrlFromShareId(shareUrl.id, 256, 256);
+    }
+
+    public openShareDialog(shareUrl: Immutable<ShareUrl>) {
+        this.dialog.open<ShareShowDialogComponent, Immutable<ShareUrl>>(ShareShowDialogComponent, {
+            data: shareUrl,
+            width: "480px"
+        });
     }
 
     public deleteShareUrl(shareUrl: Immutable<ShareUrl>) {
