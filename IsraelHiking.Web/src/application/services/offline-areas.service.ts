@@ -14,7 +14,7 @@ import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
 import { SpatialHelper } from "./spatial.helper";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState, OfflineArea } from "../models";
+import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
 /**
  * The areas that can be downloaded for offline usage and the ones that were. A downloaded area is kept on the
@@ -59,8 +59,8 @@ export class OfflineAreasService {
     }
 
     /**
-     * Reads the areas that are kept on the device into the state. A file that can not be read is skipped, which
-     * leaves its files listed by the id of the area until they are downloaded again.
+     * Reads the areas that are kept on the device. A file that can not be read is skipped, which leaves its files
+     * listed by the id of the area until they are downloaded again.
      */
     public async loadDownloadedAreas(): Promise<Record<string, OfflineArea>> {
         const areas: Record<string, OfflineArea> = {};
@@ -72,21 +72,24 @@ export class OfflineAreasService {
                 this.loggingService.warning(`[Offline Areas] Failed to read ${fileName}: ${(ex as Error).message}`);
             }
         }
-        this.store.dispatch(new SetDownloadedAreasAction(areas));
         return areas;
     }
 
+    /**
+     * Keeps an area in its file, and in the state when its files are already there - the files of an area that is
+     * downloaded for the first time are read into the state along with it, see updateDownloadedAreasFromDevice.
+     */
     public async saveDownloadedArea(area: Immutable<OfflineArea>): Promise<void> {
         await this.fileService.writeFileInDataDirectory(OfflineAreasService.getAreaFileName(area.properties.id), JSON.stringify(area));
-        const areas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-        this.store.dispatch(new SetDownloadedAreasAction({ ...areas, [area.properties.id]: area }));
+        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+        const downloadedArea = downloadedAreas[area.properties.id];
+        if (downloadedArea != null) {
+            this.store.dispatch(new SetDownloadedAreasAction({ ...downloadedAreas, [area.properties.id]: { ...downloadedArea, area } } as Record<string, DownloadedArea>));
+        }
     }
 
     public async deleteDownloadedArea(id: string): Promise<void> {
         await this.fileService.deleteFileInDataDirectory(OfflineAreasService.getAreaFileName(id));
-        const areas = { ...this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas) };
-        delete areas[id];
-        this.store.dispatch(new SetDownloadedAreasAction(areas));
     }
 
     /** Names a downloaded area the way the user typed it, in every language, since that is the name they will look for */

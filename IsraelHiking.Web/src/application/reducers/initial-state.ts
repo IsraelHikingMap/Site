@@ -244,9 +244,7 @@ export const initialState =
         },
         inMemoryState: {
             effectiveTheme: "light",
-            downloadedTiles: {},
             downloadedAreas: {},
-            downloadedRoutingTiles: [],
             distance: false,
             following: true,
             pannedTimestamp: null,

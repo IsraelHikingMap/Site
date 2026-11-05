@@ -15,6 +15,7 @@ import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
 import { PmTilesService } from "./pmtiles.service";
 import { SpatialHelper } from "./spatial.helper";
+import type { DownloadedArea } from "../models";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
 
@@ -22,6 +23,12 @@ const sliceKeyOf = (lat: number, lng: number) => {
     const tile = SpatialHelper.toTile({ lat, lng }, 7);
     return `${Math.floor(tile.x)}-${Math.floor(tile.y)}`;
 };
+
+/** Areas that were downloaded along with their routing tiles */
+function withRoutingTiles(...keys: string[]): Record<string, DownloadedArea> {
+    const downloadedArea: DownloadedArea = { area: null, files: [], hasRoutingTiles: true };
+    return Object.fromEntries(keys.map(key => [key, downloadedArea]));
+}
 
 describe("RoutingProvider", () => {
     beforeEach(() => {
@@ -109,7 +116,7 @@ describe("RoutingProvider", () => {
         async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: { isSubscribed: false },
-                inMemoryState: { downloadedRoutingTiles: [] }
+                inMemoryState: { downloadedAreas: {} }
             });
 
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
@@ -125,7 +132,7 @@ describe("RoutingProvider", () => {
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
                 store.reset({
                     offlineState: { isSubscribed: false },
-                    inMemoryState: { downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -142,7 +149,7 @@ describe("RoutingProvider", () => {
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
                 store.reset({
                     offlineState: { isSubscribed: false },
-                    inMemoryState: { downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -161,7 +168,7 @@ describe("RoutingProvider", () => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: false },
-                    inMemoryState: { downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -180,7 +187,7 @@ describe("RoutingProvider", () => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -199,7 +206,7 @@ describe("RoutingProvider", () => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -218,7 +225,7 @@ describe("RoutingProvider", () => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedRoutingTiles: [sliceKeyOf(32, 35), sliceKeyOf(32.001, 35.001)] }
+                    inMemoryState: { downloadedAreas: withRoutingTiles(sliceKeyOf(32, 35), sliceKeyOf(32.001, 35.001)) }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
@@ -238,7 +245,7 @@ describe("RoutingProvider", () => {
                 vi.mocked(pmTilesService.findDownloadedAreaId).mockReturnValue("israel-and-palestine");
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedRoutingTiles: ["israel-and-palestine"] }
+                    inMemoryState: { downloadedAreas: withRoutingTiles("israel-and-palestine") }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");

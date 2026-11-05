@@ -58,7 +58,7 @@ describe("DefaultStyleService", () => {
 
         TestBed.inject(Store).reset({
             configuration: { units: "metric" },
-            inMemoryState: { effectiveTheme: "light", downloadedTiles: {} }
+            inMemoryState: { effectiveTheme: "light", downloadedAreas: {} }
         });
     });
 
@@ -332,7 +332,7 @@ describe("DefaultStyleService", () => {
     it("should use the imperial multiplier for the contour source when units are imperial", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
         store.reset({
             configuration: { units: "imperial" },
-            inMemoryState: { effectiveTheme: "light", downloadedTiles: {} }
+            inMemoryState: { effectiveTheme: "light", downloadedAreas: {} }
         });
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
@@ -375,7 +375,7 @@ describe("DefaultStyleService", () => {
     it("should tag the contour source with imperial units in car mode when configured", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
         store.reset({
             configuration: { units: "imperial" },
-            inMemoryState: { effectiveTheme: "light", downloadedTiles: {} }
+            inMemoryState: { effectiveTheme: "light", downloadedAreas: {} }
         });
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
@@ -406,7 +406,7 @@ describe("DefaultStyleService", () => {
     }));
 
     it("should recolor the background and palette fills, leaving others untouched, when the theme is dark", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
-        store.reset({ configuration: { units: "metric" }, inMemoryState: { effectiveTheme: "dark", downloadedTiles: {} } });
+        store.reset({ configuration: { units: "metric" }, inMemoryState: { effectiveTheme: "dark", downloadedAreas: {} } });
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
             sources: {},
@@ -458,7 +458,7 @@ describe("DefaultStyleService", () => {
     }));
 
     it("should not recolor any layer in car mode even when the theme is dark", inject([DefaultStyleService, Store, FileService], async (service: DefaultStyleService, store: Store, fileService: FileService) => {
-        store.reset({ configuration: { units: "metric" }, inMemoryState: { effectiveTheme: "dark", downloadedTiles: {} } });
+        store.reset({ configuration: { units: "metric" }, inMemoryState: { effectiveTheme: "dark", downloadedAreas: {} } });
         (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
             version: 8,
             sources: {},

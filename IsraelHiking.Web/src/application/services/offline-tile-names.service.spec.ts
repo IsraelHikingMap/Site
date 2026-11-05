@@ -11,7 +11,7 @@ import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";
 import { InMemoryReducer, SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
-import type { ApplicationState, OfflineArea } from "../models";
+import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
 describe("OfflineTileNamesService", () => {
     let service: OfflineTileNamesService;
@@ -37,7 +37,7 @@ describe("OfflineTileNamesService", () => {
         mockBackend = TestBed.inject(HttpTestingController);
         store = TestBed.inject(Store);
         fileService = TestBed.inject(FileService);
-        store.dispatch(new SetDownloadedAreasAction({ [tile.properties.id]: tile }));
+        store.dispatch(new SetDownloadedAreasAction({ [tile.properties.id]: downloaded(tile) }));
     });
 
     it("should ask the server for the names of the tile and keep them with the tile", async () => {
@@ -55,8 +55,8 @@ describe("OfflineTileNamesService", () => {
     it("should number in every language the names another area already goes by", async () => {
         const otherTile = OfflineAreasService.createTileArea(75, 52);
         store.dispatch(new SetDownloadedAreasAction({
-            [tile.properties.id]: tile,
-            [otherTile.properties.id]: { ...otherTile, properties: { id: otherTile.properties.id, name: "Israel" } }
+            [tile.properties.id]: downloaded(tile),
+            [otherTile.properties.id]: downloaded({ ...otherTile, properties: { id: otherTile.properties.id, name: "Israel" } })
         }));
 
         const promise = service.nameTile(tile);
@@ -92,7 +92,11 @@ describe("OfflineTileNamesService", () => {
         return mockBackend.expectOne(r => r.url === Urls.offlineTileName);
     }
 
+    function downloaded(area: OfflineArea): DownloadedArea {
+        return { area, files: [], hasRoutingTiles: false };
+    }
+
     function getTile(): OfflineArea {
-        return store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[tile.properties.id] as OfflineArea;
+        return store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[tile.properties.id].area as OfflineArea;
     }
 });

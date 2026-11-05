@@ -61,7 +61,7 @@ async function initialize(service: OfflineFilesDownloadService, mockBackend: Htt
     store.reset({
         userState: { token: "token" },
         offlineState: { isSubscribed: true },
-        inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+        inMemoryState: { downloadedAreas: {} }
     });
     const promise = service.initialize();
     await flushStyles(mockBackend, hikeMinVersions, bikeMinVersions);
@@ -136,10 +136,10 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, {});
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual([MAP_FILE, "raster-dem+76-51.pmtiles"]);
-                expect(downloadedTiles[TILE_KEY][0].date).toBe(DOWNLOAD_DATE.toISOString());
-                expect(downloadedTiles[ROOT_TILE_KEY].map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual([MAP_FILE, "raster-dem+76-51.pmtiles"]);
+                expect(downloadedAreas[TILE_KEY]?.files[0].date).toBe(DOWNLOAD_DATE.toISOString());
+                expect(downloadedAreas[ROOT_TILE_KEY]?.files.map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
                 expect(fileService.clearOfflineCache).toHaveBeenCalled();
             }
         )
@@ -150,8 +150,8 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, pmTilesService: PmTilesService) => {
                 await initialize(service, mockBackend, store, {});
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
                 expect(pmTilesService.getVersion).not.toHaveBeenCalled();
             }
         )
@@ -166,8 +166,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -181,8 +181,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -196,8 +196,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { "IHM-schema": versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -211,8 +211,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { ihm: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -226,8 +226,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedAreas[ROOT_TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -241,8 +241,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedAreas[ROOT_TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -256,8 +256,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -271,8 +271,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: versionTheStyleRequires });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -286,8 +286,8 @@ describe("OfflineFilesDownloadService", () => {
                 // The hiking style is happy with the version the file is at, the bicycle one needs a newer file
                 await initialize(service, mockBackend, store, { IHM: fileVersion }, { "IHM-schema": "3" });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -298,8 +298,8 @@ describe("OfflineFilesDownloadService", () => {
                 vi.mocked(pmTilesService.getVersion).mockResolvedValue(undefined); // The file holds no version
                 await initialize(service, mockBackend, store, { IHM: "2" }); // The style requires 2
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -312,8 +312,8 @@ describe("OfflineFilesDownloadService", () => {
                 // Version 3 is required from a source that no style has, so it is required from no file
                 await initialize(service, mockBackend, store, { "a-source-that-does-not-exist": "3" });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -353,9 +353,9 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, {});
 
                 // raster-dem has tile files but no root file of its own, so the root is not missing anything
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedTiles[ROOT_TILE_KEY])).toBe("compatible");
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(ROOT_TILE_KEY, downloadedAreas[ROOT_TILE_KEY]?.files)).toBe("compatible");
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -368,8 +368,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: "2" }); // Both styles require 2
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("compatible");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("compatible");
             }
         )
     );
@@ -383,8 +383,8 @@ describe("OfflineFilesDownloadService", () => {
                 // The style on the device requires nothing, the one that was downloaded now requires 3
                 await initialize(service, mockBackend, store, { IHM: "3" });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("outdated");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("outdated");
             }
         )
     );
@@ -399,8 +399,8 @@ describe("OfflineFilesDownloadService", () => {
 
                 await initialize(service, mockBackend, store, { IHM: "3" });
 
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(service.getTileCompatibility(TILE_KEY, downloadedTiles[TILE_KEY])).toBe("unusable");
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(service.getTileCompatibility(TILE_KEY, downloadedAreas[TILE_KEY]?.files)).toBe("unusable");
             }
         )
     );
@@ -409,7 +409,7 @@ describe("OfflineFilesDownloadService", () => {
         inject([OfflineFilesDownloadService, HttpTestingController, Store],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                 await initialize(service, mockBackend, store, {});
-                store.reset({ inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] } });
+                store.reset({ inMemoryState: { downloadedAreas: {} } });
 
                 expect(service.getTileCompatibility(TILE_KEY, [{ fileName: MAP_FILE, date: "2026-01-01" }])).toBe("outdated");
                 expect(service.getTileCompatibility(ROOT_TILE_KEY, [{ fileName: ROOT_MAP_FILE, date: "2026-01-01" }])).toBe("compatible");
@@ -425,7 +425,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -451,7 +451,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -460,12 +460,12 @@ describe("OfflineFilesDownloadService", () => {
                 await flushFilesToDownload(mockBackend, true, { [SERVER_MAP_FILE]: "2026-06-01", [SERVER_ROUTING_TILES_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual(["raster-dem+76-51.pmtiles", MAP_FILE]);
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual(["raster-dem+76-51.pmtiles", MAP_FILE]);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(MAP_FILE);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROUTING_TILES_FILE);
                 expect(routingProvider.extractOfflineRoutingTiles).toHaveBeenCalledWith(ROUTING_TILES_FILE, TILE_KEY);
-                expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([TILE_KEY]);
+                expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[TILE_KEY].hasRoutingTiles).toBe(true);
             }
         )
     );
@@ -482,7 +482,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -491,8 +491,8 @@ describe("OfflineFilesDownloadService", () => {
                 await flushFilesToDownload(mockBackend, true, { [SERVER_MAP_FILE]: "2026-06-01", [SERVER_ROUTING_TILES_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual([MAP_FILE]);
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual([MAP_FILE]);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(ROUTING_TILES_FILE);
             }
         )
@@ -504,7 +504,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
                 // Aborting a download makes the request of every file that is being downloaded fail
                 vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(() => {
@@ -529,7 +529,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
                 const stuckDownloads: (() => void)[] = [];
                 const progressCallbacks: FileDownloadProgressCallback[] = [];
@@ -577,7 +577,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
                 const area: OfflineArea = {
                     type: "Feature",
@@ -643,8 +643,9 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: { [TILE_KEY]: namedTile }, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
+                vi.mocked(offlineAreasService.loadDownloadedAreas).mockResolvedValue({ [TILE_KEY]: namedTile });
 
                 const promise = service.downloadArea(namedTile);
                 await flushStyles(mockBackend, {});
@@ -671,8 +672,8 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith(SERVER_MAP_FILE, MAP_FILE);
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledTimes(1);
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(TILE_AREA);
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY].map(f => f.fileName)).toEqual([MAP_FILE]);
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual([MAP_FILE]);
             }
         )
     );
@@ -695,7 +696,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
                 vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([MAP_FILE]);
 
@@ -723,7 +724,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {} }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -750,7 +751,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {} }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -781,7 +782,7 @@ describe("OfflineFilesDownloadService", () => {
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedTiles: {}, downloadedAreas: {}, downloadedRoutingTiles: [] }
+                    inMemoryState: { downloadedAreas: {} }
                 });
 
                 const promise = service.downloadArea(TILE_AREA);
@@ -811,9 +812,8 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
                 expect(routingProvider.deleteOfflineRoutingTiles).toHaveBeenCalledWith(TILE_KEY);
                 expect(offlineAreasService.deleteDownloadedArea).toHaveBeenCalledWith(TILE_KEY);
-                expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles)).toEqual([]);
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY]).toBeUndefined();
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files).toBeUndefined();
             }
         )
     );
@@ -826,9 +826,9 @@ describe("OfflineFilesDownloadService", () => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [MAP_FILE, legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 await initialize(service, mockBackend, store, {});
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[PmTilesService.LEGACY_ROOT_KEY].map(f => f.fileName)).toEqual([legacyRootFile]);
-                expect(downloadedTiles[ROOT_TILE_KEY].map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[PmTilesService.LEGACY_ROOT_KEY]?.files.map(f => f.fileName)).toEqual([legacyRootFile]);
+                expect(downloadedAreas[ROOT_TILE_KEY]?.files.map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
 
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
@@ -853,8 +853,8 @@ describe("OfflineFilesDownloadService", () => {
                 await service.deleteArea(TILE_KEY);
 
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
-                const downloadedTiles = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedTiles);
-                expect(downloadedTiles[TILE_KEY]).toBeUndefined();
+                const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+                expect(downloadedAreas[TILE_KEY]?.files).toBeUndefined();
             }
         )
     );

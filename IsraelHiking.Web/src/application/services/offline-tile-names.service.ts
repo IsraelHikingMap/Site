@@ -41,13 +41,16 @@ export class OfflineTileNamesService {
             return;
         }
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-        if (names?.name == null || downloadedAreas[id] == null || downloadedAreas[id].properties.name != null) {
+        const tileArea = downloadedAreas[id]?.area;
+        if (names?.name == null || tileArea == null || tileArea.properties.name != null) {
             return;
         }
-        const namesInUse = Object.values(downloadedAreas).filter(other => other.properties.id !== id).map(other => this.offlineAreasService.getName(other));
+        const namesInUse = Object.entries(downloadedAreas)
+            .filter(([key, other]) => key !== id && other.area != null)
+            .map(([, other]) => this.offlineAreasService.getName(other.area));
         const suffix = OfflineTileNamesService.getUniqueSuffix(this.offlineAreasService.getName({ ...area, properties: { ...names, id } }), namesInUse);
         const properties = Object.fromEntries(Object.entries(names).map(([key, name]) => [key, name + suffix]));
-        await this.offlineAreasService.saveDownloadedArea({ ...downloadedAreas[id], properties: { ...properties, id } });
+        await this.offlineAreasService.saveDownloadedArea({ ...tileArea, properties: { ...properties, id } });
     }
 
     /**

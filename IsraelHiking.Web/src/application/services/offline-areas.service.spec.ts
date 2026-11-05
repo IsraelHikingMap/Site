@@ -9,9 +9,11 @@ import { OfflineAreasService } from "./offline-areas.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { InMemoryReducer, SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
+
+const FILE = { fileName: "IHM-schema+israel-and-palestine.pmtiles", date: "2026-11-01" };
 
 describe("OfflineAreasService", () => {
     let service: OfflineAreasService;
@@ -74,7 +76,7 @@ describe("OfflineAreasService", () => {
         expect(service.getName(createArea("oberbayern", [10, 47, 13, 49]))).toBe("oberbayern");
     });
 
-    it("should read the areas that are kept on the device into the state, skipping a file that can not be read", async () => {
+    it("should read the areas that are kept on the device, skipping a file that can not be read", async () => {
         const area = createArea("israel-and-palestine", [34, 29, 36, 34]);
         vi.mocked(fileService.listFileNamesInDataDirectory).mockResolvedValue(["israel-and-palestine.area.json", "broken.area.json"]);
         vi.mocked(fileService.readFileInDataDirectory).mockImplementation(fileName =>
@@ -82,31 +84,37 @@ describe("OfflineAreasService", () => {
 
         expect(await service.loadDownloadedAreas()).toEqual({ "israel-and-palestine": area });
         expect(fileService.listFileNamesInDataDirectory).toHaveBeenCalledWith(".area.json");
-        expect(getDownloadedAreas()).toEqual({ "israel-and-palestine": area });
     });
 
-    it("should keep an area in a file of its own and in the state", async () => {
+    it("should keep an area in a file of its own and in the state when its files are there", async () => {
         const area = createArea("israel-and-palestine", [34, 29, 36, 34]);
+        store.dispatch(new SetDownloadedAreasAction({ "israel-and-palestine": { area: null, files: [FILE], hasRoutingTiles: true } }));
 
         await service.saveDownloadedArea(area);
 
         expect(fileService.writeFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json", JSON.stringify(area));
-        expect(getDownloadedAreas()).toEqual({ "israel-and-palestine": area });
+        expect(getDownloadedAreas()).toEqual({ "israel-and-palestine": { area, files: [FILE], hasRoutingTiles: true } });
     });
 
-    it("should delete the file an area is kept in and remove it from the state", async () => {
+    it("should only keep an area in its file while its files are not there yet, they are read into the state along with it", async () => {
         await service.saveDownloadedArea(createArea("israel-and-palestine", [34, 29, 36, 34]));
 
-        await service.deleteDownloadedArea("israel-and-palestine");
-
-        expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json");
+        expect(fileService.writeFileInDataDirectory).toHaveBeenCalled();
         expect(getDownloadedAreas()).toEqual({});
     });
 
+    it("should delete the file an area is kept in", async () => {
+        await service.deleteDownloadedArea("israel-and-palestine");
+
+        expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json");
+    });
+
     it("should rename an area in every language", async () => {
+        store.dispatch(new SetDownloadedAreasAction({ "israel-and-palestine": { area: null, files: [FILE], hasRoutingTiles: false } }));
+
         await service.renameDownloadedArea(createArea("israel-and-palestine", [34, 29, 36, 34], { "name:he": "ישראל" }), "Home");
 
-        expect(getDownloadedAreas()["israel-and-palestine"].properties).toEqual({ id: "israel-and-palestine", name: "Home" });
+        expect(getDownloadedAreas()["israel-and-palestine"].area.properties).toEqual({ id: "israel-and-palestine", name: "Home" });
     });
 
     it("should make a tile an area whose id is the key of the tile", () => {

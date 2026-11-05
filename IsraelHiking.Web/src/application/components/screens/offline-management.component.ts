@@ -105,7 +105,6 @@ export class OfflineManagementComponent {
     private readonly offlineAreasService = inject(OfflineAreasService);
     private readonly store = inject(Store);
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
-    private readonly downloadedTilesState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
     private readonly downloadedAreas = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedAreas);
     public readonly resources = inject(ResourcesService);
 
@@ -113,7 +112,7 @@ export class OfflineManagementComponent {
     public readonly downloadInProgress = this.offlineFilesDownloadService.downloadInProgress;
 
     public readonly isSelectedDownloaded = computed(() =>
-        this.selectedArea() != null && this.downloadedTilesState()[this.selectedArea().properties.id] != null);
+        this.selectedArea() != null && this.downloadedAreas()[this.selectedArea().properties.id] != null);
 
     /**
      * The areas that are on the device but can no longer be used, sorted so that moving to the next one
@@ -121,10 +120,10 @@ export class OfflineManagementComponent {
      * they are not drawn on the map either, and they are updated along with any area that is downloaded.
      */
     public readonly incompatibleAreaIds = computed<string[]>(() => {
-        const downloadedTiles = this.downloadedTilesState();
-        return Object.keys(downloadedTiles)
+        const downloadedAreas = this.downloadedAreas();
+        return Object.keys(downloadedAreas)
             .filter(id => !PmTilesService.isRootKey(id))
-            .filter(id => this.offlineFilesDownloadService.getTileCompatibility(id, downloadedTiles[id]) !== "compatible")
+            .filter(id => this.offlineFilesDownloadService.getTileCompatibility(id, downloadedAreas[id].files) !== "compatible")
             .sort();
     });
 
@@ -134,16 +133,16 @@ export class OfflineManagementComponent {
      * its progress shows in the list and not only on the map.
      */
     public readonly downloadedAreaRows = computed<DownloadedAreaRow[]>(() => {
-        const downloadedTiles = this.downloadedTilesState();
-        const rows = Object.entries(downloadedTiles)
+        const downloadedAreas = this.downloadedAreas();
+        const rows = Object.entries(downloadedAreas)
             .filter(([id]) => !PmTilesService.isRootKey(id))
-            .map(([id, files]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
+            .map(([id, { files }]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
                 this.offlineFilesDownloadService.getTileCompatibility(id, files)));
         rows.sort((a, b) =>
             OfflineManagementComponent.COMPATIBILITY_ORDER[a.compatibility] - OfflineManagementComponent.COMPATIBILITY_ORDER[b.compatibility] ||
             b.downloadedDate.getTime() - a.downloadedDate.getTime());
         const downloadInProgress = this.downloadInProgress();
-        if (downloadInProgress != null && downloadedTiles[downloadInProgress.area.properties.id] == null) {
+        if (downloadInProgress != null && downloadedAreas[downloadInProgress.area.properties.id] == null) {
             rows.unshift(this.toRow(downloadInProgress.area.properties.id, null, "compatible", downloadInProgress.area));
         }
         return rows;
@@ -279,7 +278,7 @@ export class OfflineManagementComponent {
      * is going to delete old tiles, see OfflineFilesDownloadService.getOverlappedTileKeys.
      */
     public downloadArea(area: Immutable<OfflineArea>) {
-        const areaToDownload = this.downloadedAreas()[area.properties.id] ?? area;
+        const areaToDownload = this.downloadedAreas()[area.properties.id]?.area ?? area;
         const overlappedTileKeys = this.offlineFilesDownloadService.getOverlappedTileKeys(areaToDownload);
         if (overlappedTileKeys.length === 0) {
             this.startDownload(areaToDownload);
@@ -336,7 +335,7 @@ export class OfflineManagementComponent {
             this.selectedArea.set(null);
             return;
         }
-        this.selectArea(this.downloadedAreas()[area.properties.id] ?? area);
+        this.selectArea(this.downloadedAreas()[area.properties.id]?.area ?? area);
     }
 
     /**
@@ -378,7 +377,7 @@ export class OfflineManagementComponent {
     /** An area as it is kept on the device, where a tile that is not kept yet is the area of the tile itself */
     private getDownloadedArea(id: string): Immutable<OfflineArea> | null {
         const tile = PmTilesService.fromTileKey(id);
-        return this.downloadedAreas()[id] ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
+        return this.downloadedAreas()[id]?.area ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
     }
 
     /** What an area that has no name is called: a tile by the coordinates of its middle, anything else by its id */

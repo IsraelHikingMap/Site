@@ -89,14 +89,14 @@ export class PmTilesService {
      * zoom 6 root they came with fills the zooms below that while it is kept, see LEGACY_ROOT_KEY.
      */
     private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
-        if (z <= ROOT_ZOOM && downloadedTiles[PmTilesService.toTileKey()] != null) {
+        const downloadedAreas = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedAreas);
+        if (z <= ROOT_ZOOM && downloadedAreas[PmTilesService.toTileKey()] != null) {
             return `${type}-${ROOT_ZOOM}.pmtiles`;
         }
         if (z >= TILES_ZOOM) {
             const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
             const tileKey = PmTilesService.toTileKey(tileX, tileY);
-            if (downloadedTiles[tileKey] != null) {
+            if (downloadedAreas[tileKey] != null) {
                 return `${type}+${tileKey}.pmtiles`;
             }
         }
@@ -105,7 +105,7 @@ export class PmTilesService {
         if (areaId != null) {
             return `${type}+${areaId}.pmtiles`;
         }
-        return z < TILES_ZOOM && downloadedTiles[PmTilesService.LEGACY_ROOT_KEY] != null ? `${type}-${TILES_ZOOM - 1}.pmtiles` : null;
+        return z < TILES_ZOOM && downloadedAreas[PmTilesService.LEGACY_ROOT_KEY] != null ? `${type}-${TILES_ZOOM - 1}.pmtiles` : null;
     }
 
     /**
@@ -113,12 +113,10 @@ export class PmTilesService {
      * Where downloaded areas overlap, any of them has the point, since an area reaches a few kilometers past its border.
      */
     public findDownloadedAreaId(point: GeoJSON.Position): string | null {
-        const state = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
-        const area = Object.values(state.downloadedAreas).find(downloadedArea =>
-            PmTilesService.fromTileKey(downloadedArea.properties.id) == null &&
-            state.downloadedTiles[downloadedArea.properties.id] != null &&
-            booleanPointInPolygon(point, downloadedArea as Immutable<OfflineArea> as OfflineArea));
-        return area?.properties.id ?? null;
+        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+        const id = Object.keys(downloadedAreas).find(key => PmTilesService.fromTileKey(key) == null && downloadedAreas[key].area != null &&
+            booleanPointInPolygon(point, downloadedAreas[key].area as Immutable<OfflineArea> as OfflineArea));
+        return id ?? null;
     }
 
     /**

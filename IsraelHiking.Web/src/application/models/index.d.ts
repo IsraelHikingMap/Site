@@ -17,7 +17,7 @@ export type Difficulty = ShareUrl["difficulty"];
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 export type { Bounds } from "./bounds";
-export type { OfflineArea } from "./offline-area";
+export type { OfflineArea, DownloadedArea } from "./offline-area";
 export type { EditableLayer } from "./editable-layer";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";

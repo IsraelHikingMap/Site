@@ -107,7 +107,7 @@ export class RoutingProvider {
      * routing tiles, so it needs to be downloaded again.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
-        const downloadedRoutingTiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedRoutingTiles);
+        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         const startTile = SpatialHelper.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
         const endTile = SpatialHelper.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
         const tiles = new Set<string>();
@@ -116,8 +116,8 @@ export class RoutingProvider {
                 tiles.add(`${x}-${y}`);
             }
         }
-        return Array.from(tiles).every(tile => downloadedRoutingTiles.includes(tile)) ||
-            [start, end].every(point => downloadedRoutingTiles.includes(this.pmTilesService.findDownloadedAreaId([point.lng, point.lat])));
+        return Array.from(tiles).every(tile => downloadedAreas[tile]?.hasRoutingTiles) ||
+            [start, end].every(point => downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat])]?.hasRoutingTiles);
     }
 
     /**

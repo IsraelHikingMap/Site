@@ -5,8 +5,8 @@ import { provideStore, Store } from "@ngxs/store";
 import { PmTilesService, ROOT_ZOOM } from "./pmtiles.service";
 import { LoggingService } from "./logging.service";
 import { OfflineAreasService } from "./offline-areas.service";
-import { InMemoryReducer, SetDownloadedAreasAction, SetDownloadedTilesAction } from "../reducers/in-memory.reducer";
-import type { OfflineArea } from "../models";
+import { InMemoryReducer, SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
+import type { DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
 describe("PmTilesService", () => {
     let service: PmTilesService;
@@ -31,30 +31,24 @@ describe("PmTilesService", () => {
     });
 
     it("should find the downloaded area a point is in", () => {
-        store.dispatch(new SetDownloadedAreasAction({ [area.properties.id]: area }));
-        store.dispatch(new SetDownloadedTilesAction({ [area.properties.id]: [file] }));
+        store.dispatch(new SetDownloadedAreasAction({ [area.properties.id]: downloaded(area, [file]) }));
 
         expect(service.findDownloadedAreaId([35, 32])).toBe("israel-and-palestine");
         expect(service.findDownloadedAreaId([40, 32])).toBeNull();
     });
 
-    it("should not find an area whose files are not on the device", () => {
-        store.dispatch(new SetDownloadedAreasAction({ [area.properties.id]: area }));
-
-        expect(service.findDownloadedAreaId([35, 32])).toBeNull();
-    });
-
     it("should not find a tile, which is found by the tile itself", () => {
         const tile = OfflineAreasService.createTileArea(76, 51);
-        store.dispatch(new SetDownloadedAreasAction({ [tile.properties.id]: tile }));
-        store.dispatch(new SetDownloadedTilesAction({ [tile.properties.id]: [file] }));
+        store.dispatch(new SetDownloadedAreasAction({ [tile.properties.id]: downloaded(tile, [file]) }));
 
         expect(service.findDownloadedAreaId([35, 32])).toBeNull();
     });
 
     it("should read the root files up to their zoom and the area a tile is in above it", () => {
-        store.dispatch(new SetDownloadedAreasAction({ [area.properties.id]: area }));
-        store.dispatch(new SetDownloadedTilesAction({ [PmTilesService.toTileKey()]: [{ fileName: "IHM-schema-4.pmtiles", date: "2026-11-01" }], [area.properties.id]: [file] }));
+        store.dispatch(new SetDownloadedAreasAction({
+            [PmTilesService.toTileKey()]: downloaded(null, [{ fileName: "IHM-schema-4.pmtiles", date: "2026-11-01" }]),
+            [area.properties.id]: downloaded(area, [file])
+        }));
 
         expect(getFileName(ROOT_ZOOM, 9, 6)).toBe("IHM-schema-4.pmtiles");
         // A tile whose middle is in the area, and one in the middle of the ocean
@@ -63,15 +57,19 @@ describe("PmTilesService", () => {
     });
 
     it("should read a tile that came before areas from its own file, and fill the zooms below it from the zoom 6 root files", () => {
-        store.dispatch(new SetDownloadedTilesAction({
-            [PmTilesService.LEGACY_ROOT_KEY]: [{ fileName: "IHM-schema-6.pmtiles", date: "2025-01-01" }],
-            "76-51": [{ fileName: "IHM-schema+76-51.pmtiles", date: "2025-01-01" }]
+        store.dispatch(new SetDownloadedAreasAction({
+            [PmTilesService.LEGACY_ROOT_KEY]: downloaded(null, [{ fileName: "IHM-schema-6.pmtiles", date: "2025-01-01" }]),
+            "76-51": downloaded(OfflineAreasService.createTileArea(76, 51), [{ fileName: "IHM-schema+76-51.pmtiles", date: "2025-01-01" }])
         }));
 
         expect(getFileName(9, 305, 205)).toBe("IHM-schema+76-51.pmtiles");
         expect(getFileName(6, 38, 25)).toBe("IHM-schema-6.pmtiles");
         expect(getFileName(ROOT_ZOOM, 9, 6)).toBe("IHM-schema-6.pmtiles");
     });
+
+    function downloaded(downloadedArea: OfflineArea | null, files: FileNameDateVersion[]): DownloadedArea {
+        return { area: downloadedArea, files, hasRoutingTiles: false };
+    }
 
     function getFileName(z: number, x: number, y: number): string | null {
         return service["getFileNameByType"](z, x, y, "IHM-schema");
