@@ -114,6 +114,8 @@
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSAdvertisingAttributionReportEndpoint</key>
+	<string>https://appsflyer-skadnetwork.com/</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need the camera in order to take a picture, these pictures can then be uploaded to describe a point of interest or as a private photo in a route</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
@@ -126,6 +128,21 @@
 	<string>We need access to the photo library to save pictures there</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to the photo library to get pictures from there</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>v9wttpbfk9.skadnetwork</string>
+		</dict>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>n38lu8286q.skadnetwork</string>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
