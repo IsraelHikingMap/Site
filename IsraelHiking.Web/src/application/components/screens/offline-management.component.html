@@ -82,8 +82,11 @@
                     <div class="font-bold">{{row.name}}</div>
                     }
                     @if (isDownloading(row)) {
-                    <mat-progress-bar class="my-2" mode="determinate" [value]="downloadInProgress().progress">
-                    </mat-progress-bar>
+                    <div class="my-2 flex flex-row items-center gap-2">
+                        <mat-progress-bar class="flex-1" mode="determinate" [value]="downloadInProgress().progress">
+                        </mat-progress-bar>
+                        <span class="tabular-nums">{{downloadInProgress().progress.toFixed(2)}}%</span>
+                    </div>
                     } @else {
                     <div>{{row.downloadedDate | date:resources.getDateFormat()}}</div>
                     }
