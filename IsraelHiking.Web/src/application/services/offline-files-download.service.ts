@@ -272,11 +272,7 @@ export class OfflineFilesDownloadService {
         return OfflineFilesDownloadService.LEGACY_ROOT_FILE_NAME_REGEX.test(fileName) ? PmTilesService.LEGACY_ROOT_KEY : PmTilesService.toTileKey();
     }
 
-    /**
-     * The name a file is kept under on the device, "name+id.ext" after the id of the area it is of. The server
-     * names the files of a tile "name+7-x-y.ext", the way the apps that came before areas keep them, and a root
-     * file, which is of no area, keeps its name.
-     */
+    /** The name a file is kept under on the device, "name+id.ext" after the id of the area it is of, a root file keeps its name */
     private static getLocalFileName(serverFileName: string, key: string): string {
         const plusIndex = serverFileName.indexOf("+");
         return plusIndex < 0
@@ -315,14 +311,12 @@ export class OfflineFilesDownloadService {
             await this.deleteFilesOfUnusedSources(key);
             // What is asked of the server is decided by the state, so it is read again now that files were deleted
             await this.updateDownloadedAreasFromDevice();
-            const fileNamesForRoot = await this.getFilesToDownload();
-            const fileNamesForArea = await this.getFilesToDownload(area);
-            if (fileNamesForArea.length === 0 && fileNamesForRoot.length === 0) {
+            const fileNames = await this.getFilesToDownload(area);
+            if (fileNames.length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
             }
-            const fileNames = [...fileNamesForRoot, ...fileNamesForArea];
-            await this.downloadOfflineFilesProgressAction(currentDownload, fileNames, fileNamesForRoot.length);
+            await this.downloadOfflineFilesProgressAction(currentDownload, fileNames);
 
             if (currentDownload.abortController.signal.aborted) {
                 return "aborted";
@@ -367,7 +361,7 @@ export class OfflineFilesDownloadService {
      * on its own once every other file is done.
      * A file that is already whole in the cache is not downloaded again.
      */
-    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: FileToDownload[], rootFilesCount: number): Promise<void> {
+    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: FileToDownload[]): Promise<void> {
         const { area, abortController } = currentDownload;
         const key = area.properties.id;
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${key}`);
@@ -388,8 +382,7 @@ export class OfflineFilesDownloadService {
                 continue;
             }
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-            const isRootFile = fileNameIndex < rootFilesCount;
-            const fileDownloadUrl = isRootFile ? `${Urls.offlineFiles}/${serverFileName}` : OfflineFilesDownloadService.getFileUrl(area, serverFileName);
+            const fileDownloadUrl = OfflineFilesDownloadService.getFileUrl(area, serverFileName);
             fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
                 value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
         }
@@ -397,12 +390,11 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(`[Offline Download] Finished downloading offline files of ${key}`);
     }
 
-    /** Where the server serves a file of an area from, see FilesController, a tile is asked for by its coordinates */
+    /** Where the server serves a file of an area from, see FilesController, a root file is of no area and is served by its name */
     private static getFileUrl(area: Immutable<OfflineArea>, serverFileName: string): string {
-        const tile = PmTilesService.fromTileKey(area.properties.id);
-        return tile == null
+        return serverFileName.includes("+")
             ? `${Urls.offlineArea}/${area.properties.id}/${serverFileName}`
-            : `${Urls.offlineFiles}/${serverFileName}?tileX=${tile.tileX}&tileY=${tile.tileY}`;
+            : `${Urls.offlineFiles}/${serverFileName}`;
     }
 
     /**
@@ -473,41 +465,25 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Asks the server which of the files of an area need downloading, the root files when no area is given, named
-     * the way they are kept on the device.
+     * Asks the server which of the files of an area need downloading, along with the root files, named the way they
+     * are kept on the device. The root files are asked for by the date of the area, which lists them with almost
+     * every download, since they are small and that is simpler than asking for them on their own.
      * The order the server lists them in is kept as it is: it lists the files that take it longest first,
      * and they are downloaded in the order they are listed in, see downloadOfflineFilesProgressAction.
      */
-    private async getFilesToDownload(area?: Immutable<OfflineArea>): Promise<FileToDownload[]> {
-        const key = area?.properties.id ?? PmTilesService.toTileKey();
-        const downloadedTile = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[key]?.files;
-        const isCompatible = downloadedTile != null &&
-            this.getTileCompatibility(key, downloadedTile) === "compatible";
-        if (downloadedTile != null && !isCompatible) {
+    private async getFilesToDownload(area: Immutable<OfflineArea>): Promise<FileToDownload[]> {
+        const key = area.properties.id;
+        const downloadedFiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[key]?.files;
+        const isCompatible = downloadedFiles != null && this.getTileCompatibility(key, downloadedFiles) === "compatible";
+        if (downloadedFiles != null && !isCompatible) {
             this.loggingService.info(`[Offline Download] Asking for every file of ${key}, what it holds can not be used`);
         }
-        const lastModifiedString = isCompatible ? this.getLastModifiedDate(downloadedTile)?.toISOString() : undefined;
-        const params: Record<string, string> = {};
-        if (lastModifiedString) {
-            params.lastModified = lastModifiedString;
-        }
-        const tile = area == null ? null : PmTilesService.fromTileKey(key);
-        if (area == null || tile != null) {
-            params.routingTile = "true";
-        }
-        if (tile != null) {
-            params.tileX = tile.tileX.toString();
-            params.tileY = tile.tileY.toString();
-        }
-        const url = area != null && tile == null ? `${Urls.offlineArea}/${key}` : Urls.offlineFiles;
-        const request = this.httpClient.get<Record<string, string>>(url, { params: params });
+        const lastModifiedString = isCompatible ? this.getLastModifiedDate(downloadedFiles)?.toISOString() : undefined;
+        const params: Record<string, string> = lastModifiedString ? { lastModified: lastModifiedString } : {};
+        const request = this.httpClient.get<Record<string, string>>(`${Urls.offlineArea}/${key}`, { params });
         const fileNames = await firstValueFrom(request.pipe(timeout(5000)));
-        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded ` +
-            `for ${key === PmTilesService.toTileKey() ? "the root files" : key}, ` +
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded for ${key}, ` +
             `${lastModifiedString == null ? "all of them" : `the ones that changed since ${lastModifiedString}`}`);
-        if (Object.keys(fileNames).length === 0) {
-            return [];
-        }
         return Object.entries(fileNames).map(([serverFileName, date]) =>
             ({ fileName: OfflineFilesDownloadService.getLocalFileName(serverFileName, key), serverFileName, date }));
     }

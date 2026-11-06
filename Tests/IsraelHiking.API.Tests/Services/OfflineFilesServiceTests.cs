@@ -33,6 +33,9 @@ public class OfflineFilesServiceTests
     }
     """;
 
+    private const string AreaGeometry = """{"type":"Polygon","coordinates":[[[34,29],[36,29],[36,34],[34,34],[34,29]]]}""";
+    private const string AreasFile = $$"""{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"id":"5a46cb2cd3d6abed","name":"Israel"},"geometry":{{AreaGeometry}}}]}""";
+
     private OfflineFilesService _service;
     private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private string _valhallaProfilesFilePath;
@@ -46,7 +49,7 @@ public class OfflineFilesServiceTests
         _valhallaProfilesFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         File.WriteAllText(_valhallaProfilesFilePath, "{ \"foot\": {} }");
         _offlineAreasFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        File.WriteAllText(_offlineAreasFilePath, "{ \"type\": \"FeatureCollection\", \"features\": [] }");
+        File.WriteAllText(_offlineAreasFilePath, AreasFile);
         var options = Substitute.For<IOptions<ConfigurationData>>();
         options.Value.Returns(new ConfigurationData
         {
@@ -81,9 +84,9 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-4.pmtiles"]);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code-4.pmtiles"]);
-        Assert.AreEqual(DateTime.UtcNow.Date, results["global_points-4.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-6.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code-6.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["global_points-6.pmtiles"]);
     }
 
     [TestMethod]
@@ -265,7 +268,7 @@ public class OfflineFilesServiceTests
         var results = await _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false);
 
         Assert.HasCount(3, results);
-        Assert.IsFalse(results.ContainsKey("raster-dem-4.pmtiles"));
+        Assert.IsFalse(results.ContainsKey("raster-dem-6.pmtiles"));
     }
 
     [TestMethod]
@@ -293,9 +296,9 @@ public class OfflineFilesServiceTests
     {
         _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
 
-        await _service.GetFileContent("global_points-4.pmtiles", null, null);
+        await _service.GetFileContent("global_points-6.pmtiles", null, null);
 
-        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "global_points-4.pmtiles");
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "global_points-6.pmtiles");
     }
 
     [TestMethod]
@@ -304,5 +307,54 @@ public class OfflineFilesServiceTests
         using var reader = new StreamReader(_service.GetAreasContent());
 
         Assert.AreEqual(File.ReadAllText(_offlineAreasFilePath), reader.ReadToEnd());
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesListForArea_ShouldListEverySourceByTheAreaAndTheRootFilesWithoutRoutingTiles()
+    {
+        var results = await _service.GetUpdatedFilesListForArea("5a46cb2cd3d6abed", DateTime.MinValue);
+
+        CollectionAssert.AreEqual(new[]
+        {
+            "IHM-schema+5a46cb2cd3d6abed.pmtiles", "IHM-code+5a46cb2cd3d6abed.pmtiles", "raster-dem+5a46cb2cd3d6abed.pmtiles",
+            "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema-4.pmtiles", "IHM-code-4.pmtiles", "global_points-4.pmtiles",
+            "valhalla-profiles.json"
+        }, results.Keys.ToArray());
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-4.pmtiles"]);
+    }
+
+    [TestMethod]
+    public async Task GetUpdatedFilesListForArea_AreaThatIsNotOffered_ShouldReturnNull()
+    {
+        Assert.IsNull(await _service.GetUpdatedFilesListForArea("0000000000000000", DateTime.MinValue));
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_ShouldPostThePolygonOfTheAreaAboveTheRootZoom()
+    {
+        _remoteFileFetcherGateway.PostForFileStream(Arg.Any<string>(), Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
+
+        var result = await _service.GetFileContentForArea("5a46cb2cd3d6abed", "IHM-schema+5a46cb2cd3d6abed.pmtiles");
+
+        Assert.AreEqual(42, result?.Length);
+        await _remoteFileFetcherGateway.Received(1).PostForFileStream(OnTheFlyAddress + "IHM-schema?minzoom=5", AreaGeometry);
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_Dem_ShouldBePostedToTheDemServer()
+    {
+        _remoteFileFetcherGateway.PostForFileStream(Arg.Any<string>(), Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
+
+        await _service.GetFileContentForArea("5a46cb2cd3d6abed", "raster-dem+5a46cb2cd3d6abed.pmtiles");
+
+        await _remoteFileFetcherGateway.Received(1).PostForFileStream(OnTheFlyDemAddress + "raster-dem?minzoom=5", AreaGeometry);
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_UnknownAreaOrSource_ShouldReturnNull()
+    {
+        Assert.IsNull(await _service.GetFileContentForArea("0000000000000000", "IHM-schema+0000000000000000.pmtiles"));
+        Assert.IsNull(await _service.GetFileContentForArea("5a46cb2cd3d6abed", "other+5a46cb2cd3d6abed.pmtiles"));
+        await _remoteFileFetcherGateway.DidNotReceive().PostForFileStream(Arg.Any<string>(), Arg.Any<string>());
     }
 }

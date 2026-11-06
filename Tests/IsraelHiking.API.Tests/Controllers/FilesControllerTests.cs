@@ -280,4 +280,71 @@ public class FilesControllerTests
 
         Assert.IsTrue(results);
     }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_NotEntitled_ShouldGetForbid()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+        Assert.IsInstanceOfType<ForbidResult>(_controller.GetOfflineFilesForArea("area", DateTime.Now).Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_AreaThatIsNotOffered_ShouldGetNotFound()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns((Dictionary<string, DateTime>)null);
+
+        Assert.IsInstanceOfType<NotFoundResult>(_controller.GetOfflineFilesForArea("area", DateTime.Now).Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_ShouldGetTheList()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var files = new Dictionary<string, DateTime>();
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns(files);
+
+        var results = _controller.GetOfflineFilesForArea("area", DateTime.Now).Result as OkObjectResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreSame(files, results.Value);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_NotEntitled_ShouldGetForbid()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+        Assert.IsInstanceOfType<ForbidResult>(_controller.GetOfflineFileForArea("area", "file").Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_UnknownFile_ShouldGetNotFound()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetFileContentForArea("area", "file").Returns(((Stream Content, long? Length)?)null);
+
+        Assert.IsInstanceOfType<NotFoundResult>(_controller.GetOfflineFileForArea("area", "file").Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_ShouldServeTheFile()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var content = new MemoryStream();
+        _offlineFilesService.GetFileContentForArea("area", "file").Returns((content, (long?)42));
+
+        var results = _controller.GetOfflineFileForArea("area", "file").Result as FileStreamResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreSame(content, results.FileStream);
+        Assert.AreEqual(42, _controller.Response.ContentLength);
+    }
 }

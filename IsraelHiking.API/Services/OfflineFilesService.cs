@@ -21,10 +21,21 @@ public class OfflineFilesService : IOfflineFilesService
     private const int SLICE_TILE_ZOOM = 7;
 
     /// <summary>
-    /// The zoom level up to which the root (non-tiled) overview files hold the whole world. It is kept low so they
-    /// stay small, every downloaded area holds the zooms above it.
+    /// The zoom level up to which the root files that are listed along with an area hold the whole world. It is
+    /// kept low so they stay small enough to be downloaded with every area, which holds the zooms above it.
     /// </summary>
     private const int ROOT_ZOOM = 4;
+
+    /// <summary>
+    /// The zoom level up to which the root files of the apps that download tiles hold the whole world, their
+    /// tiles start at the zoom after it.
+    /// </summary>
+    private const int TILES_ROOT_ZOOM = SLICE_TILE_ZOOM - 1;
+
+    /// <summary>
+    /// The zoom level the files of an area start at, where the root files end.
+    /// </summary>
+    private const int AREA_MIN_ZOOM = ROOT_ZOOM + 1;
 
     /// <summary>
     /// The location of the styles the map is drawn with, which the client reads them from by itself.
@@ -177,9 +188,67 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// The root files are listed along with the files of the area, which are listed first since they are the larger
+    /// ones. There are no routing tiles, since the service that slices them only slices by tile.
+    /// </remarks>
+    public async Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate)
+    {
+        if (await GetAreaGeometry(areaId) == null)
+        {
+            return null;
+        }
+        var filesDictionary = new Dictionary<string, DateTime>();
+        var today = DateTime.UtcNow.Date;
+        var sourceNames = await GetSourceNames();
+        foreach (var name in sourceNames)
+        {
+            AddIfUpdated(filesDictionary, $"{name}+{areaId}.pmtiles", IsDem(name) ? DEM_MODIFIED_DATE : today, lastModifiedDate);
+        }
+        foreach (var name in sourceNames.Where(name => !IsDem(name)))
+        {
+            AddIfUpdated(filesDictionary, $"{name}-{ROOT_ZOOM}.pmtiles", today, lastModifiedDate);
+        }
+        foreach (var fileName in ROOT_ONLY_FILE_NAMES)
+        {
+            AddIfUpdated(filesDictionary, fileName, today, lastModifiedDate);
+        }
+        return filesDictionary;
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The polygon of the area is posted to the on-the-fly service, since the larger ones are too long for a url.
+    /// </remarks>
+    public async Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName)
+    {
+        var sourceName = FileNameToSourceName(fileName);
+        var geometry = await GetAreaGeometry(areaId);
+        if (geometry == null || !(await GetSourceNames()).Contains(sourceName))
+        {
+            return null;
+        }
+        var address = IsDem(sourceName) ? _options.OnTheFlyDemAddress : _options.OnTheFlyFilesAddress;
+        return await _remoteFileFetcherGateway.PostForFileStream($"{address}{sourceName}?minzoom={AREA_MIN_ZOOM}", geometry);
+    }
+
+    /// <inheritdoc/>
     public Stream GetAreasContent()
     {
         return OpenLocalFile(_options.OfflineAreasFilePath).Content;
+    }
+
+    /// <summary>
+    /// The GeoJSON geometry of one of the areas, null when there is no such area. The file is read every time,
+    /// since it can be replaced while the site is running.
+    /// </summary>
+    private async Task<string> GetAreaGeometry(string areaId)
+    {
+        await using var content = GetAreasContent();
+        using var document = await JsonDocument.ParseAsync(content);
+        var area = document.RootElement.GetProperty("features").EnumerateArray()
+            .FirstOrDefault(feature => feature.GetProperty("properties").TryGetProperty("id", out var id) && id.GetString() == areaId);
+        return area.ValueKind == JsonValueKind.Undefined ? null : area.GetProperty("geometry").GetRawText();
     }
 
     /// <summary>
@@ -299,6 +368,6 @@ public class OfflineFilesService : IOfflineFilesService
     {
         return tileX.HasValue && tileY.HasValue
             ? $"{sourceName}+{SLICE_TILE_ZOOM}-{tileX}-{tileY}{extension}"
-            : $"{sourceName}-{ROOT_ZOOM}{extension}";
+            : $"{sourceName}-{TILES_ROOT_ZOOM}{extension}";
     }
 }
