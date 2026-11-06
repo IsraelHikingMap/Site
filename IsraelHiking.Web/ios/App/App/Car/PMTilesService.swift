@@ -3,20 +3,26 @@ import Foundation
 import PMTiles
 
 /// Reads offline vector tiles from the PMTiles archives the app downloads into its Documents
-/// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: `{type}-4.pmtiles`
-/// up to zoom 4, the zoom 7 tile's `{type}+{x}-{y}.pmtiles`, the `{type}+{id}.pmtiles` of the downloaded area the
-/// tile's center is in, and below zoom 7 the `{type}-6.pmtiles` the tiles that came before areas were downloaded with.
+/// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: the `{type}+{id}.pmtiles`
+/// of the smallest downloaded area that holds the zoom of the tile and its center, so that an area is read before the
+/// root files of the whole world.
 final class PMTilesService {
 
-    static let tilesZoom = 7
-    static let rootZoom = 4
     private static let areaFileSuffix = ".area.json"
     private static let areasRefreshInterval: TimeInterval = 30
 
-    /// An area the app downloaded, as it keeps it next to its files in an "id.area.json" file, see offline-areas.service.ts
+    /// An area the app downloaded, as it keeps it next to its files in an "id.area.json" file, see offline-areas.service.ts,
+    /// where the root files and the tiles that came before areas are areas as well
     private struct DownloadedArea {
         let id: String
         let polygons: [[[[Double]]]]
+        let zooms: ClosedRange<Int>
+
+        var boundsArea: Double {
+            let points = polygons.joined().joined()
+            let lngs = points.map { $0[0] }, lats = points.map { $0[1] }
+            return ((lngs.max() ?? 0) - (lngs.min() ?? 0)) * ((lats.max() ?? 0) - (lats.min() ?? 0))
+        }
     }
 
     private let baseDir: URL
@@ -42,29 +48,19 @@ final class PMTilesService {
     }
 
     private func fileName(z: Int, x: Int, y: Int, type: String) -> String? {
-        if z <= Self.rootZoom, let rootFile = existing("\(type)-\(Self.rootZoom).pmtiles") {
-            return rootFile
-        }
-        if z >= Self.tilesZoom {
-            let scale = 1 << (z - Self.tilesZoom)
-            if let tileFile = existing("\(type)+\(x / scale)-\(y / scale).pmtiles") {
-                return tileFile
-            }
-        }
         let lng = Self.tileCenterLng(x: x, z: z)
         let lat = Self.tileCenterLat(y: y, z: z)
-        let areaFile = downloadedAreas()
-            .filter { area in area.polygons.contains { Self.contains($0, lng: lng, lat: lat) } }
+        return downloadedAreas()
+            .filter { area in area.zooms.contains(z) && area.polygons.contains { Self.contains($0, lng: lng, lat: lat) } }
             .lazy.compactMap { self.existing("\(type)+\($0.id).pmtiles") }
             .first
-        return areaFile ?? (z < Self.tilesZoom ? existing("\(type)-\(Self.tilesZoom - 1).pmtiles") : nil)
     }
 
     private func existing(_ name: String) -> String? {
         FileManager.default.fileExists(atPath: baseDir.appendingPathComponent(name).path) ? name : nil
     }
 
-    /// The areas are read again every so often rather than for every tile, so that one downloaded meanwhile shows up
+    /// The areas, smallest first, are read again every so often rather than for every tile, so that one downloaded meanwhile shows up
     private func downloadedAreas() -> [DownloadedArea] {
         lock.lock(); defer { lock.unlock() }
         if Date().timeIntervalSince(areasReadAt) < Self.areasRefreshInterval {
@@ -75,16 +71,18 @@ final class PMTilesService {
         areas = names.filter { $0.hasSuffix(Self.areaFileSuffix) }.compactMap { name in
             guard let data = FileManager.default.contents(atPath: baseDir.appendingPathComponent(name).path),
                   let area = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let id = (area["properties"] as? [String: Any])?["id"] as? String,
+                  let properties = area["properties"] as? [String: Any],
+                  let id = properties["id"] as? String,
                   let geometry = area["geometry"] as? [String: Any]
             else { return nil }
+            let zooms = (properties["minZoom"] as? Int ?? 0)...(properties["maxZoom"] as? Int ?? Int.max)
             if geometry["type"] as? String == "MultiPolygon" {
                 guard let polygons = geometry["coordinates"] as? [[[[Double]]]] else { return nil }
-                return DownloadedArea(id: id, polygons: polygons)
+                return DownloadedArea(id: id, polygons: polygons, zooms: zooms)
             }
             guard let polygon = geometry["coordinates"] as? [[[Double]]] else { return nil }
-            return DownloadedArea(id: id, polygons: [polygon])
-        }
+            return DownloadedArea(id: id, polygons: [polygon], zooms: zooms)
+        }.sorted { $0.boundsArea < $1.boundsArea }
         return areas
     }
 

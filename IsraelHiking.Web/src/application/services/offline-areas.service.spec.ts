@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, vi } from "vitest";
+﻿import { describe, beforeEach, it, expect, vi } from "vitest";
 import { TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -120,7 +120,7 @@ describe("OfflineAreasService", () => {
     it("should make a tile an area whose id is the key of the tile", () => {
         const tile = OfflineAreasService.createTileArea(76, 51);
 
-        expect(tile.properties).toEqual({ id: "76-51" });
+        expect(tile.properties).toEqual({ id: "76-51", minZoom: 7 });
         expect(tile.geometry.type).toBe("Polygon");
         expect((tile.geometry as GeoJSON.Polygon).coordinates[0]).toHaveLength(5);
     });

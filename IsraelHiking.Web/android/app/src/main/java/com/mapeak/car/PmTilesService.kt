@@ -16,8 +16,15 @@ class PmTilesService(context: Context) : AutoCloseable {
     private var areas: List<DownloadedArea> = emptyList()
     private var areasReadAt = 0L
 
-    /** An area the app downloaded, as it keeps it next to its files in an "id.area.json" file, see offline-areas.service.ts */
-    private class DownloadedArea(val id: String, val polygons: List<List<List<DoubleArray>>>)
+    /**
+     * An area the app downloaded, as it keeps it next to its files in an "id.area.json" file, see offline-areas.service.ts,
+     * where the root files and the tiles that came before areas are areas as well
+     */
+    private class DownloadedArea(val id: String, val polygons: List<List<List<DoubleArray>>>, val zooms: IntRange) {
+        val boundsArea: Double = polygons.flatten().flatten().let { points ->
+            (points.maxOf { it[0] } - points.minOf { it[0] }) * (points.maxOf { it[1] } - points.minOf { it[1] })
+        }
+    }
 
     @Throws(IOException::class)
     fun getTileByType(z: Int, x: Int, y: Int, type: String): ByteArray? {
@@ -40,27 +47,23 @@ class PmTilesService(context: Context) : AutoCloseable {
     }
 
     /**
-     * The file a tile is read from, mirroring getFileNameByType of pmtiles.service.ts: the root file up to its zoom,
-     * the zoom 7 tile it is in, the downloaded area its center is in, and below zoom 7 the zoom 6 root file the tiles
-     * that came before areas were downloaded with.
+     * The file a tile is read from, mirroring findDownloadedAreaId of pmtiles.service.ts: of the smallest downloaded area
+     * that holds the zoom of the tile and its center, so that an area is read before the root files of the whole world.
      */
     private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String? {
-        if (z <= ROOT_ZOOM) {
-            existing("$type-$ROOT_ZOOM.pmtiles")?.let { return it }
-        }
-        if (z >= TILES_ZOOM) {
-            val scale = 1 shl (z - TILES_ZOOM)
-            existing("$type+${x / scale}-${y / scale}.pmtiles")?.let { return it }
-        }
+        val lng = tileCenterLng(x, z)
+        val lat = tileCenterLat(y, z)
         return getDownloadedAreas()
-            .filter { area -> area.polygons.any { contains(it, tileCenterLng(x, z), tileCenterLat(y, z)) } }
+            .filter { area -> z in area.zooms && area.polygons.any { contains(it, lng, lat) } }
             .firstNotNullOfOrNull { existing("$type+${it.id}.pmtiles") }
-            ?: if (z < TILES_ZOOM) existing("$type-${TILES_ZOOM - 1}.pmtiles") else null
     }
 
     private fun existing(fileName: String): String? = if (File(baseDir, fileName).exists()) fileName else null
 
-    /** The areas are read again every so often rather than for every tile, so that one downloaded meanwhile shows up */
+    /**
+     * The areas, smallest first, are read again every so often rather than for every tile, so that one downloaded
+     * meanwhile shows up
+     */
     @Synchronized
     private fun getDownloadedAreas(): List<DownloadedArea> {
         val now = System.currentTimeMillis()
@@ -78,11 +81,13 @@ class PmTilesService(context: Context) : AutoCloseable {
                 } else {
                     listOf(toPolygon(coordinates))
                 }
-                DownloadedArea(area.getJSONObject("properties").getString("id"), polygons)
+                val properties = area.getJSONObject("properties")
+                val zooms = properties.optInt("minZoom", 0)..properties.optInt("maxZoom", Int.MAX_VALUE)
+                DownloadedArea(properties.getString("id"), polygons, zooms)
             } catch (_: Exception) {
                 null
             }
-        }
+        }.sortedBy { it.boundsArea }
         return areas
     }
 
@@ -146,8 +151,6 @@ class PmTilesService(context: Context) : AutoCloseable {
     }
 
     companion object {
-        const val TILES_ZOOM: Int = 7
-        const val ROOT_ZOOM: Int = 4
         private const val AREA_FILE_SUFFIX = ".area.json"
         private const val AREAS_REFRESH_MILLIS = 30_000L
     }

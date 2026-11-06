@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, vi } from "vitest";
+﻿import { describe, beforeEach, it, expect, vi } from "vitest";
 import { TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting, type TestRequest } from "@angular/common/http/testing";
@@ -48,7 +48,7 @@ describe("OfflineTileNamesService", () => {
 
         expect(request.request.params.get("tileX")).toBe("76");
         expect(request.request.params.get("tileY")).toBe("52");
-        expect(getTile().properties).toEqual({ id: "76-52", name: "Israel", "name:he": "ישראל" });
+        expect(getTile().properties).toEqual({ id: "76-52", name: "Israel", "name:he": "ישראל", minZoom: 7 });
         expect(fileService.writeFileInDataDirectory).toHaveBeenCalledWith("76-52.area.json", JSON.stringify(getTile()));
     });
 
@@ -63,7 +63,7 @@ describe("OfflineTileNamesService", () => {
         (await expectNameRequest()).flush({ name: "Israel", "name:he": "ישראל" });
         await promise;
 
-        expect(getTile().properties).toEqual({ id: "76-52", name: "Israel (2)", "name:he": "ישראל (2)" });
+        expect(getTile().properties).toEqual({ id: "76-52", name: "Israel (2)", "name:he": "ישראל (2)", minZoom: 7 });
     });
 
     it("should leave a tile without a name when its names can not be fetched", async () => {

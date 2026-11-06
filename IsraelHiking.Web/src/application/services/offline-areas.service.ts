@@ -3,7 +3,6 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
-import { bbox } from "@turf/bbox";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
 import type { LngLat } from "maplibre-gl";
 
@@ -55,7 +54,7 @@ export class OfflineAreasService {
     public findArea(areas: OfflineArea[], lngLat: LngLat): OfflineArea | null {
         return areas
             .filter(area => booleanPointInPolygon([lngLat.lng, lngLat.lat], area))
-            .sort((a, b) => OfflineAreasService.getBoundsArea(a) - OfflineAreasService.getBoundsArea(b))[0] ?? null;
+            .sort((a, b) => PmTilesService.getBoundsArea(a) - PmTilesService.getBoundsArea(b))[0] ?? null;
     }
 
     /**
@@ -94,22 +93,32 @@ export class OfflineAreasService {
 
     /** Names a downloaded area the way the user typed it, in every language, since that is the name they will look for */
     public renameDownloadedArea(area: Immutable<OfflineArea>, name: string): Promise<void> {
-        return this.saveDownloadedArea({ ...area, properties: { id: area.properties.id, name } });
+        return this.saveDownloadedArea(OfflineAreasService.withNames(area, { name }));
     }
 
-    /** A tile as an area, whose id is the key of the tile, see PmTilesService */
+    /** An area by other names, which keeps the id and the zooms its files hold */
+    public static withNames(area: Immutable<OfflineArea>, names: Record<string, string>): Immutable<OfflineArea> {
+        const { id, minZoom, maxZoom } = area.properties;
+        return { ...area, properties: { ...names, id, minZoom, maxZoom } };
+    }
+
+    /** A tile as an area, whose id is the key of the tile, see PmTilesService, and whose files start at its zoom */
     public static createTileArea(tileX: number, tileY: number): OfflineArea {
+        return OfflineAreasService.createSquareArea(PmTilesService.toTileKey(tileX, tileY), tileX, tileY, TILES_ZOOM, TILES_ZOOM);
+    }
+
+    /** Root files as an area, the whole world up to the zoom they hold, see PmTilesService.isRootKey */
+    public static createRootArea(id: string, maxZoom: number): OfflineArea {
+        return OfflineAreasService.createSquareArea(id, 0, 0, 0, 0, maxZoom);
+    }
+
+    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number, minZoom: number, maxZoom?: number): OfflineArea {
         const corners = [[tileX, tileY], [tileX + 1, tileY], [tileX + 1, tileY + 1], [tileX, tileY + 1], [tileX, tileY]]
-            .map(([x, y]) => SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x, y }, TILES_ZOOM)));
-        return { type: "Feature", properties: { id: PmTilesService.toTileKey(tileX, tileY) }, geometry: { type: "Polygon", coordinates: [corners] } };
+            .map(([x, y]) => SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x, y }, zoom)));
+        return { type: "Feature", properties: { id, minZoom, maxZoom }, geometry: { type: "Polygon", coordinates: [corners] } };
     }
 
     private static getAreaFileName(id: string): string {
         return id + OfflineAreasService.AREA_FILE_SUFFIX;
-    }
-
-    private static getBoundsArea(area: OfflineArea): number {
-        const [minLng, minLat, maxLng, maxLat] = bbox(area);
-        return (maxLng - minLng) * (maxLat - minLat);
     }
 }

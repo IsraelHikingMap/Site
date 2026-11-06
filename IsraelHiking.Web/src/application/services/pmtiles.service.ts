@@ -4,6 +4,7 @@ import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
+import { bbox } from "@turf/bbox";
 import type { Immutable } from "immer";
 
 import { SpatialHelper } from "./spatial.helper";
@@ -13,6 +14,8 @@ import type { ApplicationState, OfflineArea } from "../models";
 export const TILES_ZOOM = 7;
 /** The zoom up to which the root files hold the whole world, every downloaded area holds the zooms above it */
 export const ROOT_ZOOM = 4;
+/** The zoom the files of an area start at, see the server's OfflineFilesService */
+export const AREA_MIN_ZOOM = ROOT_ZOOM + 1;
 
 class CapacitorSource implements Source {
 
@@ -83,40 +86,31 @@ export class PmTilesService {
         return await this.getTileFromFile(fileName, z, x, y);
     }
 
-    /**
-     * The file a tile is in: the root file up to its zoom, then the file of the downloaded tile it is a part of, and
-     * then the file of a downloaded area its middle is in. The tiles that came before areas start at zoom 7, so the
-     * zoom 6 root they came with fills the zooms below that while it is kept, see LEGACY_ROOT_KEY.
-     */
+    /** The file a tile is in, the one of the downloaded area that holds it, see findDownloadedAreaId */
     private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
-        const downloadedAreas = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedAreas);
-        if (z <= ROOT_ZOOM && downloadedAreas[PmTilesService.toTileKey()] != null) {
-            return `${type}-${ROOT_ZOOM}.pmtiles`;
-        }
-        if (z >= TILES_ZOOM) {
-            const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
-            const tileKey = PmTilesService.toTileKey(tileX, tileY);
-            if (downloadedAreas[tileKey] != null) {
-                return `${type}+${tileKey}.pmtiles`;
-            }
-        }
         const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: x + 0.5, y: y + 0.5 }, z));
-        const areaId = this.findDownloadedAreaId(center);
-        if (areaId != null) {
-            return `${type}+${areaId}.pmtiles`;
-        }
-        return z < TILES_ZOOM && downloadedAreas[PmTilesService.LEGACY_ROOT_KEY] != null ? `${type}-${TILES_ZOOM - 1}.pmtiles` : null;
+        const areaId = this.findDownloadedAreaId(center, z);
+        return areaId == null ? null : `${type}+${areaId}.pmtiles`;
     }
 
     /**
-     * The downloaded area a point is in, that is not a tile, since the files of a tile are found by the tile itself.
-     * Where downloaded areas overlap, any of them has the point, since an area reaches a few kilometers past its border.
+     * The downloaded area whose files hold a point at a zoom, the smallest of them where they overlap, so that an
+     * area is read before the root files of the whole world, which only fill in where there is no area.
      */
-    public findDownloadedAreaId(point: GeoJSON.Position): string | null {
+    public findDownloadedAreaId(point: GeoJSON.Position, zoom: number): string | null {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-        const id = Object.keys(downloadedAreas).find(key => PmTilesService.fromTileKey(key) == null && downloadedAreas[key].area != null &&
-            booleanPointInPolygon(point, downloadedAreas[key].area as Immutable<OfflineArea> as OfflineArea));
-        return id ?? null;
+        const areas = Object.values(downloadedAreas)
+            .map(({ area }) => area as Immutable<OfflineArea> as OfflineArea)
+            .filter(area => area != null && (area.properties.minZoom ?? 0) <= zoom && zoom <= (area.properties.maxZoom ?? Infinity) &&
+                booleanPointInPolygon(point, area))
+            .sort((a, b) => PmTilesService.getBoundsArea(a) - PmTilesService.getBoundsArea(b));
+        return areas[0]?.properties.id ?? null;
+    }
+
+    /** How large an area is, by its bounds, which is enough to tell a smaller area from a larger one */
+    public static getBoundsArea(area: OfflineArea): number {
+        const [minLng, minLat, maxLng, maxLat] = bbox(area);
+        return (maxLng - minLng) * (maxLat - minLat);
     }
 
     /**
@@ -153,23 +147,24 @@ export class PmTilesService {
         return (await pmTilesProvider.getMetadata() as { version?: string })?.version;
     }
 
+    /** The key of the root files, which hold the whole world up to ROOT_ZOOM and come with every area */
+    public static readonly ROOT_KEY = "root";
+
     /** The key of the zoom 6 root files, which are only kept as long as a tile that came before areas is */
     public static readonly LEGACY_ROOT_KEY = "legacy-root";
 
-    /** Whether a key is of root files, which are of no area */
+    /** Whether a key is of root files, which are of no area the user downloaded and are not listed */
     public static isRootKey(key: string): boolean {
-        return key === PmTilesService.toTileKey() || key === PmTilesService.LEGACY_ROOT_KEY;
+        return key === PmTilesService.ROOT_KEY || key === PmTilesService.LEGACY_ROOT_KEY;
     }
 
-    /**
-     * The key the files of a tile are stored under, where an undefined tile is the root, non-tiled, one.
-     */
-    public static toTileKey(tileX?: number, tileY?: number): string {
+    /** The key the files of a tile that was downloaded before areas are stored under */
+    public static toTileKey(tileX: number, tileY: number): string {
         return `${tileX}-${tileY}`;
     }
 
     /**
-     * The tile a key was made of, null for the root key and for the id of an area, which are not of a tile.
+     * The tile a key was made of, null for the root keys and for the id of an area, which are not of a tile.
      */
     public static fromTileKey(tileKey: string): { tileX: number, tileY: number } | null {
         const match = tileKey.match(/^(\d+)-(\d+)$/);

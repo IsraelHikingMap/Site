@@ -19,7 +19,7 @@ import { OfflineAreasService } from "./offline-areas.service";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
-const ROOT_TILE_KEY = PmTilesService.toTileKey();
+const ROOT_TILE_KEY = PmTilesService.ROOT_KEY;
 const TILE_KEY = PmTilesService.toTileKey(76, 51);
 const TILE_AREA = OfflineAreasService.createTileArea(76, 51);
 /** The file of the tile as it is kept on the device */
@@ -36,7 +36,9 @@ const AREA: OfflineArea = {
 const OTHER_AREA: OfflineArea = { ...AREA, properties: { id: "0f1e2d3c4b5a6978", name: "Other area" } };
 const AREA_MAP_FILE = `IHM-schema+${AREA_ID}.pmtiles`;
 const AREA_ROUTING_TILES_FILE = `valhalla+${AREA_ID}.tgz`;
-const ROOT_MAP_FILE = "IHM-schema-4.pmtiles";
+const ROOT_MAP_FILE = "IHM-schema+root.pmtiles";
+/** The root file as the server names it */
+const SERVER_ROOT_MAP_FILE = "IHM-schema-4.pmtiles";
 const DOWNLOAD_DATE = new Date("2026-01-01T10:00:00.000Z");
 const FILE_SIZE = 1024 * 1024;
 
@@ -593,17 +595,18 @@ describe("OfflineFilesDownloadService", () => {
                 await flushStyles(mockBackend, {});
                 const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`));
                 expect(service.downloadInProgress()).toEqual({ area, progress: 0 });
-                areaRequest.flush({ [areaFile]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" });
+                areaRequest.flush({ [areaFile]: "2026-06-01", [SERVER_ROOT_MAP_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
                 expect(areaRequest.request.method).toBe("GET");
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
                     `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, areaFile, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    `${Urls.offlineFiles}/${ROOT_MAP_FILE}`, ROOT_MAP_FILE, "token", expect.any(Function), expect.any(AbortController));
+                    `${Urls.offlineFiles}/${SERVER_ROOT_MAP_FILE}`, ROOT_MAP_FILE, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
-                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(area);
+                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith({ ...area, properties: { ...area.properties, minZoom: 5 } });
+                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(OfflineAreasService.createRootArea(ROOT_TILE_KEY, 4));
                 expect(vi.mocked(offlineAreasService.saveDownloadedArea).mock.invocationCallOrder[0])
                     .toBeGreaterThan(vi.mocked(fileService.moveFileFromCacheToDataDirectory).mock.invocationCallOrder[0]);
             }
@@ -651,7 +654,7 @@ describe("OfflineFilesDownloadService", () => {
                     offlineState: { isSubscribed: true },
                     inMemoryState: { downloadedAreas: {} }
                 });
-                vi.mocked(offlineAreasService.loadDownloadedAreas).mockResolvedValue({ [AREA_ID]: namedArea });
+                vi.mocked(offlineAreasService.loadDownloadedAreas).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_TILE_KEY]: OfflineAreasService.createRootArea(ROOT_TILE_KEY, 4) });
 
                 const promise = service.downloadArea(namedArea);
                 await flushStyles(mockBackend, {});
@@ -663,20 +666,22 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should rename the files of the tiles that were downloaded before areas, and keep each tile as an area",
+    it("Should rename the files of the tiles and the root files that were downloaded before areas, and keep each of them as an area",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
                 offlineAreasService: OfflineAreasService) => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory)
-                    .mockResolvedValueOnce([SERVER_MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))
-                    .mockResolvedValue([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                    .mockResolvedValueOnce([SERVER_MAP_FILE, "IHM-schema-6.pmtiles"].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))
+                    .mockResolvedValue([MAP_FILE, "IHM-schema+legacy-root.pmtiles"].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
 
                 await initialize(service, mockBackend, store, {});
 
-                expect(fileService.renameFileInDataDirectory).toHaveBeenCalledTimes(1);
+                expect(fileService.renameFileInDataDirectory).toHaveBeenCalledTimes(2);
                 expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith(SERVER_MAP_FILE, MAP_FILE);
-                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledTimes(1);
+                expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith("IHM-schema-6.pmtiles", "IHM-schema+legacy-root.pmtiles");
+                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledTimes(2);
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(TILE_AREA);
+                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(OfflineAreasService.createRootArea(PmTilesService.LEGACY_ROOT_KEY, 6));
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
                 expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual([MAP_FILE]);
             }
@@ -686,7 +691,10 @@ describe("OfflineFilesDownloadService", () => {
     it("Should not keep a tile that is already kept as an area again, which would drop the name the user gave it",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, OfflineAreasService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, offlineAreasService: OfflineAreasService) => {
-                vi.mocked(offlineAreasService.loadDownloadedAreas).mockResolvedValue({ [TILE_KEY]: { ...TILE_AREA, properties: { id: TILE_KEY, name: "My tile" } } });
+                vi.mocked(offlineAreasService.loadDownloadedAreas).mockResolvedValue({
+                    [TILE_KEY]: { ...TILE_AREA, properties: { id: TILE_KEY, name: "My tile" } },
+                    [ROOT_TILE_KEY]: OfflineAreasService.createRootArea(ROOT_TILE_KEY, 4)
+                });
 
                 await initialize(service, mockBackend, store, {});
 
@@ -749,7 +757,7 @@ describe("OfflineFilesDownloadService", () => {
                     AREA_MAP_FILE,
                     `a-removed-source+${AREA_ID}.pmtiles`,
                     "a-removed-source+75-50.pmtiles",
-                    "a-removed-source-4.pmtiles"
+                    "a-removed-source+root.pmtiles"
                 ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
@@ -767,7 +775,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith("a-removed-source+75-50.pmtiles");
                 // The styles on the device are the ones that were just downloaded, so 75-50 can not be drawn
                 // from that source either way and nothing is left that the root file could serve
-                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-4.pmtiles");
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+root.pmtiles");
             }
         )
     );
@@ -779,7 +787,7 @@ describe("OfflineFilesDownloadService", () => {
                     AREA_MAP_FILE,
                     `global_points+${AREA_ID}.pmtiles`,
                     `a-removed-source+${AREA_ID}.pmtiles`,
-                    "a-removed-source-4.pmtiles"
+                    "a-removed-source+root.pmtiles"
                 ].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 store.reset({
                     userState: { token: "token" },
@@ -793,7 +801,7 @@ describe("OfflineFilesDownloadService", () => {
 
                 expect(await promise).toBe("up-to-date");
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(`a-removed-source+${AREA_ID}.pmtiles`);
-                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source-4.pmtiles");
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+root.pmtiles");
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(AREA_MAP_FILE);
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(`global_points+${AREA_ID}.pmtiles`);
             }
@@ -820,9 +828,10 @@ describe("OfflineFilesDownloadService", () => {
     );
 
     it("Should keep the zoom 6 root files of the tiles that came before areas apart, and delete them along with the last of those tiles",
-        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
-            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
-                const legacyRootFile = "IHM-schema-6.pmtiles";
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
+                offlineAreasService: OfflineAreasService) => {
+                const legacyRootFile = "IHM-schema+legacy-root.pmtiles";
                 const areaFile = "IHM-schema+israel-and-palestine.pmtiles";
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [MAP_FILE, legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
@@ -836,6 +845,7 @@ describe("OfflineFilesDownloadService", () => {
                 await service.deleteArea(TILE_KEY);
 
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(legacyRootFile);
+                expect(offlineAreasService.deleteDownloadedArea).toHaveBeenCalledWith(PmTilesService.LEGACY_ROOT_KEY);
                 // The area still uses the new root files
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(ROOT_MAP_FILE);
             }

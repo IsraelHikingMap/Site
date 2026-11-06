@@ -103,7 +103,7 @@ export class RoutingProvider {
 
     /**
      * Whether the slices holding the given points were downloaded along with their routing tiles, or the points
-     * are in downloaded areas that were. A slice that was downloaded before offline routing existed holds no
+     * are in downloaded areas that were, which are looked up at a zoom the root files do not hold. A slice that was downloaded before offline routing existed holds no
      * routing tiles, so it needs to be downloaded again.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
@@ -117,7 +117,7 @@ export class RoutingProvider {
             }
         }
         return Array.from(tiles).every(tile => downloadedAreas[tile]?.hasRoutingTiles) ||
-            [start, end].every(point => downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat])]?.hasRoutingTiles);
+            [start, end].every(point => downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat], RoutingProvider.SLICE_TILE_ZOOM)]?.hasRoutingTiles);
     }
 
     /**
