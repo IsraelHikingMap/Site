@@ -1,7 +1,9 @@
 ﻿using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.Features;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -103,6 +105,8 @@ public class OfflineFilesService : IOfflineFilesService
     [
         VALHALLA_PROFILES_FILE_NAME
     ];
+
+    private static readonly JsonSerializerOptions GEO_JSON_OPTIONS = new() { Converters = { GeoJsonExtensions.GeoJsonWritableFactory } };
 
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private readonly ILogger _logger;
@@ -245,10 +249,9 @@ public class OfflineFilesService : IOfflineFilesService
     private async Task<string> GetAreaGeometry(string areaId)
     {
         await using var content = GetAreasContent();
-        using var document = await JsonDocument.ParseAsync(content);
-        var area = document.RootElement.GetProperty("features").EnumerateArray()
-            .FirstOrDefault(feature => feature.GetProperty("properties").TryGetProperty("id", out var id) && id.GetString() == areaId);
-        return area.ValueKind == JsonValueKind.Undefined ? null : area.GetProperty("geometry").GetRawText();
+        var areas = await JsonSerializer.DeserializeAsync<FeatureCollection>(content, GEO_JSON_OPTIONS);
+        var area = areas.FirstOrDefault(feature => feature.Attributes.GetOptionalValue("id") as string == areaId);
+        return area == null ? null : JsonSerializer.Serialize(area.Geometry, GEO_JSON_OPTIONS);
     }
 
     /// <summary>
