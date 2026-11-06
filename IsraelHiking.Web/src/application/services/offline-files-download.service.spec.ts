@@ -119,7 +119,7 @@ describe("OfflineFilesDownloadService", () => {
                         updateOfflineRoutingProfiles: vi.fn(() => Promise.resolve()),
                         extractOfflineRoutingTiles: vi.fn(() => Promise.resolve()),
                         deleteOfflineRoutingTiles: vi.fn(() => Promise.resolve()),
-                        getOfflineRoutingTiles: vi.fn(() => Promise.resolve([TILE_KEY]))
+                        getAreasWithRoutingTiles: vi.fn(() => Promise.resolve([TILE_KEY]))
                     }
                 },
                 { provide: RunningContextService, useValue: { isCapacitor: true } },
@@ -433,7 +433,7 @@ describe("OfflineFilesDownloadService", () => {
                 routingProvider: RoutingProvider) => {
                 const downloadDate = new Date();
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([AREA_MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: downloadDate, size: FILE_SIZE })));
-                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([AREA_ID]);
+                vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValue([AREA_ID]);
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
@@ -457,7 +457,7 @@ describe("OfflineFilesDownloadService", () => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory)
                     .mockResolvedValueOnce([`raster-dem+${AREA_ID}.pmtiles`].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))
                     .mockResolvedValue([`raster-dem+${AREA_ID}.pmtiles`, AREA_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
-                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValueOnce([]).mockResolvedValue([AREA_ID]);
+                vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValueOnce([]).mockResolvedValue([AREA_ID]);
                 store.reset({
                     userState: { token: "token" },
                     offlineState: { isSubscribed: true },
@@ -486,7 +486,7 @@ describe("OfflineFilesDownloadService", () => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory)
                     .mockResolvedValueOnce([])
                     .mockResolvedValue([AREA_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
-                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
+                vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValue([]);
                 vi.mocked(routingProvider.extractOfflineRoutingTiles).mockRejectedValue(new Error("Not implemented"));
                 store.reset({
                     userState: { token: "token" },
@@ -814,7 +814,7 @@ describe("OfflineFilesDownloadService", () => {
                 fileService: FileService, routingProvider: RoutingProvider, offlineAreasService: OfflineAreasService) => {
                 await initialize(service, mockBackend, store, {});
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
-                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
+                vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValue([]);
 
                 await service.deleteArea(TILE_KEY);
 
@@ -858,7 +858,7 @@ describe("OfflineFilesDownloadService", () => {
                 fileService: FileService, routingProvider: RoutingProvider) => {
                 await initialize(service, mockBackend, store, {});
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
-                vi.mocked(routingProvider.getOfflineRoutingTiles).mockResolvedValue([]);
+                vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValue([]);
                 vi.mocked(routingProvider.deleteOfflineRoutingTiles).mockRejectedValue(new Error("Not implemented"));
 
                 await service.deleteArea(TILE_KEY);

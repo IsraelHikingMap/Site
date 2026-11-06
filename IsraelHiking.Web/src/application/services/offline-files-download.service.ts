@@ -603,7 +603,7 @@ export class OfflineFilesDownloadService {
      * Failing to read the files is logged and otherwise ignored, leaving the state as it was.
      */
     public async updateDownloadedAreasFromDevice(): Promise<void> {
-        const routingTileKeys = await this.routingProvider.getOfflineRoutingTiles();
+        const areaIdsWithRoutingTiles = await this.routingProvider.getAreasWithRoutingTiles();
         let offlineFiles: DataDirectoryFile[];
         let areas: Record<string, OfflineArea>;
         try {
@@ -619,7 +619,7 @@ export class OfflineFilesDownloadService {
             if (key == null) {
                 continue;
             }
-            downloadedAreas[key] ??= { area: areas[key] ?? null, files: [], hasRoutingTiles: routingTileKeys.includes(key) };
+            downloadedAreas[key] ??= { area: areas[key] ?? null, files: [], hasRoutingTiles: areaIdsWithRoutingTiles.includes(key) };
             downloadedAreas[key].files.push({ fileName: file.fileName, date: file.modifiedDate.toISOString() });
         }
         this.logDownloadedAreas(downloadedAreas, offlineFiles);

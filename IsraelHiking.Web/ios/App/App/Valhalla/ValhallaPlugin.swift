@@ -13,9 +13,9 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "extractFile", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "storeProfiles", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "listTiles", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "deleteTile", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "clearTiles", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "listIds", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "deleteById", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "deleteAll", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "route", returnType: CAPPluginReturnPromise)
     ]
 
@@ -24,19 +24,19 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
     private lazy var router = ValhallaRouter(tiles: tiles)
 
     /// Extracts a downloaded file of routing tiles into the shared tiles directory.
-    /// Extracting the files of several adjacent tiles into it is the way to route across them.
-    /// The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
+    /// Extracting the files of several adjacent areas into it is the way to route across them.
+    /// The tiles it held are kept under the given id, so that they can later be removed on their own.
     @objc func extractFile(_ call: CAPPluginCall) {
         guard let tarFileName = call.getString("tarFileName"), !tarFileName.isEmpty else {
             call.reject("tarFileName is required")
             return
         }
-        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
-            call.reject("tileKey is required")
+        guard let id = call.getString("id"), !id.isEmpty else {
+            call.reject("id is required")
             return
         }
         do {
-            let result = try tiles.extract(tarFileName: tarFileName, tileKey: tileKey)
+            let result = try tiles.extract(tarFileName: tarFileName, id: id)
             router.invalidate()
             call.resolve(["extractedFiles": result.extractedFiles, "tilesDir": result.tilesDir])
         } catch {
@@ -44,19 +44,19 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// The keys of the tiles whose routing tiles are on the device, so that the app can tell which
-    /// areas it can route in without keeping a list of its own.
-    @objc func listTiles(_ call: CAPPluginCall) {
-        call.resolve(["tileKeys": tiles.tileKeys()])
+    /// The ids routing tiles are kept under, so that the app can tell what it can route in without
+    /// keeping a list of its own.
+    @objc func listIds(_ call: CAPPluginCall) {
+        call.resolve(["ids": tiles.ids()])
     }
 
-    /// Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
-    @objc func deleteTile(_ call: CAPPluginCall) {
-        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
-            call.reject("tileKey is required")
+    /// Removes the routing tiles kept under an id, keeping the ones that are also kept under another id.
+    @objc func deleteById(_ call: CAPPluginCall) {
+        guard let id = call.getString("id"), !id.isEmpty else {
+            call.reject("id is required")
             return
         }
-        tiles.delete(tileKey: tileKey)
+        tiles.delete(id: id)
         router.invalidate()
         call.resolve()
     }
@@ -76,8 +76,8 @@ public class ValhallaPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    /// Removes all the extracted tiles.
-    @objc func clearTiles(_ call: CAPPluginCall) {
+    /// Removes the routing tiles kept under every id.
+    @objc func deleteAll(_ call: CAPPluginCall) {
         do {
             try tiles.clear()
             router.invalidate()

@@ -1,4 +1,4 @@
-import { inject, Service } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
@@ -11,7 +11,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { PmTilesService } from "./pmtiles.service";
+import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
 import { Valhalla } from "./valhalla.plugin";
 import { Urls } from "../urls";
 import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
@@ -33,9 +33,6 @@ export class RoutingProvider {
     /** How long to wait for the server, shorter when the route can be calculated on the device */
     private static readonly ONLINE_TIMEOUT_MS = 4500;
     private static readonly ONLINE_TIMEOUT_WITH_TILES_MS = 1500;
-
-    /** The zoom level the offline files are sliced at, see the server's OfflineFilesService */
-    private static readonly SLICE_TILE_ZOOM = 7;
 
     private static readonly ROUTING_TILES_PREFIX = "valhalla";
     private static readonly ROUTING_TILES_EXTENSION = ".tgz";
@@ -102,22 +99,14 @@ export class RoutingProvider {
     }
 
     /**
-     * Whether the slices holding the given points were downloaded along with their routing tiles, or the points
-     * are in downloaded areas that were, which are looked up at a zoom the root files do not hold. A slice that was downloaded before offline routing existed holds no
-     * routing tiles, so it needs to be downloaded again.
+     * Whether both points are in downloaded areas that have their routing tiles, looked up at a zoom only areas
+     * hold, so that the root files are not taken for one. An area that was downloaded before offline routing
+     * existed has none, so it needs to be downloaded again.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-        const startTile = SpatialHelper.toTile(start, RoutingProvider.SLICE_TILE_ZOOM);
-        const endTile = SpatialHelper.toTile(end, RoutingProvider.SLICE_TILE_ZOOM);
-        const tiles = new Set<string>();
-        for (let x = Math.floor(startTile.x); x <= Math.floor(endTile.x); x++) {
-            for (let y = Math.floor(startTile.y); y <= Math.floor(endTile.y); y++) {
-                tiles.add(`${x}-${y}`);
-            }
-        }
-        return Array.from(tiles).every(tile => downloadedAreas[tile]?.hasRoutingTiles) ||
-            [start, end].every(point => downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat], RoutingProvider.SLICE_TILE_ZOOM)]?.hasRoutingTiles);
+        return [start, end].every(point =>
+            downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat], TILES_ZOOM)]?.hasRoutingTiles === true);
     }
 
     /**
@@ -147,20 +136,20 @@ export class RoutingProvider {
 
     /**
      * Extracts a downloaded offline routing tiles file, the file itself is removed once extracted.
-     * The tile it belongs to is identified so that it can later be removed without affecting its neighbours.
+     * The area it belongs to is identified so that it can later be removed without affecting its neighbours.
      */
-    public async extractOfflineRoutingTiles(fileName: string, tileKey: string): Promise<void> {
-        const results = await Valhalla.extractFile({ tarFileName: fileName, tileKey });
-        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for tile: ${tileKey}`);
+    public async extractOfflineRoutingTiles(fileName: string, areaId: string): Promise<void> {
+        const results = await Valhalla.extractFile({ tarFileName: fileName, id: areaId });
+        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for area: ${areaId}`);
     }
 
     /**
-     * The tiles whose routing tiles are on the device. They are stored by the plugin and not as files,
+     * The areas whose routing tiles are on the device. They are stored by the plugin and not as files,
      * so it is the one that knows about them, and failing to ask it means there are none to route with.
      */
-    public async getOfflineRoutingTiles(): Promise<string[]> {
+    public async getAreasWithRoutingTiles(): Promise<string[]> {
         try {
-            return (await Valhalla.listTiles()).tileKeys;
+            return (await Valhalla.listIds()).ids;
         } catch (ex) {
             this.loggingService.warning(`[Routing] Failed to get the offline routing tiles: ${(ex as Error).message}`);
             return [];
@@ -168,11 +157,11 @@ export class RoutingProvider {
     }
 
     /**
-     * Removes the offline routing tiles of a single tile, the tiles it shares with its neighbours are kept.
+     * Removes the offline routing tiles of a single area, the tiles it shares with its neighbours are kept.
      */
-    public async deleteOfflineRoutingTiles(tileKey: string): Promise<void> {
-        await Valhalla.deleteTile({ tileKey });
-        this.loggingService.info(`[Routing] Removed the offline routing tiles of ${tileKey}`);
+    public async deleteOfflineRoutingTiles(areaId: string): Promise<void> {
+        await Valhalla.deleteById({ id: areaId });
+        this.loggingService.info(`[Routing] Removed the offline routing tiles of ${areaId}`);
     }
 
     /**

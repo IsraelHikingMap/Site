@@ -1,4 +1,4 @@
-import { describe, beforeEach, vi, it, expect } from "vitest";
+﻿import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -14,15 +14,9 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
 import { PmTilesService } from "./pmtiles.service";
-import { SpatialHelper } from "./spatial.helper";
 import type { DownloadedArea } from "../models";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
-
-const sliceKeyOf = (lat: number, lng: number) => {
-    const tile = SpatialHelper.toTile({ lat, lng }, 7);
-    return `${Math.floor(tile.x)}-${Math.floor(tile.y)}`;
-};
 
 /** Areas that were downloaded along with their routing tiles */
 function withRoutingTiles(...keys: string[]): Record<string, DownloadedArea> {
@@ -218,25 +212,6 @@ describe("RoutingProvider", () => {
         )
     );
 
-    it("Should only say that routing failed when the area and its routing tiles are there",
-        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
-                runningContextService: RunningContextService) => {
-                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
-                store.reset({
-                    offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedAreas: withRoutingTiles(sliceKeyOf(32, 35), sliceKeyOf(32.001, 35.001)) }
-                });
-
-                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
-
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                await promise;
-                expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
-            }
-        )
-    );
-
     it("Should only say that routing failed when the points are in a downloaded area with its routing tiles",
         inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService, PmTilesService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
@@ -253,6 +228,7 @@ describe("RoutingProvider", () => {
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 await promise;
                 expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
+                expect(pmTilesService.findDownloadedAreaId).toHaveBeenCalledWith([35, 32], 7);
             }
         )
     );
