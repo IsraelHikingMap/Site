@@ -400,9 +400,26 @@ describe("MapService", () => {
                 on: () => { },
                 getZoom: () => 1
             } as unknown as Map);
-            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 500);
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0].zoom).toBe(1);
+        }
+    ));
+
+    it("Should move to with the given duration", inject([MapService],
+        async (service: MapService) => {
+            const spy = vi.fn();
+            service.setMap({
+                easeTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
+                on: () => { },
+                getZoom: () => 1
+            } as unknown as Map);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 150);
+            await new Promise(resolve => setTimeout(resolve));
+
+            expect(vi.mocked(spy).mock.calls[0][0].duration).toBe(150);
         }
     ));
 
@@ -418,7 +435,7 @@ describe("MapService", () => {
                 off: () => { }
             } as unknown as Map);
             service.unsetMap();
-            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 500);
             expect(spy).not.toHaveBeenCalled();
         }
     ));

@@ -17,6 +17,21 @@ export type LocationWithBearing = {
     accuracy: number;
 };
 
+/**
+ * How long the map takes to turn to a new compass heading. Kept close to the compass event interval, as each
+ * heading interrupts the animation of the one before it and a longer animation leaves the map trailing behind.
+ */
+const COMPASS_ANIMATION_DURATION_MILLISECONDS = 150;
+
+/**
+ * How long the map takes to move to a new GPS position. About the time between positions when on the move, so the
+ * map glides from one to the next instead of stopping in between.
+ */
+const GPS_ANIMATION_DURATION_MILLISECONDS = 1000;
+
+/** How long the map takes to move back to the GPS position when it is centered on it again. */
+export const CENTER_ANIMATION_DURATION_MILLISECONDS = 500;
+
 /** The last speed the GPS reported together with a heading, and when it arrived. */
 type GpsSpeedState = {
     speed: number;
@@ -64,14 +79,14 @@ export class LocationService {
             this.lastGpsSpeed = null;
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
-            if (!this.mapService.isMoving() && this.isFollowing()) {
-                this.moveMapToGpsPosition();
+            if (this.isFollowing()) {
+                this.moveMapToGpsPosition(COMPASS_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
         this.geoLocationService.backToForeground.subscribe(() => {
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -86,7 +101,7 @@ export class LocationService {
                 this.store.dispatch(new ToggleDistanceAction());
             }
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -120,7 +135,7 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    public moveMapToGpsPosition() {
+    public moveMapToGpsPosition(duration: number) {
         if (this.locationWithBearing == null) {
             return;
         }
@@ -128,7 +143,7 @@ export class LocationService {
         const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        this.mapService.moveToWithCurrentZoom(center, bearing);
+        this.mapService.moveToWithCurrentZoom(center, bearing, duration);
     }
 
     private handlePositionChange(position: GeolocationPosition) {
@@ -157,7 +172,7 @@ export class LocationService {
         this.paceCalculatorService.updatePace(position.coords.speed);
         this.changed.next(this.locationWithBearing);
         if (this.isFollowing()) {
-            this.moveMapToGpsPosition();
+            this.moveMapToGpsPosition(GPS_ANIMATION_DURATION_MILLISECONDS);
         }
     }
 
