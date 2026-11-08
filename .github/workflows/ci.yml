@@ -64,6 +64,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: 'gradle'
+          cache-dependency-path: |
+            IsraelHiking.Web/android/**/*.gradle*
+            IsraelHiking.Web/android/**/gradle-wrapper.properties
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
