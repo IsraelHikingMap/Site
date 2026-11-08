@@ -193,8 +193,8 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <inheritdoc/>
     /// <remarks>
-    /// The root files are listed along with the files of the area, which are listed first since they are the larger
-    /// ones. There are no routing tiles, since the service that slices them only slices by tile.
+    /// The routing tiles are listed first, as the largest and slowest file, then the files of the area and then the
+    /// root files that come with every area.
     /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate)
     {
@@ -204,6 +204,7 @@ public class OfflineFilesService : IOfflineFilesService
         }
         var filesDictionary = new Dictionary<string, DateTime>();
         var today = DateTime.UtcNow.Date;
+        AddIfUpdated(filesDictionary, $"{VALHALLA_FILE_NAME}+{areaId}{VALHALLA_FILE_EXTENSION}", today, lastModifiedDate);
         var sourceNames = await GetSourceNames();
         foreach (var name in sourceNames)
         {
@@ -222,13 +223,21 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <inheritdoc/>
     /// <remarks>
-    /// The polygon of the area is posted to the on-the-fly service, since the larger ones are too long for a url.
+    /// The polygon of the area is posted to the service that slices the file, since the larger ones are too long for a url.
     /// </remarks>
     public async Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName)
     {
         var sourceName = FileNameToSourceName(fileName);
         var geometry = await GetAreaGeometry(areaId);
-        if (geometry == null || !(await GetSourceNames()).Contains(sourceName))
+        if (geometry == null)
+        {
+            return null;
+        }
+        if (sourceName == VALHALLA_FILE_NAME)
+        {
+            return await _remoteFileFetcherGateway.PostForFileStream($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry);
+        }
+        if (!(await GetSourceNames()).Contains(sourceName))
         {
             return null;
         }
