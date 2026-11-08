@@ -48,7 +48,7 @@ export class LegendItemComponent {
     });
 
     public moveToLocation() {
-        this.mapService.moveTo(this.item().latlng, this.item().zoom, 0);
+        this.mapService.flyTo(this.item().latlng, this.item().zoom);
     }
 
     public getImageAddress() {
