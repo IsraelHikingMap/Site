@@ -54,10 +54,25 @@ export class WikidataService implements ImageAttributionProvider {
     private readonly resources: ResourcesService = inject(ResourcesService);
     private readonly httpClient: HttpClient = inject(HttpClient);
 
+    /**
+     * Adds the images and the description of the point's Wikipedia article, read in another language when
+     * there is no article in the requested one, so the description component can offer it translated.
+     */
     public async enritchFeatureFromWikimedia(feature: GeoJSON.Feature, language: string): Promise<void> {
         const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
         const wikidata = await this.getWikidataFromId(feature.properties.wikidata);
-        await this.setDescriptionAndImages(wikidata, feature, languageShort);
+        await this.setDescriptionAndImages(wikidata, feature, this.getArticleLanguage(wikidata, languageShort));
+    }
+
+    /**
+     * Picks the language of the Wikipedia article to read the point from - the requested language, then
+     * English, then any language the item has an article in.
+     */
+    private getArticleLanguage(wikidata: WikiDataPage, language: string): string {
+        const articleLanguages = Object.keys(wikidata.sitelinks)
+            .map(key => key.match(/^([a-z]{2,3})wiki$/)?.[1])
+            .filter(articleLanguage => articleLanguage != null);
+        return [language, "en"].find(preferred => articleLanguages.includes(preferred)) ?? articleLanguages[0] ?? language;
     }
 
     public async createFeatureFromPageId(wikidataId: string, language: string): Promise<GeoJSON.Feature> {

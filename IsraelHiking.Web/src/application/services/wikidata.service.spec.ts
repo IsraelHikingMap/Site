@@ -249,6 +249,87 @@ describe("WikidataService", () => {
         expect(feature.properties["description:" + language]).toBeUndefined();
     }));
 
+    it("should enrich feature from the english article when there is none in the requested language", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+        const wikidataId = "Q123";
+        const title = "en-test";
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [1, 2]
+            },
+            properties: {
+                wikidata: wikidataId
+            }
+        };
+        const promise = serive.enritchFeatureFromWikimedia(feature, "he");
+
+        backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
+            sitelinks: {
+                enwiki: {
+                    title
+                }
+            },
+            statements: {}
+        });
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)))).flush({
+            query: {
+                pages: {
+                    "1": {
+                        extract: "english description"
+                    }
+                }
+            }
+        });
+
+        await promise;
+        expect(feature.properties["poiExternalDescription:en"]).toBe("english description");
+        expect(feature.properties["poiExternalDescription:he"]).toBeUndefined();
+    }));
+
+    it("should enrich feature from an article in another language when there is none in the requested language or english", inject([WikidataService, HttpTestingController], async (serive: WikidataService, backend: HttpTestingController) => {
+        const wikidataId = "Q123";
+        const title = "de-test";
+        const feature: GeoJSON.Feature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [1, 2]
+            },
+            properties: {
+                wikidata: wikidataId
+            }
+        };
+        const promise = serive.enritchFeatureFromWikimedia(feature, "he");
+
+        backend.expectOne(r => r.url === `https://www.wikidata.org/w/rest.php/wikibase/v1/entities/items/${wikidataId}`).flush({
+            sitelinks: {
+                commonswiki: {
+                    title: "Category:test"
+                },
+                dewikivoyage: {
+                    title: "voyage-test"
+                },
+                dewiki: {
+                    title
+                }
+            },
+            statements: {}
+        });
+        (await vi.waitFor(() => backend.expectOne(r => r.url.startsWith(`https://de.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&piprop=original&exintro=&redirects=1&explaintext=&titles=${title}`)))).flush({
+            query: {
+                pages: {
+                    "1": {
+                        extract: "german description"
+                    }
+                }
+            }
+        });
+
+        await promise;
+        expect(feature.properties["poiExternalDescription:de"]).toBe("german description");
+    }));
+
     const IMAGE_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg";
 
     const flushPage = (mockBackend: HttpTestingController, page: unknown, wikiPrefix = Urls.wikimediaCommons) =>
