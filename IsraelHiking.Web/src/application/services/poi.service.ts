@@ -709,10 +709,15 @@ export class PoiService {
         return data;
     }
 
+    /**
+     * The description is read only in the UI language, without falling back to another one, so the
+     * editor never offers a description the user can not read. It is an empty string rather than
+     * undefined so that an untouched empty field does not count as a change and wipe the tag.
+     */
     private getUpdatableDataFromFeature(feature: Immutable<GeoJSON.Feature>): UpdateablePublicPoiData {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         return {
-            description: GeoJSONUtils.getDescription(feature, language),
+            description: feature.properties["description:" + language] || "",
             title: GeoJSONUtils.getTitle(feature, language),
             icon: feature.properties.poiIcon,
             iconColor: feature.properties.poiIconColor,

@@ -629,7 +629,27 @@ describe("Poi Service", () => {
             expect(data.description).toBe("the description of the point");
         }));
 
-    it("Should keep the language-less description of an existing point when merging a private marker with no description",
+    it("Should not offer a description in another language for editing", inject([PoiService, Store],
+        async (poiService: PoiService, store: Store) => {
+            store.reset({ poiState: { uploadMarkerData: null } });
+            const feature: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [3, 4]
+                },
+                properties: {
+                    poiId: "poi-42",
+                    poiSource: "OSM",
+                    "description:en": "english description"
+                }
+            };
+
+            const data = await poiService.createEditableDataAndMerge(feature);
+            expect(data.description).toBe("");
+        }));
+
+    it("Should not offer the language-less description of an existing point for editing",
         inject([PoiService, Store], async (poiService: PoiService, store: Store) => {
             store.reset({
                 poiState: {
@@ -657,7 +677,7 @@ describe("Poi Service", () => {
             };
 
             const data = await poiService.createEditableDataAndMerge(feature);
-            expect(data.description).toBe("the description of the point");
+            expect(data.description).toBe("");
         }));
 
     it("Should throw for invalid source", inject([PoiService], async (poiService: PoiService) => {
@@ -1084,7 +1104,7 @@ describe("Poi Service", () => {
                             identifier: "id",
                             imageUrl: "wikimedia.org/some-image-url",
                             website: "some-url",
-                            description: "description",
+                            "description:he": "description",
                             poiCategory: "natural",
                             poiIcon: "icon-spring",
                             poiIconColor: "#1e80e3",
