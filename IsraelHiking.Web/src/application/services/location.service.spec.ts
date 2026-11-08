@@ -42,7 +42,6 @@ describe("LocationService", () => {
             disable: vi.fn()
         };
         const mapService = {
-            isMoving: () => false,
             initializationPromise: Promise.resolve(),
             moveToWithCurrentZoom: vi.fn()
         };
@@ -129,7 +128,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4, undefined);
         }
     ));
 
@@ -147,7 +146,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, undefined);
         }
     ));
 
@@ -236,6 +235,24 @@ describe("LocationService", () => {
             deviceOrientationService.orientationChanged.emit(5);
 
             expect(eventSpy).toHaveBeenCalledTimes(2);
+        }
+    ));
+
+    it("Should move the map with a short animation on orientation change", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(5);
+
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenLastCalledWith({ lat: 2, lng: 3, alt: undefined }, 5, 150);
         }
     ));
 

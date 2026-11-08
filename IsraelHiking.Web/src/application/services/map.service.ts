@@ -277,19 +277,20 @@ export class MapService {
         this.currentMap.flyTo({ center: latLng, zoom });
     }
 
-    public async moveToWithCurrentZoom(center: LatLngAltTime, bearing: number) {
+    public async moveToWithCurrentZoom(center: LatLngAltTime, bearing: number, duration?: number) {
         if (!this.currentMap) {
             return;
         }
-        this.moveTo(center, this.currentMap.getZoom(), bearing);
+        this.moveTo(center, this.currentMap.getZoom(), bearing, duration);
     }
 
-    public async moveTo(center: LatLngAltTime, zoom: number, bearing: number) {
+    public async moveTo(center: LatLngAltTime, zoom: number, bearing: number, duration = 500) {
         await this.initializationPromise;
         this.currentMap.easeTo({
             bearing,
             center,
             zoom,
+            duration,
             animate: true,
             easing: (x) => x,
             offset: [0, 100]

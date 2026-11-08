@@ -60,7 +60,7 @@ export class DeviceOrientationService {
         this.eventHandler = await CapgoCompass.addListener("headingChange", (event) => {
             this.orientationChanged.next(event.value);
         });
-        await CapgoCompass.startListening({ minInterval: 400 });
+        await CapgoCompass.startListening({ minInterval: 100 });
         this.loggingService.info("[Orientation] Started listening to device orientation events");
     }
 

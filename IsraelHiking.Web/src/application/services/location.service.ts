@@ -17,6 +17,12 @@ export type LocationWithBearing = {
     accuracy: number;
 };
 
+/**
+ * How long the map takes to turn to a new compass heading. Kept close to the compass event interval, as each
+ * heading interrupts the animation of the one before it and a longer animation leaves the map trailing behind.
+ */
+const COMPASS_ANIMATION_DURATION_MILLISECONDS = 150;
+
 /** The last speed the GPS reported together with a heading, and when it arrived. */
 type GpsSpeedState = {
     speed: number;
@@ -64,8 +70,8 @@ export class LocationService {
             this.lastGpsSpeed = null;
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
-            if (!this.mapService.isMoving() && this.isFollowing()) {
-                this.moveMapToGpsPosition();
+            if (this.isFollowing()) {
+                this.moveMapToGpsPosition(COMPASS_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -120,7 +126,8 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    public moveMapToGpsPosition() {
+    /** @param duration - of the map animation in milliseconds, the default of {@link MapService.moveTo} when not given */
+    public moveMapToGpsPosition(duration?: number) {
         if (this.locationWithBearing == null) {
             return;
         }
@@ -128,7 +135,7 @@ export class LocationService {
         const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        this.mapService.moveToWithCurrentZoom(center, bearing);
+        this.mapService.moveToWithCurrentZoom(center, bearing, duration);
     }
 
     private handlePositionChange(position: GeolocationPosition) {
