@@ -91,7 +91,7 @@ describe("LocationService", () => {
     ));
 
     it("Should not move to gps position if position is not defined", inject([LocationService, MapService], (service: LocationService, mapService: MapService) => {
-        service.moveMapToGpsPosition();
+        service.moveMapToGpsPosition(500);
 
         expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
     }));
@@ -128,7 +128,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4, undefined);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4, 1000);
         }
     ));
 
@@ -146,7 +146,7 @@ describe("LocationService", () => {
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, undefined);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, 1000);
         }
     ));
 

@@ -15,7 +15,7 @@ import { ToastService } from "../services/toast.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialHelper } from "../services/spatial.helper";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { LocationService } from "../services/location.service";
+import { CENTER_ANIMATION_DURATION_MILLISECONDS, LocationService } from "../services/location.service";
 import { MapService } from "../services/map.service";
 import { RunningContextService } from "../services/running-context.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
@@ -135,7 +135,7 @@ export class LocationComponent {
         // is active must be true
         if (this.selectedRouteService.isEditingRoute()) {
             // Following can't be turned on while editing, so the button can only center the map once.
-            this.locationService.moveMapToGpsPosition();
+            this.locationService.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             this.toastService.warning(this.resources.trackingIsDisabledWhileEditing);
             return;
         }
@@ -145,7 +145,7 @@ export class LocationComponent {
             if (this.showDistance()) {
                 this.store.dispatch(new ToggleDistanceAction());
             }
-            this.locationService.moveMapToGpsPosition();
+            this.locationService.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             return;
         }
         // following and not panned

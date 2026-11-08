@@ -23,6 +23,15 @@ export type LocationWithBearing = {
  */
 const COMPASS_ANIMATION_DURATION_MILLISECONDS = 150;
 
+/**
+ * How long the map takes to move to a new GPS position. About the time between positions when on the move, so the
+ * map glides from one to the next instead of stopping in between.
+ */
+const GPS_ANIMATION_DURATION_MILLISECONDS = 1000;
+
+/** How long the map takes to move back to the GPS position when it is centered on it again. */
+export const CENTER_ANIMATION_DURATION_MILLISECONDS = 500;
+
 /** The last speed the GPS reported together with a heading, and when it arrived. */
 type GpsSpeedState = {
     speed: number;
@@ -77,7 +86,7 @@ export class LocationService {
 
         this.geoLocationService.backToForeground.subscribe(() => {
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -92,7 +101,7 @@ export class LocationService {
                 this.store.dispatch(new ToggleDistanceAction());
             }
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -126,8 +135,7 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    /** @param duration - of the map animation in milliseconds, the default of {@link MapService.moveTo} when not given */
-    public moveMapToGpsPosition(duration?: number) {
+    public moveMapToGpsPosition(duration: number) {
         if (this.locationWithBearing == null) {
             return;
         }
@@ -164,7 +172,7 @@ export class LocationService {
         this.paceCalculatorService.updatePace(position.coords.speed);
         this.changed.next(this.locationWithBearing);
         if (this.isFollowing()) {
-            this.moveMapToGpsPosition();
+            this.moveMapToGpsPosition(GPS_ANIMATION_DURATION_MILLISECONDS);
         }
     }
 
