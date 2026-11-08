@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AppsFlyerSDK/appsflyer-apple-rpc.git",
       "state" : {
-        "revision" : "24d34041b6a9876e6cd6b1c4090a01616b05b9b5",
-        "version" : "7.0.13"
+        "revision" : "c9de36e8da134d4537d3d29f0bb1085de9e4ff93",
+        "version" : "7.0.41"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/AppsFlyerSDK/AppsFlyerFramework-Static.git",
       "state" : {
-        "revision" : "14ab04fdb7cfd40623477e111698fe1cad888728",
-        "version" : "7.0.2"
+        "revision" : "698c7af917d0c4b97bad055a2c616cde55a0fa74",
+        "version" : "7.0.4"
       }
     },
     {
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
       "state" : {
-        "revision" : "4c7f346d16196e21fbe23d4a7a6fc7af62af6742",
-        "version" : "8.5.3"
+        "revision" : "e9e932f7748d3b948bc47f5791c761ac5221ec6a",
+        "version" : "8.6.0"
       }
     },
     {
@@ -213,8 +213,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/RevenueCat/purchases-hybrid-common.git",
       "state" : {
-        "revision" : "6af96ad29738d8f46120aa14705737d5b90d7c19",
-        "version" : "19.17.0"
+        "revision" : "ac8d230faf29c583cb65ef3495a5d32e7e1005f9",
+        "version" : "20.1.0"
       }
     },
     {
