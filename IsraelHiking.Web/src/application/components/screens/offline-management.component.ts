@@ -32,7 +32,7 @@ export type DownloadedAreaRow = {
     id: string;
     /** The area as it is kept on the device, null for files whose area could not be read */
     area: Immutable<OfflineArea> | null;
-    /** The name of the area, falling back to the coordinates of the middle of an old tile the user did not name */
+    /** The name of the area, falling back to its id, which for an old tile is its x and y */
     name: string;
     /** When the area was last downloaded, null while it is downloaded for the first time */
     downloadedDate: Date;
@@ -205,7 +205,7 @@ export class OfflineManagementComponent {
         if (selectedArea == null || this.downloadInProgress() != null) {
             return { type: "FeatureCollection", features: [] };
         }
-        const name = this.offlineAreasService.getName(selectedArea) ?? this.getDefaultName(selectedArea.properties.id);
+        const name = this.offlineAreasService.getName(selectedArea) ?? selectedArea.properties.id;
         return { type: "FeatureCollection", features: [selectedArea as OfflineArea, this.getLabelPoint(selectedArea, name)] };
     });
 
@@ -344,7 +344,7 @@ export class OfflineManagementComponent {
         return {
             id,
             area,
-            name: (area == null ? null : this.offlineAreasService.getName(area)) ?? this.getDefaultName(id),
+            name: (area == null ? null : this.offlineAreasService.getName(area)) ?? id,
             downloadedDate,
             compatibility,
             canBeUpdated: this.offeredAreaIds().has(id)
@@ -355,16 +355,6 @@ export class OfflineManagementComponent {
     private getDownloadedArea(id: string): Immutable<OfflineArea> | null {
         const tile = OfflineAreasService.fromTileId(id);
         return this.downloadedAreas()[id]?.area ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
-    }
-
-    /** What an area that has no name is called: a tile by the coordinates of its middle, anything else by its id */
-    private getDefaultName(id: string): string {
-        const tile = OfflineAreasService.fromTileId(id);
-        if (tile == null) {
-            return id;
-        }
-        const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: tile.tileX + 0.5, y: tile.tileY + 0.5 }, TILES_ZOOM));
-        return `${center[1].toFixed(2)}, ${center[0].toFixed(2)}`;
     }
 
     /**
