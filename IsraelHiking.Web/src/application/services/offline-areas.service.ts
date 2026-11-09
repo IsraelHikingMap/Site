@@ -77,7 +77,7 @@ export class OfflineAreasService {
      * The downloaded area whose files hold a point or a tile at a zoom, the smallest of them where they overlap, so that
      * an area is read before the root files of the whole world, which only fill in where there is no area.
      */
-    public static findDownloadedAreaId(downloadedAreas: Immutable<Record<string, DownloadedArea>>, geometry: GeoJSON.Point | GeoJSON.Polygon,
+    private static findDownloadedAreaId(downloadedAreas: Immutable<Record<string, DownloadedArea>>, geometry: GeoJSON.Point | GeoJSON.Polygon,
         zoom: number): string | null {
         const areas = Object.values(downloadedAreas)
             .map(({ area }) => area)
