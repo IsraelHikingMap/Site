@@ -13,6 +13,9 @@ import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
+/** The zooms the files of an area hold, see findDownloadedAreaIdOfTile */
+export type AreaZooms = { minZoom?: number, maxZoom?: number };
+
 /** The zoom of the old tiles, whose ids are their x and y at it, see toTileId */
 export const TILES_ZOOM = 7;
 
@@ -123,10 +126,12 @@ export class OfflineAreasService {
     }
 
     /**
-     * Writes the metadata of an area to its file, and to the state when its files are already there - the files of an area that is
-     * downloaded for the first time are read into the state along with it, see updateDownloadedAreasFromDevice.
+     * Writes the metadata of an area to its file, with the zooms its files hold, and to the state when its files are already
+     * there - the files of an area that is downloaded for the first time are read into the state along with it, see
+     * updateDownloadedAreasFromDevice.
      */
-    public async saveAreaMetadata(area: Immutable<OfflineArea>): Promise<void> {
+    public async saveAreaMetadata(areaToSave: Immutable<OfflineArea>, zooms: AreaZooms): Promise<void> {
+        const area = { ...areaToSave, properties: { ...areaToSave.properties, ...zooms } };
         await this.fileService.writeFileInDataDirectory(OfflineAreasService.getAreaFileName(area.properties.id), JSON.stringify(area));
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         const downloadedArea = downloadedAreas[area.properties.id];
@@ -141,32 +146,22 @@ export class OfflineAreasService {
 
     /** Names a downloaded area the way the user typed it, in every language, since that is the name they will look for */
     public renameDownloadedArea(area: Immutable<OfflineArea>, name: string): Promise<void> {
-        return this.saveAreaMetadata(OfflineAreasService.withNames(area, { name }));
-    }
-
-    /** An area by other names, which keeps the id and the zooms its files hold */
-    public static withNames(area: Immutable<OfflineArea>, names: Record<string, string>): Immutable<OfflineArea> {
         const { id, minZoom, maxZoom } = area.properties;
-        return { ...area, properties: { ...names, id, minZoom, maxZoom } };
-    }
-
-    /** An area that holds the given zooms, which are the ones its files hold, see findDownloadedAreaId */
-    public static withZooms<T extends Immutable<OfflineArea>>(area: T, zooms: { minZoom: number, maxZoom: number }): T {
-        return { ...area, properties: { ...area.properties, minZoom: zooms.minZoom, maxZoom: zooms.maxZoom } };
+        return this.saveAreaMetadata({ ...area, properties: { id, name } }, { minZoom, maxZoom });
     }
 
     /** A tile as an area, see toTileId */
-    public static createTileArea(tileX: number, tileY: number): OfflineArea {
-        return OfflineAreasService.createSquareArea(OfflineAreasService.toTileId(tileX, tileY), tileX, tileY, TILES_ZOOM);
+    public static createTileArea(tileX: number, tileY: number, zooms: AreaZooms = {}): OfflineArea {
+        return OfflineAreasService.createSquareArea(OfflineAreasService.toTileId(tileX, tileY), tileX, tileY, TILES_ZOOM, zooms);
     }
 
     /** The root files as an area, the whole world */
-    public static createRootArea(): OfflineArea {
-        return OfflineAreasService.createSquareArea(OfflineAreasService.ROOT_ID, 0, 0, 0);
+    public static createRootArea(zooms: AreaZooms = {}): OfflineArea {
+        return OfflineAreasService.createSquareArea(OfflineAreasService.ROOT_ID, 0, 0, 0, zooms);
     }
 
-    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number): OfflineArea {
-        return { type: "Feature", properties: { id }, geometry: SpatialHelper.getTilePolygon({ x: tileX, y: tileY }, zoom) };
+    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number, zooms: AreaZooms): OfflineArea {
+        return { type: "Feature", properties: { id, ...zooms }, geometry: SpatialHelper.getTilePolygon({ x: tileX, y: tileY }, zoom) };
     }
 
     private static getAreaFileName(id: string): string {

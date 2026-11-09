@@ -16,7 +16,7 @@ import { ResourcesService } from "./resources.service";
 import { PmTilesService } from "./pmtiles.service";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
-import { OfflineAreasService } from "./offline-areas.service";
+import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
@@ -608,8 +608,8 @@ describe("OfflineFilesDownloadService", () => {
                     `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, ROOT_MAP_FILE, "token", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
-                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith({ ...area, properties: { ...area.properties, minZoom: 5, maxZoom: 14 } });
-                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), ROOT_ZOOMS));
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(area, { minZoom: 5, maxZoom: 14 });
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OfflineAreasService.createRootArea(), ROOT_ZOOMS);
                 expect(vi.mocked(offlineAreasService.saveAreaMetadata).mock.invocationCallOrder[0])
                     .toBeGreaterThan(vi.mocked(fileService.moveFileFromCacheToDataDirectory).mock.invocationCallOrder[0]);
             }
@@ -623,8 +623,8 @@ describe("OfflineFilesDownloadService", () => {
                 const farTileFile = "IHM-schema+10-10.pmtiles";
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [MAP_FILE, farTileFile, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
-                await offlineAreasService.saveAreaMetadata(TILE_AREA);
-                await offlineAreasService.saveAreaMetadata(OfflineAreasService.createTileArea(10, 10));
+                await offlineAreasService.saveAreaMetadata(TILE_AREA, {});
+                await offlineAreasService.saveAreaMetadata(OfflineAreasService.createTileArea(10, 10), {});
                 await initialize(service, mockBackend, store, {});
                 const area: OfflineArea = {
                     type: "Feature",
@@ -659,7 +659,7 @@ describe("OfflineFilesDownloadService", () => {
                     offlineState: { isSubscribed: true },
                     inMemoryState: { downloadedAreas: {} }
                 });
-                vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_ID]: OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), ROOT_ZOOMS) });
+                vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_ID]: OfflineAreasService.createRootArea(ROOT_ZOOMS) });
 
                 const promise = service.downloadArea(namedArea);
                 await flushStyles(mockBackend, {});
@@ -687,8 +687,8 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith(SERVER_MAP_FILE, MAP_FILE);
                 expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith("IHM-schema-6.pmtiles", ROOT_MAP_FILE);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledTimes(2);
-                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OfflineAreasService.withZooms(TILE_AREA, { minZoom: 7, maxZoom: 14 }));
-                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 6 }));
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(TILE_AREA, { minZoom: 7, maxZoom: 14 });
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 6 });
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
                 expect(downloadedAreas[TILE_ID]?.files.map(f => f.fileName)).toEqual([MAP_FILE]);
             }
@@ -700,7 +700,7 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, offlineAreasService: OfflineAreasService) => {
                 vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({
                     [TILE_ID]: { ...TILE_AREA, properties: { id: TILE_ID, name: "My tile" } },
-                    [ROOT_ID]: OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), ROOT_ZOOMS)
+                    [ROOT_ID]: OfflineAreasService.createRootArea(ROOT_ZOOMS)
                 });
 
                 await initialize(service, mockBackend, store, {});
@@ -917,8 +917,8 @@ describe("OfflineFilesDownloadService", () => {
         const areas: Record<string, Immutable<OfflineArea>> = {};
         return {
             loadAreasMetadata: vi.fn(() => Promise.resolve({ ...areas })),
-            saveAreaMetadata: vi.fn((area: Immutable<OfflineArea>) => {
-                areas[area.properties.id] = area;
+            saveAreaMetadata: vi.fn((area: Immutable<OfflineArea>, zooms: AreaZooms) => {
+                areas[area.properties.id] = { ...area, properties: { ...area.properties, ...zooms } };
                 return Promise.resolve();
             }),
             deleteAreaMetadata: vi.fn((id: string) => {

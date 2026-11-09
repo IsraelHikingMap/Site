@@ -14,10 +14,10 @@ import { Urls } from "../urls";
 import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
 const FILE = { fileName: "IHM-schema+israel-and-palestine.pmtiles", date: "2026-11-01" };
-const ISRAEL_AREA = OfflineAreasService.withZooms(createArea("israel-and-palestine", [34, 29, 36, 34]), { minZoom: 5, maxZoom: 14 });
-const ROOT_AREA = OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 4 });
-const MIGRATED_ROOT_AREA = OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 6 });
-const TILE_AREA = OfflineAreasService.withZooms(OfflineAreasService.createTileArea(76, 51), { minZoom: 7, maxZoom: 14 });
+const ISRAEL_AREA: OfflineArea = { ...createArea("israel-and-palestine", [34, 29, 36, 34]), properties: { id: "israel-and-palestine", minZoom: 5, maxZoom: 14 } };
+const ROOT_AREA = OfflineAreasService.createRootArea({ minZoom: 0, maxZoom: 4 });
+const MIGRATED_ROOT_AREA = OfflineAreasService.createRootArea({ minZoom: 0, maxZoom: 6 });
+const TILE_AREA = OfflineAreasService.createTileArea(76, 51, { minZoom: 7, maxZoom: 14 });
 
 function toDownloadedAreas(...areas: OfflineArea[]): Record<string, DownloadedArea> {
     return Object.fromEntries(areas.map((area): [string, DownloadedArea] => [area.properties.id, { area, files: [], hasRoutingTiles: false }]));
@@ -102,8 +102,8 @@ describe("OfflineAreasService", () => {
             const otherArea = createArea("oberbayern", [10, 47, 13, 49]);
             store.dispatch(new SetDownloadedAreasAction({ "israel-and-palestine": { area: null, files: [FILE], hasRoutingTiles: true } }));
 
-            await service.saveAreaMetadata(area);
-            await service.saveAreaMetadata(otherArea);
+            await service.saveAreaMetadata(area, {});
+            await service.saveAreaMetadata(otherArea, {});
             await service.deleteAreaMetadata("oberbayern");
 
             expect(fileService.writeFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json", JSON.stringify(area));

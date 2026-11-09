@@ -367,7 +367,7 @@ export class OfflineFilesDownloadService {
      */
     private async saveAreaMetadataIfNew(area: Immutable<OfflineArea>, fileNames: string[], downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<void> {
         if (downloadedAreas[area.properties.id]?.area == null) {
-            await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(area, await this.getZooms(area.properties.id, fileNames)));
+            await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(area.properties.id, fileNames));
         }
     }
 
@@ -375,7 +375,7 @@ export class OfflineFilesDownloadService {
     private async saveRootAreaMetadataIfDownloaded(fileNames: string[]): Promise<void> {
         if (fileNames.some(fileName => OfflineFilesDownloadService.getAreaId(fileName) === OfflineAreasService.ROOT_ID)) {
             const zooms = await this.getZooms(OfflineAreasService.ROOT_ID, fileNames);
-            await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), zooms));
+            await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.createRootArea(), zooms);
         }
     }
 
@@ -541,7 +541,7 @@ export class OfflineFilesDownloadService {
                 if (!savedIds.has(id) && newFileName.endsWith(".pmtiles")) {
                     savedIds.add(id);
                     this.loggingService.info(`[Offline Download] Keeping ${id} as an area`);
-                    await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(area, await this.pmtilesService.getZooms(newFileName)));
+                    await this.offlineAreasService.saveAreaMetadata(area, await this.pmtilesService.getZooms(newFileName));
                 }
             }
         } catch (ex) {
