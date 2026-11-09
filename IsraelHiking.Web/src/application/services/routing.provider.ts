@@ -11,7 +11,6 @@ import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { OfflineAreasService, TILES_ZOOM } from "./offline-areas.service";
 import { Valhalla } from "./valhalla.plugin";
 import { Urls } from "../urls";
 import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
@@ -97,14 +96,13 @@ export class RoutingProvider {
         return hasTiles ? this.resources.routingFailed : this.resources.routingFailedDownloadTheArea;
     }
 
-    /**
-     * Whether both points are in downloaded areas that have their routing tiles, looked up at a zoom only areas
-     * hold, so that the root files are not taken for one.
-     */
+    /** Whether both points are in downloaded areas that have their routing tiles */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
-        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+        const areasWithRoutingTiles = Object.values(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
+            .filter(({ area, hasRoutingTiles }) => area != null && hasRoutingTiles)
+            .map(({ area }) => area);
         return [start, end].every(point =>
-            downloadedAreas[OfflineAreasService.findDownloadedAreaId(downloadedAreas, { type: "Point", coordinates: [point.lng, point.lat] }, TILES_ZOOM)]?.hasRoutingTiles === true);
+            areasWithRoutingTiles.some(area => SpatialHelper.isPointInPolygon(SpatialHelper.toCoordinate(point), area)));
     }
 
     /**

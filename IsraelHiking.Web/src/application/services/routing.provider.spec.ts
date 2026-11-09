@@ -186,14 +186,19 @@ describe("RoutingProvider", () => {
         )
     );
 
-    it("Should suggest downloading the area when it holds no routing tiles",
+    it("Should suggest downloading the area when it holds no routing tiles, and not take the root files for one",
         inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
                 runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedAreas: {} }
+                    inMemoryState: {
+                        downloadedAreas: {
+                            "76-51": { area: OfflineAreasService.createTileArea(76, 51), files: [], hasRoutingTiles: false },
+                            [OfflineAreasService.ROOT_ID]: { area: OfflineAreasService.createRootArea(), files: [], hasRoutingTiles: false }
+                        }
+                    }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
