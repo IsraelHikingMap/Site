@@ -50,9 +50,11 @@ class PmTilesService(context: Context) : AutoCloseable {
      * The file a tile is read from, mirroring findDownloadedAreaId of pmtiles.service.ts: of the smallest downloaded area
      * that holds the zoom of the tile and overlaps it, so that an area is read before the root files of the whole world.
      * An area holds every tile its polygon touches, so a tile along its border is read from it even when its center is outside.
+     * The tile is tested a little inside its edges, so that one that only touches an area, like the neighbour of a tile
+     * that came before areas, is not read from it.
      */
     private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String? {
-        val tile = TileBounds(tileLng(x, z), tileLat(y + 1, z), tileLng(x + 1, z), tileLat(y, z))
+        val tile = TileBounds(tileLng(x + TILE_INSET, z), tileLat(y + 1 - TILE_INSET, z), tileLng(x + 1 - TILE_INSET, z), tileLat(y + TILE_INSET, z))
         return getDownloadedAreas()
             .filter { area -> z in area.zooms && area.polygons.any { intersects(it, tile) } }
             .firstNotNullOfOrNull { existing("$type+${it.id}.pmtiles") }
@@ -143,10 +145,10 @@ class PmTilesService(context: Context) : AutoCloseable {
         return inside
     }
 
-    private fun tileLng(x: Int, z: Int): Double = x.toDouble() / (1 shl z) * 360.0 - 180.0
+    private fun tileLng(x: Double, z: Int): Double = x / (1 shl z) * 360.0 - 180.0
 
-    private fun tileLat(y: Int, z: Int): Double =
-        Math.toDegrees(Math.atan(Math.sinh(Math.PI * (1 - 2 * y.toDouble() / (1 shl z)))))
+    private fun tileLat(y: Double, z: Int): Double =
+        Math.toDegrees(Math.atan(Math.sinh(Math.PI * (1 - 2 * y / (1 shl z)))))
 
     @Throws(IOException::class)
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
@@ -183,5 +185,7 @@ class PmTilesService(context: Context) : AutoCloseable {
     companion object {
         private const val AREA_FILE_SUFFIX = ".area.json"
         private const val AREAS_REFRESH_MILLIS = 30_000L
+        /** How far inside its edges a tile is tested for overlapping an area, as a part of its size, see getFileNameByType */
+        private const val TILE_INSET = 0.001
     }
 }

@@ -38,6 +38,9 @@ class CapacitorSource implements Source {
 @Service()
 export class PmTilesService {
 
+    /** How far inside its edges a tile is tested for overlapping an area, as a part of its size, see getFileNameByType */
+    private static readonly TILE_INSET = 0.001;
+
     private readonly sourcesCache = new Map<string, CapacitorSource>;
 
     private readonly loggingService = inject(LoggingService);
@@ -89,9 +92,12 @@ export class PmTilesService {
     /**
      * The file a tile is in, the one of the downloaded area that the tile overlaps, see findDownloadedAreaId. An area
      * holds every tile its polygon touches, so a tile along its border is read from it even when its center is outside.
+     * The tile is tested a little inside its edges, so that one that only touches an area, like the neighbour of a
+     * tile that came before areas, is not read from it.
      */
     private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
-        const corners = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1], [x, y]]
+        const inset = PmTilesService.TILE_INSET;
+        const corners = [[x + inset, y + inset], [x + 1 - inset, y + inset], [x + 1 - inset, y + 1 - inset], [x + inset, y + 1 - inset], [x + inset, y + inset]]
             .map(([cornerX, cornerY]) => SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: cornerX, y: cornerY }, z)));
         const areaId = this.findDownloadedAreaId({ type: "Polygon", coordinates: [corners] }, z);
         return areaId == null ? null : `${type}+${areaId}.pmtiles`;

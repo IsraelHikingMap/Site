@@ -80,6 +80,14 @@ describe("PmTilesService", () => {
         store.dispatch(new SetDownloadedAreasAction(downloadedAreas));
     }
 
+    it("should not read a tile from an area it only touches, so that a tile next to one that came before areas is read from the area around it", () => {
+        setDownloadedAreas(legacyRoot, tile, area);
+
+        // Right below tile 76/51, which ends where this tile starts
+        expect(getFileName(8, 152, 104)).toBe("IHM-schema+israel-and-palestine.pmtiles");
+        expect(getFileName(8, 152, 103)).toBe("IHM-schema+76-51.pmtiles");
+    });
+
     function point(lng: number, lat: number): GeoJSON.Point {
         return { type: "Point", coordinates: [lng, lat] };
     }

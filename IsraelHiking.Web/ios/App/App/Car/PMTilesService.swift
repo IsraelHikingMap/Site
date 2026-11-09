@@ -6,11 +6,14 @@ import PMTiles
 /// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: the `{type}+{id}.pmtiles`
 /// of the smallest downloaded area that holds the zoom of the tile and overlaps it, so that an area is read before the
 /// root files of the whole world. An area holds every tile its polygon touches, so a tile along its border is read from
-/// it even when its center is outside.
+/// it even when its center is outside. The tile is tested a little inside its edges, so that one that only touches an
+/// area, like the neighbour of a tile that came before areas, is not read from it.
 final class PMTilesService {
 
     private static let areaFileSuffix = ".area.json"
     private static let areasRefreshInterval: TimeInterval = 30
+    /// How far inside its edges a tile is tested for overlapping an area, as a part of its size, see `fileName`
+    private static let tileInset = 0.001
 
     /// An area the app downloaded, as it keeps it next to its files in an "id.area.json" file, see offline-areas.service.ts,
     /// where the root files and the tiles that came before areas are areas as well
@@ -49,8 +52,9 @@ final class PMTilesService {
     }
 
     private func fileName(z: Int, x: Int, y: Int, type: String) -> String? {
-        let tile = TileBounds(minLng: Self.tileLng(x: x, z: z), minLat: Self.tileLat(y: y + 1, z: z),
-                              maxLng: Self.tileLng(x: x + 1, z: z), maxLat: Self.tileLat(y: y, z: z))
+        let inset = Self.tileInset
+        let tile = TileBounds(minLng: Self.tileLng(x: Double(x) + inset, z: z), minLat: Self.tileLat(y: Double(y + 1) - inset, z: z),
+                              maxLng: Self.tileLng(x: Double(x + 1) - inset, z: z), maxLat: Self.tileLat(y: Double(y) + inset, z: z))
         return downloadedAreas()
             .filter { area in area.zooms.contains(z) && area.polygons.contains { Self.intersects($0, tile) } }
             .lazy.compactMap { self.existing("\(type)+\($0.id).pmtiles") }
@@ -138,12 +142,12 @@ final class PMTilesService {
         return cross > 0 ? 1 : cross < 0 ? -1 : 0
     }
 
-    private static func tileLng(x: Int, z: Int) -> Double {
-        Double(x) / Double(1 << z) * 360 - 180
+    private static func tileLng(x: Double, z: Int) -> Double {
+        x / Double(1 << z) * 360 - 180
     }
 
-    private static func tileLat(y: Int, z: Int) -> Double {
-        atan(sinh(Double.pi * (1 - 2 * Double(y) / Double(1 << z)))) * 180 / Double.pi
+    private static func tileLat(y: Double, z: Int) -> Double {
+        atan(sinh(Double.pi * (1 - 2 * y / Double(1 << z)))) * 180 / Double.pi
     }
 
     private func getReader(for name: String) -> PmTilesReader? {
