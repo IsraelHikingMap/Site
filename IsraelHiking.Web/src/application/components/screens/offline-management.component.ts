@@ -351,10 +351,9 @@ export class OfflineManagementComponent {
         };
     }
 
-    /** An area as it is kept on the device, where an old tile whose metadata could not be read is the square of the tile */
+    /** An area as it is kept on the device, null when its metadata could not be read */
     private getDownloadedArea(id: string): Immutable<OfflineArea> | null {
-        const tile = OfflineAreasService.fromTileId(id);
-        return this.downloadedAreas()[id]?.area ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
+        return this.downloadedAreas()[id]?.area ?? null;
     }
 
     /**

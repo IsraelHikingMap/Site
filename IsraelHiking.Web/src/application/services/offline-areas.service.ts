@@ -16,8 +16,6 @@ import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 /** The zooms the files of an area hold, see findDownloadedAreaIdOfTile */
 export type AreaZooms = { minZoom?: number, maxZoom?: number };
 
-/** The zoom of the old tiles, whose ids are their x and y at it, see toTileId */
-export const TILES_ZOOM = 7;
 
 /**
  * The areas that can be downloaded for offline usage and the ones that were. A downloaded area is kept on the
@@ -95,17 +93,9 @@ export class OfflineAreasService {
         return id === OfflineAreasService.ROOT_ID;
     }
 
-    /** The id the files of an old tile are kept under */
-    public static toTileId(tileX: number, tileY: number): string {
-        return `${tileX}-${tileY}`;
-    }
-
-    /**
-     * The tile an id was made of, null for the root id and for the id of an area, which are not of a tile.
-     */
-    public static fromTileId(tileId: string): { tileX: number, tileY: number } | null {
-        const match = tileId.match(/^(\d+)-(\d+)$/);
-        return match == null ? null : { tileX: +match[1], tileY: +match[2] };
+    /** Whether an id is of an old tile, which is its x and y, "x-y" */
+    public static isTileId(id: string): boolean {
+        return /^\d+-\d+$/.test(id);
     }
 
     /**
@@ -150,18 +140,9 @@ export class OfflineAreasService {
         return this.saveAreaMetadata({ ...area, properties: { id, name } }, { minZoom, maxZoom });
     }
 
-    /** A tile as an area, see toTileId */
-    public static createTileArea(tileX: number, tileY: number, zooms: AreaZooms = {}): OfflineArea {
-        return OfflineAreasService.createSquareArea(OfflineAreasService.toTileId(tileX, tileY), tileX, tileY, TILES_ZOOM, zooms);
-    }
-
     /** The root files as an area, the whole world */
     public static createRootArea(zooms: AreaZooms = {}): OfflineArea {
-        return OfflineAreasService.createSquareArea(OfflineAreasService.ROOT_ID, 0, 0, 0, zooms);
-    }
-
-    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number, zooms: AreaZooms): OfflineArea {
-        return { type: "Feature", properties: { id, ...zooms }, geometry: SpatialHelper.getTilePolygon({ x: tileX, y: tileY }, zoom) };
+        return { type: "Feature", properties: { id: OfflineAreasService.ROOT_ID, ...zooms }, geometry: SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 0) };
     }
 
     private static getAreaFileName(id: string): string {

@@ -17,12 +17,13 @@ import { PmTilesService } from "./pmtiles.service";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
+import { SpatialHelper } from "./spatial.helper";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
 const ROOT_ID = OfflineAreasService.ROOT_ID;
-const TILE_ID = OfflineAreasService.toTileId(76, 51);
-const TILE_AREA = OfflineAreasService.createTileArea(76, 51);
+const TILE_ID = "76-51";
+const TILE_AREA: OfflineArea = { type: "Feature", properties: { id: TILE_ID }, geometry: SpatialHelper.getTilePolygon({ x: 76, y: 51 }, 7) };
 /** The zooms the root files that come with an area hold */
 const ROOT_ZOOMS = { minZoom: 0, maxZoom: 4 };
 /** The file of the tile as it is kept on the device */
@@ -624,7 +625,7 @@ describe("OfflineFilesDownloadService", () => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
                     [MAP_FILE, farTileFile, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 await offlineAreasService.saveAreaMetadata(TILE_AREA, {});
-                await offlineAreasService.saveAreaMetadata(OfflineAreasService.createTileArea(10, 10), {});
+                await offlineAreasService.saveAreaMetadata({ ...TILE_AREA, properties: { id: "10-10" }, geometry: SpatialHelper.getTilePolygon({ x: 10, y: 10 }, 7) }, {});
                 await initialize(service, mockBackend, store, {});
                 const area: OfflineArea = {
                     type: "Feature",

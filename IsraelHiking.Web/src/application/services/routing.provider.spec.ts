@@ -14,8 +14,11 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
 import { OfflineAreasService } from "./offline-areas.service";
+import { SpatialHelper } from "./spatial.helper";
+import type { OfflineArea } from "../models";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
+const TILE_AREA: OfflineArea = { type: "Feature", properties: { id: "76-51" }, geometry: SpatialHelper.getTilePolygon({ x: 76, y: 51 }, 7) };
 
 /** Areas that were downloaded along with their routing tiles */
 describe("RoutingProvider", () => {
@@ -195,7 +198,7 @@ describe("RoutingProvider", () => {
                     offlineState: { isSubscribed: true },
                     inMemoryState: {
                         downloadedAreas: {
-                            "76-51": { area: OfflineAreasService.createTileArea(76, 51), files: [], hasRoutingTiles: false },
+                            "76-51": { area: TILE_AREA, files: [], hasRoutingTiles: false },
                             [OfflineAreasService.ROOT_ID]: { area: OfflineAreasService.createRootArea(), files: [], hasRoutingTiles: false }
                         }
                     }
@@ -217,7 +220,7 @@ describe("RoutingProvider", () => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedAreas: { "76-51": { area: OfflineAreasService.createTileArea(76, 51), files: [], hasRoutingTiles: true } } }
+                    inMemoryState: { downloadedAreas: { "76-51": { area: TILE_AREA, files: [], hasRoutingTiles: true } } }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");

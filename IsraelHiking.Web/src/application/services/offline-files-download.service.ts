@@ -19,7 +19,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { OfflineAreasService, TILES_ZOOM } from "./offline-areas.service";
+import { OfflineAreasService } from "./offline-areas.service";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
@@ -62,10 +62,12 @@ export class OfflineFilesDownloadService {
      */
     private static readonly APPLICATION_SOURCE_FILE_NAMES = ["global_points"];
 
+    /** The zoom the old tiles were cut at, which the migration makes their squares at */
+    private static readonly TILES_ZOOM = 7;
     /** The name of the files of an old tile, which the migration moves, "name+7-x-y.pmtiles" */
-    private static readonly TILE_FILE_NAME_REGEX = new RegExp(`^(.+)\\+${TILES_ZOOM}-(\\d+-\\d+)(\\.\\w+)$`);
+    private static readonly TILE_FILE_NAME_REGEX = new RegExp(`^(.+)\\+${OfflineFilesDownloadService.TILES_ZOOM}-(\\d+)-(\\d+)(\\.\\w+)$`);
     /** The name of the old root files, which the migration moves, "name-6.pmtiles" */
-    private static readonly LEGACY_ROOT_FILE_NAME_REGEX = new RegExp(`^([^+]+)-${TILES_ZOOM - 1}(\\.pmtiles)$`);
+    private static readonly LEGACY_ROOT_FILE_NAME_REGEX = new RegExp(`^([^+]+)-${OfflineFilesDownloadService.TILES_ZOOM - 1}(\\.pmtiles)$`);
 
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
@@ -524,12 +526,16 @@ export class OfflineFilesDownloadService {
             for (const { fileName } of await this.fileService.listOfflineFilesInDataDirectory()) {
                 const tileMatch = fileName.match(OfflineFilesDownloadService.TILE_FILE_NAME_REGEX);
                 const rootMatch = fileName.match(OfflineFilesDownloadService.LEGACY_ROOT_FILE_NAME_REGEX);
-                const tile = tileMatch == null ? null : OfflineAreasService.fromTileId(tileMatch[2]);
                 let newFileName: string;
                 let area: OfflineArea;
-                if (tile != null) {
-                    newFileName = `${tileMatch[1]}+${tileMatch[2]}${tileMatch[3]}`;
-                    area = OfflineAreasService.createTileArea(tile.tileX, tile.tileY);
+                if (tileMatch != null) {
+                    const [, name, x, y, extension] = tileMatch;
+                    newFileName = `${name}+${x}-${y}${extension}`;
+                    area = {
+                        type: "Feature",
+                        properties: { id: `${x}-${y}` },
+                        geometry: SpatialHelper.getTilePolygon({ x: +x, y: +y }, OfflineFilesDownloadService.TILES_ZOOM)
+                    };
                 } else if (rootMatch != null) {
                     newFileName = `${rootMatch[1]}+${OfflineAreasService.ROOT_ID}${rootMatch[2]}`;
                     area = OfflineAreasService.createRootArea();
@@ -679,7 +685,7 @@ export class OfflineFilesDownloadService {
     /** The old tiles an area overlaps, which the area replaces, so they are deleted once it is downloaded */
     public getOverlappedTileIds(area: Immutable<OfflineArea>): string[] {
         return Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
-            .filter(([id, { area: tileArea }]) => id !== area.properties.id && OfflineAreasService.fromTileId(id) != null &&
+            .filter(([id, { area: tileArea }]) => id !== area.properties.id && OfflineAreasService.isTileId(id) &&
                 tileArea != null && SpatialHelper.intersects(tileArea, area))
             .map(([id]) => id);
     }

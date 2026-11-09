@@ -6,6 +6,7 @@ import { provideStore, Store } from "@ngxs/store";
 import { LngLat } from "maplibre-gl";
 
 import { OfflineAreasService } from "./offline-areas.service";
+import { SpatialHelper } from "./spatial.helper";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";
@@ -17,7 +18,7 @@ const FILE = { fileName: "IHM-schema+israel-and-palestine.pmtiles", date: "2026-
 const ISRAEL_AREA: OfflineArea = { ...createArea("israel-and-palestine", [34, 29, 36, 34]), properties: { id: "israel-and-palestine", minZoom: 5, maxZoom: 14 } };
 const ROOT_AREA = OfflineAreasService.createRootArea({ minZoom: 0, maxZoom: 4 });
 const MIGRATED_ROOT_AREA = OfflineAreasService.createRootArea({ minZoom: 0, maxZoom: 6 });
-const TILE_AREA = OfflineAreasService.createTileArea(76, 51, { minZoom: 7, maxZoom: 14 });
+const TILE_AREA: OfflineArea = { type: "Feature", properties: { id: "76-51", minZoom: 7, maxZoom: 14 }, geometry: SpatialHelper.getTilePolygon({ x: 76, y: 51 }, 7) };
 
 function toDownloadedAreas(...areas: OfflineArea[]): Record<string, DownloadedArea> {
     return Object.fromEntries(areas.map((area): [string, DownloadedArea] => [area.properties.id, { area, files: [], hasRoutingTiles: false }]));
