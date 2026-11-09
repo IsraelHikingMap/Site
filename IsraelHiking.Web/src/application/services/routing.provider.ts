@@ -106,7 +106,7 @@ export class RoutingProvider {
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         return [start, end].every(point =>
-            downloadedAreas[this.pmTilesService.findDownloadedAreaId([point.lng, point.lat], TILES_ZOOM)]?.hasRoutingTiles === true);
+            downloadedAreas[this.pmTilesService.findDownloadedAreaId({ type: "Point", coordinates: [point.lng, point.lat] }, TILES_ZOOM)]?.hasRoutingTiles === true);
     }
 
     /**

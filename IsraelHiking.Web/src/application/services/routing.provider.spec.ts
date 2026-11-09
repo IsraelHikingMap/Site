@@ -228,7 +228,7 @@ describe("RoutingProvider", () => {
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 await promise;
                 expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
-                expect(pmTilesService.findDownloadedAreaId).toHaveBeenCalledWith([35, 32], 7);
+                expect(pmTilesService.findDownloadedAreaId).toHaveBeenCalledWith({ type: "Point", coordinates: [35, 32] }, 7);
             }
         )
     );

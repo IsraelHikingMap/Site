@@ -35,9 +35,9 @@ describe("PmTilesService", () => {
     it("should find the downloaded area a point is in, only at the zooms its files hold", () => {
         setDownloadedAreas(area);
 
-        expect(service.findDownloadedAreaId([35, 32], 8)).toBe("israel-and-palestine");
-        expect(service.findDownloadedAreaId([35, 32], ROOT_ZOOM)).toBeNull();
-        expect(service.findDownloadedAreaId([40, 32], 8)).toBeNull();
+        expect(service.findDownloadedAreaId(point(35, 32), 8)).toBe("israel-and-palestine");
+        expect(service.findDownloadedAreaId(point(35, 32), ROOT_ZOOM)).toBeNull();
+        expect(service.findDownloadedAreaId(point(40, 32), 8)).toBeNull();
     });
 
     it("should read the root files up to their zoom and the area a tile is in above it", () => {
@@ -47,6 +47,13 @@ describe("PmTilesService", () => {
         // A tile whose middle is in the area, and one in the middle of the ocean
         expect(getFileName(8, 152, 103)).toBe("IHM-schema+israel-and-palestine.pmtiles");
         expect(getFileName(8, 10, 103)).toBeNull();
+    });
+
+    it("should read a tile along the border of an area from the area even when the middle of the tile is outside it", () => {
+        setDownloadedAreas(root, area);
+
+        // 35.86 to 36.56 east, the area ends at 36
+        expect(getFileName(9, 307, 206)).toBe("IHM-schema+israel-and-palestine.pmtiles");
     });
 
     it("should read a tile that came before areas from its own file, and fill the zooms below it from the zoom 6 root files", () => {
@@ -71,6 +78,10 @@ describe("PmTilesService", () => {
             downloadedAreas[downloadedArea.properties.id] = { area: downloadedArea, files: [], hasRoutingTiles: false };
         }
         store.dispatch(new SetDownloadedAreasAction(downloadedAreas));
+    }
+
+    function point(lng: number, lat: number): GeoJSON.Point {
+        return { type: "Point", coordinates: [lng, lat] };
     }
 
     function getFileName(z: number, x: number, y: number): string | null {

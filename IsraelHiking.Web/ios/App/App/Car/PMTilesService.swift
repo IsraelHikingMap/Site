@@ -4,8 +4,9 @@ import PMTiles
 
 /// Reads offline vector tiles from the PMTiles archives the app downloads into its Documents
 /// directory (Capacitor `Directory.Data`). Mirrors `PmTilesService.kt` and `pmtiles.service.ts`: the `{type}+{id}.pmtiles`
-/// of the smallest downloaded area that holds the zoom of the tile and its center, so that an area is read before the
-/// root files of the whole world.
+/// of the smallest downloaded area that holds the zoom of the tile and overlaps it, so that an area is read before the
+/// root files of the whole world. An area holds every tile its polygon touches, so a tile along its border is read from
+/// it even when its center is outside.
 final class PMTilesService {
 
     private static let areaFileSuffix = ".area.json"
@@ -48,10 +49,10 @@ final class PMTilesService {
     }
 
     private func fileName(z: Int, x: Int, y: Int, type: String) -> String? {
-        let lng = Self.tileCenterLng(x: x, z: z)
-        let lat = Self.tileCenterLat(y: y, z: z)
+        let tile = TileBounds(minLng: Self.tileLng(x: x, z: z), minLat: Self.tileLat(y: y + 1, z: z),
+                              maxLng: Self.tileLng(x: x + 1, z: z), maxLat: Self.tileLat(y: y, z: z))
         return downloadedAreas()
-            .filter { area in area.zooms.contains(z) && area.polygons.contains { Self.contains($0, lng: lng, lat: lat) } }
+            .filter { area in area.zooms.contains(z) && area.polygons.contains { Self.intersects($0, tile) } }
             .lazy.compactMap { self.existing("\(type)+\($0.id).pmtiles") }
             .first
     }
@@ -102,12 +103,47 @@ final class PMTilesService {
         return inside
     }
 
-    private static func tileCenterLng(x: Int, z: Int) -> Double {
-        (Double(x) + 0.5) / Double(1 << z) * 360 - 180
+    private struct TileBounds {
+        let minLng: Double, minLat: Double, maxLng: Double, maxLat: Double
+
+        var corners: [[Double]] { [[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat]] }
+
+        func contains(_ point: [Double]) -> Bool {
+            (minLng...maxLng).contains(point[0]) && (minLat...maxLat).contains(point[1])
+        }
     }
 
-    private static func tileCenterLat(y: Int, z: Int) -> Double {
-        atan(sinh(Double.pi * (1 - 2 * (Double(y) + 0.5) / Double(1 << z)))) * 180 / Double.pi
+    /// Whether a polygon and a tile overlap: a corner of the tile is in the polygon, a point of the polygon is in the tile,
+    /// or one of their edges crosses the other's
+    private static func intersects(_ rings: [[[Double]]], _ tile: TileBounds) -> Bool {
+        let corners = tile.corners
+        if corners.contains(where: { contains(rings, lng: $0[0], lat: $0[1]) }) {
+            return true
+        }
+        let tileEdges = corners.indices.map { (corners[$0], corners[($0 + 1) % corners.count]) }
+        return rings.contains { ring in
+            ring.indices.contains { index in
+                let start = ring[index], end = ring[(index + 1) % ring.count]
+                return tile.contains(start) || tileEdges.contains { crosses(start, end, $0.0, $0.1) }
+            }
+        }
+    }
+
+    private static func crosses(_ a: [Double], _ b: [Double], _ c: [Double], _ d: [Double]) -> Bool {
+        side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0
+    }
+
+    private static func side(_ a: [Double], _ b: [Double], _ point: [Double]) -> Double {
+        let cross = (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0])
+        return cross > 0 ? 1 : cross < 0 ? -1 : 0
+    }
+
+    private static func tileLng(x: Int, z: Int) -> Double {
+        Double(x) / Double(1 << z) * 360 - 180
+    }
+
+    private static func tileLat(y: Int, z: Int) -> Double {
+        atan(sinh(Double.pi * (1 - 2 * Double(y) / Double(1 << z)))) * 180 / Double.pi
     }
 
     private func getReader(for name: String) -> PmTilesReader? {

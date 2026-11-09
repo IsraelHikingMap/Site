@@ -3,7 +3,7 @@ import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
-import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
+import { booleanIntersects } from "@turf/boolean-intersects";
 import { bbox } from "@turf/bbox";
 import type { Immutable } from "immer";
 
@@ -86,23 +86,27 @@ export class PmTilesService {
         return await this.getTileFromFile(fileName, z, x, y);
     }
 
-    /** The file a tile is in, the one of the downloaded area that holds it, see findDownloadedAreaId */
+    /**
+     * The file a tile is in, the one of the downloaded area that the tile overlaps, see findDownloadedAreaId. An area
+     * holds every tile its polygon touches, so a tile along its border is read from it even when its center is outside.
+     */
     private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
-        const center = SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: x + 0.5, y: y + 0.5 }, z));
-        const areaId = this.findDownloadedAreaId(center, z);
+        const corners = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1], [x, y]]
+            .map(([cornerX, cornerY]) => SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x: cornerX, y: cornerY }, z)));
+        const areaId = this.findDownloadedAreaId({ type: "Polygon", coordinates: [corners] }, z);
         return areaId == null ? null : `${type}+${areaId}.pmtiles`;
     }
 
     /**
-     * The downloaded area whose files hold a point at a zoom, the smallest of them where they overlap, so that an
-     * area is read before the root files of the whole world, which only fill in where there is no area.
+     * The downloaded area whose files hold a point or a tile at a zoom, the smallest of them where they overlap, so that
+     * an area is read before the root files of the whole world, which only fill in where there is no area.
      */
-    public findDownloadedAreaId(point: GeoJSON.Position, zoom: number): string | null {
+    public findDownloadedAreaId(geometry: GeoJSON.Point | GeoJSON.Polygon, zoom: number): string | null {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         const areas = Object.values(downloadedAreas)
             .map(({ area }) => area as Immutable<OfflineArea> as OfflineArea)
             .filter(area => area != null && (area.properties.minZoom ?? 0) <= zoom && zoom <= (area.properties.maxZoom ?? Infinity) &&
-                booleanPointInPolygon(point, area))
+                booleanIntersects(geometry, area))
             .sort((a, b) => PmTilesService.getBoundsArea(a) - PmTilesService.getBoundsArea(b));
         return areas[0]?.properties.id ?? null;
     }

@@ -48,15 +48,45 @@ class PmTilesService(context: Context) : AutoCloseable {
 
     /**
      * The file a tile is read from, mirroring findDownloadedAreaId of pmtiles.service.ts: of the smallest downloaded area
-     * that holds the zoom of the tile and its center, so that an area is read before the root files of the whole world.
+     * that holds the zoom of the tile and overlaps it, so that an area is read before the root files of the whole world.
+     * An area holds every tile its polygon touches, so a tile along its border is read from it even when its center is outside.
      */
     private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String? {
-        val lng = tileCenterLng(x, z)
-        val lat = tileCenterLat(y, z)
+        val tile = TileBounds(tileLng(x, z), tileLat(y + 1, z), tileLng(x + 1, z), tileLat(y, z))
         return getDownloadedAreas()
-            .filter { area -> z in area.zooms && area.polygons.any { contains(it, lng, lat) } }
+            .filter { area -> z in area.zooms && area.polygons.any { intersects(it, tile) } }
             .firstNotNullOfOrNull { existing("$type+${it.id}.pmtiles") }
     }
+
+    private class TileBounds(val minLng: Double, val minLat: Double, val maxLng: Double, val maxLat: Double) {
+        val corners = listOf(doubleArrayOf(minLng, minLat), doubleArrayOf(maxLng, minLat), doubleArrayOf(maxLng, maxLat), doubleArrayOf(minLng, maxLat))
+
+        fun contains(point: DoubleArray): Boolean = point[0] in minLng..maxLng && point[1] in minLat..maxLat
+    }
+
+    /**
+     * Whether a polygon and a tile overlap: a corner of the tile is in the polygon, a point of the polygon is in the tile,
+     * or one of their edges crosses the other's
+     */
+    private fun intersects(rings: List<List<DoubleArray>>, tile: TileBounds): Boolean {
+        if (tile.corners.any { contains(rings, it[0], it[1]) }) {
+            return true
+        }
+        val tileEdges = tile.corners.indices.map { tile.corners[it] to tile.corners[(it + 1) % tile.corners.size] }
+        return rings.any { ring ->
+            ring.indices.any { index ->
+                val start = ring[index]
+                val end = ring[(index + 1) % ring.size]
+                tile.contains(start) || tileEdges.any { (tileStart, tileEnd) -> crosses(start, end, tileStart, tileEnd) }
+            }
+        }
+    }
+
+    private fun crosses(a: DoubleArray, b: DoubleArray, c: DoubleArray, d: DoubleArray): Boolean =
+        side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0
+
+    private fun side(a: DoubleArray, b: DoubleArray, point: DoubleArray): Double =
+        Math.signum((b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]))
 
     private fun existing(fileName: String): String? = if (File(baseDir, fileName).exists()) fileName else null
 
@@ -113,10 +143,10 @@ class PmTilesService(context: Context) : AutoCloseable {
         return inside
     }
 
-    private fun tileCenterLng(x: Int, z: Int): Double = (x + 0.5) / (1 shl z) * 360.0 - 180.0
+    private fun tileLng(x: Int, z: Int): Double = x.toDouble() / (1 shl z) * 360.0 - 180.0
 
-    private fun tileCenterLat(y: Int, z: Int): Double =
-        Math.toDegrees(Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 0.5) / (1 shl z)))))
+    private fun tileLat(y: Int, z: Int): Double =
+        Math.toDegrees(Math.atan(Math.sinh(Math.PI * (1 - 2 * y.toDouble() / (1 shl z)))))
 
     @Throws(IOException::class)
     private fun getTileFromFile(fileName: String, z: Int, x: Int, y: Int): ByteArray? {
