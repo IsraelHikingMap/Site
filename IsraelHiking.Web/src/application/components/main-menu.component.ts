@@ -145,7 +145,7 @@ export class MainMenuComponent {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`,
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
-                `Downloaded Areas: ${Object.keys(downloadedAreas)}`
+                `Downloaded Areas: ${Object.values(downloadedAreas).map(a => a.area.properties.name).join(", ")}`
             ].join("\n");
             // The log goes over as a file - inline it takes the saved plugin call over android's
             // binder limit and crashes the app when the mail app opens. The info is small enough.
