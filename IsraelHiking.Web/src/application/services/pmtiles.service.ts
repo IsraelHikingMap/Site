@@ -71,9 +71,6 @@ export class PmTilesService {
 
     public async getTileByType(z: number, x: number, y: number, type: string): Promise<ArrayBuffer> {
         const fileName = this.getFileNameByType(z, x, y, type);
-        if (fileName == null) {
-            return new ArrayBuffer(0);
-        }
         return await this.getTileFromFile(fileName, z, x, y);
     }
 
@@ -89,6 +86,9 @@ export class PmTilesService {
      * so a missing tile is returned as an empty tile and not as an error.
      */
     private async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+        if (fileName == null) {
+            return new ArrayBuffer(0);
+        }
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
