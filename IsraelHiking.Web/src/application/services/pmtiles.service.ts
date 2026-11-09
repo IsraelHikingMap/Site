@@ -5,7 +5,6 @@ import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
 import { booleanIntersects } from "@turf/boolean-intersects";
 import { bbox } from "@turf/bbox";
-import type { Immutable } from "immer";
 
 import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
@@ -110,7 +109,7 @@ export class PmTilesService {
     public findDownloadedAreaId(geometry: GeoJSON.Point | GeoJSON.Polygon, zoom: number): string | null {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         const areas = Object.values(downloadedAreas)
-            .map(({ area }) => area as Immutable<OfflineArea> as OfflineArea)
+            .map(({ area }) => area as OfflineArea)
             .filter(area => area != null && (area.properties.minZoom ?? 0) <= zoom && zoom <= (area.properties.maxZoom ?? Infinity) &&
                 booleanIntersects(geometry, area))
             .sort((a, b) => PmTilesService.getBoundsArea(a) - PmTilesService.getBoundsArea(b));
