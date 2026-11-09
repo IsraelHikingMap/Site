@@ -26,7 +26,6 @@ import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
 import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
-import { OfflineTileNamesService } from "../../services/offline-tile-names.service";
 import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, OfflineArea } from "../../models";
@@ -81,11 +80,8 @@ export class OfflineManagementComponent {
     private readonly offeredAreaIds = computed(() => new Set(this.areas().map(area => area.properties.id)));
     /** The area the user selected, one the server offers or one that was downloaded */
     public readonly selectedArea = signal<Immutable<OfflineArea>>(null);
-    /**
-     * Whether a narrow screen shows the map rather than the list. It starts on the map when nothing was
-     * downloaded yet, since the map is where an area is selected to be downloaded.
-     */
-    public readonly showMap = signal(false);
+    /** Whether a narrow screen shows the map rather than the list, the map is where an area is selected to be downloaded */
+    public readonly showMap = signal(true);
     /** The area whose name is being edited in the list */
     public readonly editedAreaId = signal<string>(null);
     public readonly editedName = signal("");
@@ -101,7 +97,6 @@ export class OfflineManagementComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
-    private readonly offlineTileNamesService = inject(OfflineTileNamesService);
     private readonly offlineAreasService = inject(OfflineAreasService);
     private readonly store = inject(Store);
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
@@ -237,8 +232,6 @@ export class OfflineManagementComponent {
         if (this.baseLayerData.key !== HIKING_MAP && this.baseLayerData.key !== MTB_MAP) {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
-        this.showMap.set(this.downloadedAreaRows().length === 0);
-        this.nameUnnamedTiles();
         this.offlineAreasService.getAreas().then(areas => this.areas.set(areas));
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {
@@ -349,18 +342,6 @@ export class OfflineManagementComponent {
         this.showMap.set(true);
         await new Promise((resolve) => setTimeout(resolve, 100));
         this.selectArea(row.area);
-    }
-
-    /**
-     * Names the tiles that were downloaded before tiles had names, or whose naming failed, one at a time
-     * so that opening the screen does not send a burst of requests.
-     */
-    private async nameUnnamedTiles() {
-        for (const row of this.downloadedAreaRows()) {
-            if (row.area != null) {
-                await this.offlineTileNamesService.nameTile(row.area);
-            }
-        }
     }
 
     private toRow(id: string, downloadedDate: Date, compatibility: TileCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaRow {

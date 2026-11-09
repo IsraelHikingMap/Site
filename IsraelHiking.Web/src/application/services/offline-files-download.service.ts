@@ -563,7 +563,7 @@ export class OfflineFilesDownloadService {
 
     /**
      * Keeps the files of a tile or the root files that are not kept as an area yet as one, with the zooms they hold,
-     * so that they are read like any other area. A tile is kept without a name, see OfflineTileNamesService.
+     * so that they are read like any other area. A tile is kept without a name.
      * Failing is logged, an area that is kept already must never be kept again on top of the name the user gave it.
      */
     private async keepFilesWithoutAnAreaAsAreas(): Promise<void> {

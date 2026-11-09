@@ -230,22 +230,6 @@ public class FilesController : ControllerBase
     }
 
     /// <summary>
-    /// Get the name of a tile
-    /// </summary>
-    /// <remarks>The default name of a downloaded zoom 7 tile, which the user can change on the device, in the form the
-    /// names of an area are in: an English "name" and a "name:xx" for every other language there is a name in.
-    /// Not implemented yet.</remarks>
-    /// <param name="tileX">The tile's X coordinates</param>
-    /// <param name="tileY">The tile's Y coordinates</param>
-    /// <returns>The names of the tile</returns>
-    [HttpGet]
-    [Route("offline/name")]
-    public IActionResult GetOfflineTileName([FromQuery] long tileX, [FromQuery] long tileY)
-    {
-        return StatusCode(StatusCodes.Status501NotImplemented);
-    }
-
-    /// <summary>
     /// Check subscription
     /// </summary>
     /// <remarks>Returns true when the current user has an active (entitled) subscription. The client asks
