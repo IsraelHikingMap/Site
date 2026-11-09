@@ -27,6 +27,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let bridgeViewController = rootViewController as? CAPBridgeViewController {
             bridgeViewController.bridge?.registerPluginInstance(ReactivePreferencesPlugin())
             bridgeViewController.bridge?.registerPluginInstance(ValhallaPlugin())
+            bridgeViewController.bridge?.registerPluginInstance(OfflineDownloadPlugin())
         }
 
         if let urlContext = connectionOptions.urlContexts.first {

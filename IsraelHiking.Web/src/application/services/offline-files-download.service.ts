@@ -407,12 +407,14 @@ export class OfflineFilesDownloadService {
         const tileKey = PmTilesService.toTileKey(tileX, tileY);
         this.store.dispatch(new SetTileDownloadInProgressAction({ tileX, tileY, files: fileNames }));
         const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+        const directory = await this.fileService.getOfflineCacheUri();
         const result = await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile,
             () => this.offlineDownload.startTileDownload({
                 tileKey,
                 files,
                 headers: { Authorization: `Bearer ${token}` },
-                concurrency: OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY
+                concurrency: OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY,
+                directory
             }));
         this.logBackgroundDownloadResult(tileKey, result);
         if (result.state !== "completed" && !currentDownload.abortController.signal.aborted) {

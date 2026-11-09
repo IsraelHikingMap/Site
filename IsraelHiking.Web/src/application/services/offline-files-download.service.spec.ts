@@ -92,7 +92,8 @@ describe("OfflineFilesDownloadService", () => {
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
                         listOfflineFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
                         listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as string[])),
-                        clearOfflineCache: vi.fn(() => Promise.resolve())
+                        clearOfflineCache: vi.fn(() => Promise.resolve()),
+                        getOfflineCacheUri: vi.fn(() => Promise.resolve("file:///cache/offline-files"))
                     }
                 },
                 { provide: LoggingService, useValue: { info: vi.fn(), debug: vi.fn(), warning: vi.fn(), error: vi.fn(), getErrorTypeAndMessage: () => ({ type: "client", message: "" }) } },
@@ -773,7 +774,8 @@ describe("OfflineFilesDownloadService", () => {
                             { fileName: ROUTING_TILES_FILE, url: `${Urls.offlineFiles}/${ROUTING_TILES_FILE}?tileX=76&tileY=51` }
                         ],
                         headers: { Authorization: "Bearer token" },
-                        concurrency: 3
+                        concurrency: 3,
+                        directory: "file:///cache/offline-files"
                     });
                     expect(fileService.downloadFileToCacheAuthenticated).not.toHaveBeenCalled();
                     for (const fileName of [ROOT_MAP_FILE, ROUTING_TILES_FILE, MAP_FILE]) {

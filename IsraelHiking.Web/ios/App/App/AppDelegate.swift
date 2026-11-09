@@ -9,7 +9,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         UIApplication.shared.applicationSupportsShakeToEdit = false;
+        _ = OfflineDownloadManager.shared
         return true
+    }
+    /// Keeps the handler iOS hands over when it relaunched the app for the events of the offline download's
+    /// background session, it is called once the session delivered them all.
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        guard identifier == OfflineDownloadManager.sessionIdentifier else {
+            completionHandler()
+            return
+        }
+        OfflineDownloadManager.shared.backgroundCompletionHandler = completionHandler
     }
     /// Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     /// Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

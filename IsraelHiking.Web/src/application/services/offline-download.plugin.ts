@@ -23,6 +23,11 @@ export interface OfflineDownloadPlugin {
         files: { fileName: string; url: string }[];
         headers: Record<string, string>;
         concurrency: number;
+        /**
+         * The URI of the offline files cache, where the app reads the files from. iOS writes the files there, and
+         * android writes them to "offline-files" in its cache directory, which is the same directory.
+         */
+        directory: string;
     }): Promise<void>;
     /** Stops the transfers of a tile and deletes its partial files, the files that completed are kept */
     cancelTileDownload(options: { tileKey: string }): Promise<void>;

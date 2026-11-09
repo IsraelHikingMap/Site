@@ -230,6 +230,15 @@ describe("FileService", () => {
         }
     ));
 
+    it("Should give the native background download the offline files cache, where the downloaded files are read from", inject([FileService],
+        async (service: FileService) => {
+            const uri = await service.getOfflineCacheUri();
+
+            expect(uri).toBe((await Filesystem.getUri({ path: "offline-files", directory: Directory.Cache })).uri);
+            expect(uri.endsWith("offline-files")).toBe(true);
+        }
+    ));
+
     it("Should save log to zip file", inject([FileService], async (service: FileService) => {
         const anchorClickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => { });
 
