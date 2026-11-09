@@ -15,6 +15,7 @@ import { form, FormField, validate } from "@angular/forms/signals";
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from "@angular/material/core";
 import { bbox } from "@turf/bbox";
 import { bboxClip } from "@turf/bbox-clip";
+import polylabel from "polylabel";
 import type { Immutable } from "immer";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
@@ -54,6 +55,9 @@ export type DownloadedAreaRow = {
     providers: [{ provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }]
 })
 export class OfflineManagementComponent {
+    /** How close to the best place inside an area its label is put, finer only costs more time */
+    private static readonly LABEL_PRECISION_DEGREES = 0.01;
+
     /**
      * The color a downloaded area is drawn in: orange when only the style that was downloaded now asks
      * for more than the area holds, which is something to do rather than something that is broken, and
@@ -177,8 +181,8 @@ export class OfflineManagementComponent {
      * The areas that were downloaded, drawn from the files that are on the device - they are read into
      * the state while the app is running, so this follows it instead of being built once.
      * The area that is being downloaded and the selected one are drawn on their own, so they are skipped.
-     * An area that can no longer be used is marked with a "!" rather than with the date it was downloaded
-     * at, which is not the reason it can't be used, and is drawn with a dashed outline so that it is told
+     * An area is labeled with its name and the date it was downloaded at. One that can no longer be used is marked
+     * with a "!" rather than with the date, which is not the reason it can't be used, and is drawn with a dashed outline so that it is told
      * apart from the rest without relying on its color alone.
      */
     public readonly downloadedAreasFeatures = computed<GeoJSON.FeatureCollection>(() => {
@@ -189,12 +193,10 @@ export class OfflineManagementComponent {
             }
             const isCompatible = row.compatibility === "compatible";
             const label = isCompatible
-                ? row.downloadedDate.getFullYear() + "\n" +
-                (row.downloadedDate.getMonth() + 1).toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 }) + "\n" +
-                row.downloadedDate.getDate().toLocaleString(this.resources.getCurrentLanguageCodeSimplified(), { minimumIntegerDigits: 2 })
+                ? row.name + "\n" + row.downloadedDate.toLocaleDateString(this.resources.getCurrentLanguageCodeSimplified())
                 : "!";
             const properties = { color: OfflineManagementComponent.AREA_COLOR[row.compatibility], incompatible: isCompatible ? "false" : "true" };
-            features.push({ ...row.area as OfflineArea, properties }, this.getLabelPoint(row.area, label, { ...properties, textSize: isCompatible ? 30 : 60 }));
+            features.push({ ...row.area as OfflineArea, properties }, this.getLabelPoint(row.area, label, { ...properties, textSize: isCompatible ? 20 : 60 }));
         }
         return { type: "FeatureCollection", features };
     });
@@ -313,9 +315,17 @@ export class OfflineManagementComponent {
     }
 
     /** A point in the middle of the box of an area, which is named there rather than on the area itself, which would name every island of it */
+    /**
+     * Where the label of an area goes: the point furthest inside the largest of its polygons, since the middle of its
+     * bounds can be outside it, in a neighbour, like the middle of Croatia is in Bosnia.
+     */
     private getLabelPoint(area: Immutable<OfflineArea>, label: string, properties: Record<string, string | number> = {}): GeoJSON.Feature<GeoJSON.Point> {
-        const [minLng, minLat, maxLng, maxLat] = bbox(area as OfflineArea);
-        return { type: "Feature", properties: { ...properties, label }, geometry: { type: "Point", coordinates: [(minLng + maxLng) / 2, (minLat + maxLat) / 2] } };
+        const geometry = area.geometry as OfflineArea["geometry"];
+        const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+        const coordinates = polygons
+            .map(polygon => polylabel(polygon as [number, number][][], OfflineManagementComponent.LABEL_PRECISION_DEGREES))
+            .reduce((best, candidate) => candidate.distance > best.distance ? candidate : best);
+        return { type: "Feature", properties: { ...properties, label }, geometry: { type: "Point", coordinates: [coordinates[0], coordinates[1]] } };
     }
 
     public cancelDownload() {
