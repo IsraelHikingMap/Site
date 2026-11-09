@@ -188,7 +188,8 @@
               }" [paint]="{
                   'text-color': 'green',
                   'text-halo-color' : 'white',
-                  'text-halo-width': 2
+                  'text-halo-width': 3,
+                  'text-halo-blur': 1
               }">
             </mgl-layer>
             <mgl-geojson-source id="in-progress-area" [data]="inProgress()">
@@ -201,7 +202,7 @@
                   'line-width': 3
               }">
             </mgl-layer>
-            <mgl-layer id="in-progress-area-text" type="symbol" source="in-progress-area" [minzoom]="4"
+            <mgl-layer id="in-progress-area-text" type="symbol" source="in-progress-area"
                 [filter]="['has', 'label']" [layout]="{
                   'text-field': ['get', 'label'],
                   'text-font': ['Noto Sans Regular'],
