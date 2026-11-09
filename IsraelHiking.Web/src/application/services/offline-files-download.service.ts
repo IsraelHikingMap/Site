@@ -117,18 +117,18 @@ export class OfflineFilesDownloadService {
             const styles = await this.downloadStyleAndUpdateMetadata();
             downloadedAreas = await this.updateVersionsOfDownloadedFiles(downloadedAreas);
             const incompatibleIds: string[] = [];
-            for (const [ids, { files }] of Object.entries(downloadedAreas)) {
-                if (OfflineAreasService.isRootId(ids)) {
+            for (const [id, { files }] of Object.entries(downloadedAreas)) {
+                if (OfflineAreasService.isRootId(id)) {
                     continue;
                 }
-                const compatibility = this.getAreaCompatibility(ids, files);
+                const compatibility = this.getAreaCompatibility(id, files);
                 if (compatibility === "compatible") {
                     continue;
                 }
-                incompatibleIds.push(ids);
-                const reason = this.getUnmetRequirement(ids, files, this.offlineStyleRequirements)
-                    ?? this.getUnmetRequirement(ids, files, this.onlineStyleRequirements);
-                this.loggingService.info(`[Offline Download] ${ids} is ${compatibility}${reason == null ? "" : `: ${reason}`}`);
+                incompatibleIds.push(id);
+                const reason = this.getUnmetRequirement(id, files, this.offlineStyleRequirements)
+                    ?? this.getUnmetRequirement(id, files, this.onlineStyleRequirements);
+                this.loggingService.info(`[Offline Download] ${id} is ${compatibility}${reason == null ? "" : `: ${reason}`}`);
             }
             if (incompatibleIds.length > 0) {
                 this.loggingService.info(`[Offline Download] These tiles need to be downloaded again: ${incompatibleIds.join(", ")}`);

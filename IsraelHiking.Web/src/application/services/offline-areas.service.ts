@@ -13,7 +13,7 @@ import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
-/** The zoom of the old tiles, whose keys are their x and y at it, see toTileId */
+/** The zoom of the old tiles, whose ids are their x and y at it, see toTileId */
 export const TILES_ZOOM = 7;
 
 /**
@@ -29,7 +29,7 @@ export class OfflineAreasService {
     /** How far inside its edges a tile is tested for overlapping an area, as a part of its size, see findDownloadedAreaIdOfTile */
     private static readonly TILE_INSET = 0.001;
 
-    /** The key of the root files, which hold the whole world at the zooms below the areas and come with every area */
+    /** The id of the root files, which hold the whole world at the zooms below the areas and come with every area */
     public static readonly ROOT_ID = "root";
 
     private readonly httpClient = inject(HttpClient);
@@ -87,21 +87,21 @@ export class OfflineAreasService {
         return areas[0]?.properties.id ?? null;
     }
 
-    /** Whether a key is of root files, which are of no area the user downloaded and are not listed */
-    public static isRootId(key: string): boolean {
-        return key === OfflineAreasService.ROOT_ID;
+    /** Whether an id is of the root files, which are of no area the user downloaded and are not listed */
+    public static isRootId(id: string): boolean {
+        return id === OfflineAreasService.ROOT_ID;
     }
 
-    /** The key the files of an old tile are kept under */
+    /** The id the files of an old tile are kept under */
     public static toTileId(tileX: number, tileY: number): string {
         return `${tileX}-${tileY}`;
     }
 
     /**
-     * The tile a key was made of, null for the root key and for the id of an area, which are not of a tile.
+     * The tile an id was made of, null for the root id and for the id of an area, which are not of a tile.
      */
-    public static fromTileId(tileKey: string): { tileX: number, tileY: number } | null {
-        const match = tileKey.match(/^(\d+)-(\d+)$/);
+    public static fromTileId(tileId: string): { tileX: number, tileY: number } | null {
+        const match = tileId.match(/^(\d+)-(\d+)$/);
         return match == null ? null : { tileX: +match[1], tileY: +match[2] };
     }
 
@@ -155,7 +155,7 @@ export class OfflineAreasService {
         return { ...area, properties: { ...area.properties, minZoom: zooms.minZoom, maxZoom: zooms.maxZoom } };
     }
 
-    /** A tile as an area, whose id is the key of the tile, see toTileId */
+    /** A tile as an area, see toTileId */
     public static createTileArea(tileX: number, tileY: number): OfflineArea {
         return OfflineAreasService.createSquareArea(OfflineAreasService.toTileId(tileX, tileY), tileX, tileY, TILES_ZOOM);
     }
