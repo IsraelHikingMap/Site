@@ -19,7 +19,7 @@ import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-pres
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService, type DownloadInProgress, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
-import { OfflineAreasService, TILES_ZOOM } from "../../services/offline-areas.service";
+import { OfflineAreasService } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
@@ -251,11 +251,11 @@ export class OfflineManagementComponent {
             const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
             this.map.flyTo({
                 center: [mapCenter.longitude, mapCenter.latitude],
-                zoom: TILES_ZOOM
+                zoom: 7
             });
             return;
         }
-        this.fitBounds({ type: "FeatureCollection", features: areas }, TILES_ZOOM - 1);
+        this.fitBounds({ type: "FeatureCollection", features: areas });
     }
 
     public downloadSelected() {
@@ -284,7 +284,7 @@ export class OfflineManagementComponent {
 
     private async startDownload(areaToDownload: Immutable<OfflineArea>) {
         this.toastService.info(this.resources.dontSwitchApps);
-        this.fitBounds(areaToDownload, TILES_ZOOM - 1);
+        this.fitBounds(areaToDownload);
         this.selectedArea.set(null);
         const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload);
         this.reportDownloadEnd(status, () => this.selectedArea.set(areaToDownload));
@@ -403,12 +403,12 @@ export class OfflineManagementComponent {
 
     private selectArea(area: Immutable<OfflineArea>) {
         this.selectedArea.set(area);
-        this.fitBounds(area, TILES_ZOOM);
+        this.fitBounds(area);
     }
 
-    private fitBounds(geoJson: Immutable<GeoJSON.Feature | GeoJSON.FeatureCollection>, maxZoom: number) {
+    private fitBounds(geoJson: Immutable<GeoJSON.Feature | GeoJSON.FeatureCollection>) {
         const bounds = geoJson.type === "FeatureCollection" ? SpatialHelper.getBoundsForFeatureCollection(geoJson) : SpatialHelper.getBoundsForFeature(geoJson);
-        this.map.fitBounds(SpatialHelper.boundsToMBBounds(bounds), { padding: 40, maxZoom });
+        this.map.fitBounds(SpatialHelper.boundsToMBBounds(bounds), { padding: { top: 100, bottom: 150, left: 50, right: 50 } });
     }
 
     /**
