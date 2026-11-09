@@ -11,6 +11,10 @@ namespace IsraelHiking.API.OpenApi;
 /// <summary>
 /// Sets the API title/version and registers the Bearer security scheme on the OpenAPI document
 /// </summary>
+/// <remarks>
+/// The server is set to a relative "/" since the one generated from the request is http behind the proxy,
+/// so the API reference sends its requests to whatever origin it was opened from.
+/// </remarks>
 [ExcludeFromCodeCoverage]
 public class ApiInfoDocumentTransformer : IOpenApiDocumentTransformer
 {
@@ -19,6 +23,7 @@ public class ApiInfoDocumentTransformer : IOpenApiDocumentTransformer
     {
         document.Info.Title = "Mapeak API";
         document.Info.Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+        document.Servers = [new OpenApiServer { Url = "/" }];
         document.Components ??= new OpenApiComponents();
         document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
         document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
