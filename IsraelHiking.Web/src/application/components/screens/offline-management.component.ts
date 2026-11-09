@@ -18,7 +18,7 @@ import type { Immutable } from "immer";
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { OfflineFilesDownloadService, type DownloadStatus, type TileCompatibility } from "../../services/offline-files-download.service";
+import { OfflineFilesDownloadService, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
 import { OfflineAreasService, TILES_ZOOM } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
@@ -27,19 +27,19 @@ import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, OfflineArea } from "../../models";
 
-/** A downloaded area as the list shows it, where a tile is an area as well */
+/** A downloaded area as the list shows it, where an old tile is an area as well */
 export type DownloadedAreaRow = {
     id: string;
     /** The area as it is kept on the device, null for files whose area could not be read */
     area: Immutable<OfflineArea> | null;
-    /** The name of the area, falling back to the coordinates of the middle of a tile that was not named yet */
+    /** The name of the area, falling back to the coordinates of the middle of an old tile the user did not name */
     name: string;
     /** When the area was last downloaded, null while it is downloaded for the first time */
     downloadedDate: Date;
-    compatibility: TileCompatibility;
+    compatibility: AreaCompatibility;
     /**
-     * Whether the server still offers the area, an area whose shape changed got a new id and a tile that was downloaded
-     * before areas existed never had one, so either can only be deleted and replaced by an area the server offers.
+     * Whether the server still offers the area. An area whose shape changed got a new id and an old tile has none of
+     * the server's, so either can only be deleted and replaced by an area the server offers.
      */
     canBeUpdated: boolean;
 };
@@ -59,14 +59,14 @@ export class OfflineManagementComponent {
      * for more than the area holds, which is something to do rather than something that is broken, and
      * red when the styles that are already on the device do, which is what draws the map itself wrong.
      */
-    private static readonly AREA_COLOR: Record<TileCompatibility, string> = {
+    private static readonly AREA_COLOR: Record<AreaCompatibility, string> = {
         compatible: "blue",
         outdated: "#ef6c00",
         unusable: "red"
     };
 
     /** The order the list shows the areas in, the ones that need to be downloaded again first */
-    private static readonly COMPATIBILITY_ORDER: Record<TileCompatibility, number> = {
+    private static readonly COMPATIBILITY_ORDER: Record<AreaCompatibility, number> = {
         unusable: 0,
         outdated: 1,
         compatible: 2
@@ -117,8 +117,8 @@ export class OfflineManagementComponent {
     public readonly incompatibleAreaIds = computed<string[]>(() => {
         const downloadedAreas = this.downloadedAreas();
         return Object.keys(downloadedAreas)
-            .filter(id => !OfflineAreasService.isRootKey(id))
-            .filter(id => this.offlineFilesDownloadService.getTileCompatibility(id, downloadedAreas[id].files) !== "compatible")
+            .filter(id => !OfflineAreasService.isRootId(id))
+            .filter(id => this.offlineFilesDownloadService.getAreaCompatibility(id, downloadedAreas[id].files) !== "compatible")
             .sort();
     });
 
@@ -130,9 +130,9 @@ export class OfflineManagementComponent {
     public readonly downloadedAreaRows = computed<DownloadedAreaRow[]>(() => {
         const downloadedAreas = this.downloadedAreas();
         const rows = Object.entries(downloadedAreas)
-            .filter(([id]) => !OfflineAreasService.isRootKey(id))
+            .filter(([id]) => !OfflineAreasService.isRootId(id))
             .map(([id, { files }]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
-                this.offlineFilesDownloadService.getTileCompatibility(id, files)));
+                this.offlineFilesDownloadService.getAreaCompatibility(id, files)));
         rows.sort((a, b) =>
             OfflineManagementComponent.COMPATIBILITY_ORDER[a.compatibility] - OfflineManagementComponent.COMPATIBILITY_ORDER[b.compatibility] ||
             b.downloadedDate.getTime() - a.downloadedDate.getTime());
@@ -216,7 +216,7 @@ export class OfflineManagementComponent {
             return { type: "FeatureCollection", features: [] };
         }
         const { area, progress } = downloadInProgress;
-        const fillFeature = SpatialHelper.clipFromWest(area as OfflineArea, progress / 100.0);
+        const fillFeature = SpatialHelper.clipFromWest(area, progress / 100.0);
         return {
             type: "FeatureCollection",
             features: [{ ...fillFeature, properties: { fill: "true" } }, { ...area as OfflineArea, properties: {} }, this.getLabelPoint(area, progress.toFixed(2) + "%")]
@@ -255,7 +255,7 @@ export class OfflineManagementComponent {
             });
             return;
         }
-        this.fitBounds({ type: "FeatureCollection", features: areas as OfflineArea[] }, TILES_ZOOM - 1);
+        this.fitBounds({ type: "FeatureCollection", features: areas }, TILES_ZOOM - 1);
     }
 
     public downloadSelected() {
@@ -265,26 +265,26 @@ export class OfflineManagementComponent {
     /**
      * Downloads an area, where an area that was downloaded before is downloaded again the way it is kept on the
      * device, which might no longer be the way the server offers it. The user confirms first when the download
-     * is going to delete old tiles, see OfflineFilesDownloadService.getOverlappedTileKeys.
+     * is going to delete old tiles, see OfflineFilesDownloadService.getOverlappedTileIds.
      */
     public downloadArea(area: Immutable<OfflineArea>) {
         const areaToDownload = this.downloadedAreas()[area.properties.id]?.area ?? area;
-        const overlappedTileKeys = this.offlineFilesDownloadService.getOverlappedTileKeys(areaToDownload);
-        if (overlappedTileKeys.length === 0) {
+        const overlappedTileIds = this.offlineFilesDownloadService.getOverlappedTileIds(areaToDownload);
+        if (overlappedTileIds.length === 0) {
             this.startDownload(areaToDownload);
             return;
         }
-        const names = this.downloadedAreaRows().filter(row => overlappedTileKeys.includes(row.id)).map(row => row.name);
+        const names = this.downloadedAreaRows().filter(row => overlappedTileIds.includes(row.id)).map(row => row.name);
         this.toastService.confirm({
             message: this.resources.downloadingThisAreaDeletesOldTiles.replace("{{names}}", names.join(", ")),
-            type: "YesNo",
+            type: "OkCancel",
             confirmAction: () => this.startDownload(areaToDownload)
         });
     }
 
     private async startDownload(areaToDownload: Immutable<OfflineArea>) {
         this.toastService.info(this.resources.dontSwitchApps);
-        this.fitBounds(areaToDownload as OfflineArea, TILES_ZOOM - 1);
+        this.fitBounds(areaToDownload, TILES_ZOOM - 1);
         this.selectedArea.set(null);
         const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload);
         this.reportDownloadEnd(status, () => this.selectedArea.set(areaToDownload));
@@ -310,7 +310,7 @@ export class OfflineManagementComponent {
     }
 
     private getLabelPoint(area: Immutable<OfflineArea>, label: string, properties: Record<string, string | number> = {}): GeoJSON.Feature<GeoJSON.Point> {
-        const coordinates = SpatialHelper.getLabelPosition(area.geometry as OfflineArea["geometry"], OfflineManagementComponent.LABEL_PRECISION_DEGREES);
+        const coordinates = SpatialHelper.getLabelPosition(area.geometry, OfflineManagementComponent.LABEL_PRECISION_DEGREES);
         return { type: "Feature", properties: { ...properties, label }, geometry: { type: "Point", coordinates } };
     }
 
@@ -340,7 +340,7 @@ export class OfflineManagementComponent {
         this.selectArea(row.area);
     }
 
-    private toRow(id: string, downloadedDate: Date, compatibility: TileCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaRow {
+    private toRow(id: string, downloadedDate: Date, compatibility: AreaCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaRow {
         return {
             id,
             area,
@@ -351,15 +351,15 @@ export class OfflineManagementComponent {
         };
     }
 
-    /** An area as it is kept on the device, where a tile that is not kept yet is the area of the tile itself */
+    /** An area as it is kept on the device, where an old tile whose metadata could not be read is the square of the tile */
     private getDownloadedArea(id: string): Immutable<OfflineArea> | null {
-        const tile = OfflineAreasService.fromTileKey(id);
+        const tile = OfflineAreasService.fromTileId(id);
         return this.downloadedAreas()[id]?.area ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
     }
 
     /** What an area that has no name is called: a tile by the coordinates of its middle, anything else by its id */
     private getDefaultName(id: string): string {
-        const tile = OfflineAreasService.fromTileKey(id);
+        const tile = OfflineAreasService.fromTileId(id);
         if (tile == null) {
             return id;
         }
@@ -413,10 +413,10 @@ export class OfflineManagementComponent {
 
     private selectArea(area: Immutable<OfflineArea>) {
         this.selectedArea.set(area);
-        this.fitBounds(area as OfflineArea, TILES_ZOOM);
+        this.fitBounds(area, TILES_ZOOM);
     }
 
-    private fitBounds(geoJson: GeoJSON.Feature | GeoJSON.FeatureCollection, maxZoom: number) {
+    private fitBounds(geoJson: Immutable<GeoJSON.Feature | GeoJSON.FeatureCollection>, maxZoom: number) {
         const bounds = geoJson.type === "FeatureCollection" ? SpatialHelper.getBoundsForFeatureCollection(geoJson) : SpatialHelper.getBoundsForFeature(geoJson);
         this.map.fitBounds(SpatialHelper.boundsToMBBounds(bounds), { padding: 40, maxZoom });
     }

@@ -5,7 +5,7 @@ import { HttpTestingController, provideHttpClientTesting } from "@angular/common
 import { provideStore, Store } from "@ngxs/store";
 import { LngLat } from "maplibre-gl";
 
-import { AREA_MIN_ZOOM, OfflineAreasService, ROOT_ZOOM, TILES_ZOOM } from "./offline-areas.service";
+import { OfflineAreasService } from "./offline-areas.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";
@@ -82,7 +82,7 @@ describe("OfflineAreasService", () => {
         vi.mocked(fileService.readFileInDataDirectory).mockImplementation(fileName =>
             Promise.resolve(fileName === "broken.area.json" ? "{" : JSON.stringify(area)));
 
-        expect(await service.loadDownloadedAreas()).toEqual({ "israel-and-palestine": area });
+        expect(await service.loadAreasMetadata()).toEqual({ "israel-and-palestine": area });
         expect(fileService.listFileNamesInDataDirectory).toHaveBeenCalledWith(".area.json");
     });
 
@@ -90,21 +90,21 @@ describe("OfflineAreasService", () => {
         const area = createArea("israel-and-palestine", [34, 29, 36, 34]);
         store.dispatch(new SetDownloadedAreasAction({ "israel-and-palestine": { area: null, files: [FILE], hasRoutingTiles: true } }));
 
-        await service.saveDownloadedArea(area);
+        await service.saveAreaMetadata(area);
 
         expect(fileService.writeFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json", JSON.stringify(area));
         expect(getDownloadedAreas()).toEqual({ "israel-and-palestine": { area, files: [FILE], hasRoutingTiles: true } });
     });
 
     it("should only keep an area in its file while its files are not there yet, they are read into the state along with it", async () => {
-        await service.saveDownloadedArea(createArea("israel-and-palestine", [34, 29, 36, 34]));
+        await service.saveAreaMetadata(createArea("israel-and-palestine", [34, 29, 36, 34]));
 
         expect(fileService.writeFileInDataDirectory).toHaveBeenCalled();
         expect(getDownloadedAreas()).toEqual({});
     });
 
     it("should delete the file an area is kept in", async () => {
-        await service.deleteDownloadedArea("israel-and-palestine");
+        await service.deleteAreaMetadata("israel-and-palestine");
 
         expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("israel-and-palestine.area.json");
     });
@@ -120,29 +120,29 @@ describe("OfflineAreasService", () => {
     it("should make a tile an area whose id is the key of the tile", () => {
         const tile = OfflineAreasService.createTileArea(76, 51);
 
-        expect(tile.properties).toEqual({ id: "76-51", minZoom: 7 });
+        expect(tile.properties).toEqual({ id: "76-51" });
         expect(tile.geometry.type).toBe("Polygon");
         expect((tile.geometry as GeoJSON.Polygon).coordinates[0]).toHaveLength(5);
     });
 
     describe("finding the downloaded area that holds a tile", () => {
-        const area: OfflineArea = { ...createArea("israel-and-palestine", [34, 29, 36, 34]), properties: { id: "israel-and-palestine", minZoom: AREA_MIN_ZOOM } };
-        const root = OfflineAreasService.createRootArea(OfflineAreasService.ROOT_KEY, ROOT_ZOOM);
-        const legacyRoot = OfflineAreasService.createRootArea(OfflineAreasService.LEGACY_ROOT_KEY, TILES_ZOOM - 1);
-        const tile = OfflineAreasService.createTileArea(76, 51);
+        const area = OfflineAreasService.withZooms(createArea("israel-and-palestine", [34, 29, 36, 34]), { minZoom: 5, maxZoom: 14 });
+        const root = OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 4 });
+        const migratedRoot = OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), { minZoom: 0, maxZoom: 6 });
+        const tile = OfflineAreasService.withZooms(OfflineAreasService.createTileArea(76, 51), { minZoom: 7, maxZoom: 14 });
 
         it("should find the downloaded area a point is in, only at the zooms its files hold", () => {
             const downloadedAreas = toDownloadedAreas(area);
 
             expect(OfflineAreasService.findDownloadedAreaId(downloadedAreas, point(35, 32), 8)).toBe("israel-and-palestine");
-            expect(OfflineAreasService.findDownloadedAreaId(downloadedAreas, point(35, 32), ROOT_ZOOM)).toBeNull();
+            expect(OfflineAreasService.findDownloadedAreaId(downloadedAreas, point(35, 32), 4)).toBeNull();
             expect(OfflineAreasService.findDownloadedAreaId(downloadedAreas, point(40, 32), 8)).toBeNull();
         });
 
         it("should read the root files up to their zoom and the area a tile is in above it", () => {
             const downloadedAreas = toDownloadedAreas(root, area);
 
-            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, ROOT_ZOOM, 9, 6)).toBe(OfflineAreasService.ROOT_KEY);
+            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 4, 9, 6)).toBe(OfflineAreasService.ROOT_ID);
             // A tile whose middle is in the area, and one in the middle of the ocean
             expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 8, 152, 103)).toBe("israel-and-palestine");
             expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 8, 10, 103)).toBeNull();
@@ -154,7 +154,7 @@ describe("OfflineAreasService", () => {
         });
 
         it("should not read a tile from an area it only touches, so that a tile next to one that came before areas is read from the area around it", () => {
-            const downloadedAreas = toDownloadedAreas(legacyRoot, tile, area);
+            const downloadedAreas = toDownloadedAreas(migratedRoot, tile, area);
 
             // Right below tile 76/51, which ends where this tile starts
             expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 8, 152, 104)).toBe("israel-and-palestine");
@@ -162,19 +162,19 @@ describe("OfflineAreasService", () => {
         });
 
         it("should read a tile that came before areas from its own file, and fill the zooms below it from the zoom 6 root files", () => {
-            const downloadedAreas = toDownloadedAreas(legacyRoot, tile);
+            const downloadedAreas = toDownloadedAreas(migratedRoot, tile);
 
             expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 9, 305, 205)).toBe("76-51");
-            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 38, 25)).toBe(OfflineAreasService.LEGACY_ROOT_KEY);
-            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, ROOT_ZOOM, 9, 6)).toBe(OfflineAreasService.LEGACY_ROOT_KEY);
+            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 38, 25)).toBe(OfflineAreasService.ROOT_ID);
+            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 4, 9, 6)).toBe(OfflineAreasService.ROOT_ID);
         });
 
         it("should read the smallest of the areas that hold a tile, so that the root files only fill in where there is no area", () => {
             const largeArea: OfflineArea = { ...area, geometry: createArea("large", [30, 25, 40, 35]).geometry };
-            const downloadedAreas = toDownloadedAreas(legacyRoot, largeArea);
+            const downloadedAreas = toDownloadedAreas(migratedRoot, largeArea);
 
             expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 38, 25)).toBe("israel-and-palestine");
-            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 10, 25)).toBe(OfflineAreasService.LEGACY_ROOT_KEY);
+            expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 10, 25)).toBe(OfflineAreasService.ROOT_ID);
         });
     });
 

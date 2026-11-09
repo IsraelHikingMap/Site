@@ -318,10 +318,10 @@ public class OfflineFilesServiceTests
         {
             "valhalla+5a46cb2cd3d6abed.tgz",
             "IHM-schema+5a46cb2cd3d6abed.pmtiles", "IHM-code+5a46cb2cd3d6abed.pmtiles", "raster-dem+5a46cb2cd3d6abed.pmtiles",
-            "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema-4.pmtiles", "IHM-code-4.pmtiles",
+            "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema+root.pmtiles", "IHM-code+root.pmtiles",
             "valhalla-profiles.json"
         }, results.Keys.ToArray());
-        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-4.pmtiles"]);
+        Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema+root.pmtiles"]);
     }
 
     [TestMethod]
@@ -359,6 +359,27 @@ public class OfflineFilesServiceTests
         await _service.GetFileContentForArea("5a46cb2cd3d6abed", "raster-dem+5a46cb2cd3d6abed.pmtiles");
 
         await _remoteFileFetcherGateway.Received(1).PostForFileStream(OnTheFlyDemAddress + "raster-dem?minzoom=5", AreaGeometry);
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_RootFile_ShouldBeTheZoom4FileOfTheWholeWorld()
+    {
+        _remoteFileFetcherGateway.GetFileStream(Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
+
+        var result = await _service.GetFileContentForArea("5a46cb2cd3d6abed", "IHM-schema+root.pmtiles");
+
+        Assert.AreEqual(42, result?.Length);
+        await _remoteFileFetcherGateway.Received(1).GetFileStream(OnTheFlyAddress + "IHM-schema-4.pmtiles");
+        await _remoteFileFetcherGateway.DidNotReceive().PostForFileStream(Arg.Any<string>(), Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_Profiles_ShouldBeThisServersFile()
+    {
+        var (content, _) = (await _service.GetFileContentForArea("5a46cb2cd3d6abed", "valhalla-profiles.json")).Value;
+
+        using var reader = new StreamReader(content);
+        Assert.AreEqual("{ \"foot\": {} }", reader.ReadToEnd());
     }
 
     [TestMethod]

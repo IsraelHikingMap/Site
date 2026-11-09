@@ -112,6 +112,12 @@ export class PmTilesService {
         return true;
     }
 
+    /** The zooms a file holds, as its header has them */
+    public async getZooms(fileName: string): Promise<{ minZoom: number, maxZoom: number }> {
+        const header = await new PMTiles(await this.getSource(fileName)).getHeader();
+        return { minZoom: header.minZoom, maxZoom: header.maxZoom };
+    }
+
     public async getVersion(fileName: string): Promise<string> {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);

@@ -19,7 +19,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { AREA_MIN_ZOOM, OfflineAreasService, ROOT_ZOOM, TILES_ZOOM } from "./offline-areas.service";
+import { OfflineAreasService, TILES_ZOOM } from "./offline-areas.service";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
@@ -32,14 +32,13 @@ type StyleRequirements = {
 };
 
 /**
- * How usable the files of a tile still are, see getTileCompatibility. "outdated" only means that a newer
+ * How usable the files of an area still are, see getAreaCompatibility. "outdated" only means that a newer
  * style wants more than they hold, while "unusable" means the map is already drawn wrong without them.
  */
-export type TileCompatibility = "compatible" | "outdated" | "unusable";
+export type AreaCompatibility = "compatible" | "outdated" | "unusable";
 
 /** The download that is going on right now, everything that lives as long as it does */
 type CurrentDownload = {
-    /** The area that is downloaded, one the server offers, since a tile that came before areas can not be downloaded again */
     area: Immutable<OfflineArea>;
     /** How much was downloaded so far, from 0 to 100 */
     progress: number;
@@ -47,17 +46,11 @@ type CurrentDownload = {
     abortController: AbortController;
 };
 
-/** A file the server lists, by the name it serves it by and the name it is kept by on the device, see getLocalFileName */
-type FileToDownload = {
-    fileName: string;
-    serverFileName: string;
-};
-
 export type DownloadStatus = "up-to-date" | "downloaded" | "error" | "aborted";
 
 @Service()
 export class OfflineFilesDownloadService {
-    /** The metadata key a style uses to declare the minimal version it needs from one of its sources */
+    /** The metadata id a style uses to declare the minimal version it needs from one of its sources */
     private static readonly MIN_VERSION_KEY_REGEX = /^sources:(.+):min-version$/;
 
     /**
@@ -66,10 +59,10 @@ export class OfflineFilesDownloadService {
      */
     private static readonly APPLICATION_SOURCE_FILE_NAMES = ["global_points"];
 
-    /** The name the files of a tile were kept under before tiles were kept like areas, "name+7-x-y.pmtiles" */
+    /** The name of the files of an old tile, which the migration moves, "name+7-x-y.pmtiles" */
     private static readonly TILE_FILE_NAME_REGEX = new RegExp(`^(.+)\\+${TILES_ZOOM}-(\\d+-\\d+)(\\.\\w+)$`);
-    /** The name the server gives a root file, and the one they were kept under before they were kept like areas, "name-4.pmtiles" */
-    private static readonly ROOT_FILE_NAME_REGEX = /^([^+]+)-(\d+)(\.pmtiles)$/;
+    /** The name of the old root files, which the migration moves, "name-6.pmtiles" */
+    private static readonly LEGACY_ROOT_FILE_NAME_REGEX = new RegExp(`^([^+]+)-${TILES_ZOOM - 1}(\\.pmtiles)$`);
 
     private readonly resources = inject(ResourcesService);
     private readonly fileService = inject(FileService);
@@ -87,7 +80,7 @@ export class OfflineFilesDownloadService {
     private onlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
     /**
      * What the styles that are already on the device need. They are what the map is drawn with when there
-     * is no network, and they are only replaced once every tile can be drawn with them, so a tile that
+     * is no network, and they are only replaced once every area can be drawn with them, so an area that
      * does not meet them is one the app can not draw correctly right now.
      */
     private offlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
@@ -112,8 +105,8 @@ export class OfflineFilesDownloadService {
         }
         await this.fileService.clearOfflineCache();
         await this.migrateToAreas();
-        await this.updateDownloadedAreasFromDevice();
-        await this.deleteUnusedRootFiles();
+        let downloadedAreas = await this.updateDownloadedAreasFromDevice();
+        downloadedAreas = await this.deleteUnusedRootFiles(downloadedAreas);
         await this.updateOfflineStyleRequirements();
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
@@ -122,26 +115,25 @@ export class OfflineFilesDownloadService {
         }
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
-            await this.updateVersionsOfDownloadedFiles();
-            const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-            const incompatibleTileKeys: string[] = [];
-            for (const [tileKey, { files }] of Object.entries(downloadedAreas)) {
-                if (tileKey === OfflineAreasService.LEGACY_ROOT_KEY) {
+            downloadedAreas = await this.updateVersionsOfDownloadedFiles(downloadedAreas);
+            const incompatibleIds: string[] = [];
+            for (const [ids, { files }] of Object.entries(downloadedAreas)) {
+                if (OfflineAreasService.isRootId(ids)) {
                     continue;
                 }
-                const compatibility = this.getTileCompatibility(tileKey, files);
+                const compatibility = this.getAreaCompatibility(ids, files);
                 if (compatibility === "compatible") {
                     continue;
                 }
-                incompatibleTileKeys.push(tileKey);
-                const reason = this.getUnmetRequirement(tileKey, files, this.offlineStyleRequirements)
-                    ?? this.getUnmetRequirement(tileKey, files, this.onlineStyleRequirements);
-                this.loggingService.info(`[Offline Download] ${tileKey} is ${compatibility}${reason == null ? "" : `: ${reason}`}`);
+                incompatibleIds.push(ids);
+                const reason = this.getUnmetRequirement(ids, files, this.offlineStyleRequirements)
+                    ?? this.getUnmetRequirement(ids, files, this.onlineStyleRequirements);
+                this.loggingService.info(`[Offline Download] ${ids} is ${compatibility}${reason == null ? "" : `: ${reason}`}`);
             }
-            if (incompatibleTileKeys.length > 0) {
-                this.loggingService.info(`[Offline Download] These tiles need to be downloaded again: ${incompatibleTileKeys.join(", ")}`);
+            if (incompatibleIds.length > 0) {
+                this.loggingService.info(`[Offline Download] These tiles need to be downloaded again: ${incompatibleIds.join(", ")}`);
             }
-            const needToAskToRedownload = Object.keys(downloadedAreas).length === 0 || incompatibleTileKeys.length > 0;
+            const needToAskToRedownload = Object.keys(downloadedAreas).length === 0 || incompatibleIds.length > 0;
             if (!needToAskToRedownload) {
                 await this.writeStylesToDevice(styles);
                 return;
@@ -170,9 +162,9 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Reads what the styles that are on the device require, so that a tile that can not be drawn with them
+     * Reads what the styles that are on the device require, so that an area that can not be drawn with them
      * is told apart from one that only lacks what a newer style asks for. A style that is not on the device
-     * reads as empty and requires nothing - without it there is nothing to say the tiles are drawn wrong.
+     * reads as empty and requires nothing - without it there is nothing to say the areas are drawn wrong.
      */
     private async updateOfflineStyleRequirements(): Promise<void> {
         const requirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
@@ -205,7 +197,7 @@ export class OfflineFilesDownloadService {
     /**
      * A style declares the minimal version it needs from a source using a "sources:{name}:min-version" metadata
      * key, but the offline files are named after the file the source's url points to and not after the name of
-     * the source in the style - the "IHM" source, for example, is downloaded as "IHM-schema+7-x-y.pmtiles".
+     * the source in the style - the "IHM" source, for example, is downloaded as "IHM-schema+{id}.pmtiles".
      * This translates every such key to the name of the file it refers to, accepting a key that is written using
      * either name, so that a mismatch between the two does not silently skip the version check.
      * When both styles require a version from the same file the stricter one wins.
@@ -246,34 +238,16 @@ export class OfflineFilesDownloadService {
         return lastPart ? OfflineFilesDownloadService.removeExtension(lastPart) : null;
     }
 
-    /**
-     * The name of the source file an offline file holds: the files of an area look like "name+id.pmtiles" and
-     * root files like "name-4.pmtiles", where the name itself may contain a "-".
-     */
+    /** The name of the source file an offline file holds, the files look like "name+id.pmtiles" */
     private static getSourceFileName(fileName: string): string {
         const plusIndex = fileName.indexOf("+");
-        if (plusIndex >= 0) {
-            return fileName.substring(0, plusIndex);
-        }
-        return OfflineFilesDownloadService.removeExtension(fileName).replace(/-\d+$/, "");
+        return plusIndex < 0 ? OfflineFilesDownloadService.removeExtension(fileName) : fileName.substring(0, plusIndex);
     }
 
     /** The id of the area an offline file is of, taken from its name, "name+id.pmtiles", null for a file that is of none */
-    private static getKey(fileName: string): string | null {
+    private static getAreaId(fileName: string): string | null {
         const plusIndex = fileName.indexOf("+");
         return plusIndex < 0 ? null : OfflineFilesDownloadService.removeExtension(fileName.substring(plusIndex + 1));
-    }
-
-    /**
-     * The name a file is kept under on the device, "name+id.ext" after the id of the area it is of, where a root
-     * file is of the root files, see OfflineAreasService.ROOT_KEY, and a file that is of no area keeps its name.
-     */
-    private static getLocalFileName(serverFileName: string, key: string): string {
-        const plusIndex = serverFileName.indexOf("+");
-        if (plusIndex >= 0) {
-            return `${serverFileName.substring(0, plusIndex)}+${key}${serverFileName.substring(serverFileName.lastIndexOf("."))}`;
-        }
-        return serverFileName.replace(OfflineFilesDownloadService.ROOT_FILE_NAME_REGEX, `$1+${OfflineAreasService.ROOT_KEY}$3`);
     }
 
     private static removeExtension(fileName: string): string {
@@ -287,8 +261,7 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Downloads everything an area needs, where a tile is an area as well, see OfflineAreasService.createTileArea.
-     * A download that is still going on when this is called is aborted first, so that the one the user asked for
+     * Downloads everything an area needs. A download that is still going on when this is called is aborted first, so that the one the user asked for
      * last is the only one that goes on.
      * A download that failed is logged with what it failed on rather than with a status code alone: a
      * request that got no answer is the connection and not the server, which is how a download of hundreds
@@ -299,15 +272,14 @@ export class OfflineFilesDownloadService {
         this.abortCurrentDownload();
         const currentDownload: CurrentDownload = { area, progress: 0, abortController: new AbortController() };
         this.currentDownload.set(currentDownload);
-        const key = area.properties.id;
-        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${key}`);
+        const id = area.properties.id;
+        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${id}`);
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
             await this.writeStylesToDevice(styles);
-            await this.deleteFilesOfUnusedSources(key);
-            // What is asked of the server is decided by the state, so it is read again now that files were deleted
-            await this.updateDownloadedAreasFromDevice();
-            const fileNames = await this.getFilesToDownload(area);
+            await this.deleteFilesOfUnusedSources(id);
+            const downloadedAreas = await this.updateDownloadedAreasFromDevice();
+            const fileNames = await this.getFilesToDownload(area, downloadedAreas[id]?.files);
             if (fileNames.length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
@@ -319,14 +291,13 @@ export class OfflineFilesDownloadService {
             }
 
             await this.moveDownloadedFilesToDataDirectory(currentDownload, fileNames);
-            await this.keepNewArea(area);
-            await this.keepFilesWithoutAnAreaAsAreas();
-            for (const tileKey of this.getOverlappedTileKeys(area)) {
-                await this.deleteArea(tileKey);
+            await this.saveAreaMetadataIfNew(area, fileNames, downloadedAreas);
+            await this.saveRootAreaMetadataIfDownloaded(fileNames);
+            for (const tileId of this.getOverlappedTileIds(area)) {
+                await this.deleteArea(tileId);
             }
-            // The files that were just moved in are what the app has now, with the versions of the new ones
-            await this.updateDownloadedAreasFromDevice();
-            await this.updateVersionsOfDownloadedFiles();
+            const updatedAreas = await this.updateDownloadedAreasFromDevice();
+            await this.updateVersionsOfDownloadedFiles(updatedAreas);
             return "downloaded";
         } catch (ex) {
             if (currentDownload.abortController.signal.aborted) {
@@ -340,7 +311,7 @@ export class OfflineFilesDownloadService {
                 : typeAndMessage.statusCode != null
                     ? `the server answering with ${typeAndMessage.statusCode}`
                     : "a request that got no answer, i.e. the connection and not the server";
-            this.loggingService.error(`[Offline Download] The download of ${key} failed due to ${reason}: ${typeAndMessage.message}`);
+            this.loggingService.error(`[Offline Download] The download of ${id} failed due to ${reason}: ${typeAndMessage.message}`);
             return "error";
         } finally {
             // A download that was aborted might only get here after the next one started, and it is not its to clear
@@ -358,17 +329,17 @@ export class OfflineFilesDownloadService {
      * on its own once every other file is done.
      * A file that is already whole in the cache is not downloaded again.
      */
-    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: FileToDownload[]): Promise<void> {
+    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
         const { area, abortController } = currentDownload;
-        const key = area.properties.id;
-        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${key}`);
+        const id = area.properties.id;
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${id}`);
         const length = fileNames.length;
         const progressPerFile: Record<number, number> = {};
         const alreadyDownloaded = await this.fileService.listFilesInOfflineCache();
         const fileDownloadPromises: Promise<void>[] = [];
         const limit = pLimit(3);
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-            const { fileName, serverFileName } = fileNames[fileNameIndex];
+            const fileName = fileNames[fileNameIndex];
             if (abortController.signal.aborted) {
                 this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
                 return;
@@ -379,30 +350,41 @@ export class OfflineFilesDownloadService {
                 continue;
             }
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-            const fileDownloadUrl = OfflineFilesDownloadService.getFileUrl(area, serverFileName);
+            const fileDownloadUrl = `${Urls.offlineArea}/${id}/${fileName}`;
             fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
                 value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
         }
         await Promise.all(fileDownloadPromises);
-        this.loggingService.info(`[Offline Download] Finished downloading offline files of ${key}`);
-    }
-
-    /** Where the server serves a file of an area from, see FilesController, a root file is of no area and is served by its name */
-    private static getFileUrl(area: Immutable<OfflineArea>, serverFileName: string): string {
-        return serverFileName.includes("+")
-            ? `${Urls.offlineArea}/${area.properties.id}/${serverFileName}`
-            : `${Urls.offlineFiles}/${serverFileName}`;
+        this.loggingService.info(`[Offline Download] Finished downloading offline files of ${id}`);
     }
 
     /**
-     * Keeps an area that was downloaded for the first time on the device, after its files are, with the zooms they
-     * hold. An area that was downloaded before is kept as it was, with the name the user gave it and the polygon
-     * it was downloaded with.
+     * Saves an area that was downloaded for the first time, with the zooms its files hold. An area that was downloaded
+     * before is not saved again, so it keeps the name the user gave it and the polygon it was downloaded with.
      */
-    private async keepNewArea(area: Immutable<OfflineArea>): Promise<void> {
-        if (this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[area.properties.id]?.area == null) {
-            await this.offlineAreasService.saveDownloadedArea({ ...area, properties: { ...area.properties, minZoom: AREA_MIN_ZOOM } });
+    private async saveAreaMetadataIfNew(area: Immutable<OfflineArea>, fileNames: string[], downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<void> {
+        if (downloadedAreas[area.properties.id]?.area == null) {
+            await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(area, await this.getZooms(area.properties.id, fileNames)));
         }
+    }
+
+    /** Saves the root area with the zooms its files hold, when the root files were downloaded and may hold other zooms than before */
+    private async saveRootAreaMetadataIfDownloaded(fileNames: string[]): Promise<void> {
+        if (fileNames.some(fileName => OfflineFilesDownloadService.getAreaId(fileName) === OfflineAreasService.ROOT_ID)) {
+            const zooms = await this.getZooms(OfflineAreasService.ROOT_ID, fileNames);
+            await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(OfflineAreasService.createRootArea(), zooms));
+        }
+    }
+
+    /**
+     * The zooms the map files of an area hold together, from the lowest zoom any of them starts at to the highest any
+     * of them ends at, as their headers have them.
+     */
+    private async getZooms(id: string, fileNames: string[]): Promise<{ minZoom: number, maxZoom: number }> {
+        const zooms = await Promise.all(fileNames
+            .filter(fileName => OfflineFilesDownloadService.getAreaId(fileName) === id && fileName.endsWith(".pmtiles"))
+            .map(fileName => this.pmtilesService.getZooms(fileName)));
+        return { minZoom: Math.min(...zooms.map(z => z.minZoom)), maxZoom: Math.max(...zooms.map(z => z.maxZoom)) };
     }
 
     /**
@@ -416,19 +398,19 @@ export class OfflineFilesDownloadService {
      * A file the routing engine did not take is deleted, since it is of no use to the app and nothing else
      * would ever clean it up - it is not one of the files the device is read for.
      */
-    private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: FileToDownload[]): Promise<void> {
-        const key = currentDownload.area.properties.id;
-        for (const { fileName } of fileNames) {
+    private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
+        const id = currentDownload.area.properties.id;
+        for (const fileName of fileNames) {
             await this.fileService.moveFileFromCacheToDataDirectory(fileName);
         }
-        for (const { fileName } of fileNames) {
+        for (const fileName of fileNames) {
             const isRoutingTilesFile = RoutingProvider.isRoutingTilesFile(fileName);
             if (!isRoutingTilesFile && !RoutingProvider.isRoutingProfilesFile(fileName)) {
                 continue;
             }
             try {
                 if (isRoutingTilesFile) {
-                    await this.routingProvider.extractOfflineRoutingTiles(fileName, key);
+                    await this.routingProvider.extractOfflineRoutingTiles(fileName, id);
                 } else {
                     await this.routingProvider.storeRoutingProfiles(await this.fileService.readFileInDataDirectory(fileName));
                     await this.fileService.deleteFileInDataDirectory(fileName);
@@ -438,7 +420,7 @@ export class OfflineFilesDownloadService {
                 await this.fileService.deleteFileInDataDirectory(fileName);
             }
         }
-        this.loggingService.info(`[Offline Download] Moved ${fileNames.length} files of ${key} to the data directory`);
+        this.loggingService.info(`[Offline Download] Moved ${fileNames.length} files of ${id} to the data directory`);
     }
 
     /**
@@ -469,21 +451,19 @@ export class OfflineFilesDownloadService {
      * The order the server lists them in is kept as it is: it lists the files that take it longest first,
      * and they are downloaded in the order they are listed in, see downloadOfflineFilesProgressAction.
      */
-    private async getFilesToDownload(area: Immutable<OfflineArea>): Promise<FileToDownload[]> {
-        const key = area.properties.id;
-        const downloadedFiles = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[key]?.files;
-        const isCompatible = downloadedFiles != null && this.getTileCompatibility(key, downloadedFiles) === "compatible";
+    private async getFilesToDownload(area: Immutable<OfflineArea>, downloadedFiles: Immutable<FileNameDateVersion[]> | undefined): Promise<string[]> {
+        const id = area.properties.id;
+        const isCompatible = downloadedFiles != null && this.getAreaCompatibility(id, downloadedFiles) === "compatible";
         if (downloadedFiles != null && !isCompatible) {
-            this.loggingService.info(`[Offline Download] Asking for every file of ${key}, what it holds can not be used`);
+            this.loggingService.info(`[Offline Download] Asking for every file of ${id}, what it holds can not be used`);
         }
         const lastModifiedString = isCompatible ? this.getLastModifiedDate(downloadedFiles)?.toISOString() : undefined;
         const params: Record<string, string> = lastModifiedString ? { lastModified: lastModifiedString } : {};
-        const request = this.httpClient.get<Record<string, string>>(`${Urls.offlineArea}/${key}`, { params });
+        const request = this.httpClient.get<Record<string, string>>(`${Urls.offlineArea}/${id}`, { params });
         const fileNames = await firstValueFrom(request.pipe(timeout(5000)));
-        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded for ${key}, ` +
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded for ${id}, ` +
             `${lastModifiedString == null ? "all of them" : `the ones that changed since ${lastModifiedString}`}`);
-        return Object.keys(fileNames).map(serverFileName =>
-            ({ fileName: OfflineFilesDownloadService.getLocalFileName(serverFileName, key), serverFileName }));
+        return Object.keys(fileNames);
     }
 
     public abortCurrentDownload(): void {
@@ -503,127 +483,100 @@ export class OfflineFilesDownloadService {
      * what the device holds has to be read again either way, and leaving the state as it was would keep an area
      * that is no longer there.
      */
-    public async deleteArea(key: string): Promise<void> {
-        this.loggingService.info(`[Offline Download] Deleting ${key}`);
-        for (const { fileName } of this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[key]?.files ?? []) {
+    public async deleteArea(id: string): Promise<Immutable<Record<string, DownloadedArea>>> {
+        this.loggingService.info(`[Offline Download] Deleting ${id}`);
+        for (const { fileName } of this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[id]?.files ?? []) {
             this.loggingService.info(`[Offline Download] Deleting file ${fileName}`);
             await this.fileService.deleteFileInDataDirectory(fileName);
             this.pmtilesService.invalidateFile(fileName);
         }
         try {
-            await this.routingProvider.deleteOfflineRoutingTiles(key);
+            await this.routingProvider.deleteOfflineRoutingTiles(id);
         } catch (ex) {
-            this.loggingService.warning(`[Offline Download] Failed to remove the routing tiles of ${key}: ${(ex as Error).message}`);
+            this.loggingService.warning(`[Offline Download] Failed to remove the routing tiles of ${id}: ${(ex as Error).message}`);
         }
-        await this.offlineAreasService.deleteDownloadedArea(key);
-        await this.updateDownloadedAreasFromDevice();
-        if (!OfflineAreasService.isRootKey(key)) {
-            await this.deleteUnusedRootFiles();
+        await this.offlineAreasService.deleteAreaMetadata(id);
+        const downloadedAreas = await this.updateDownloadedAreasFromDevice();
+        return OfflineAreasService.isRootId(id) ? downloadedAreas : await this.deleteUnusedRootFiles(downloadedAreas);
+    }
+
+    /** Deletes the root files once no area uses them, returns what the device holds afterwards */
+    private async deleteUnusedRootFiles(downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<Immutable<Record<string, DownloadedArea>>> {
+        const ids = Object.keys(downloadedAreas);
+        if (ids.includes(OfflineAreasService.ROOT_ID) && ids.every(id => OfflineAreasService.isRootId(id))) {
+            return await this.deleteArea(OfflineAreasService.ROOT_ID);
         }
+        return downloadedAreas;
     }
 
     /**
-     * Deletes the root files once no area uses them, and the zoom 6 root files once no tile that came before areas
-     * does, see OfflineAreasService.LEGACY_ROOT_KEY.
-     */
-    private async deleteUnusedRootFiles(): Promise<void> {
-        const keys = Object.keys(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas));
-        if (keys.includes(OfflineAreasService.LEGACY_ROOT_KEY) && !keys.some(key => OfflineAreasService.fromTileKey(key) != null)) {
-            await this.deleteArea(OfflineAreasService.LEGACY_ROOT_KEY);
-        }
-        if (keys.includes(OfflineAreasService.ROOT_KEY) && keys.every(key => OfflineAreasService.isRootKey(key))) {
-            await this.deleteArea(OfflineAreasService.ROOT_KEY);
-        }
-    }
-
-    /**
-     * Moves the files that were kept before areas existed to the name the files of an area are kept under: the files
-     * of a tile, "name+7-x-y.pmtiles", to "name+x-y.pmtiles", and the root files, "name-6.pmtiles", to
-     * "name+legacy-root.pmtiles", see OfflineAreasService.LEGACY_ROOT_KEY. It is done every time the app starts, so that
-     * a start that was cut short in the middle of it finishes it the next time.
-     * Failing is logged and leaves the files as they are.
+     * Moves the files of old tiles, "name+7-x-y.pmtiles", to "name+x-y.pmtiles", and the old root files, "name-6.pmtiles",
+     * to "name+root.pmtiles", the names areas are kept under, and saves the metadata of the tile or of the root files
+     * along with the first of their map files, with the zooms it holds.
+     * Failing is logged and leaves the files that were not moved yet as they are, to be moved the next time the app starts.
      */
     private async migrateToAreas(): Promise<void> {
         try {
+            const savedIds = new Set<string>();
             for (const { fileName } of await this.fileService.listOfflineFilesInDataDirectory()) {
                 const tileMatch = fileName.match(OfflineFilesDownloadService.TILE_FILE_NAME_REGEX);
-                const rootMatch = fileName.match(OfflineFilesDownloadService.ROOT_FILE_NAME_REGEX);
-                if (tileMatch != null) {
-                    await this.fileService.renameFileInDataDirectory(fileName, `${tileMatch[1]}+${tileMatch[2]}${tileMatch[3]}`);
+                const rootMatch = fileName.match(OfflineFilesDownloadService.LEGACY_ROOT_FILE_NAME_REGEX);
+                const tile = tileMatch == null ? null : OfflineAreasService.fromTileId(tileMatch[2]);
+                let newFileName: string;
+                let area: OfflineArea;
+                if (tile != null) {
+                    newFileName = `${tileMatch[1]}+${tileMatch[2]}${tileMatch[3]}`;
+                    area = OfflineAreasService.createTileArea(tile.tileX, tile.tileY);
                 } else if (rootMatch != null) {
-                    const key = +rootMatch[2] === TILES_ZOOM - 1 ? OfflineAreasService.LEGACY_ROOT_KEY : OfflineAreasService.ROOT_KEY;
-                    await this.fileService.renameFileInDataDirectory(fileName, `${rootMatch[1]}+${key}${rootMatch[3]}`);
+                    newFileName = `${rootMatch[1]}+${OfflineAreasService.ROOT_ID}${rootMatch[2]}`;
+                    area = OfflineAreasService.createRootArea();
+                } else {
+                    continue;
+                }
+                await this.fileService.renameFileInDataDirectory(fileName, newFileName);
+                const id = area.properties.id;
+                if (!savedIds.has(id) && newFileName.endsWith(".pmtiles")) {
+                    savedIds.add(id);
+                    this.loggingService.info(`[Offline Download] Keeping ${id} as an area`);
+                    await this.offlineAreasService.saveAreaMetadata(OfflineAreasService.withZooms(area, await this.pmtilesService.getZooms(newFileName)));
                 }
             }
         } catch (ex) {
-            this.loggingService.warning(`[Offline Download] Failed to rename the files that were kept before areas: ${(ex as Error).message}`);
+            this.loggingService.warning(`[Offline Download] Failed to move the files that were kept before areas: ${(ex as Error).message}`);
         }
-        await this.keepFilesWithoutAnAreaAsAreas();
     }
 
     /**
-     * Keeps the files of a tile or the root files that are not kept as an area yet as one, with the zooms they hold,
-     * so that they are read like any other area. A tile is kept without a name.
-     * Failing is logged, an area that is kept already must never be kept again on top of the name the user gave it.
-     */
-    private async keepFilesWithoutAnAreaAsAreas(): Promise<void> {
-        try {
-            const areas = await this.offlineAreasService.loadDownloadedAreas();
-            const keys = new Set((await this.fileService.listOfflineFilesInDataDirectory()).map(f => OfflineFilesDownloadService.getKey(f.fileName)));
-            for (const key of keys) {
-                const area = key == null || areas[key] != null ? null : OfflineFilesDownloadService.createAreaOfKey(key);
-                if (area != null) {
-                    this.loggingService.info(`[Offline Download] Keeping ${key} as an area`);
-                    await this.offlineAreasService.saveDownloadedArea(area);
-                }
-            }
-        } catch (ex) {
-            this.loggingService.warning(`[Offline Download] Failed to keep the tiles and the root files as areas: ${(ex as Error).message}`);
-        }
-    }
-
-    /** The area of a tile or of the root files, null for an area the server offers, which is kept when it is downloaded */
-    private static createAreaOfKey(key: string): OfflineArea | null {
-        if (key === OfflineAreasService.ROOT_KEY) {
-            return OfflineAreasService.createRootArea(key, ROOT_ZOOM);
-        }
-        if (key === OfflineAreasService.LEGACY_ROOT_KEY) {
-            return OfflineAreasService.createRootArea(key, TILES_ZOOM - 1);
-        }
-        const tile = OfflineAreasService.fromTileKey(key);
-        return tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY);
-    }
-
-    /**
-     * Reads what was downloaded into the state, which is the only place it is listed - there's nothing
+     * Reads what was downloaded into the state and returns it. The state is the only place it is listed - there's nothing
      * stored that can go out of sync with the device. The map files are grouped by the area they are of, the
      * date of a file is the time it was written, which is when it was downloaded, and its version is only read
      * when it is needed, see updateVersionsOfDownloadedFiles. The areas are read from the files they are kept in
      * and the routing tiles from the routing plugin, which is what keeps them.
      * Failing to read the files is logged and otherwise ignored, leaving the state as it was.
      */
-    public async updateDownloadedAreasFromDevice(): Promise<void> {
+    public async updateDownloadedAreasFromDevice(): Promise<Immutable<Record<string, DownloadedArea>>> {
         const areaIdsWithRoutingTiles = await this.routingProvider.getAreasWithRoutingTiles();
         let offlineFiles: DataDirectoryFile[];
         let areas: Record<string, OfflineArea>;
         try {
             offlineFiles = await this.fileService.listOfflineFilesInDataDirectory();
-            areas = await this.offlineAreasService.loadDownloadedAreas();
+            areas = await this.offlineAreasService.loadAreasMetadata();
         } catch (ex) {
             this.loggingService.warning(`[Offline Download] Failed to read the files on the device: ${(ex as Error).message}`);
-            return;
+            return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         }
         const downloadedAreas: Record<string, DownloadedArea> = {};
         for (const file of offlineFiles) {
-            const key = OfflineFilesDownloadService.getKey(file.fileName);
-            if (key == null) {
+            const id = OfflineFilesDownloadService.getAreaId(file.fileName);
+            if (id == null) {
                 continue;
             }
-            downloadedAreas[key] ??= { area: areas[key] ?? null, files: [], hasRoutingTiles: areaIdsWithRoutingTiles.includes(key) };
-            downloadedAreas[key].files.push({ fileName: file.fileName, date: file.modifiedDate.toISOString() });
+            downloadedAreas[id] ??= { area: areas[id] ?? null, files: [], hasRoutingTiles: areaIdsWithRoutingTiles.includes(id) };
+            downloadedAreas[id].files.push({ fileName: file.fileName, date: file.modifiedDate.toISOString() });
         }
         this.logDownloadedAreas(downloadedAreas, offlineFiles);
         this.store.dispatch(new SetDownloadedAreasAction(downloadedAreas));
+        return downloadedAreas;
     }
 
     /**
@@ -641,7 +594,7 @@ export class OfflineFilesDownloadService {
             `downloaded between ${new Date(Math.min(...downloadDates)).toISOString()} and ` +
             `${new Date(Math.max(...downloadDates)).toISOString()}`);
         this.loggingService.info(`[Offline Download] The areas are: ${Object.entries(downloadedAreas)
-            .map(([key, { files, hasRoutingTiles }]) => `${key} ` +
+            .map(([id, { files, hasRoutingTiles }]) => `${id} ` +
                 `(${files.length} file${files.length === 1 ? "" : "s"}` +
                 `${hasRoutingTiles ? ", with routing tiles" : ""})`).join(", ")}`);
     }
@@ -655,14 +608,14 @@ export class OfflineFilesDownloadService {
     /**
      * Reads the versions of the downloaded files, which means opening every one of them, and only of the
      * files the styles require a version from - the version of any other file is never compared to anything.
+     * Returns the given areas with the versions of their files, which are kept in the state as well.
      */
-    private async updateVersionsOfDownloadedFiles(): Promise<void> {
-        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+    private async updateVersionsOfDownloadedFiles(downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<Immutable<Record<string, DownloadedArea>>> {
         if (Object.keys(this.onlineStyleRequirements.minVersionPerFile).length === 0) {
-            return;
+            return downloadedAreas;
         }
         const areasWithVersions: Record<string, Immutable<DownloadedArea>> = {};
-        for (const [key, downloadedArea] of Object.entries(downloadedAreas)) {
+        for (const [id, downloadedArea] of Object.entries(downloadedAreas)) {
             const files: Immutable<FileNameDateVersion>[] = [];
             for (const file of downloadedArea.files) {
                 const sourceFileName = OfflineFilesDownloadService.getSourceFileName(file.fileName).toLowerCase();
@@ -672,9 +625,10 @@ export class OfflineFilesDownloadService {
                 }
                 files.push({ ...file, version: await this.getVersion(file.fileName) });
             }
-            areasWithVersions[key] = { ...downloadedArea, files };
+            areasWithVersions[id] = { ...downloadedArea, files };
         }
         this.store.dispatch(new SetDownloadedAreasAction(areasWithVersions as Record<string, DownloadedArea>));
+        return areasWithVersions;
     }
 
     /** The version of a file, undefined when it has none or when the file can not be read */
@@ -699,7 +653,7 @@ export class OfflineFilesDownloadService {
      * Only the offline map files are deleted, the styles and any other file that is stored in the same
      * directory are not this service's.
      */
-    private async deleteFilesOfUnusedSources(tileKey: string): Promise<void> {
+    private async deleteFilesOfUnusedSources(id: string): Promise<void> {
         if (this.onlineStyleRequirements.sourceFileNames.length === 0) {
             this.loggingService.warning("[Offline Download] The styles have no sources, keeping all the files");
             return;
@@ -708,8 +662,8 @@ export class OfflineFilesDownloadService {
         const files = await this.fileService.listOfflineFilesInDataDirectory();
         const unusedFiles = files.filter(f => !usedSourceFileNames.includes(OfflineFilesDownloadService.getSourceFileName(f.fileName).toLowerCase()));
         for (const { fileName } of unusedFiles) {
-            const fileTileKey = OfflineFilesDownloadService.getKey(fileName);
-            if (fileTileKey !== tileKey && (fileTileKey == null || !OfflineAreasService.isRootKey(fileTileKey))) {
+            const fileId = OfflineFilesDownloadService.getAreaId(fileName);
+            if (fileId !== id && (fileId == null || !OfflineAreasService.isRootId(fileId))) {
                 continue;
             }
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase();
@@ -719,21 +673,15 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    /**
-     * The tiles that were downloaded before areas existed and that an area overlaps. They can no longer be
-     * updated, so downloading the area replaces them and they are deleted once it is downloaded.
-     */
-    public getOverlappedTileKeys(area: Immutable<OfflineArea>): string[] {
-        return Object.keys(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
-            .filter(key => key !== area.properties.id)
-            .map(key => OfflineAreasService.fromTileKey(key))
-            .filter(tile => tile != null)
-            .map(tile => OfflineAreasService.createTileArea(tile.tileX, tile.tileY))
-            .filter(tileArea => SpatialHelper.intersects(tileArea, area as OfflineArea))
-            .map(tileArea => tileArea.properties.id);
+    /** The old tiles an area overlaps, which the area replaces, so they are deleted once it is downloaded */
+    public getOverlappedTileIds(area: Immutable<OfflineArea>): string[] {
+        return Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
+            .filter(([id, { area: tileArea }]) => id !== area.properties.id && OfflineAreasService.fromTileId(id) != null &&
+                tileArea != null && SpatialHelper.intersects(tileArea, area))
+            .map(([id]) => id);
     }
 
-    /** The time the newest file of a tile was downloaded at, which is when the tile was last updated */
+    /** The time the newest file of an area was downloaded at, which is when the area was last updated */
     public getLastModifiedDate(files: Immutable<FileNameDateVersion[]>) {
         if (!files?.length) {
             return null;
@@ -748,44 +696,42 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * How usable the files of a tile still are: they are "outdated" when only the style that was just
+     * How usable the files of an area still are: they are "outdated" when only the style that was just
      * downloaded asks for more than they hold, which leaves the map drawn as it always was until they
      * are downloaded again, and "unusable" when the styles that are already on the device ask for more,
      * which is what makes the map itself come out wrong.
      */
-    public getTileCompatibility(tileKey: string, files: Immutable<FileNameDateVersion[]>): TileCompatibility {
-        if (!this.meetsRequirements(tileKey, files, this.offlineStyleRequirements)) {
+    public getAreaCompatibility(id: string, files: Immutable<FileNameDateVersion[]>): AreaCompatibility {
+        if (!this.meetsRequirements(id, files, this.offlineStyleRequirements)) {
             return "unusable";
         }
-        if (!this.meetsRequirements(tileKey, files, this.onlineStyleRequirements) || !this.hasRoutingTiles(tileKey)) {
+        if (!this.meetsRequirements(id, files, this.onlineStyleRequirements) || !this.hasRoutingTiles(id)) {
             return "outdated";
         }
         return "compatible";
     }
 
     /**
-     * Whether the routing tiles of a tile are on the device. A tile that was downloaded before offline
-     * routing existed has none and has to be downloaded again to get them, but the map itself is still
-     * drawn from the files it does have, so such a tile is only out of date and not unusable.
-     * The root files are not of a specific area, so they have no routing tiles of their own.
+     * Whether the routing tiles of an area are on the device. An area without them is only out of date and not
+     * unusable, since its map is still drawn from the files it has. The root files have no routing tiles of their own.
      */
-    private hasRoutingTiles(tileKey: string): boolean {
-        if (OfflineAreasService.isRootKey(tileKey)) {
+    private hasRoutingTiles(id: string): boolean {
+        if (OfflineAreasService.isRootId(id)) {
             return true;
         }
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[tileKey]?.hasRoutingTiles === true;
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[id]?.hasRoutingTiles === true;
     }
 
     /**
-     * The names of the source files a tile is expected to hold. The server decides which source has files
-     * of its own per tile and which only has root files - the elevation source, for example, has no root
+     * The names of the source files an area is expected to hold. The server decides which source has files
+     * of its own per area and which only has root files - the elevation source, for example, has no root
      * file - so rather than assume, this takes the sources the styles use and keeps the ones that are
-     * actually downloaded for tiles of the same kind, root or not, as any other tile on the device shows.
+     * actually downloaded for areas of the same kind, root or not, as any other area on the device shows.
      */
-    private getExpectedSourceFileNames(tileKey: string, requirements: StyleRequirements): string[] {
+    private getExpectedSourceFileNames(id: string, requirements: StyleRequirements): string[] {
         const downloadedSourceFileNames = new Set<string>();
-        for (const [otherTileKey, { files: otherFiles }] of Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))) {
-            if (OfflineAreasService.isRootKey(otherTileKey) !== OfflineAreasService.isRootKey(tileKey)) {
+        for (const [otherAreaId, { files: otherFiles }] of Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))) {
+            if (OfflineAreasService.isRootId(otherAreaId) !== OfflineAreasService.isRootId(id)) {
                 continue;
             }
             for (const { fileName } of otherFiles) {
@@ -796,24 +742,24 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Whether the files of a tile are still the ones a style can be drawn with: it has a file of every
+     * Whether the files of an area are still the ones a style can be drawn with: it has a file of every
      * source the style uses, none of a source it no longer uses, and they are all new enough for it.
      * A source that was renamed shows up as both - the file of the old name is of no source of the style
-     * and the new name has no file at all - and either way the tile can not be drawn and has to be
-     * downloaded again. A file the style requires a version from but that has none is treated as too old,
-     * either it was downloaded before the versions existed or it can not be read.
+     * and the new name has no file at all - and either way the area can not be drawn and has to be
+     * downloaded again. A file the style requires a version from but that has none, or that can not be read,
+     * is treated as too old.
      */
-    private meetsRequirements(tileKey: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): boolean {
-        return this.getUnmetRequirement(tileKey, files, requirements) == null;
+    private meetsRequirements(id: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): boolean {
+        return this.getUnmetRequirement(id, files, requirements) == null;
     }
 
     /**
-     * What keeps the files of a tile from being drawn with a style, in words, or null when nothing does.
-     * It says it rather than writes it to the log, since this is asked for every tile that is drawn on the
+     * What keeps the files of an area from being drawn with a style, in words, or null when nothing does.
+     * It says it rather than writes it to the log, since this is asked for every area that is drawn on the
      * offline management screen every time anything on it changes - only the reasons that are worth
      * telling about are written, see initialize.
      */
-    private getUnmetRequirement(tileKey: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): string | null {
+    private getUnmetRequirement(id: string, files: Immutable<FileNameDateVersion[]>, requirements: StyleRequirements): string | null {
         if (requirements.sourceFileNames.length === 0) {
             return null; // Nothing was read from the styles, so there is nothing to hold the files against
         }
@@ -825,7 +771,7 @@ export class OfflineFilesDownloadService {
                 return `${sourceFileName} is not a source of the style`;
             }
         }
-        for (const sourceFileName of this.getExpectedSourceFileNames(tileKey, requirements)) {
+        for (const sourceFileName of this.getExpectedSourceFileNames(id, requirements)) {
             if (!sourceFileNamesOfTile.has(sourceFileName)) {
                 return `there is no file of ${sourceFileName}, which the style uses`;
             }

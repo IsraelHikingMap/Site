@@ -344,12 +344,12 @@ export class SpatialHelper {
         };
     }
 
-    public static getBoundsForFeatureCollection(featureCollection: GeoJSON.FeatureCollection): Bounds {
-        return SpatialHelper.bboxToBounds(bbox(featureCollection));
+    public static getBoundsForFeatureCollection(featureCollection: Immutable<GeoJSON.FeatureCollection>): Bounds {
+        return SpatialHelper.bboxToBounds(bbox(featureCollection as GeoJSON.FeatureCollection));
     }
 
-    public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>): Bounds {
-        return SpatialHelper.getBoundsForFeatureCollection(featureCollection([feature]));
+    public static getBoundsForFeature(feature: Immutable<GeoJSON.Feature<GeoJSON.Geometry>>): Bounds {
+        return SpatialHelper.getBoundsForFeatureCollection(featureCollection([feature as GeoJSON.Feature]));
     }
 
     private static bboxToBounds(boundingBox: number[]): Bounds {
@@ -414,25 +414,25 @@ export class SpatialHelper {
         return { type: "Polygon", coordinates: [corners] };
     }
 
-    public static isPointInPolygon(position: GeoJSON.Position, polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>): boolean {
-        return booleanPointInPolygon(position, polygon);
+    public static isPointInPolygon(position: GeoJSON.Position, polygon: Immutable<GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>>): boolean {
+        return booleanPointInPolygon(position, polygon as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>);
     }
 
-    public static intersects(geometry: GeoJSON.Feature | GeoJSON.Geometry, otherGeometry: GeoJSON.Feature | GeoJSON.Geometry): boolean {
-        return booleanIntersects(geometry, otherGeometry);
+    public static intersects(geometry: Immutable<GeoJSON.Feature | GeoJSON.Geometry>, otherGeometry: Immutable<GeoJSON.Feature | GeoJSON.Geometry>): boolean {
+        return booleanIntersects(geometry as GeoJSON.Feature | GeoJSON.Geometry, otherGeometry as GeoJSON.Feature | GeoJSON.Geometry);
     }
 
     /** The part of a polygon west of a line that is the given part of the way across its bounds */
-    public static clipFromWest(polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>, part: number): GeoJSON.Feature {
-        const [minLng, minLat, maxLng, maxLat] = bbox(polygon);
-        return bboxClip(polygon, [minLng, minLat, minLng + (maxLng - minLng) * part, maxLat]);
+    public static clipFromWest(polygon: Immutable<GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>>, part: number): GeoJSON.Feature {
+        const [minLng, minLat, maxLng, maxLat] = bbox(polygon as GeoJSON.Feature);
+        return bboxClip(polygon as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>, [minLng, minLat, minLng + (maxLng - minLng) * part, maxLat]);
     }
 
     /**
      * Where a polygon is best labeled: the point furthest inside the largest of its parts, since the middle of its bounds
      * can be outside it, in a neighbour, like the middle of Croatia is in Bosnia. The precision is in degrees.
      */
-    public static getLabelPosition(geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon, precision: number): GeoJSON.Position {
+    public static getLabelPosition(geometry: Immutable<GeoJSON.Polygon | GeoJSON.MultiPolygon>, precision: number): GeoJSON.Position {
         const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
         const best = polygons
             .map(polygon => polylabel(polygon as [number, number][][], precision))
@@ -441,8 +441,8 @@ export class SpatialHelper {
     }
 
     /** How large a feature is by its bounds, in square degrees, which is enough to tell a smaller one from a larger one */
-    public static getBoundsArea(feature: GeoJSON.Feature): number {
-        const [minLng, minLat, maxLng, maxLat] = bbox(feature);
+    public static getBoundsArea(feature: Immutable<GeoJSON.Feature>): number {
+        const [minLng, minLat, maxLng, maxLat] = bbox(feature as GeoJSON.Feature);
         return (maxLng - minLng) * (maxLat - minLat);
     }
 

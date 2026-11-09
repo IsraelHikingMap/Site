@@ -35,6 +35,11 @@ public class OfflineFilesService : IOfflineFilesService
     private const int TILES_ROOT_ZOOM = SLICE_TILE_ZOOM - 1;
 
     /// <summary>
+    /// The id the root files that are listed along with an area are named by, the one the client keeps them under.
+    /// </summary>
+    private const string ROOT_KEY = "root";
+
+    /// <summary>
     /// The zoom level the files of an area start at, where the root files end.
     /// </summary>
     private const int AREA_MIN_ZOOM = ROOT_ZOOM + 1;
@@ -183,6 +188,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// <remarks>
     /// The routing tiles are listed first, as the largest and slowest file, then the files of the area and then the
     /// root files that come with every area. The global points have no root file, they hold nothing at its zooms.
+    /// Every file is named the way the client keeps it, so the root files are named by <see cref="ROOT_KEY"/>.
     /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate)
     {
@@ -200,7 +206,7 @@ public class OfflineFilesService : IOfflineFilesService
         }
         foreach (var name in sourceNames.Where(name => !IsDem(name) && name != GLOBAL_POINTS))
         {
-            AddIfUpdated(filesDictionary, $"{name}-{ROOT_ZOOM}.pmtiles", today, lastModifiedDate);
+            AddIfUpdated(filesDictionary, $"{name}+{ROOT_KEY}.pmtiles", today, lastModifiedDate);
         }
         AddIfUpdated(filesDictionary, VALHALLA_PROFILES_FILE_NAME, today, lastModifiedDate);
         return filesDictionary;
@@ -209,15 +215,20 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The polygon of the area is posted to the service that slices the file, since the larger ones are too long for a url.
+    /// The root files are the zoom <see cref="ROOT_ZOOM"/> files of the whole world, and the profiles are this server's own file.
     /// </remarks>
     public async Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName)
     {
-        var sourceName = FileNameToSourceName(fileName);
         var geometry = await GetAreaGeometry(areaId);
         if (geometry == null)
         {
             return null;
         }
+        if (fileName == VALHALLA_PROFILES_FILE_NAME)
+        {
+            return OpenLocalFile(_options.ValhallaProfilesFilePath);
+        }
+        var sourceName = FileNameToSourceName(fileName);
         if (sourceName == VALHALLA_FILE_NAME)
         {
             return await _remoteFileFetcherGateway.PostForFileStream($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry);
@@ -225,6 +236,10 @@ public class OfflineFilesService : IOfflineFilesService
         if (!(await GetSourceNames()).Contains(sourceName))
         {
             return null;
+        }
+        if (fileName == $"{sourceName}+{ROOT_KEY}.pmtiles")
+        {
+            return await _remoteFileFetcherGateway.GetFileStream($"{_options.OnTheFlyFilesAddress}{sourceName}-{ROOT_ZOOM}.pmtiles");
         }
         var address = IsDem(sourceName) ? _options.OnTheFlyDemAddress : _options.OnTheFlyFilesAddress;
         return await _remoteFileFetcherGateway.PostForFileStream($"{address}{sourceName}?minzoom={AREA_MIN_ZOOM}", geometry);
@@ -343,9 +358,9 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <summary>
-    /// Extracts the layer name from an offline file name, dropping the zoom/tile suffix.
-    /// Tile files look like "name+7-x-y.pmtiles" and root files look like "name-4.pmtiles",
-    /// where the layer name itself may contain '-'.
+    /// Extracts the layer name from an offline file name, dropping what follows it.
+    /// The files of an area look like "name+id.pmtiles", the tiles like "name+7-x-y.pmtiles" and their root
+    /// files like "name-6.pmtiles", where the layer name itself may contain '-'.
     /// </summary>
     private static string FileNameToSourceName(string fileName)
     {

@@ -178,7 +178,7 @@ public class FilesController : ControllerBase
     /// List outdated offline files of an area
     /// </summary>
     /// <remarks>The files of one of the areas of offline/areas, from zoom 5 up, along with the root files, which
-    /// hold the whole world up to zoom 4 and are named "name-4", and with its routing tiles. An area that is changed gets a new id, so an id that is no longer in
+    /// hold the whole world up to zoom 4 and are named "name+root", and with its routing tiles. An area that is changed gets a new id, so an id that is no longer in
     /// offline/areas can not be updated, and the client has the user delete it and download another area instead.
     /// Requires an entitled (subscribed) user.</remarks>
     /// <param name="areaId">The id of the area, as offline/areas has it</param>

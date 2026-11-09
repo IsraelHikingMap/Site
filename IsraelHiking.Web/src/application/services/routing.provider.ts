@@ -99,8 +99,7 @@ export class RoutingProvider {
 
     /**
      * Whether both points are in downloaded areas that have their routing tiles, looked up at a zoom only areas
-     * hold, so that the root files are not taken for one. An area that was downloaded before offline routing
-     * existed has none, so it needs to be downloaded again.
+     * hold, so that the root files are not taken for one.
      */
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);

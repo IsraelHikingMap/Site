@@ -13,12 +13,8 @@ import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, DownloadedArea, OfflineArea } from "../models";
 
-/** The zoom the map was split into tiles at, before areas */
+/** The zoom of the old tiles, whose keys are their x and y at it, see toTileId */
 export const TILES_ZOOM = 7;
-/** The zoom up to which the root files hold the whole world, every downloaded area holds the zooms above it */
-export const ROOT_ZOOM = 4;
-/** The zoom the files of an area start at, see the server's OfflineFilesService */
-export const AREA_MIN_ZOOM = ROOT_ZOOM + 1;
 
 /**
  * The areas that can be downloaded for offline usage and the ones that were. A downloaded area is kept on the
@@ -33,11 +29,8 @@ export class OfflineAreasService {
     /** How far inside its edges a tile is tested for overlapping an area, as a part of its size, see findDownloadedAreaIdOfTile */
     private static readonly TILE_INSET = 0.001;
 
-    /** The key of the root files, which hold the whole world up to ROOT_ZOOM and come with every area */
-    public static readonly ROOT_KEY = "root";
-
-    /** The key of the zoom 6 root files, which are only kept as long as a tile that came before areas is */
-    public static readonly LEGACY_ROOT_KEY = "legacy-root";
+    /** The key of the root files, which hold the whole world at the zooms below the areas and come with every area */
+    public static readonly ROOT_ID = "root";
 
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
@@ -48,15 +41,15 @@ export class OfflineAreasService {
     /** The areas that can be downloaded, none when they can not be fetched, offline for example */
     public async getAreas(): Promise<OfflineArea[]> {
         try {
-            const areas = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection>(Urls.offlineAreas));
-            return areas.features as OfflineArea[];
+            const areas = await firstValueFrom(this.httpClient.get<{ features: OfflineArea[] }>(Urls.offlineAreas));
+            return areas.features;
         } catch (ex) {
             this.loggingService.warning(`[Offline Areas] Failed to get the areas: ${(ex as Error).message}`);
             return [];
         }
     }
 
-    /** The name of an area in the language of the app, in English when it has none in it, none for a tile that was not named yet */
+    /** The name of an area in the language of the app, in English when it has none in it, none for an old tile the user did not name */
     public getName(area: Immutable<OfflineArea>): string | undefined {
         return area.properties[`name:${this.resources.getCurrentLanguageCodeSimplified()}`] ?? area.properties.name;
     }
@@ -74,7 +67,7 @@ export class OfflineAreasService {
     /**
      * The downloaded area whose files hold a tile, see findDownloadedAreaId. An area holds every tile its polygon touches,
      * so a tile along its border is read from it even when its center is outside. The tile is tested a little inside its
-     * edges, so that one that only touches an area, like the neighbour of a tile that came before areas, is not read from it.
+     * edges, so that one that only touches an area, like the neighbour of an old tile, is not read from it.
      */
     public static findDownloadedAreaIdOfTile(downloadedAreas: Immutable<Record<string, DownloadedArea>>, z: number, x: number, y: number): string | null {
         return OfflineAreasService.findDownloadedAreaId(downloadedAreas, SpatialHelper.getTilePolygon({ x, y }, z, OfflineAreasService.TILE_INSET), z);
@@ -87,7 +80,7 @@ export class OfflineAreasService {
     public static findDownloadedAreaId(downloadedAreas: Immutable<Record<string, DownloadedArea>>, geometry: GeoJSON.Point | GeoJSON.Polygon,
         zoom: number): string | null {
         const areas = Object.values(downloadedAreas)
-            .map(({ area }) => area as OfflineArea)
+            .map(({ area }) => area)
             .filter(area => area != null && (area.properties.minZoom ?? 0) <= zoom && zoom <= (area.properties.maxZoom ?? Infinity) &&
                 SpatialHelper.intersects(geometry, area))
             .sort((a, b) => SpatialHelper.getBoundsArea(a) - SpatialHelper.getBoundsArea(b));
@@ -95,32 +88,32 @@ export class OfflineAreasService {
     }
 
     /** Whether a key is of root files, which are of no area the user downloaded and are not listed */
-    public static isRootKey(key: string): boolean {
-        return key === OfflineAreasService.ROOT_KEY || key === OfflineAreasService.LEGACY_ROOT_KEY;
+    public static isRootId(key: string): boolean {
+        return key === OfflineAreasService.ROOT_ID;
     }
 
-    /** The key the files of a tile that was downloaded before areas are stored under */
-    public static toTileKey(tileX: number, tileY: number): string {
+    /** The key the files of an old tile are kept under */
+    public static toTileId(tileX: number, tileY: number): string {
         return `${tileX}-${tileY}`;
     }
 
     /**
-     * The tile a key was made of, null for the root keys and for the id of an area, which are not of a tile.
+     * The tile a key was made of, null for the root key and for the id of an area, which are not of a tile.
      */
-    public static fromTileKey(tileKey: string): { tileX: number, tileY: number } | null {
+    public static fromTileId(tileKey: string): { tileX: number, tileY: number } | null {
         const match = tileKey.match(/^(\d+)-(\d+)$/);
         return match == null ? null : { tileX: +match[1], tileY: +match[2] };
     }
 
     /**
-     * Reads the areas that are kept on the device. A file that can not be read is skipped, which leaves its files
+     * Reads the metadata of the areas that are kept on the device. A file that can not be read is skipped, which leaves its files
      * listed by the id of the area until they are downloaded again.
      */
-    public async loadDownloadedAreas(): Promise<Record<string, OfflineArea>> {
+    public async loadAreasMetadata(): Promise<Record<string, OfflineArea>> {
         const areas: Record<string, OfflineArea> = {};
         for (const fileName of await this.fileService.listFileNamesInDataDirectory(OfflineAreasService.AREA_FILE_SUFFIX)) {
             try {
-                const area = JSON.parse(await this.fileService.readFileInDataDirectory(fileName)) as OfflineArea;
+                const area: OfflineArea = JSON.parse(await this.fileService.readFileInDataDirectory(fileName));
                 areas[area.properties.id] = area;
             } catch (ex) {
                 this.loggingService.warning(`[Offline Areas] Failed to read ${fileName}: ${(ex as Error).message}`);
@@ -130,10 +123,10 @@ export class OfflineAreasService {
     }
 
     /**
-     * Keeps an area in its file, and in the state when its files are already there - the files of an area that is
+     * Writes the metadata of an area to its file, and to the state when its files are already there - the files of an area that is
      * downloaded for the first time are read into the state along with it, see updateDownloadedAreasFromDevice.
      */
-    public async saveDownloadedArea(area: Immutable<OfflineArea>): Promise<void> {
+    public async saveAreaMetadata(area: Immutable<OfflineArea>): Promise<void> {
         await this.fileService.writeFileInDataDirectory(OfflineAreasService.getAreaFileName(area.properties.id), JSON.stringify(area));
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         const downloadedArea = downloadedAreas[area.properties.id];
@@ -142,13 +135,13 @@ export class OfflineAreasService {
         }
     }
 
-    public async deleteDownloadedArea(id: string): Promise<void> {
+    public async deleteAreaMetadata(id: string): Promise<void> {
         await this.fileService.deleteFileInDataDirectory(OfflineAreasService.getAreaFileName(id));
     }
 
     /** Names a downloaded area the way the user typed it, in every language, since that is the name they will look for */
     public renameDownloadedArea(area: Immutable<OfflineArea>, name: string): Promise<void> {
-        return this.saveDownloadedArea(OfflineAreasService.withNames(area, { name }));
+        return this.saveAreaMetadata(OfflineAreasService.withNames(area, { name }));
     }
 
     /** An area by other names, which keeps the id and the zooms its files hold */
@@ -157,18 +150,23 @@ export class OfflineAreasService {
         return { ...area, properties: { ...names, id, minZoom, maxZoom } };
     }
 
-    /** A tile as an area, whose id is the key of the tile, see toTileKey, and whose files start at its zoom */
+    /** An area that holds the given zooms, which are the ones its files hold, see findDownloadedAreaId */
+    public static withZooms<T extends Immutable<OfflineArea>>(area: T, zooms: { minZoom: number, maxZoom: number }): T {
+        return { ...area, properties: { ...area.properties, minZoom: zooms.minZoom, maxZoom: zooms.maxZoom } };
+    }
+
+    /** A tile as an area, whose id is the key of the tile, see toTileId */
     public static createTileArea(tileX: number, tileY: number): OfflineArea {
-        return OfflineAreasService.createSquareArea(OfflineAreasService.toTileKey(tileX, tileY), tileX, tileY, TILES_ZOOM, TILES_ZOOM);
+        return OfflineAreasService.createSquareArea(OfflineAreasService.toTileId(tileX, tileY), tileX, tileY, TILES_ZOOM);
     }
 
-    /** Root files as an area, the whole world up to the zoom they hold, see isRootKey */
-    public static createRootArea(id: string, maxZoom: number): OfflineArea {
-        return OfflineAreasService.createSquareArea(id, 0, 0, 0, 0, maxZoom);
+    /** The root files as an area, the whole world */
+    public static createRootArea(): OfflineArea {
+        return OfflineAreasService.createSquareArea(OfflineAreasService.ROOT_ID, 0, 0, 0);
     }
 
-    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number, minZoom: number, maxZoom?: number): OfflineArea {
-        return { type: "Feature", properties: { id, minZoom, maxZoom }, geometry: SpatialHelper.getTilePolygon({ x: tileX, y: tileY }, zoom) };
+    private static createSquareArea(id: string, tileX: number, tileY: number, zoom: number): OfflineArea {
+        return { type: "Feature", properties: { id }, geometry: SpatialHelper.getTilePolygon({ x: tileX, y: tileY }, zoom) };
     }
 
     private static getAreaFileName(id: string): string {
