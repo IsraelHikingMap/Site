@@ -7,7 +7,6 @@ import { Store } from "@ngxs/store";
 import { last } from "lodash-es";
 import { Immutable } from "immer";
 import pLimit from "p-limit";
-import { booleanIntersects } from "@turf/boolean-intersects";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { Urls } from "../urls";
@@ -15,11 +14,12 @@ import { FileService, type DataDirectoryFile } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { AREA_MIN_ZOOM, PmTilesService, ROOT_ZOOM, TILES_ZOOM } from "./pmtiles.service";
+import { PmTilesService } from "./pmtiles.service";
+import { SpatialHelper } from "./spatial.helper";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { OfflineAreasService } from "./offline-areas.service";
+import { AREA_MIN_ZOOM, OfflineAreasService, ROOT_ZOOM, TILES_ZOOM } from "./offline-areas.service";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
@@ -126,7 +126,7 @@ export class OfflineFilesDownloadService {
             const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
             const incompatibleTileKeys: string[] = [];
             for (const [tileKey, { files }] of Object.entries(downloadedAreas)) {
-                if (tileKey === PmTilesService.LEGACY_ROOT_KEY) {
+                if (tileKey === OfflineAreasService.LEGACY_ROOT_KEY) {
                     continue;
                 }
                 const compatibility = this.getTileCompatibility(tileKey, files);
@@ -266,14 +266,14 @@ export class OfflineFilesDownloadService {
 
     /**
      * The name a file is kept under on the device, "name+id.ext" after the id of the area it is of, where a root
-     * file is of the root files, see PmTilesService.ROOT_KEY, and a file that is of no area keeps its name.
+     * file is of the root files, see OfflineAreasService.ROOT_KEY, and a file that is of no area keeps its name.
      */
     private static getLocalFileName(serverFileName: string, key: string): string {
         const plusIndex = serverFileName.indexOf("+");
         if (plusIndex >= 0) {
             return `${serverFileName.substring(0, plusIndex)}+${key}${serverFileName.substring(serverFileName.lastIndexOf("."))}`;
         }
-        return serverFileName.replace(OfflineFilesDownloadService.ROOT_FILE_NAME_REGEX, `$1+${PmTilesService.ROOT_KEY}$3`);
+        return serverFileName.replace(OfflineFilesDownloadService.ROOT_FILE_NAME_REGEX, `$1+${OfflineAreasService.ROOT_KEY}$3`);
     }
 
     private static removeExtension(fileName: string): string {
@@ -517,29 +517,29 @@ export class OfflineFilesDownloadService {
         }
         await this.offlineAreasService.deleteDownloadedArea(key);
         await this.updateDownloadedAreasFromDevice();
-        if (!PmTilesService.isRootKey(key)) {
+        if (!OfflineAreasService.isRootKey(key)) {
             await this.deleteUnusedRootFiles();
         }
     }
 
     /**
      * Deletes the root files once no area uses them, and the zoom 6 root files once no tile that came before areas
-     * does, see PmTilesService.LEGACY_ROOT_KEY.
+     * does, see OfflineAreasService.LEGACY_ROOT_KEY.
      */
     private async deleteUnusedRootFiles(): Promise<void> {
         const keys = Object.keys(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas));
-        if (keys.includes(PmTilesService.LEGACY_ROOT_KEY) && !keys.some(key => PmTilesService.fromTileKey(key) != null)) {
-            await this.deleteArea(PmTilesService.LEGACY_ROOT_KEY);
+        if (keys.includes(OfflineAreasService.LEGACY_ROOT_KEY) && !keys.some(key => OfflineAreasService.fromTileKey(key) != null)) {
+            await this.deleteArea(OfflineAreasService.LEGACY_ROOT_KEY);
         }
-        if (keys.includes(PmTilesService.ROOT_KEY) && keys.every(key => PmTilesService.isRootKey(key))) {
-            await this.deleteArea(PmTilesService.ROOT_KEY);
+        if (keys.includes(OfflineAreasService.ROOT_KEY) && keys.every(key => OfflineAreasService.isRootKey(key))) {
+            await this.deleteArea(OfflineAreasService.ROOT_KEY);
         }
     }
 
     /**
      * Moves the files that were kept before areas existed to the name the files of an area are kept under: the files
      * of a tile, "name+7-x-y.pmtiles", to "name+x-y.pmtiles", and the root files, "name-6.pmtiles", to
-     * "name+legacy-root.pmtiles", see PmTilesService.LEGACY_ROOT_KEY. It is done every time the app starts, so that
+     * "name+legacy-root.pmtiles", see OfflineAreasService.LEGACY_ROOT_KEY. It is done every time the app starts, so that
      * a start that was cut short in the middle of it finishes it the next time.
      * Failing is logged and leaves the files as they are.
      */
@@ -551,7 +551,7 @@ export class OfflineFilesDownloadService {
                 if (tileMatch != null) {
                     await this.fileService.renameFileInDataDirectory(fileName, `${tileMatch[1]}+${tileMatch[2]}${tileMatch[3]}`);
                 } else if (rootMatch != null) {
-                    const key = +rootMatch[2] === TILES_ZOOM - 1 ? PmTilesService.LEGACY_ROOT_KEY : PmTilesService.ROOT_KEY;
+                    const key = +rootMatch[2] === TILES_ZOOM - 1 ? OfflineAreasService.LEGACY_ROOT_KEY : OfflineAreasService.ROOT_KEY;
                     await this.fileService.renameFileInDataDirectory(fileName, `${rootMatch[1]}+${key}${rootMatch[3]}`);
                 }
             }
@@ -584,13 +584,13 @@ export class OfflineFilesDownloadService {
 
     /** The area of a tile or of the root files, null for an area the server offers, which is kept when it is downloaded */
     private static createAreaOfKey(key: string): OfflineArea | null {
-        if (key === PmTilesService.ROOT_KEY) {
+        if (key === OfflineAreasService.ROOT_KEY) {
             return OfflineAreasService.createRootArea(key, ROOT_ZOOM);
         }
-        if (key === PmTilesService.LEGACY_ROOT_KEY) {
+        if (key === OfflineAreasService.LEGACY_ROOT_KEY) {
             return OfflineAreasService.createRootArea(key, TILES_ZOOM - 1);
         }
-        const tile = PmTilesService.fromTileKey(key);
+        const tile = OfflineAreasService.fromTileKey(key);
         return tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY);
     }
 
@@ -709,7 +709,7 @@ export class OfflineFilesDownloadService {
         const unusedFiles = files.filter(f => !usedSourceFileNames.includes(OfflineFilesDownloadService.getSourceFileName(f.fileName).toLowerCase()));
         for (const { fileName } of unusedFiles) {
             const fileTileKey = OfflineFilesDownloadService.getKey(fileName);
-            if (fileTileKey !== tileKey && (fileTileKey == null || !PmTilesService.isRootKey(fileTileKey))) {
+            if (fileTileKey !== tileKey && (fileTileKey == null || !OfflineAreasService.isRootKey(fileTileKey))) {
                 continue; // It is another tile's, and taking it apart would leave the user without that area
             }
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase();
@@ -726,10 +726,10 @@ export class OfflineFilesDownloadService {
     public getOverlappedTileKeys(area: Immutable<OfflineArea>): string[] {
         return Object.keys(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
             .filter(key => key !== area.properties.id)
-            .map(key => PmTilesService.fromTileKey(key))
+            .map(key => OfflineAreasService.fromTileKey(key))
             .filter(tile => tile != null)
             .map(tile => OfflineAreasService.createTileArea(tile.tileX, tile.tileY))
-            .filter(tileArea => booleanIntersects(tileArea, area as OfflineArea))
+            .filter(tileArea => SpatialHelper.intersects(tileArea, area as OfflineArea))
             .map(tileArea => tileArea.properties.id);
     }
 
@@ -770,7 +770,7 @@ export class OfflineFilesDownloadService {
      * The root files are not of a specific area, so they have no routing tiles of their own.
      */
     private hasRoutingTiles(tileKey: string): boolean {
-        if (PmTilesService.isRootKey(tileKey)) {
+        if (OfflineAreasService.isRootKey(tileKey)) {
             return true;
         }
         return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)[tileKey]?.hasRoutingTiles === true;
@@ -785,7 +785,7 @@ export class OfflineFilesDownloadService {
     private getExpectedSourceFileNames(tileKey: string, requirements: StyleRequirements): string[] {
         const downloadedSourceFileNames = new Set<string>();
         for (const [otherTileKey, { files: otherFiles }] of Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))) {
-            if (PmTilesService.isRootKey(otherTileKey) !== PmTilesService.isRootKey(tileKey)) {
+            if (OfflineAreasService.isRootKey(otherTileKey) !== OfflineAreasService.isRootKey(tileKey)) {
                 continue;
             }
             for (const { fileName } of otherFiles) {

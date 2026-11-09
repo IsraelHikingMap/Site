@@ -13,20 +13,16 @@ import { DatePipe, NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { form, FormField, validate } from "@angular/forms/signals";
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from "@angular/material/core";
-import { bbox } from "@turf/bbox";
-import { bboxClip } from "@turf/bbox-clip";
-import polylabel from "polylabel";
 import type { Immutable } from "immer";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { OfflineFilesDownloadService, type DownloadStatus, type TileCompatibility } from "../../services/offline-files-download.service";
-import { OfflineAreasService } from "../../services/offline-areas.service";
+import { OfflineAreasService, TILES_ZOOM } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
-import { PmTilesService, TILES_ZOOM } from "../../services/pmtiles.service";
 import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, OfflineArea } from "../../models";
@@ -121,7 +117,7 @@ export class OfflineManagementComponent {
     public readonly incompatibleAreaIds = computed<string[]>(() => {
         const downloadedAreas = this.downloadedAreas();
         return Object.keys(downloadedAreas)
-            .filter(id => !PmTilesService.isRootKey(id))
+            .filter(id => !OfflineAreasService.isRootKey(id))
             .filter(id => this.offlineFilesDownloadService.getTileCompatibility(id, downloadedAreas[id].files) !== "compatible")
             .sort();
     });
@@ -134,7 +130,7 @@ export class OfflineManagementComponent {
     public readonly downloadedAreaRows = computed<DownloadedAreaRow[]>(() => {
         const downloadedAreas = this.downloadedAreas();
         const rows = Object.entries(downloadedAreas)
-            .filter(([id]) => !PmTilesService.isRootKey(id))
+            .filter(([id]) => !OfflineAreasService.isRootKey(id))
             .map(([id, { files }]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
                 this.offlineFilesDownloadService.getTileCompatibility(id, files)));
         rows.sort((a, b) =>
@@ -220,8 +216,7 @@ export class OfflineManagementComponent {
             return { type: "FeatureCollection", features: [] };
         }
         const { area, progress } = downloadInProgress;
-        const [minLng, minLat, maxLng, maxLat] = bbox(area as OfflineArea);
-        const fillFeature = bboxClip(area as OfflineArea, [minLng, minLat, minLng + (maxLng - minLng) * progress / 100.0, maxLat]);
+        const fillFeature = SpatialHelper.clipFromWest(area as OfflineArea, progress / 100.0);
         return {
             type: "FeatureCollection",
             features: [{ ...fillFeature, properties: { fill: "true" } }, { ...area as OfflineArea, properties: {} }, this.getLabelPoint(area, progress.toFixed(2) + "%")]
@@ -314,18 +309,9 @@ export class OfflineManagementComponent {
         }
     }
 
-    /** A point in the middle of the box of an area, which is named there rather than on the area itself, which would name every island of it */
-    /**
-     * Where the label of an area goes: the point furthest inside the largest of its polygons, since the middle of its
-     * bounds can be outside it, in a neighbour, like the middle of Croatia is in Bosnia.
-     */
     private getLabelPoint(area: Immutable<OfflineArea>, label: string, properties: Record<string, string | number> = {}): GeoJSON.Feature<GeoJSON.Point> {
-        const geometry = area.geometry as OfflineArea["geometry"];
-        const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-        const coordinates = polygons
-            .map(polygon => polylabel(polygon as [number, number][][], OfflineManagementComponent.LABEL_PRECISION_DEGREES))
-            .reduce((best, candidate) => candidate.distance > best.distance ? candidate : best);
-        return { type: "Feature", properties: { ...properties, label }, geometry: { type: "Point", coordinates: [coordinates[0], coordinates[1]] } };
+        const coordinates = SpatialHelper.getLabelPosition(area.geometry as OfflineArea["geometry"], OfflineManagementComponent.LABEL_PRECISION_DEGREES);
+        return { type: "Feature", properties: { ...properties, label }, geometry: { type: "Point", coordinates } };
     }
 
     public cancelDownload() {
@@ -367,13 +353,13 @@ export class OfflineManagementComponent {
 
     /** An area as it is kept on the device, where a tile that is not kept yet is the area of the tile itself */
     private getDownloadedArea(id: string): Immutable<OfflineArea> | null {
-        const tile = PmTilesService.fromTileKey(id);
+        const tile = OfflineAreasService.fromTileKey(id);
         return this.downloadedAreas()[id]?.area ?? (tile == null ? null : OfflineAreasService.createTileArea(tile.tileX, tile.tileY));
     }
 
     /** What an area that has no name is called: a tile by the coordinates of its middle, anything else by its id */
     private getDefaultName(id: string): string {
-        const tile = PmTilesService.fromTileKey(id);
+        const tile = OfflineAreasService.fromTileKey(id);
         if (tile == null) {
             return id;
         }
@@ -431,8 +417,8 @@ export class OfflineManagementComponent {
     }
 
     private fitBounds(geoJson: GeoJSON.Feature | GeoJSON.FeatureCollection, maxZoom: number) {
-        const [minLng, minLat, maxLng, maxLat] = bbox(geoJson);
-        this.map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 40, maxZoom });
+        const bounds = geoJson.type === "FeatureCollection" ? SpatialHelper.getBoundsForFeatureCollection(geoJson) : SpatialHelper.getBoundsForFeature(geoJson);
+        this.map.fitBounds(SpatialHelper.boundsToMBBounds(bounds), { padding: 40, maxZoom });
     }
 
     /**

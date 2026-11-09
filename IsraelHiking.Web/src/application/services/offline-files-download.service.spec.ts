@@ -19,8 +19,8 @@ import { OfflineAreasService } from "./offline-areas.service";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
-const ROOT_TILE_KEY = PmTilesService.ROOT_KEY;
-const TILE_KEY = PmTilesService.toTileKey(76, 51);
+const ROOT_TILE_KEY = OfflineAreasService.ROOT_KEY;
+const TILE_KEY = OfflineAreasService.toTileKey(76, 51);
 const TILE_AREA = OfflineAreasService.createTileArea(76, 51);
 /** The file of the tile as it is kept on the device */
 const MAP_FILE = "IHM-schema+76-51.pmtiles";
@@ -681,7 +681,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.renameFileInDataDirectory).toHaveBeenCalledWith("IHM-schema-6.pmtiles", "IHM-schema+legacy-root.pmtiles");
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledTimes(2);
                 expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(TILE_AREA);
-                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(OfflineAreasService.createRootArea(PmTilesService.LEGACY_ROOT_KEY, 6));
+                expect(offlineAreasService.saveDownloadedArea).toHaveBeenCalledWith(OfflineAreasService.createRootArea(OfflineAreasService.LEGACY_ROOT_KEY, 6));
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
                 expect(downloadedAreas[TILE_KEY]?.files.map(f => f.fileName)).toEqual([MAP_FILE]);
             }
@@ -837,7 +837,7 @@ describe("OfflineFilesDownloadService", () => {
                     [MAP_FILE, legacyRootFile, ROOT_MAP_FILE, areaFile].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 await initialize(service, mockBackend, store, {});
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
-                expect(downloadedAreas[PmTilesService.LEGACY_ROOT_KEY]?.files.map(f => f.fileName)).toEqual([legacyRootFile]);
+                expect(downloadedAreas[OfflineAreasService.LEGACY_ROOT_KEY]?.files.map(f => f.fileName)).toEqual([legacyRootFile]);
                 expect(downloadedAreas[ROOT_TILE_KEY]?.files.map(f => f.fileName)).toEqual([ROOT_MAP_FILE]);
 
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
@@ -845,7 +845,7 @@ describe("OfflineFilesDownloadService", () => {
                 await service.deleteArea(TILE_KEY);
 
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(legacyRootFile);
-                expect(offlineAreasService.deleteDownloadedArea).toHaveBeenCalledWith(PmTilesService.LEGACY_ROOT_KEY);
+                expect(offlineAreasService.deleteDownloadedArea).toHaveBeenCalledWith(OfflineAreasService.LEGACY_ROOT_KEY);
                 // The area still uses the new root files
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(ROOT_MAP_FILE);
             }

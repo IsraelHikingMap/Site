@@ -100,4 +100,66 @@ enum SpatialHelper {
         }
         return points.enumerated().filter { kept[$0.offset] }.map { $0.element }
     }
+
+    /// The square of a tile as a polygon of lng/lat rings, pulled in from its edges by the inset, a part of the size of
+    /// the tile, like getTilePolygon of the web client.
+    static func getTilePolygon(x: Int, y: Int, zoom: Int, inset: Double = 0) -> [[[Double]]] {
+        let minLng = tileLng(Double(x) + inset, zoom: zoom), maxLng = tileLng(Double(x + 1) - inset, zoom: zoom)
+        let maxLat = tileLat(Double(y) + inset, zoom: zoom), minLat = tileLat(Double(y + 1) - inset, zoom: zoom)
+        return [[[minLng, maxLat], [maxLng, maxLat], [maxLng, minLat], [minLng, minLat], [minLng, maxLat]]]
+    }
+
+    /// Even-odd ray casting over every ring of a polygon, so a point in a hole is outside
+    static func isPointInPolygon(_ point: [Double], _ polygon: [[[Double]]]) -> Bool {
+        var inside = false
+        for ring in polygon where ring.count > 1 {
+            var j = ring.count - 1
+            for i in 0..<ring.count {
+                let xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]
+                if (yi > point[1]) != (yj > point[1]) && point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi {
+                    inside.toggle()
+                }
+                j = i
+            }
+        }
+        return inside
+    }
+
+    /// Whether two polygons overlap: a point of either is in the other, or one of their edges crosses the other's
+    static func intersects(_ polygon: [[[Double]]], _ otherPolygon: [[[Double]]]) -> Bool {
+        if polygon.joined().contains(where: { isPointInPolygon($0, otherPolygon) }) ||
+            otherPolygon.joined().contains(where: { isPointInPolygon($0, polygon) }) {
+            return true
+        }
+        let otherEdges = edges(otherPolygon)
+        return edges(polygon).contains { edge in otherEdges.contains { crosses(edge.0, edge.1, $0.0, $0.1) } }
+    }
+
+    /// How large polygons are by their bounds, in square degrees, which is enough to tell a smaller one from a larger one
+    static func getBoundsArea(_ polygons: [[[[Double]]]]) -> Double {
+        let points = polygons.joined().joined()
+        let lngs = points.map { $0[0] }, lats = points.map { $0[1] }
+        return ((lngs.max() ?? 0) - (lngs.min() ?? 0)) * ((lats.max() ?? 0) - (lats.min() ?? 0))
+    }
+
+    private static func edges(_ polygon: [[[Double]]]) -> [([Double], [Double])] {
+        polygon.flatMap { ring in ring.indices.map { (ring[$0], ring[($0 + 1) % ring.count]) } }
+    }
+
+    private static func crosses(_ a: [Double], _ b: [Double], _ c: [Double], _ d: [Double]) -> Bool {
+        side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0
+    }
+
+    private static func side(_ a: [Double], _ b: [Double], _ point: [Double]) -> Double {
+        let cross = (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0])
+        return cross > 0 ? 1 : cross < 0 ? -1 : 0
+    }
+
+    private static func tileLng(_ x: Double, zoom: Int) -> Double {
+        x / Double(1 << zoom) * 360 - 180
+    }
+
+    private static func tileLat(_ y: Double, zoom: Int) -> Double {
+        atan(sinh(Double.pi * (1 - 2 * y / Double(1 << zoom)))) * 180 / Double.pi
+    }
 }

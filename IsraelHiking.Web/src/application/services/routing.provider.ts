@@ -11,7 +11,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { PmTilesService, TILES_ZOOM } from "./pmtiles.service";
+import { OfflineAreasService, TILES_ZOOM } from "./offline-areas.service";
 import { Valhalla } from "./valhalla.plugin";
 import { Urls } from "../urls";
 import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
@@ -47,7 +47,6 @@ export class RoutingProvider {
     private readonly runningContextService = inject(RunningContextService);
     private readonly elevationProvider = inject(ElevationProvider);
     private readonly store = inject(Store);
-    private readonly pmTilesService = inject(PmTilesService);
 
     public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         if (routinType === "None") {
@@ -106,7 +105,7 @@ export class RoutingProvider {
     private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
         const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
         return [start, end].every(point =>
-            downloadedAreas[this.pmTilesService.findDownloadedAreaId({ type: "Point", coordinates: [point.lng, point.lat] }, TILES_ZOOM)]?.hasRoutingTiles === true);
+            downloadedAreas[OfflineAreasService.findDownloadedAreaId(downloadedAreas, { type: "Point", coordinates: [point.lng, point.lat] }, TILES_ZOOM)]?.hasRoutingTiles === true);
     }
 
     /**

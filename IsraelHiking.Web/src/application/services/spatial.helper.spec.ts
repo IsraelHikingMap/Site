@@ -388,4 +388,45 @@ describe("Spatial service", () => {
         expect(merged.coordinates.length).toBe(4);
         expect(merged.coordinates[0]).toEqual([0, 0]);
     });
+
+    it("Should get the square of a tile, and one pulled in from its edges", () => {
+        const square = SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 1);
+        const inset = SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 1, 0.25);
+
+        expect(square.coordinates[0]).toHaveLength(5);
+        expect(square.coordinates[0][0][0]).toBeCloseTo(-180);
+        expect(square.coordinates[0][1][0]).toBeCloseTo(0);
+        expect(square.coordinates[0][2][1]).toBeCloseTo(0);
+        expect(inset.coordinates[0][0][0]).toBeCloseTo(-135);
+        expect(inset.coordinates[0][1][0]).toBeCloseTo(-45);
+    });
+
+    it("Should get the area of the bounds of a feature", () => {
+        const feature: GeoJSON.Feature = { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[34, 29], [36, 34]] } };
+
+        expect(SpatialHelper.getBoundsArea(feature)).toBe(10);
+    });
+
+    it("Should clip a polygon to the part of its width from the west", () => {
+        const polygon: GeoJSON.Feature<GeoJSON.Polygon> = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]] } };
+
+        const clipped = SpatialHelper.clipFromWest(polygon, 0.3);
+
+        expect(Math.max(...(clipped.geometry as GeoJSON.Polygon).coordinates[0].map(([lng]) => lng))).toBeCloseTo(3);
+    });
+
+    it("Should label a crescent inside itself and not in the middle of its bounds, which is outside it", () => {
+        // A "C" shape, open to the east, whose bounds' middle (5, 5) is in the opening
+        const crescent: GeoJSON.Polygon = { type: "Polygon", coordinates: [[[0, 0], [10, 0], [10, 2], [2, 2], [2, 8], [10, 8], [10, 10], [0, 10], [0, 0]]] };
+
+        const position = SpatialHelper.getLabelPosition(crescent, 0.01);
+
+        expect(SpatialHelper.isPointInPolygon(position, { type: "Feature", properties: {}, geometry: crescent })).toBe(true);
+        expect(SpatialHelper.isPointInPolygon([5, 5], { type: "Feature", properties: {}, geometry: crescent })).toBe(false);
+    });
+
+    it("Should tell polygons that overlap from ones that do not", () => {
+        expect(SpatialHelper.intersects(SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 1), SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 2))).toBe(true);
+        expect(SpatialHelper.intersects(SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 1, 0.1), SpatialHelper.getTilePolygon({ x: 1, y: 1 }, 1, 0.1))).toBe(false);
+    });
 });

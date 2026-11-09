@@ -13,17 +13,11 @@ import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
-import { PmTilesService } from "./pmtiles.service";
-import type { DownloadedArea } from "../models";
+import { OfflineAreasService } from "./offline-areas.service";
 
 const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
 
 /** Areas that were downloaded along with their routing tiles */
-function withRoutingTiles(...keys: string[]): Record<string, DownloadedArea> {
-    const downloadedArea: DownloadedArea = { area: null, files: [], hasRoutingTiles: true };
-    return Object.fromEntries(keys.map(key => [key, downloadedArea]));
-}
-
 describe("RoutingProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -41,7 +35,6 @@ describe("RoutingProvider", () => {
                 { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
                 { provide: RunningContextService, useValue: { isCapacitor: false } },
                 { provide: ElevationProvider, useValue: { updateHeights: () => Promise.resolve() } },
-                { provide: PmTilesService, useValue: { findDownloadedAreaId: vi.fn((): string => null) } },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -213,14 +206,13 @@ describe("RoutingProvider", () => {
     );
 
     it("Should only say that routing failed when the points are in a downloaded area with its routing tiles",
-        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService, PmTilesService],
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
-                runningContextService: RunningContextService, pmTilesService: PmTilesService) => {
+                runningContextService: RunningContextService) => {
                 (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
-                vi.mocked(pmTilesService.findDownloadedAreaId).mockReturnValue("israel-and-palestine");
                 store.reset({
                     offlineState: { isSubscribed: true },
-                    inMemoryState: { downloadedAreas: withRoutingTiles("israel-and-palestine") }
+                    inMemoryState: { downloadedAreas: { "76-51": { area: OfflineAreasService.createTileArea(76, 51), files: [], hasRoutingTiles: true } } }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
@@ -228,7 +220,6 @@ describe("RoutingProvider", () => {
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 await promise;
                 expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
-                expect(pmTilesService.findDownloadedAreaId).toHaveBeenCalledWith({ type: "Point", coordinates: [35, 32] }, 7);
             }
         )
     );

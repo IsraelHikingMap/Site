@@ -9,6 +9,10 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import lineSplit from "@turf/line-split";
 import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
+import booleanIntersects from "@turf/boolean-intersects";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import bboxClip from "@turf/bbox-clip";
+import polylabel from "polylabel";
 import type { LngLatBounds, LngLatLike } from "maplibre-gl";
 import type { Immutable } from "immer";
 
@@ -400,6 +404,46 @@ export class SpatialHelper {
         const lng = tile.x / n * 360 - 180;
         const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * tile.y / n))) * 180 / Math.PI;
         return { lat, lng };
+    }
+
+    /** The square of a tile, pulled in from its edges by the inset, a part of the size of the tile */
+    public static getTilePolygon(tile: { x: number; y: number }, zoom: number, inset = 0): GeoJSON.Polygon {
+        const [minX, minY, maxX, maxY] = [tile.x + inset, tile.y + inset, tile.x + 1 - inset, tile.y + 1 - inset];
+        const corners = [[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY], [minX, minY]]
+            .map(([x, y]) => SpatialHelper.toCoordinate(SpatialHelper.fromTile({ x, y }, zoom)));
+        return { type: "Polygon", coordinates: [corners] };
+    }
+
+    public static isPointInPolygon(position: GeoJSON.Position, polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>): boolean {
+        return booleanPointInPolygon(position, polygon);
+    }
+
+    public static intersects(geometry: GeoJSON.Feature | GeoJSON.Geometry, otherGeometry: GeoJSON.Feature | GeoJSON.Geometry): boolean {
+        return booleanIntersects(geometry, otherGeometry);
+    }
+
+    /** The part of a polygon west of a line that is the given part of the way across its bounds */
+    public static clipFromWest(polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>, part: number): GeoJSON.Feature {
+        const [minLng, minLat, maxLng, maxLat] = bbox(polygon);
+        return bboxClip(polygon, [minLng, minLat, minLng + (maxLng - minLng) * part, maxLat]);
+    }
+
+    /**
+     * Where a polygon is best labeled: the point furthest inside the largest of its parts, since the middle of its bounds
+     * can be outside it, in a neighbour, like the middle of Croatia is in Bosnia. The precision is in degrees.
+     */
+    public static getLabelPosition(geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon, precision: number): GeoJSON.Position {
+        const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+        const best = polygons
+            .map(polygon => polylabel(polygon as [number, number][][], precision))
+            .reduce((bestSoFar, candidate) => candidate.distance > bestSoFar.distance ? candidate : bestSoFar);
+        return [best[0], best[1]];
+    }
+
+    /** How large a feature is by its bounds, in square degrees, which is enough to tell a smaller one from a larger one */
+    public static getBoundsArea(feature: GeoJSON.Feature): number {
+        const [minLng, minLat, maxLng, maxLat] = bbox(feature);
+        return (maxLng - minLng) * (maxLat - minLat);
     }
 
     public static getParentZoomTileCoordinates(tile: { x: number; y: number }, zoom: number, targetZoom: number): { tileX: number; tileY: number } {
