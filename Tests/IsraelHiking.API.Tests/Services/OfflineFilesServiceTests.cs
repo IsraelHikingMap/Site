@@ -318,7 +318,7 @@ public class OfflineFilesServiceTests
         {
             "valhalla+5a46cb2cd3d6abed.tgz",
             "IHM-schema+5a46cb2cd3d6abed.pmtiles", "IHM-code+5a46cb2cd3d6abed.pmtiles", "raster-dem+5a46cb2cd3d6abed.pmtiles",
-            "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema-4.pmtiles", "IHM-code-4.pmtiles", "global_points-4.pmtiles",
+            "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema-4.pmtiles", "IHM-code-4.pmtiles",
             "valhalla-profiles.json"
         }, results.Keys.ToArray());
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-schema-4.pmtiles"]);

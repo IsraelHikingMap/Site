@@ -194,7 +194,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// <inheritdoc/>
     /// <remarks>
     /// The routing tiles are listed first, as the largest and slowest file, then the files of the area and then the
-    /// root files that come with every area.
+    /// root files that come with every area. The global points have no root file, they hold nothing at its zooms.
     /// </remarks>
     public async Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate)
     {
@@ -210,7 +210,7 @@ public class OfflineFilesService : IOfflineFilesService
         {
             AddIfUpdated(filesDictionary, $"{name}+{areaId}.pmtiles", IsDem(name) ? DEM_MODIFIED_DATE : today, lastModifiedDate);
         }
-        foreach (var name in sourceNames.Where(name => !IsDem(name)))
+        foreach (var name in sourceNames.Where(name => !IsDem(name) && name != GLOBAL_POINTS))
         {
             AddIfUpdated(filesDictionary, $"{name}-{ROOT_ZOOM}.pmtiles", today, lastModifiedDate);
         }
