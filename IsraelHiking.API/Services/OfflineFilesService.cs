@@ -87,7 +87,8 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes
-    /// with, so that a route that is calculated offline is the same one that is calculated online.
+    /// with, so that a route that is calculated offline is the same one that is calculated online. It is not sliced,
+    /// so it is listed with the root files, and like the routing tiles only for clients that know how to handle it.
     /// </summary>
     private const string VALHALLA_PROFILES_FILE_NAME = "valhalla-profiles.json";
 
@@ -95,16 +96,6 @@ public class OfflineFilesService : IOfflineFilesService
     /// The fixed last modified date reported for the DEM, bumped whenever the underlying data changes.
     /// </summary>
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-11-07T00:00:00Z", CultureInfo.InvariantCulture).UtcDateTime;
-
-    /// <summary>
-    /// The files that are needed for offline usage but are not sliced per tile - the profiles the offline
-    /// routing engine needs. They are only relevant to the root, and like the routing tiles they are only
-    /// listed for clients that ask for them, since older clients do not know how to handle them.
-    /// </summary>
-    private static readonly string[] ROOT_ONLY_FILE_NAMES =
-    [
-        VALHALLA_PROFILES_FILE_NAME
-    ];
 
     private static readonly JsonSerializerOptions GEO_JSON_OPTIONS = new() { Converters = { GeoJsonExtensions.GeoJsonWritableFactory } };
 
@@ -159,10 +150,7 @@ public class OfflineFilesService : IOfflineFilesService
         }
         if (routingTile && !tileX.HasValue && !tileY.HasValue)
         {
-            foreach (var fileName in ROOT_ONLY_FILE_NAMES)
-            {
-                AddIfUpdated(filesDictionary, fileName, today, lastModifiedDate);
-            }
+            AddIfUpdated(filesDictionary, VALHALLA_PROFILES_FILE_NAME, today, lastModifiedDate);
         }
         return filesDictionary;
     }
@@ -214,10 +202,7 @@ public class OfflineFilesService : IOfflineFilesService
         {
             AddIfUpdated(filesDictionary, $"{name}-{ROOT_ZOOM}.pmtiles", today, lastModifiedDate);
         }
-        foreach (var fileName in ROOT_ONLY_FILE_NAMES)
-        {
-            AddIfUpdated(filesDictionary, fileName, today, lastModifiedDate);
-        }
+        AddIfUpdated(filesDictionary, VALHALLA_PROFILES_FILE_NAME, today, lastModifiedDate);
         return filesDictionary;
     }
 
