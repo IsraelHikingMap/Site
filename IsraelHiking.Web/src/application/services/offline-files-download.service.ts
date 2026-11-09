@@ -39,7 +39,7 @@ export type TileCompatibility = "compatible" | "outdated" | "unusable";
 
 /** The download that is going on right now, everything that lives as long as it does */
 type CurrentDownload = {
-    /** What is downloaded, an area or a tile, which is an area as well, see OfflineAreasService.createTileArea */
+    /** The area that is downloaded, one the server offers, since a tile that came before areas can not be downloaded again */
     area: Immutable<OfflineArea>;
     /** How much was downloaded so far, from 0 to 100 */
     progress: number;
@@ -47,9 +47,9 @@ type CurrentDownload = {
     abortController: AbortController;
 };
 
-/** A file the server lists, named the way it is kept on the device, see getLocalFileName */
-type FileToDownload = FileNameDateVersion & {
-    /** The name the server serves the file by */
+/** A file the server lists, by the name it serves it by and the name it is kept by on the device, see getLocalFileName */
+type FileToDownload = {
+    fileName: string;
     serverFileName: string;
 };
 
@@ -352,7 +352,7 @@ export class OfflineFilesDownloadService {
 
     /**
      * Downloads the files into the cache, where a download that was aborted or failed leaves whatever it
-     * did get, so that downloading the tile again continues from there instead of starting over.
+     * did get, so that downloading the area again continues from there instead of starting over.
      * A few files are downloaded at a time, in the order they were listed in, which is why the server
      * lists the files that take it longest first - a file that is started last is the one left downloading
      * on its own once every other file is done.
@@ -407,12 +407,12 @@ export class OfflineFilesDownloadService {
 
     /**
      * Moves the files that were downloaded to where the app reads them from, and extracts the routing
-     * tiles among them. This only happens once every file of the tile was downloaded, so that a download
-     * that was aborted or failed leaves the files of the tile as they were rather than half updated.
+     * tiles among them. This only happens once every file of the area was downloaded, so that a download
+     * that was aborted or failed leaves the files of the area as they were rather than half updated.
      * Every file is moved before any of them is handed to the routing engine, so that an engine that
-     * fails can not leave the files of the tile half moved, and failing to hand a file over is logged
-     * and otherwise ignored: the map files of the tile are whole and are drawn from as they are, and a
-     * tile that ended up without its routing tiles is reported as one to download again.
+     * fails can not leave the files of the area half moved, and failing to hand a file over is logged
+     * and otherwise ignored: the map files of the area are whole and are drawn from as they are, and an
+     * area that ended up without its routing tiles is reported as one to download again.
      * A file the routing engine did not take is deleted, since it is of no use to the app and nothing else
      * would ever clean it up - it is not one of the files the device is read for.
      */
@@ -442,7 +442,7 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Reports how far the download of a tile or an area got, where every one of its files weighs the same.
+     * Reports how far the download of an area got, where every one of its files weighs the same.
      * A download that is no longer the current one has nothing to report - its files might still be
      * coming in after it was aborted, and that says nothing about the download that took its place.
      */
@@ -482,8 +482,8 @@ export class OfflineFilesDownloadService {
         const fileNames = await firstValueFrom(request.pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded for ${key}, ` +
             `${lastModifiedString == null ? "all of them" : `the ones that changed since ${lastModifiedString}`}`);
-        return Object.entries(fileNames).map(([serverFileName, date]) =>
-            ({ fileName: OfflineFilesDownloadService.getLocalFileName(serverFileName, key), serverFileName, date }));
+        return Object.keys(fileNames).map(serverFileName =>
+            ({ fileName: OfflineFilesDownloadService.getLocalFileName(serverFileName, key), serverFileName }));
     }
 
     public abortCurrentDownload(): void {
@@ -689,13 +689,13 @@ export class OfflineFilesDownloadService {
 
     /**
      * Deletes the offline files whose source is not used by the styles nor by the app - a source that was
-     * removed or renamed leaves its files behind, only taking up space. Of the files of a tile only those
-     * of the tile that is being downloaded are deleted: a tile the user did not ask for keeps what it has
-     * until it is downloaded itself, so that downloading one tile never takes another one apart and leaves
-     * the user without an area they see they have. The root files are of no tile and are not shown
+     * removed or renamed leaves its files behind, only taking up space. Of the files of an area only those
+     * of the area that is being downloaded are deleted: an area the user did not ask for keeps what it has
+     * until it is downloaded itself, so that downloading one area never takes another one apart and leaves
+     * the user without an area they see they have. The root files are of no area and are not shown
      * anywhere, and the styles on the device are by now the ones that were just downloaded, so nothing on
      * the device can read a source they do not have - a root file of such a source is of no use to any
-     * tile, downloaded or not, and goes as soon as it is found.
+     * area, downloaded or not, and goes as soon as it is found.
      * Only the offline map files are deleted, the styles and any other file that is stored in the same
      * directory are not this service's.
      */
@@ -710,7 +710,7 @@ export class OfflineFilesDownloadService {
         for (const { fileName } of unusedFiles) {
             const fileTileKey = OfflineFilesDownloadService.getKey(fileName);
             if (fileTileKey !== tileKey && (fileTileKey == null || !OfflineAreasService.isRootKey(fileTileKey))) {
-                continue; // It is another tile's, and taking it apart would leave the user without that area
+                continue;
             }
             const sourceFileName = OfflineFilesDownloadService.getSourceFileName(fileName).toLowerCase();
             this.loggingService.info(`[Offline Download] Deleting ${fileName}, ${sourceFileName} is not a source of the styles`);
