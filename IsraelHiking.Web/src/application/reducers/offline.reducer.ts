@@ -25,6 +25,11 @@ export class SetLastOfflineDetectedDate {
     constructor(public readonly lastOfflineDetectedDate: Date | null) { }
 }
 
+export class SetTileDownloadInProgressAction {
+    public static readonly type = "[Offline] SetTileDownloadInProgressAction";
+    constructor(public readonly tileDownloadInProgress: OfflineState["tileDownloadInProgress"]) { }
+}
+
 @State<OfflineState>({
     name: "offlineState",
     defaults: initialState.offlineState
@@ -60,6 +65,13 @@ export class OfflineReducer {
     setLastOfflineDetectedDate(ctx: StateContext<OfflineState>, action: SetLastOfflineDetectedDate) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastOfflineDetectedDate = action.lastOfflineDetectedDate;
+        }));
+    }
+
+    @Action(SetTileDownloadInProgressAction)
+    public setTileDownloadInProgress(ctx: StateContext<OfflineState>, action: SetTileDownloadInProgressAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.tileDownloadInProgress = action.tileDownloadInProgress;
         }));
     }
 }

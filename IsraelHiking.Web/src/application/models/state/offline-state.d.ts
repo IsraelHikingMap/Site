@@ -17,4 +17,9 @@ export type OfflineState = {
      * The last time the app detected that the user is offline
      */
     lastOfflineDetectedDate: Date | null;
+    /**
+     * The tile whose files the native background download is downloading, with all the files it needs, until they
+     * were moved to where the app reads them from - a download the app did not see end is finished on its next start
+     */
+    tileDownloadInProgress: { tileX: number; tileY: number; files: FileNameDateVersion[] } | null;
 };
