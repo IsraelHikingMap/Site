@@ -1,4 +1,5 @@
-import { registerPlugin, type PluginListenerHandle } from "@capacitor/core";
+import { InjectionToken } from "@angular/core";
+import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 
 /** Where a tile download got to, "none" when there is no download of that tile */
 export type TileDownloadState = "running" | "completed" | "failed" | "cancelled" | "none";
@@ -39,3 +40,12 @@ export interface OfflineDownloadPlugin {
 }
 
 export const OfflineDownload = registerPlugin<OfflineDownloadPlugin>("OfflineDownload");
+
+/**
+ * The plugin where it is registered, and null on the platforms it was not written for, where the files are
+ * downloaded with fetch. It is injected rather than imported, so that a test can hand the app a stand-in for it.
+ */
+export const OFFLINE_DOWNLOAD = new InjectionToken<OfflineDownloadPlugin | null>("OFFLINE_DOWNLOAD", {
+    providedIn: "root",
+    factory: () => Capacitor.isPluginAvailable("OfflineDownload") ? OfflineDownload : null
+});

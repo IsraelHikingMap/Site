@@ -8,7 +8,6 @@ import { last } from "lodash-es";
 import { Immutable } from "immer";
 import pLimit from "p-limit";
 import type { StyleSpecification } from "maplibre-gl";
-import { Capacitor } from "@capacitor/core";
 import { App } from "@capacitor/app";
 
 import { Urls } from "../urls";
@@ -20,7 +19,7 @@ import { PmTilesService } from "./pmtiles.service";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { OfflineDownload, type FailedTileFile, type TileDownloadState } from "./offline-download.plugin";
+import { OFFLINE_DOWNLOAD, type FailedTileFile, type TileDownloadState } from "./offline-download.plugin";
 import { SetDownloadedRoutingTilesAction, SetDownloadedTilesAction } from "../reducers/in-memory.reducer";
 import { SetTileDownloadInProgressAction } from "../reducers/offline.reducer";
 import type { ApplicationState, FileNameDateVersion } from "../models";
@@ -78,6 +77,8 @@ export class OfflineFilesDownloadService {
     private readonly runningContextService = inject(RunningContextService);
     private readonly store = inject(Store);
     private readonly router = inject(Router);
+    /** The native background download, which goes on while the app is in the background, null where files are downloaded with fetch */
+    private readonly offlineDownload = inject(OFFLINE_DOWNLOAD);
 
     /** What the styles that were downloaded now need from the offline files, read every time they are downloaded */
     private onlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
@@ -88,11 +89,7 @@ export class OfflineFilesDownloadService {
      */
     private offlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
     private readonly currentDownload = signal<CurrentDownload | null>(null);
-    /**
-     * Whether the files are downloaded by the native background download, which goes on while the app is in
-     * the background, rather than by fetch. It is only there on the platforms the plugin was written for.
-     */
-    private readonly isBackgroundDownloadAvailable = Capacitor.isPluginAvailable("OfflineDownload");
+    private readonly isBackgroundDownloadAvailable = this.offlineDownload != null;
     /** Ends the background download the app is following, see followBackgroundDownload */
     private finishBackgroundDownload: ((result: BackgroundDownloadResult) => void) | null = null;
 
@@ -411,7 +408,7 @@ export class OfflineFilesDownloadService {
         this.store.dispatch(new SetTileDownloadInProgressAction({ tileX, tileY, files: fileNames }));
         const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
         const result = await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile,
-            () => OfflineDownload.startTileDownload({
+            () => this.offlineDownload.startTileDownload({
                 tileKey,
                 files,
                 headers: { Authorization: `Bearer ${token}` },
@@ -443,9 +440,9 @@ export class OfflineFilesDownloadService {
         let finish: (result: BackgroundDownloadResult) => void;
         const finished = new Promise<BackgroundDownloadResult>(resolve => finish = resolve);
         const handles = await Promise.all([
-            OfflineDownload.addListener("fileProgress", event => event.tileKey === tileKey && updateFileProgress(event.fileName, event.fraction)),
-            OfflineDownload.addListener("fileCompleted", event => event.tileKey === tileKey && updateFileProgress(event.fileName, 1)),
-            OfflineDownload.addListener("tileFinished", event => event.tileKey === tileKey && finish(event))
+            this.offlineDownload.addListener("fileProgress", event => event.tileKey === tileKey && updateFileProgress(event.fileName, event.fraction)),
+            this.offlineDownload.addListener("fileCompleted", event => event.tileKey === tileKey && updateFileProgress(event.fileName, 1)),
+            this.offlineDownload.addListener("tileFinished", event => event.tileKey === tileKey && finish(event))
         ]);
         const onAbort = () => finish({ state: "cancelled", failedFiles: [] });
         currentDownload.abortController.signal.addEventListener("abort", onAbort);
@@ -475,7 +472,7 @@ export class OfflineFilesDownloadService {
         }
         const tileKey = PmTilesService.toTileKey(inProgress.tileX, inProgress.tileY);
         try {
-            const result = await OfflineDownload.getTileDownload({ tileKey });
+            const result = await this.offlineDownload.getTileDownload({ tileKey });
             if (this.currentDownload() != null) {
                 if (result.state !== "running") {
                     this.finishBackgroundDownload?.(result);
@@ -649,7 +646,7 @@ export class OfflineFilesDownloadService {
         this.clearTileDownloadInProgress();
         if (this.isBackgroundDownloadAvailable) {
             const tileKey = PmTilesService.toTileKey(currentDownload.tileX, currentDownload.tileY);
-            OfflineDownload.cancelTileDownload({ tileKey }).catch(ex =>
+            this.offlineDownload.cancelTileDownload({ tileKey }).catch(ex =>
                 this.loggingService.error(`[Offline Download] Failed to cancel the background download of ${tileKey}: ${(ex as Error).message}`));
         }
     }

@@ -22,8 +22,14 @@ import java.util.concurrent.TimeUnit
  * Downloads the files of a tile job with OkHttp for whichever of the job service or the foreground
  * service runs it. The files are started in the order of the job by a fixed pool of its concurrency,
  * since the server lists the files that take it longest first.
+ * The client and the retry delay are only given by tests, which answer the requests themselves.
  */
-class TileDownloader(private val context: Context, val job: TileDownloadJob) {
+class TileDownloader(
+    private val context: Context,
+    val job: TileDownloadJob,
+    private val client: OkHttpClient = sharedClient,
+    private val retryDelayMs: Long = RETRY_DELAY_MS
+) {
 
     /** What a download reports, see TileDownloader.listeners */
     interface Listener {
@@ -229,7 +235,7 @@ class TileDownloader(private val context: Context, val job: TileDownloadJob) {
      * network that dropped would otherwise use up the retries within seconds.
      */
     private fun awaitRetry(retry: Int) {
-        if (interrupted.await(RETRY_DELAY_MS * retry, TimeUnit.MILLISECONDS)) {
+        if (interrupted.await(retryDelayMs * retry, TimeUnit.MILLISECONDS)) {
             return
         }
         val giveUpAt = SystemClock.elapsedRealtime() + NETWORK_WAIT_MS
@@ -303,7 +309,7 @@ class TileDownloader(private val context: Context, val job: TileDownloadJob) {
         private const val CANCEL_WAIT_SECONDS = 5L
         private const val BUFFER_SIZE = 64 * 1024
 
-        private val client by lazy {
+        private val sharedClient by lazy {
             OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build()
