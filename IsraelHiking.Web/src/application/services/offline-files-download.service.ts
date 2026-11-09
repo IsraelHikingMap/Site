@@ -48,6 +48,9 @@ type CurrentDownload = {
 
 export type DownloadStatus = "up-to-date" | "downloaded" | "error" | "aborted";
 
+/** The area that is being downloaded and how much of it was downloaded so far, from 0 to 100 */
+export type DownloadInProgress = { area: Immutable<OfflineArea>; progress: number };
+
 @Service()
 export class OfflineFilesDownloadService {
     /** The metadata id a style uses to declare the minimal version it needs from one of its sources */
@@ -87,7 +90,7 @@ export class OfflineFilesDownloadService {
     private readonly currentDownload = signal<CurrentDownload | null>(null);
 
     /** The area that is being downloaded right now and how far it got, null when there is no download */
-    public readonly downloadInProgress = computed(() => {
+    public readonly downloadInProgress = computed<DownloadInProgress | null>(() => {
         const currentDownload = this.currentDownload();
         return currentDownload == null ? null : { area: currentDownload.area, progress: currentDownload.progress };
     });

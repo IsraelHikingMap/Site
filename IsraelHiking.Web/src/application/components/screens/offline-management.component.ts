@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, inject, signal, computed, viewChild, type ElementRef } from "@angular/core";
+import { Component, ChangeDetectorRef, inject, signal, computed, viewChild, type ElementRef, type Signal } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import type { Map, MapMouseEvent, StyleSpecification } from "maplibre-gl";
@@ -18,7 +18,7 @@ import type { Immutable } from "immer";
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { OfflineFilesDownloadService, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
+import { OfflineFilesDownloadService, type DownloadInProgress, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
 import { OfflineAreasService, TILES_ZOOM } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
@@ -104,7 +104,7 @@ export class OfflineManagementComponent {
     public readonly resources = inject(ResourcesService);
 
     /** The area that is being downloaded right now and how far it got, null when there is no download */
-    public readonly downloadInProgress = this.offlineFilesDownloadService.downloadInProgress;
+    public readonly downloadInProgress: Signal<DownloadInProgress | null> = this.offlineFilesDownloadService.downloadInProgress;
 
     public readonly isSelectedDownloaded = computed(() =>
         this.selectedArea() != null && this.downloadedAreas()[this.selectedArea().properties.id] != null);
