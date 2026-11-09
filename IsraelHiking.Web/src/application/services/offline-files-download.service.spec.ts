@@ -93,6 +93,30 @@ async function flushFilesToDownload(mockBackend: HttpTestingController, files: R
     return request;
 }
 
+/** Keeps the areas it is given in memory, the way the real one keeps them in their files */
+function createOfflineAreasService() {
+    const areas: Record<string, Immutable<OfflineArea>> = {};
+    return {
+        loadAreasMetadata: vi.fn(() => Promise.resolve({ ...areas })),
+        saveAreaMetadata: vi.fn((area: Immutable<OfflineArea>, zooms: AreaZooms) => {
+            areas[area.properties.id] = { ...area, properties: { ...area.properties, ...zooms } };
+            return Promise.resolve();
+        }),
+        deleteAreaMetadata: vi.fn((id: string) => {
+            delete areas[id];
+            return Promise.resolve();
+        })
+    };
+}
+
+/** The zooms the header of a file has, by the kind of area it is of */
+function getZoomsOfFile(fileName: string): { minZoom: number, maxZoom: number } {
+    if (fileName.includes(`+${OfflineAreasService.ROOT_ID}.`)) {
+        return ROOT_ZOOMS;
+    }
+    return /\+\d+-\d+\./.test(fileName) ? { minZoom: 7, maxZoom: 14 } : { minZoom: 5, maxZoom: 14 };
+}
+
 describe("OfflineFilesDownloadService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -912,28 +936,4 @@ describe("OfflineFilesDownloadService", () => {
             }
         )
     );
-
-    /** Keeps the areas it is given in memory, the way the real one keeps them in their files */
-    function createOfflineAreasService() {
-        const areas: Record<string, Immutable<OfflineArea>> = {};
-        return {
-            loadAreasMetadata: vi.fn(() => Promise.resolve({ ...areas })),
-            saveAreaMetadata: vi.fn((area: Immutable<OfflineArea>, zooms: AreaZooms) => {
-                areas[area.properties.id] = { ...area, properties: { ...area.properties, ...zooms } };
-                return Promise.resolve();
-            }),
-            deleteAreaMetadata: vi.fn((id: string) => {
-                delete areas[id];
-                return Promise.resolve();
-            })
-        };
-    }
-
-    /** The zooms the header of a file has, by the kind of area it is of */
-    function getZoomsOfFile(fileName: string): { minZoom: number, maxZoom: number } {
-        if (fileName.includes(`+${OfflineAreasService.ROOT_ID}.`)) {
-            return ROOT_ZOOMS;
-        }
-        return /\+\d+-\d+\./.test(fileName) ? { minZoom: 7, maxZoom: 14 } : { minZoom: 5, maxZoom: 14 };
-    }
 });
