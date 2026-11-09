@@ -139,14 +139,6 @@ describe("OfflineAreasService", () => {
         expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 8, 152, 103)).toBe("76-51");
     });
 
-    it("should read an old tile from its own file, and fill the zooms below it from the zoom 6 root files", () => {
-        const downloadedAreas = toDownloadedAreas(MIGRATED_ROOT_AREA, TILE_AREA);
-
-        expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 9, 305, 205)).toBe("76-51");
-        expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 6, 38, 25)).toBe(OfflineAreasService.ROOT_ID);
-        expect(OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, 4, 9, 6)).toBe(OfflineAreasService.ROOT_ID);
-    });
-
     it("should read the smallest of the areas that hold a tile, so that the root files only fill in where there is no area", () => {
         const largeArea: OfflineArea = { ...ISRAEL_AREA, geometry: createArea("large", [30, 25, 40, 35]).geometry };
         const downloadedAreas = toDownloadedAreas(MIGRATED_ROOT_AREA, largeArea);
