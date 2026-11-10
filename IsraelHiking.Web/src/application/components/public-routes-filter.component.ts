@@ -25,12 +25,14 @@ export class PublicRoutesFilterComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly osmUserService = inject(OsmUserService);
 
-    public readonly unitString = signal("km");
     public readonly filterLengthStart = signal<number>(0);
     public readonly filterLengthEnd = signal<number>(0);
     public readonly filterUserName = signal<string>(null);
 
     private readonly publicRoutesFilter = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
+    private readonly units = this.store.selectSignal((state: ApplicationState) => state.configuration.units);
+
+    public readonly unitString = computed(() => this.resources.getLongDistanceUnitString(this.units()));
 
     public readonly isCategoryFiltered = computed(() => this.publicRoutesFilter().categories.length !== initialState.inMemoryState.publicRoutesFilter.categories.length);
 
@@ -39,9 +41,6 @@ export class PublicRoutesFilterComponent {
     public readonly isLengthFiltered = computed(() => this.filterLengthStart() > 0 || this.filterLengthEnd() < 50);
 
     constructor() {
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
-            this.unitString.set(this.resources.getLongDistanceUnitString(units));
-        });
         this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesFilter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (filters) => {
             this.filterLengthStart.set(filters.lengthRange[0]);
             this.filterLengthEnd.set(filters.lengthRange[1]);
