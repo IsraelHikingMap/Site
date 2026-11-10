@@ -956,6 +956,9 @@ describe("OfflineFilesDownloadService", () => {
                     // The events of another tile, a download that was replaced, say nothing about this one
                     offlineDownload.fire("fileCompleted", { tileKey: PmTilesService.toTileKey(76, 52), fileName: ROUTING_TILES_FILE });
                     expect(service.currentDownloadedTile()).toEqual({ tileX: 76, tileY: 51, progress: 50 });
+                    // A file that is not one of the tile's says nothing about it either
+                    offlineDownload.fire("fileCompleted", { tileKey: TILE_KEY, fileName: ROOT_MAP_FILE });
+                    expect(service.currentDownloadedTile()).toEqual({ tileX: 76, tileY: 51, progress: 50 });
 
                     offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
                     expect(await promise).toBe("downloaded");
@@ -1086,6 +1089,163 @@ describe("OfflineFilesDownloadService", () => {
                     expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${ROUTING_TILES_FILE} (network error: timeout)`));
                     expect(fileService.clearOfflineCache).toHaveBeenCalled();
                     expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should report a background download that ended with a file missing for a reason other than an HTTP status as an error",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "failed", failedFiles: [{ fileName: MAP_FILE, reason: "network error: timeout" }] });
+
+                    expect(await promise).toBe("error");
+                    expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${MAP_FILE} (network error: timeout)`));
+                }
+            )
+        );
+
+        it("Should report a background download that could not be started as an error, forgetting the tile in progress",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startTileDownload.mockRejectedValue(new Error("files is required"));
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+
+                    expect(await promise).toBe("error");
+                    expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining(TILE_KEY));
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should log a background download that could not be cancelled when the download is aborted",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.cancelTileDownload.mockRejectedValue(new Error("no plugin"));
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    service.abortCurrentDownload();
+
+                    expect(await promise).toBe("aborted");
+                    await vi.waitFor(() => expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("no plugin")));
+                }
+            )
+        );
+
+        it("Should keep following a background download that is still running when the app returns to the foreground",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
+                    expect(await service["resumeBackgroundDownload"]()).toBe(true);
+                    expect(service.currentDownloadedTile()?.tileX).toBe(76);
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                }
+            )
+        );
+
+        it("Should forget on start a background download that a previous run left once it ends without completing",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [MAP_FILE], failedFiles: [] });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("tileFinished", expect.any(Function)));
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "failed", failedFiles: [{ fileName: ROUTING_TILES_FILE, reason: "HTTP 500" }] });
+
+                    await vi.waitFor(() => expect(service.currentDownloadedTile()).toBeNull());
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should leave the download the user started alone when the download of a previous run it replaced unwinds",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+                    const initialized = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await initialized;
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("tileFinished", expect.any(Function)));
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
+
+                    expect(offlineDownload.cancelTileDownload).toHaveBeenCalledWith({ tileKey: TILE_KEY });
+                    expect(service.currentDownloadedTile()?.tileX).toBe(76);
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)?.files)
+                        .toEqual([{ fileName: MAP_FILE, date: "2026-06-01" }]);
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+                    expect(await promise).toBe("downloaded");
+                }
+            )
+        );
+
+        it("Should log on start a background download of a previous run whose files could not be moved",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({ state: "completed", completedFiles: [MAP_FILE, ROUTING_TILES_FILE], failedFiles: [] });
+                    vi.mocked(fileService.moveFileFromCacheToDataDirectory).mockRejectedValue(new Error("disk full"));
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    await vi.waitFor(() => expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("disk full")));
+                    expect(service.currentDownloadedTile()).toBeNull();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should clear the cache on start when the background download of a previous run can not be asked about",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockRejectedValue(new Error("no plugin"));
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("no plugin"));
+                    expect(fileService.clearOfflineCache).toHaveBeenCalled();
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
                 }
             )
