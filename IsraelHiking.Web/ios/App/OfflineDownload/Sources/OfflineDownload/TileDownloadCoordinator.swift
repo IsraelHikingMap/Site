@@ -41,6 +41,12 @@ public final class TileDownloadCoordinator {
     private let progressInterval: TimeInterval
     private let queue = DispatchQueue(label: "com.mapeak.offline-download")
     private var job: TileDownloadJob?
+    /// The transfers the job runs in when they are not the coordinator's own, see start
+    private weak var jobTransfers: TileTransfers?
+    /// How many files are handed over at a time, nil when all of them are
+    private var limit: Int?
+    /// The names of the files whose transfers were handed over and did not end yet
+    private var inFlight: Set<String> = []
     private var lastProgress: [String: Date] = [:]
     private var listeners: [WeakListener] = []
 
@@ -61,7 +67,10 @@ public final class TileDownloadCoordinator {
 
     /// Saves a new download and queues every file that is still missing, in the order of the job - the system
     /// decides the actual order once the app is in the background. A download that is going on is cancelled first.
-    public func start(_ newJob: TileDownloadJob) {
+    /// Transfers that are given run the job instead of the coordinator's own, and since they start whatever they
+    /// are handed at once they get at most the job's concurrency of files at a time. Returns the job as it started.
+    @discardableResult
+    public func start(_ newJob: TileDownloadJob, in transfers: TileTransfers? = nil) -> TileDownloadJob {
         queue.sync {
             if let current = job, current.state == .running {
                 end(current, as: .cancelled)
@@ -69,10 +78,14 @@ public final class TileDownloadCoordinator {
             var started = newJob
             started.markFilesFoundOnDisk(fileManager)
             job = started
+            jobTransfers = transfers
+            limit = transfers == nil ? nil : max(1, started.concurrency)
+            inFlight = []
             save(started)
             if !finishIfDone() {
-                started.files.filter { $0.state == .pending }.forEach { enqueue($0, of: started) }
+                enqueuePending()
             }
+            return job ?? started
         }
     }
 
@@ -92,7 +105,7 @@ public final class TileDownloadCoordinator {
     /// the files that are still missing queued again otherwise - this is asked when the app is in the foreground,
     /// where new transfers start without delay.
     public func get(tileKey: String, completion: @escaping (TileDownloadJob?) -> Void) {
-        guard let transfers = transfers else {
+        guard let transfers = queue.sync(execute: { activeTransfers }) else {
             completion(nil)
             return
         }
@@ -112,8 +125,9 @@ public final class TileDownloadCoordinator {
             return current
         }
         save(current)
+        inFlight = []
         if !finishIfDone() {
-            current.files.filter { $0.state == .pending }.forEach { enqueue($0, of: current) }
+            enqueuePending()
         }
         return job
     }
@@ -159,9 +173,12 @@ public final class TileDownloadCoordinator {
             }
             job?.files[index].state = .completed
             job?.files[index].reason = nil
+            inFlight.remove(current.files[index].fileName)
             saveCurrent()
             notify { $0.fileCompleted(tileKey: current.tileKey, fileName: current.files[index].fileName) }
-            _ = finishIfDone()
+            if !finishIfDone() {
+                enqueuePending()
+            }
         }
     }
 
@@ -185,10 +202,9 @@ public final class TileDownloadCoordinator {
                 return
             }
             job?.files[index].retries += 1
+            inFlight.remove(current.files[index].fileName)
             saveCurrent()
-            if let retried = job {
-                enqueue(retried.files[index], of: retried)
-            }
+            enqueuePending()
         }
     }
 
@@ -218,20 +234,43 @@ public final class TileDownloadCoordinator {
         return (current, index)
     }
 
+    private var activeTransfers: TileTransfers? {
+        jobTransfers ?? transfers
+    }
+
+    /// Hands over the pending files that are not in flight yet, in the order of the job, as many as the limit allows
+    private func enqueuePending() {
+        guard let current = job, current.state == .running else {
+            return
+        }
+        for file in current.files where file.state == .pending && !inFlight.contains(file.fileName) {
+            if let limit = limit, inFlight.count >= limit {
+                return
+            }
+            inFlight.insert(file.fileName)
+            enqueue(file, of: current)
+        }
+    }
+
     private func enqueue(_ file: TileDownloadFile, of job: TileDownloadJob) {
         guard let url = URL(string: file.url) else {
             return
         }
         var request = URLRequest(url: url)
         job.headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-        transfers?.enqueue(request, description: TransferDescription(jobId: job.id, tileKey: job.tileKey, fileName: file.fileName).text)
+        activeTransfers?.enqueue(request, description: TransferDescription(jobId: job.id, tileKey: job.tileKey, fileName: file.fileName).text)
     }
 
     private func fail(_ index: Int, reason: String) {
         job?.files[index].state = .failed
         job?.files[index].reason = reason
+        if let fileName = job?.files[index].fileName {
+            inFlight.remove(fileName)
+        }
         saveCurrent()
-        _ = finishIfDone()
+        if !finishIfDone() {
+            enqueuePending()
+        }
     }
 
     /// Fails every file that is not whole yet with the reason the token was rejected, and stops the rest.
@@ -259,7 +298,8 @@ public final class TileDownloadCoordinator {
         finished.state = state
         job = finished
         save(finished)
-        transfers?.cancelTransfers(ofJob: finished.id)
+        activeTransfers?.cancelTransfers(ofJob: finished.id)
+        inFlight = []
         lastProgress = [:]
         notify { $0.tileFinished(finished) }
     }

@@ -268,6 +268,78 @@ final class TileDownloadCoordinatorTests: XCTestCase {
         XCTAssertNil(get(coordinator, "7-76-52"))
     }
 
+    func testShouldHandGivenTransfersAtMostTheConcurrencyOfTheJobAndTheNextFileOnceOneEnds() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"), in: inProcess)
+
+        XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles"])
+        finish(coordinator, "b.pmtiles", 200, "b", in: inProcess)
+        XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles"])
+        finish(coordinator, "a.pmtiles", 404, "not found", in: inProcess)
+
+        XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"])
+        XCTAssertTrue(transfers.enqueued.isEmpty)
+    }
+
+    func testShouldRetryAFileInTheGivenTransfersWithoutHandingOverAnotherOne() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles"), in: inProcess)
+
+        coordinator.didFail(description: inProcess.description(of: "b.pmtiles"), failure: .network("offline"))
+
+        XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "b.pmtiles"])
+        XCTAssertTrue(transfers.enqueued.isEmpty)
+    }
+
+    func testShouldCompleteAJobInTheGivenTransfersOnceAllItsFilesArrived() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        directories.writeOfflineFile("a.pmtiles", "already here")
+
+        let started = coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles"), in: inProcess)
+        finish(coordinator, "b.pmtiles", 200, "b", in: inProcess)
+
+        XCTAssertEqual(started.files.map { $0.state }, [.completed, .pending])
+        XCTAssertEqual(events.finishedStates, [.completed])
+    }
+
+    func testShouldCancelTheTransfersOfAJobInTheTransfersItRunsIn() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        let started = coordinator.start(directories.jobOf("a.pmtiles"), in: inProcess)
+
+        coordinator.cancel(tileKey: started.tileKey)
+
+        XCTAssertEqual(inProcess.cancelledJobs, [started.id])
+        XCTAssertTrue(transfers.cancelledJobs.isEmpty)
+        XCTAssertEqual(events.finishedStates, [.cancelled])
+    }
+
+    func testShouldAskTheTransfersAJobRunsInWhetherItStillHasTransfers() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        let started = coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles"), in: inProcess)
+
+        let job = get(coordinator, started.tileKey)
+
+        XCTAssertEqual(job?.state, .running)
+        XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "b.pmtiles"])
+        XCTAssertTrue(transfers.enqueued.isEmpty)
+    }
+
+    func testShouldRunTheNextJobInItsOwnTransfersWhenNoneAreGiven() {
+        let inProcess = FakeTransfers()
+        let coordinator = makeCoordinator()
+        let first = coordinator.start(directories.jobOf("a.pmtiles"), in: inProcess)
+
+        coordinator.start(directories.jobOf("b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles", tileKey: "7-76-52"))
+
+        XCTAssertEqual(inProcess.cancelledJobs, [first.id])
+        XCTAssertEqual(transfers.enqueuedFileNames, ["b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"])
+    }
+
     private func makeCoordinator() -> TileDownloadCoordinator {
         let coordinator = TileDownloadCoordinator(store: directories.store, transfers: transfers, now: { self.time })
         coordinator.addListener(events)
@@ -275,8 +347,9 @@ final class TileDownloadCoordinatorTests: XCTestCase {
     }
 
     /// Plays the URL session finishing the last transfer of a file with the given status and body
-    private func finish(_ coordinator: TileDownloadCoordinator, _ fileName: String, _ statusCode: Int, _ content: String) {
-        coordinator.didFinishDownloading(description: transfers.description(of: fileName), statusCode: statusCode,
+    private func finish(_ coordinator: TileDownloadCoordinator, _ fileName: String, _ statusCode: Int, _ content: String,
+                        in fake: FakeTransfers? = nil) {
+        coordinator.didFinishDownloading(description: (fake ?? transfers).description(of: fileName), statusCode: statusCode,
                                          location: directories.downloaded(content))
     }
 

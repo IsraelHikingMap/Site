@@ -143,6 +143,10 @@
 			<string>n38lu8286q.skadnetwork</string>
 		</dict>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.mapeak.offline-download.*</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

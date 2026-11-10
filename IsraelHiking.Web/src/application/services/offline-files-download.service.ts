@@ -390,6 +390,9 @@ export class OfflineFilesDownloadService {
         if (backgroundFiles.length > 0) {
             await this.downloadInBackground(currentDownload, fileNames, backgroundFiles, progressPerFile);
         }
+        if (fileDownloadPromises.length > 0) {
+            this.toastService.info(this.resources.dontSwitchApps);
+        }
         await Promise.all(fileDownloadPromises);
         this.loggingService.info(`[Offline Download] Finished downloading offline files, current tile: ${PmTilesService.toTileKey(tileX, tileY)}`);
     }
@@ -399,7 +402,8 @@ export class OfflineFilesDownloadService {
      * background. The tile and all its files are kept in the state until they were moved, so that a download
      * the app did not see end is finished on its next start, see resumeBackgroundDownload.
      * A download that failed on an HTTP status throws with that status, so that downloadTile tells the server
-     * apart from the connection the same way it does for a fetch download.
+     * apart from the connection the same way it does for a fetch download. A download that was cancelled without
+     * the app asking for it, from the progress iOS shows, is aborted the way the app aborts one.
      */
     private async downloadInBackground(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[],
         files: { fileName: string; url: string }[], progressPerFile: Record<number, number>): Promise<void> {
@@ -409,14 +413,20 @@ export class OfflineFilesDownloadService {
         const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
         const directory = await this.fileService.getOfflineCacheUri();
         const result = await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile,
-            () => this.offlineDownload.startTileDownload({
+            async () => this.reportBackgroundDownloadStart(tileKey, await this.offlineDownload.startTileDownload({
                 tileKey,
                 files,
                 headers: { Authorization: `Bearer ${token}` },
                 concurrency: OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY,
-                directory
-            }));
+                directory,
+                title: this.resources.downloadMapForOfflineViewing,
+                subtitle: this.resources.mapeakPro
+            })));
         this.logBackgroundDownloadResult(tileKey, result);
+        if (result.state === "cancelled" && !currentDownload.abortController.signal.aborted) {
+            this.abortCurrentDownload();
+            return;
+        }
         if (result.state !== "completed" && !currentDownload.abortController.signal.aborted) {
             const statusCode = result.failedFiles.map(f => /^HTTP (\d+)$/.exec(f.reason)?.[1]).find(code => code != null);
             throw Object.assign(new Error(`The background download of ${tileKey} ended ${result.state}: ` +
@@ -425,10 +435,24 @@ export class OfflineFilesDownloadService {
     }
 
     /**
+     * Tells the user to keep the app in the foreground when the download does not go on in the background, which
+     * is the case on iOS before 26 and when iOS did not launch the continued task in time.
+     */
+    private reportBackgroundDownloadStart(tileKey: string, started: { background: boolean; launchDelay?: number }): void {
+        this.loggingService.info(`[Offline Download] The download of ${tileKey} started, ` +
+            `${started.background ? "it goes on in the background" : "it stops while the app is in the background"}` +
+            `${started.launchDelay == null ? "" : `, its continued task launched after ${started.launchDelay}ms`}`);
+        if (!started.background) {
+            this.toastService.info(this.resources.dontSwitchApps);
+        }
+    }
+
+    /**
      * Follows the background download of a tile until it ends, with its progress reported like the one of a
      * fetch download. It also ends when the download is aborted, or when the app finds out how it ended
      * without having heard it, see resumeBackgroundDownload. The listeners are added before the download is
-     * started, so that not even a download that ends at once is missed.
+     * started, so that not even a download that ends at once is missed, while what the app finds out is only taken
+     * once the download was started, before that it is about the download that came before.
      */
     private async followBackgroundDownload(currentDownload: CurrentDownload, fileNames: FileNameDateVersion[],
         progressPerFile: Record<number, number>, start: () => Promise<void>): Promise<BackgroundDownloadResult> {
@@ -448,9 +472,9 @@ export class OfflineFilesDownloadService {
         ]);
         const onAbort = () => finish({ state: "cancelled", failedFiles: [] });
         currentDownload.abortController.signal.addEventListener("abort", onAbort);
-        this.finishBackgroundDownload = finish;
         try {
             await start();
+            this.finishBackgroundDownload = finish;
             return await finished;
         } finally {
             currentDownload.abortController.signal.removeEventListener("abort", onAbort);

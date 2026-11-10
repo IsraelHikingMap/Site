@@ -82,7 +82,7 @@ class OfflineDownloadPlugin : Plugin(), TileDownloader.Listener {
         )
         try {
             TileDownloads.start(context, job)
-            call.resolve()
+            call.resolve(JSObject().put("background", true))
         } catch (ex: Exception) {
             call.reject("Failed to start the download of $tileKey: ${ex.message}", ex)
         }

@@ -17,6 +17,8 @@ export interface OfflineDownloadPlugin {
     /**
      * Saves the download of a tile and queues it, resolving once it was. The files are downloaded in the given
      * order, a few at a time, and a download of another tile that is going on is cancelled first.
+     * It resolves with whether the download goes on while the app is in the background, which on iOS takes a
+     * continued task of iOS 26 that the system launched, and with how long it took to launch it, in milliseconds.
      */
     startTileDownload(options: {
         tileKey: string;
@@ -28,7 +30,10 @@ export interface OfflineDownloadPlugin {
          * android writes them to "offline-files" in its cache directory, which is the same directory.
          */
         directory: string;
-    }): Promise<void>;
+        /** What iOS 26 shows the progress of the download under, on the lock screen and in the Dynamic Island */
+        title: string;
+        subtitle: string;
+    }): Promise<{ background: boolean; launchDelay?: number }>;
     /** Stops the transfers of a tile and deletes its partial files, the files that completed are kept */
     cancelTileDownload(options: { tileKey: string }): Promise<void>;
     /**

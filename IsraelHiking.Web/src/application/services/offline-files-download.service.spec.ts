@@ -81,7 +81,14 @@ describe("OfflineFilesDownloadService", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([OfflineReducer, InMemoryReducer]),
-                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download" } },
+                {
+                    provide: ResourcesService, useValue: {
+                        recommendOfflineDownload: "recommend-offline-download",
+                        dontSwitchApps: "dont-switch-apps",
+                        downloadMapForOfflineViewing: "download-map-for-offline-viewing",
+                        mapeakPro: "mapeak-pro"
+                    }
+                },
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
@@ -97,7 +104,7 @@ describe("OfflineFilesDownloadService", () => {
                     }
                 },
                 { provide: LoggingService, useValue: { info: vi.fn(), debug: vi.fn(), warning: vi.fn(), error: vi.fn(), getErrorTypeAndMessage: () => ({ type: "client", message: "" }) } },
-                { provide: ToastService, useValue: { confirm: vi.fn() } },
+                { provide: ToastService, useValue: { confirm: vi.fn(), info: vi.fn() } },
                 { provide: PmTilesService, useValue: { getVersion: vi.fn((): Promise<string> => Promise.resolve(undefined)), invalidateFile: vi.fn() } },
                 {
                     provide: RoutingProvider, useValue: {
@@ -458,6 +465,46 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
+    it("Should tell the user to keep the app open while the files are downloaded with fetch",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
+                });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+
+                expect(await promise).toBe("downloaded");
+                expect(toastService.info).toHaveBeenCalledExactlyOnceWith("dont-switch-apps");
+            }
+        )
+    );
+
+    it("Should not tell the user to keep the app open when there is nothing to download",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedTiles: {}, downloadedRoutingTiles: [] }
+                });
+
+                const promise = service.downloadTile(76, 51);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, false, {});
+                await flushFilesToDownload(mockBackend, true, {});
+
+                expect(await promise).toBe("up-to-date");
+                expect(toastService.info).not.toHaveBeenCalled();
+            }
+        )
+    );
+
     it("Should finish a download whose routing tiles could not be handed over and remove the file holding them",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
@@ -775,12 +822,118 @@ describe("OfflineFilesDownloadService", () => {
                         ],
                         headers: { Authorization: "Bearer token" },
                         concurrency: 3,
-                        directory: "file:///cache/offline-files"
+                        directory: "file:///cache/offline-files",
+                        title: "download-map-for-offline-viewing",
+                        subtitle: "mapeak-pro"
                     });
                     expect(fileService.downloadFileToCacheAuthenticated).not.toHaveBeenCalled();
                     for (const fileName of [ROOT_MAP_FILE, ROUTING_TILES_FILE, MAP_FILE]) {
                         expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(fileName);
                     }
+                }
+            )
+        );
+
+        it("Should not tell the user to keep the app open when the download goes on in the background",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(toastService.info).not.toHaveBeenCalled();
+                }
+            )
+        );
+
+        it("Should tell the user to keep the app open once the download started when it does not go on in the background",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    toastService: ToastService, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startTileDownload.mockResolvedValue({ background: false });
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(toastService.info).toHaveBeenCalledExactlyOnceWith("dont-switch-apps"));
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("it stops while the app is in the background"));
+                }
+            )
+        );
+
+        it("Should log how long iOS took to launch the task the download goes on in",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startTileDownload.mockResolvedValue({ background: true, launchDelay: 420 });
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("its continued task launched after 420ms"));
+                }
+            )
+        );
+
+        it("Should abort the download when the background download was cancelled without the app asking for it",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    // The user stopped the download from the progress iOS shows, or iOS stopped it
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "cancelled", failedFiles: [] });
+
+                    expect(await promise).toBe("aborted");
+                    expect(service.currentDownloadedTile()).toBeNull();
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should not end a download with what the app found out about the download before it, while it was being started",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+                    let started: (value: { background: boolean }) => void;
+                    offlineDownload.startTileDownload.mockReturnValue(new Promise(resolve => started = resolve));
+                    offlineDownload.getTileDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [], failedFiles: [{ fileName: MAP_FILE, reason: "HTTP 404" }]
+                    });
+
+                    const promise = service.downloadTile(76, 51);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, false, {});
+                    await flushFilesToDownload(mockBackend, true, { [MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    // The app returned to the foreground before the new download was saved, so the saved one is the previous
+                    await service["resumeBackgroundDownload"]();
+                    started({ background: true });
+                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
+                    offlineDownload.fire("tileFinished", { tileKey: TILE_KEY, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
                 }
             )
         );
@@ -950,7 +1103,8 @@ type OfflineDownloadStandIn = ReturnType<typeof createOfflineDownloadStandIn>;
 function createOfflineDownloadStandIn() {
     const listeners = new Map<string, Set<(event: object) => void>>();
     return {
-        startTileDownload: vi.fn((_options: Parameters<OfflineDownloadPlugin["startTileDownload"]>[0]) => Promise.resolve()),
+        startTileDownload: vi.fn((_options: Parameters<OfflineDownloadPlugin["startTileDownload"]>[0]) =>
+            Promise.resolve<{ background: boolean; launchDelay?: number }>({ background: true })),
         cancelTileDownload: vi.fn((_options: { tileKey: string }) => Promise.resolve()),
         getTileDownload: vi.fn((_options: { tileKey: string }) => Promise.resolve(
             { state: "none" as TileDownloadState, completedFiles: [] as string[], failedFiles: [] as FailedTileFile[] })),

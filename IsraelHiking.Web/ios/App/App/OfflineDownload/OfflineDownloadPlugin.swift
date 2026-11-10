@@ -53,14 +53,25 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
             return
         }
         let headers = (call.getObject("headers") ?? [:]).compactMapValues { $0 as? String }
-        coordinator.start(TileDownloadJob(
+        let job = TileDownloadJob(
             tileKey: tileKey,
             files: downloadFiles,
             headers: headers,
             concurrency: call.getInt("concurrency") ?? OfflineDownloadPlugin.defaultConcurrency,
             directory: directory
-        ))
-        call.resolve()
+        )
+        if #available(iOS 26.0, *), let title = call.getString("title"), let subtitle = call.getString("subtitle") {
+            OfflineDownloadManager.shared.startContinued(job, title: title, subtitle: subtitle) { background, launchDelay in
+                var result: JSObject = ["background": background]
+                if let launchDelay = launchDelay {
+                    result["launchDelay"] = Int((launchDelay * 1000).rounded())
+                }
+                call.resolve(result)
+            }
+            return
+        }
+        coordinator.start(job)
+        call.resolve(["background": false])
     }
 
     @objc func cancelTileDownload(_ call: CAPPluginCall) {
