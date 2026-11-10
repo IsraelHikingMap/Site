@@ -1,4 +1,4 @@
-﻿import type { ShareUrl, PublicRoutesFilter, Theme, FileNameDateVersion } from "..";
+﻿import type { ShareUrl, PublicRoutesFilter, Theme, DownloadedArea } from "..";
 
 /**
  * this state should be clean every time the app starts
@@ -9,16 +9,11 @@ export type InMemoryState = {
      */
     effectiveTheme: Theme;
     /**
-     * The offline files that are on the device, keyed by the id of the tile they belong to.
-     * They are read from the device when the app starts, so they are never out of sync with it,
-     * and empty until they were read, which is also what an empty device looks like.
+     * What is downloaded for offline usage, keyed by the id of the area. It is read from the device, the files, the
+     * files the areas are kept in and the routing plugin, so it is never out of sync with it, and empty until it was
+     * read, which is also what an empty device looks like.
      */
-    downloadedTiles: Record<string, FileNameDateVersion[]>;
-    /**
-     * The ids of the tiles whose routing tiles are on the device. They are not files, the routing
-     * plugin stores them, so they are read from it when the app starts just like the files are.
-     */
-    downloadedRoutingTiles: string[];
+    downloadedAreas: Record<string, DownloadedArea>;
     distance: boolean;
     pannedTimestamp: Date;
     following: boolean;

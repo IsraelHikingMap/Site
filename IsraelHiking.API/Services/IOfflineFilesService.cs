@@ -35,4 +35,26 @@ public interface IOfflineFilesService
     /// </remarks>
     /// <returns>A list of file names</returns>
     Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile);
+
+    /// <summary>
+    /// Get a list of the files of an area that have been updated since a given date
+    /// </summary>
+    /// <param name="areaId">The id of one of the areas of <see cref="GetAreasContent"/></param>
+    /// <param name="lastModifiedDate">The date to check against</param>
+    /// <returns>The names of the files and when they changed, null when there is no such area</returns>
+    Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate);
+
+    /// <summary>
+    /// Get the content of a file of an area
+    /// </summary>
+    /// <param name="areaId">The id of one of the areas of <see cref="GetAreasContent"/></param>
+    /// <param name="fileName">One of the files <see cref="GetUpdatedFilesListForArea"/> lists</param>
+    /// <returns>A read stream of the file and its length when known, null when there is no such area or file</returns>
+    Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName);
+
+    /// <summary>
+    /// Opens the file holding the areas that can be downloaded for offline usage
+    /// </summary>
+    /// <returns>The content of the file</returns>
+    Stream GetAreasContent();
 }

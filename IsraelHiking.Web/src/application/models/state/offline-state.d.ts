@@ -1,10 +1,4 @@
-﻿export type FileNameDateVersion = {
-    fileName: string;
-    date: string;
-    version?: string;
-}
-
-export type OfflineState = {
+﻿export type OfflineState = {
     /**
      * `true` after a user made a purchase of the subscription 
      */

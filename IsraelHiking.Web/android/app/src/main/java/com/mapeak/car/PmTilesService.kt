@@ -11,14 +11,16 @@ import com.mapeak.pmtiles.PmTilesException
 class PmTilesService(context: Context) : AutoCloseable {
     private val baseDir: File? = context.filesDir
     private val readerCache: MutableMap<String?, PmTilesReader> = HashMap()
+    private val offlineAreas = OfflineAreas(baseDir)
 
     @Throws(IOException::class)
     fun getTileByType(z: Int, x: Int, y: Int, type: String): ByteArray? {
-        return getTileFromFile(getFileNameByType(z, x, y, type), z, x, y)
+        val fileName = getFileNameByType(z, x, y, type) ?: return null
+        return getTileFromFile(fileName, z, x, y)
     }
 
     fun isOfflineFileAvailable(z: Int, x: Int, y: Int, type: String): Boolean {
-        return File(baseDir, getFileNameByType(z, x, y, type)).exists()
+        return getFileNameByType(z, x, y, type) != null
     }
 
     @Synchronized
@@ -31,14 +33,11 @@ class PmTilesService(context: Context) : AutoCloseable {
         readerCache.clear()
     }
 
-    private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String {
-        if (z >= TILES_ZOOM) {
-            val scale = 1 shl (z - TILES_ZOOM)
-            val tileX = x / scale
-            val tileY = y / scale
-            return "$type+$TILES_ZOOM-$tileX-$tileY.pmtiles"
-        }
-        return type + "-" + (TILES_ZOOM - 1) + ".pmtiles"
+    /** The file a tile is read from, the one of the downloaded area that holds it, see OfflineAreas.findDownloadedAreaIdOfTile */
+    private fun getFileNameByType(z: Int, x: Int, y: Int, type: String): String? {
+        val areaId = offlineAreas.findDownloadedAreaIdOfTile(z, x, y) ?: return null
+        val fileName = "$type+$areaId.pmtiles"
+        return if (File(baseDir, fileName).exists()) fileName else null
     }
 
     @Throws(IOException::class)
@@ -71,9 +70,5 @@ class PmTilesService(context: Context) : AutoCloseable {
         }
         readerCache[fileName] = reader
         return reader
-    }
-
-    companion object {
-        const val TILES_ZOOM: Int = 7
     }
 }

@@ -30,7 +30,7 @@ export class ScreenService {
      * It is a boolean of its own rather than the download itself, so that it only reacts to a download
      * starting and ending and not to every step it makes.
      */
-    private readonly isDownloadingOfflineFiles = computed(() => this.offlineFilesDownloadService.currentDownloadedTile() != null);
+    private readonly isDownloadingOfflineFiles = computed(() => this.offlineFilesDownloadService.downloadInProgress() != null);
 
     public async initialize() {
         if (!this.runningContextService.isCapacitor) {

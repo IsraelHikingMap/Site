@@ -54,7 +54,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.currentLanguageCode = language.code;
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedTiles).pipe(skip(1)).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedAreas).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
         this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).pipe(skip(1)).subscribe(() => {

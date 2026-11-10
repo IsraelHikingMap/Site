@@ -4,11 +4,9 @@ import { Source, RangeResponse, PMTiles } from "pmtiles";
 import { Store } from "@ngxs/store";
 import { decode } from "base64-arraybuffer";
 
-import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
+import { OfflineAreasService } from "./offline-areas.service";
 import type { ApplicationState } from "../models";
-
-export const TILES_ZOOM = 7;
 
 class CapacitorSource implements Source {
 
@@ -76,13 +74,11 @@ export class PmTilesService {
         return await this.getTileFromFile(fileName, z, x, y);
     }
 
-    private getFileNameByType(z: number, x: number, y: number, type: string): string {
-        if (z >= TILES_ZOOM) {
-            const { tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM);
-            return `${type}+${TILES_ZOOM}-${tileX}-${tileY}.pmtiles`;
-        } else {
-            return `${type}-${TILES_ZOOM - 1}.pmtiles`;
-        }
+    /** The file a tile is in, the one of the downloaded area that holds it, see OfflineAreasService.findDownloadedAreaIdOfTile */
+    private getFileNameByType(z: number, x: number, y: number, type: string): string | null {
+        const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+        const areaId = OfflineAreasService.findDownloadedAreaIdOfTile(downloadedAreas, z, x, y);
+        return areaId == null ? null : `${type}+${areaId}.pmtiles`;
     }
 
     /**
@@ -90,6 +86,9 @@ export class PmTilesService {
      * so a missing tile is returned as an empty tile and not as an error.
      */
     private async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+        if (fileName == null) {
+            return new ArrayBuffer(0);
+        }
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         const response = await pmTilesProvider.getZxy(z, x, y);
@@ -100,46 +99,28 @@ export class PmTilesService {
         if (this.store.selectSnapshot((state: ApplicationState) => state.offlineState).isSubscribed === false) {
             return false;
         }
-        let tileX = undefined;
-        let tileY = undefined;
-        if (z >= TILES_ZOOM) {
-            ({ tileX, tileY } = SpatialHelper.getParentZoomTileCoordinates({ x, y }, z, TILES_ZOOM));
-        }
-        const downloadedTiles = this.store.selectSnapshot((state: ApplicationState) => state.inMemoryState.downloadedTiles);
-        if (downloadedTiles[PmTilesService.toTileKey(tileX, tileY)] == null) {
+        const fileName = this.getFileNameByType(z, x, y, type);
+        if (fileName == null) {
             return false;
         }
-        const fileName = this.getFileNameByType(z, x, y, type);
         try {
             await this.getSource(fileName);
         } catch (ex) {
-            this.loggingService.warning(`Failed to open file ${fileName} for tile ${PmTilesService.toTileKey(tileX, tileY)} type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
+            this.loggingService.warning(`Failed to open file ${fileName} for type ${type} and ${z}/${x}/${y}: ${(ex as Error).message}`);
             return false;
         }
         return true;
+    }
+
+    /** The zooms a file holds, as its header has them */
+    public async getZooms(fileName: string): Promise<{ minZoom: number, maxZoom: number }> {
+        const header = await new PMTiles(await this.getSource(fileName)).getHeader();
+        return { minZoom: header.minZoom, maxZoom: header.maxZoom };
     }
 
     public async getVersion(fileName: string): Promise<string> {
         const source = await this.getSource(fileName);
         const pmTilesProvider = new PMTiles(source);
         return (await pmTilesProvider.getMetadata() as { version?: string })?.version;
-    }
-
-    /**
-     * The key the files of a tile are stored under, where an undefined tile is the root, non-tiled, one.
-     */
-    public static toTileKey(tileX?: number, tileY?: number): string {
-        return `${tileX}-${tileY}`;
-    }
-
-    /**
-     * The tile a key was made of, null for the root key, which is not of a specific tile.
-     */
-    public static fromTileKey(tileKey: string): { tileX: number, tileY: number } | null {
-        const [tileX, tileY] = tileKey.split("-").map(Number);
-        if (!Number.isInteger(tileX) || !Number.isInteger(tileY)) {
-            return null;
-        }
-        return { tileX, tileY };
     }
 }

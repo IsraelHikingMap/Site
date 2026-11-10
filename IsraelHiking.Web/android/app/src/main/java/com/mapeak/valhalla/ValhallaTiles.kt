@@ -12,14 +12,13 @@ import java.io.IOException
 /**
  * The routing tiles on the device.
  *
- * Every downloaded area is a tar of a valhalla tile tree that is extracted into a single shared
- * directory, and is identified by the id of the tile it covers. Valhalla's tiles are keyed by their
- * grid cell, so adjacent areas simply add their own cells and routing can cross from one to the next.
+ * Every downloaded tar of a valhalla tile tree is extracted into a single shared directory, and what
+ * it held is kept under an id the app gives it. Valhalla's tiles are keyed by their grid cell, so
+ * adjacent tars simply add their own cells and routing can cross from one to the next.
  *
- * Areas do share tiles though - a downloaded tile is roughly 2.8 degrees while valhalla's highway
- * tiles are 4 degrees and its arterial tiles are 1 degree, so a tile on the edge of an area is also
- * in its neighbour's tar. Each area therefore records what it extracted, and deleting one only
- * removes the tiles that no remaining area lists.
+ * Tars do share tiles though - valhalla's highway tiles are 4 degrees and its arterial tiles 1 degree,
+ * so a tile on the edge of one tar is also in its neighbour's. Each id therefore records what it
+ * extracted, and deleting one only removes the tiles that no remaining id lists.
  */
 class ValhallaTiles(private val context: Context) {
 
@@ -40,7 +39,7 @@ class ValhallaTiles(private val context: Context) {
 
     private fun manifestsDir(): File = File(context.filesDir, MANIFESTS_DIR_NAME)
 
-    private fun manifestFile(tileKey: String): File = File(manifestsDir(), tileKey + MANIFEST_EXTENSION)
+    private fun manifestFile(id: String): File = File(manifestsDir(), id + MANIFEST_EXTENSION)
 
     fun hasTiles(): Boolean {
         val dir = tilesDir()
@@ -53,23 +52,23 @@ class ValhallaTiles(private val context: Context) {
     }
 
     /**
-     * The keys of the tiles whose routing tiles are on the device, which is what the manifests are
-     * named after. This is what the app knows the downloaded areas by, so it stores nothing itself.
+     * The ids routing tiles are kept under, which is what the manifests are named after. This is what
+     * the app knows what it can route in by, so it stores nothing itself.
      */
-    fun tileKeys(): List<String> = manifestsDir().listFiles()
+    fun ids(): List<String> = manifestsDir().listFiles()
         ?.filter { it.isFile && it.name.endsWith(MANIFEST_EXTENSION) }
         ?.map { it.name.removeSuffix(MANIFEST_EXTENSION) }
         ?: emptyList()
 
     /**
      * Extracts the given archive, a gzipped tar which is expected to be in the app's files directory,
-     * into the tiles directory, and records the tiles it holds under [tileKey]. The archive is deleted
+     * into the tiles directory, and records the tiles it holds under [id]. The archive is deleted
      * afterwards - it is large and is of no use once extracted.
      * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
      * within a directory names that directory itself first, which is the one entry that is allowed to be
      * the tiles directory rather than something under it.
      */
-    fun extract(tarFileName: String, tileKey: String): ExtractResult {
+    fun extract(tarFileName: String, id: String): ExtractResult {
         val tar = File(context.filesDir, tarFileName)
         if (!tar.exists()) {
             throw IOException("Tar not found at ${tar.absolutePath}")
@@ -103,8 +102,8 @@ class ValhallaTiles(private val context: Context) {
         }
 
         // When an area is downloaded again it might no longer hold tiles it used to
-        val removedPaths = readManifest(tileKey) - extractedPaths.toSet()
-        writeManifest(tileKey, extractedPaths)
+        val removedPaths = readManifest(id) - extractedPaths.toSet()
+        writeManifest(id, extractedPaths)
         deleteUnreferenced(removedPaths)
 
         return ExtractResult(extractedPaths.size, tilesDir.absolutePath)
@@ -113,9 +112,9 @@ class ValhallaTiles(private val context: Context) {
     /**
      * Removes the tiles of the given area, keeping any tile that a remaining area still lists.
      */
-    fun delete(tileKey: String) {
-        val paths = readManifest(tileKey)
-        manifestFile(tileKey).delete()
+    fun delete(id: String) {
+        val paths = readManifest(id)
+        manifestFile(id).delete()
         deleteUnreferenced(paths)
     }
 
@@ -154,13 +153,13 @@ class ValhallaTiles(private val context: Context) {
         }
     }
 
-    private fun readManifest(tileKey: String): List<String> {
-        val manifest = manifestFile(tileKey)
+    private fun readManifest(id: String): List<String> {
+        val manifest = manifestFile(id)
         return if (manifest.exists()) manifest.readLines().filter { it.isNotBlank() } else emptyList()
     }
 
-    private fun writeManifest(tileKey: String, paths: List<String>) {
+    private fun writeManifest(id: String, paths: List<String>) {
         manifestsDir().mkdirs()
-        manifestFile(tileKey).writeText(paths.joinToString("\n"))
+        manifestFile(id).writeText(paths.joinToString("\n"))
     }
 }

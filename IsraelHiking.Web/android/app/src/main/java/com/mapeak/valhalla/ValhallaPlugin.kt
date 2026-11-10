@@ -23,8 +23,8 @@ class ValhallaPlugin : Plugin() {
 
     /**
      * Extracts a downloaded file of routing tiles into the shared tiles directory.
-     * Extracting the files of several adjacent tiles into it is the way to route across them.
-     * The tileKey identifies the tile the file belongs to, so that it can later be removed on its own.
+     * Extracting the files of several adjacent areas into it is the way to route across them.
+     * The tiles it held are kept under the given id, so that they can later be removed on their own.
      */
     @Suppress("unused")
     @PluginMethod
@@ -34,14 +34,14 @@ class ValhallaPlugin : Plugin() {
             call.reject("tarFileName is required")
             return
         }
-        val tileKey = call.getString("tileKey")
-        if (tileKey.isNullOrBlank()) {
-            call.reject("tileKey is required")
+        val id = call.getString("id")
+        if (id.isNullOrBlank()) {
+            call.reject("id is required")
             return
         }
         try {
             ValhallaRouter.close()
-            val result = tiles.extract(tarFileName, tileKey)
+            val result = tiles.extract(tarFileName, id)
             call.resolve(JSObject().put("extractedFiles", result.extractedFiles).put("tilesDir", result.tilesDir))
         } catch (ex: Throwable) {
             call.rejectWith("Tile extraction failed", ex)
@@ -69,41 +69,41 @@ class ValhallaPlugin : Plugin() {
     }
 
     /**
-     * The keys of the tiles whose routing tiles are on the device, so that the app can tell which
-     * areas it can route in without keeping a list of its own.
+     * The ids routing tiles are kept under, so that the app can tell what it can route in without
+     * keeping a list of its own.
      */
     @Suppress("unused")
     @PluginMethod
-    fun listTiles(call: PluginCall) {
-        call.resolve(JSObject().put("tileKeys", JSArray(tiles.tileKeys())))
+    fun listIds(call: PluginCall) {
+        call.resolve(JSObject().put("ids", JSArray(tiles.ids())))
     }
 
     /**
-     * Removes the routing tiles of a single tile, keeping the ones its neighbours share with it.
+     * Removes the routing tiles kept under an id, keeping the ones that are also kept under another id.
      */
     @Suppress("unused")
     @PluginMethod
-    fun deleteTile(call: PluginCall) {
-        val tileKey = call.getString("tileKey")
-        if (tileKey.isNullOrBlank()) {
-            call.reject("tileKey is required")
+    fun deleteById(call: PluginCall) {
+        val id = call.getString("id")
+        if (id.isNullOrBlank()) {
+            call.reject("id is required")
             return
         }
         try {
             ValhallaRouter.close()
-            tiles.delete(tileKey)
+            tiles.delete(id)
             call.resolve()
         } catch (ex: Throwable) {
-            call.rejectWith("Failed to delete the tiles of $tileKey", ex)
+            call.rejectWith("Failed to delete the tiles of $id", ex)
         }
     }
 
     /**
-     * Removes all the extracted tiles.
+     * Removes the routing tiles kept under every id.
      */
     @Suppress("unused")
     @PluginMethod
-    fun clearTiles(call: PluginCall) {
+    fun deleteAll(call: PluginCall) {
         try {
             ValhallaRouter.close()
             tiles.clear()

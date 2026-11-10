@@ -111,7 +111,8 @@ public class FilesController : ControllerBase
     /// </summary>
     /// <remarks>Returns the offline files that need downloading because they changed after the given last-modified time. Requires an entitled (subscribed) user.</remarks>
     /// <param name="lastModified">The last time this tile was downloaded</param>
-    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileX">The tile's X coordinates, null for the root files of the apps that download tiles, which
+    /// hold the whole world up to zoom 6</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
     /// <param name="routingTile">Whether the client can handle the offline routing files - the routing tile
     /// itself and, for the root, the valhalla configuration files</param>
@@ -157,6 +158,75 @@ public class FilesController : ControllerBase
             Response.ContentLength = length;
         }
         return File(content, "application/octet-stream", id);
+    }
+
+    /// <summary>
+    /// Get the offline areas
+    /// </summary>
+    /// <remarks>Returns the areas that can be downloaded for offline usage as a GeoJSON feature collection. Each area
+    /// has an "id", which is what its files are asked for by, an English "name" and a "name:xx" for every other
+    /// language it has a name in. They are read from a file that can be replaced while the site is running.</remarks>
+    /// <returns>A GeoJSON feature collection of polygons</returns>
+    [HttpGet]
+    [Route("offline/areas")]
+    public IActionResult GetOfflineAreas()
+    {
+        return File(_offlineFilesService.GetAreasContent(), "application/json");
+    }
+
+    /// <summary>
+    /// List outdated offline files of an area
+    /// </summary>
+    /// <remarks>The files of one of the areas of offline/areas, from zoom 5 up, along with the root files, which
+    /// hold the whole world up to zoom 4 and are named "name+root", and with its routing tiles. An area that is changed gets a new id, so an id that is no longer in
+    /// offline/areas can not be updated, and the client has the user delete it and download another area instead.
+    /// Requires an entitled (subscribed) user.</remarks>
+    /// <param name="areaId">The id of the area, as offline/areas has it</param>
+    /// <param name="lastModified">The last time this area was downloaded</param>
+    /// <returns>The names of the files that changed since then, and when they did</returns>
+    [HttpGet]
+    [Route("offline/area/{areaId}")]
+    [Authorize]
+    public async Task<IActionResult> GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified)
+    {
+        if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
+        {
+            _logger.LogInformation($"Unable to get the list of offline files of area {areaId} for user: {User.Identity?.Name} since the user is not entitled");
+            return Forbid();
+        }
+        _logger.LogInformation($"Getting the list of offline files of area {areaId} for user: {User.Identity?.Name}, date: {lastModified}");
+        var files = await _offlineFilesService.GetUpdatedFilesListForArea(areaId, lastModified);
+        return files == null ? NotFound() : Ok(files);
+    }
+
+    /// <summary>
+    /// Download an offline file of an area
+    /// </summary>
+    /// <remarks>Returns the content stream of one of the files listed for an area. Requires an entitled (subscribed)
+    /// user.</remarks>
+    /// <param name="areaId">The id of the area, as offline/areas has it</param>
+    /// <param name="fileName">The name of the file</param>
+    /// <returns>A file stream</returns>
+    [HttpGet]
+    [Route("offline/area/{areaId}/{fileName}")]
+    [Authorize]
+    public async Task<IActionResult> GetOfflineFileForArea(string areaId, string fileName)
+    {
+        if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
+        {
+            _logger.LogInformation($"Unable to get the offline file {fileName} of area {areaId} for user: {User.Identity?.Name} since the user is not entitled");
+            return Forbid();
+        }
+        _logger.LogInformation($"Getting the offline file {fileName} of area {areaId} for user: {User.Identity?.Name}");
+        if (await _offlineFilesService.GetFileContentForArea(areaId, fileName) is not var (content, length))
+        {
+            return NotFound();
+        }
+        if (length.HasValue)
+        {
+            Response.ContentLength = length;
+        }
+        return File(content, "application/octet-stream", fileName);
     }
 
     /// <summary>

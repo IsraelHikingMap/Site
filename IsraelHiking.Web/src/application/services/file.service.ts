@@ -679,6 +679,32 @@ export class FileService {
             .map(f => ({ fileName: f.name, modifiedDate: new Date(f.mtime), size: f.size }));
     }
 
+    /** The names of the files in the data directory that end with the given suffix, like ".area.json" */
+    public async listFileNamesInDataDirectory(suffix: string): Promise<string[]> {
+        const results = await Filesystem.readdir({
+            path: "",
+            directory: Directory.Data
+        });
+        return results.files.filter(f => f.type === "file" && f.name.endsWith(suffix)).map(f => f.name);
+    }
+
+    public async writeFileInDataDirectory(fileName: string, content: string): Promise<void> {
+        await Filesystem.writeFile({
+            path: fileName,
+            data: content,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8
+        });
+    }
+
+    public async renameFileInDataDirectory(fileName: string, newFileName: string): Promise<void> {
+        await Filesystem.rename({
+            from: fileName,
+            to: newFileName,
+            directory: Directory.Data
+        });
+    }
+
     public async deleteFileInDataDirectory(fileName: string): Promise<void> {
         try {
             await Filesystem.deleteFile({
