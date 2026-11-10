@@ -65,11 +65,12 @@
     restart: always
   translation:
     image: ghcr.io/mapeak-com/translation:latest
+    platform: linux/amd64
     container_name: translation
     environment:
-      - LTENGINE_MODEL=gemma3-12b
+      - GOOGLE_API_KEY=invalid-dev-key
     volumes:
-      - ltdata:/models
+      - translationcache:/var/cache/nginx
     ports:
       - 5432:5050
     restart: always
@@ -120,7 +121,7 @@ volumes:
     driver: local
   valhalladata:
     driver: local
-  ltdata:
+  translationcache:
     driver: local
   userimagesdata:
     driver: local

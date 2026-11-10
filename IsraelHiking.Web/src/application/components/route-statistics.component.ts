@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ElementRef, ChangeDetectorRef, DestroyRef, inject, viewChild, signal, computed } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
@@ -90,7 +90,6 @@ export class RouteStatisticsComponent implements OnInit {
     public readonly durationUnits = signal("");
     public readonly averageSpeed = signal<number | null>(null);
     public readonly currentSpeed = signal<number | null>(null);
-    public readonly speedUnitString = signal("");
     public readonly remainingDistance = signal(0);
     public readonly traveledDistance = signal(0);
     public readonly ETA = signal("--:--");
@@ -114,6 +113,8 @@ export class RouteStatisticsComponent implements OnInit {
     });
     public readonly subRouteRange = signal<IChartSubRouteRange>(null);
     public readonly slopeRoutePaint = signal<LineLayerSpecification["paint"]>({});
+
+    public readonly speedUnitString = computed(() => this.resources.getSpeedUnitString(this.configurationUnits()));
 
     public readonly lineChartContainer = viewChild<ElementRef>("lineChartContainer");
 
@@ -223,8 +224,7 @@ export class RouteStatisticsComponent implements OnInit {
         this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
         });
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((units) => {
-            this.speedUnitString.set(this.resources.getSpeedUnitString(units));
+        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
             this.updateKmMarkers();
         });
