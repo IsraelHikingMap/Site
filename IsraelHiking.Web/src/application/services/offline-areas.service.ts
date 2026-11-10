@@ -66,24 +66,17 @@ export class OfflineAreasService {
     }
 
     /**
-     * The downloaded area whose files hold a tile, see findDownloadedAreaId. An area holds every tile its polygon touches,
-     * so a tile along its border is read from it even when its center is outside. The tile is tested a little inside its
-     * edges, so that one that only touches an area, like the neighbour of an old tile, is not read from it.
+     * The downloaded area whose files hold a tile, the smallest of them where they overlap, so that an area is read before the
+     * root files of the whole world, which only fill in where there is no area. An area holds every tile its polygon touches,
+     * so the tile is tested a little inside its edges, so that one that only touches an area, like the neighbour of an old
+     * tile, is not read from it.
      */
     public static findDownloadedAreaIdOfTile(downloadedAreas: Immutable<Record<string, DownloadedArea>>, z: number, x: number, y: number): string | null {
-        return OfflineAreasService.findDownloadedAreaId(downloadedAreas, SpatialHelper.getTilePolygon({ x, y }, z, OfflineAreasService.TILE_INSET), z);
-    }
-
-    /**
-     * The downloaded area whose files hold a point or a tile at a zoom, the smallest of them where they overlap, so that
-     * an area is read before the root files of the whole world, which only fill in where there is no area.
-     */
-    private static findDownloadedAreaId(downloadedAreas: Immutable<Record<string, DownloadedArea>>, geometry: GeoJSON.Point | GeoJSON.Polygon,
-        zoom: number): string | null {
+        const tileWithInsets = SpatialHelper.getTilePolygon({ x, y }, z, OfflineAreasService.TILE_INSET);
         const areas = Object.values(downloadedAreas)
             .map(({ area }) => area)
-            .filter(area => area != null && (area.properties.minZoom ?? 0) <= zoom && zoom <= (area.properties.maxZoom ?? Infinity) &&
-                SpatialHelper.intersects(geometry, area))
+            .filter(area => area != null && (area.properties.minZoom ?? 0) <= z && z <= (area.properties.maxZoom ?? Infinity) &&
+                SpatialHelper.intersects(tileWithInsets, area))
             .sort((a, b) => SpatialHelper.getBoundsArea(a) - SpatialHelper.getBoundsArea(b));
         return areas[0]?.properties.id ?? null;
     }
