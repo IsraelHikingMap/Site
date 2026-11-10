@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -231,7 +232,7 @@ public class OfflineFilesService : IOfflineFilesService
         var sourceName = FileNameToSourceName(fileName);
         if (sourceName == VALHALLA_FILE_NAME)
         {
-            return await _remoteFileFetcherGateway.PostForFileStream($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry);
+            return await PostForSlice($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry, fileName);
         }
         if (!(await GetSourceNames()).Contains(sourceName))
         {
@@ -242,7 +243,19 @@ public class OfflineFilesService : IOfflineFilesService
             return await _remoteFileFetcherGateway.GetFileStream($"{_options.OnTheFlyFilesAddress}{sourceName}-{ROOT_ZOOM}.pmtiles");
         }
         var address = IsDem(sourceName) ? _options.OnTheFlyDemAddress : _options.OnTheFlyFilesAddress;
-        return await _remoteFileFetcherGateway.PostForFileStream($"{address}{sourceName}?minzoom={AREA_MIN_ZOOM}", geometry);
+        return await PostForSlice($"{address}{sourceName}?minzoom={AREA_MIN_ZOOM}", geometry, fileName);
+    }
+
+    /// <summary>
+    /// Posts the polygon of an area to a service that slices a file by it, and logs how long the slicing took, which is the
+    /// time until the response starts, before its body is streamed to the client.
+    /// </summary>
+    private async Task<(Stream Content, long? Length)> PostForSlice(string url, string geometry, string fileName)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var result = await _remoteFileFetcherGateway.PostForFileStream(url, geometry);
+        _logger.LogInformation($"Sliced {fileName} in {stopwatch.ElapsedMilliseconds} ms, {result.Length?.ToString() ?? "unknown"} bytes");
+        return result;
     }
 
     /// <inheritdoc/>
