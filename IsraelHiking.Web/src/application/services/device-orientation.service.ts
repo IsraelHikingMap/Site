@@ -7,11 +7,30 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import type { ApplicationState } from "../models";
 
+/**
+ * How much of each new compass reading is taken into the heading. The raw readings jitter by a few degrees between
+ * events, which shakes the map when it turns to every one of them, so they are averaged out over the last few events.
+ */
+const HEADING_SMOOTHING_FACTOR = 0.25;
+
+/**
+ * Moves the previous heading part of the way towards the new reading, going around the shorter side of the circle so
+ * that readings on both sides of north average to north and not to south.
+ */
+export function smoothHeading(previous: number | null, heading: number): number {
+    if (previous == null) {
+        return heading;
+    }
+    const delta = ((heading - previous + 540) % 360) - 180;
+    return (previous + HEADING_SMOOTHING_FACTOR * delta + 360) % 360;
+}
+
 @Service()
 export class DeviceOrientationService {
     public readonly orientationChanged = new EventEmitter<number>();
 
     private eventHandler: { remove: () => Promise<void> } = null;
+    private heading: number | null = null;
 
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
@@ -57,8 +76,10 @@ export class DeviceOrientationService {
             this.eventHandler.remove();
             this.eventHandler = null;
         }
+        this.heading = null;
         this.eventHandler = await CapgoCompass.addListener("headingChange", (event) => {
-            this.orientationChanged.next(event.value);
+            this.heading = smoothHeading(this.heading, event.value);
+            this.orientationChanged.next(this.heading);
         });
         await CapgoCompass.startListening({ minInterval: 100 });
         this.loggingService.info("[Orientation] Started listening to device orientation events");
