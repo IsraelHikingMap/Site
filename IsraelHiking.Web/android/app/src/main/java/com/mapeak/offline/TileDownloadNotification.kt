@@ -17,8 +17,11 @@ class TileDownloadNotification(private val context: Context) {
     private val notificationManager = NotificationManagerCompat.from(context)
     private var lastUpdate = 0L
 
-    fun build(progress: Double): Notification {
+    init {
         ensureChannel()
+    }
+
+    fun build(progress: Double): Notification {
         val percentage = (progress * 100).toInt().coerceIn(0, 100)
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.bg_notification)

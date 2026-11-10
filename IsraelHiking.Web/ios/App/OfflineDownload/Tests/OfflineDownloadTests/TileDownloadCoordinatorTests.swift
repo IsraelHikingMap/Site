@@ -200,6 +200,39 @@ final class TileDownloadCoordinatorTests: XCTestCase {
         XCTAssertEqual(directories.store.load()?.tileKey, "7-76-52")
     }
 
+    func testShouldQueueAtMostTheConcurrencyOfTheJobWhileTheAppIsInTheForeground() {
+        let coordinator = makeCoordinator()
+        coordinator.appDidBecomeActive()
+        coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"))
+
+        XCTAssertEqual(transfers.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles"])
+        finish(coordinator, "a.pmtiles", 200, "a")
+
+        XCTAssertEqual(transfers.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles"])
+    }
+
+    func testShouldQueueEveryRemainingFileOnceWhenTheAppLeavesTheForeground() {
+        let coordinator = makeCoordinator()
+        coordinator.appDidBecomeActive()
+        coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"))
+
+        coordinator.appWillResignActive()
+        coordinator.appDidBecomeActive()
+        finish(coordinator, "a.pmtiles", 200, "a")
+
+        XCTAssertEqual(transfers.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "d.pmtiles", "e.pmtiles"])
+    }
+
+    func testShouldNotQueueAgainTheFilesARelaunchedAppStillHasTransfersOfWhenOneEnds() {
+        makeCoordinator().start(directories.jobOf("a.pmtiles", "b.pmtiles", "c.pmtiles"))
+        let relaunched = makeCoordinator()
+
+        finish(relaunched, "a.pmtiles", 200, "a")
+        relaunched.didFail(description: transfers.description(of: "b.pmtiles"), failure: .network("offline"))
+
+        XCTAssertEqual(transfers.enqueuedFileNames, ["a.pmtiles", "b.pmtiles", "c.pmtiles", "b.pmtiles"])
+    }
+
     func testShouldLeaveAFileTheSystemInterruptedPendingForTheNextRun() {
         let coordinator = makeCoordinator()
         coordinator.start(directories.jobOf("a.pmtiles"))
@@ -213,17 +246,35 @@ final class TileDownloadCoordinatorTests: XCTestCase {
         XCTAssertTrue(events.finishedStates.isEmpty)
     }
 
-    func testShouldQueueOnlyTheMissingFilesOfARunningJobThatLostItsTransfersWhenAskedAboutIt() {
+    func testShouldFailTheMissingFilesOfARunningJobThatLostItsTransfersAsInterruptedWithoutQueuingThem() {
         makeCoordinator().start(directories.jobOf("a.pmtiles", "b.pmtiles"))
         directories.writeOfflineFile("a.pmtiles", "a")
         transfers = FakeTransfers()
+        events = RecordedEvents()
         let restarted = makeCoordinator()
 
         let job = get(restarted, "7-76-51")
 
-        XCTAssertEqual(job?.state, .running)
-        XCTAssertEqual(job?.files.map { $0.state }, [.completed, .pending])
-        XCTAssertEqual(transfers.enqueuedFileNames, ["b.pmtiles"])
+        XCTAssertEqual(job?.state, .failed)
+        XCTAssertEqual(job?.files.map { $0.state }, [.completed, .failed])
+        XCTAssertEqual(job?.files[1].reason, "interrupted")
+        XCTAssertEqual(directories.store.load()?.state, .failed)
+        XCTAssertTrue(transfers.enqueued.isEmpty)
+        XCTAssertEqual(events.finishedStates, [.failed])
+    }
+
+    func testShouldFailAFileWhoseTransferEndedSinceTheUserForceQuitTheAppWithoutTryingItAgain() {
+        let coordinator = makeCoordinator()
+        coordinator.start(directories.jobOf("a.pmtiles", "b.pmtiles"))
+
+        coordinator.didFail(description: transfers.description(of: "a.pmtiles"), failure: .forceQuit)
+        coordinator.didFail(description: transfers.description(of: "b.pmtiles"), failure: .forceQuit)
+
+        let job = directories.store.load()!
+        XCTAssertEqual(job.state, .failed)
+        XCTAssertEqual(job.files.map { $0.reason }, ["force-quit", "force-quit"])
+        XCTAssertEqual(transfers.enqueuedFileNames, ["a.pmtiles", "b.pmtiles"])
+        XCTAssertEqual(events.finishedStates, [.failed])
     }
 
     func testShouldCompleteARunningJobWhoseFilesAreAllOnDiskWhenAskedAboutIt() {

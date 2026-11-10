@@ -50,4 +50,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         _ = ApplicationDelegateProxy.shared.application(
             UIApplication.shared, continue: userActivity) { _ in }
     }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        OfflineDownloadManager.shared.coordinator.appDidBecomeActive()
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        OfflineDownloadManager.shared.coordinator.appWillResignActive()
+    }
 }

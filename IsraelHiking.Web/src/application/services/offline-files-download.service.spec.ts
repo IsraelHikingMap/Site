@@ -1090,6 +1090,47 @@ describe("OfflineFilesDownloadService", () => {
                 }
             )
         );
+
+        it("Should keep the cache on start for a background download that iOS stopped when the app was force-quit",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [MAP_FILE], failedFiles: [{ fileName: ROUTING_TILES_FILE, reason: "force-quit" }]
+                    });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    expect(offlineDownload.startTileDownload).not.toHaveBeenCalled();
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should keep the cache on start for a background download whose process ended while it was going on",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithTileDownloadInProgress(store);
+                    offlineDownload.getTileDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [], failedFiles: [
+                            { fileName: MAP_FILE, reason: "interrupted" }, { fileName: ROUTING_TILES_FILE, reason: "interrupted" }
+                        ]
+                    });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    expect(offlineDownload.startTileDownload).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress)).toBeNull();
+                }
+            )
+        );
     });
 });
 

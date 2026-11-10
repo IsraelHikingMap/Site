@@ -69,12 +69,26 @@ public struct TileDownloadJob: Codable {
             }
         }
     }
+
+    /// The job with its directory under the given home instead of the one it was saved under, since iOS may move
+    /// the app's container to another path between runs.
+    func moved(from savedHome: String, to home: String) -> TileDownloadJob {
+        let path = directory.path
+        guard savedHome != home, path.hasPrefix(savedHome + "/") else {
+            return self
+        }
+        return TileDownloadJob(id: id, tileKey: tileKey, files: files, headers: headers, concurrency: concurrency,
+                               directory: URL(fileURLWithPath: home + path.dropFirst(savedHome.count), isDirectory: true),
+                               state: state)
+    }
 }
 
 /// Keeps the one tile download there is in a json file, written atomically so that an app that is killed
-/// while writing it never leaves a file that can not be read.
+/// while writing it never leaves a file that can not be read. The app's home directory is saved with the job,
+/// so that a job saved before iOS moved the app's container still writes its files to where the app reads them.
 public final class TileDownloadJobStore {
     private let fileURL: URL
+    private let home: String
 
     /// The store of the app, in Application Support where the system neither purges nor shows it
     public static func applicationSupport() -> TileDownloadJobStore {
@@ -83,19 +97,26 @@ public final class TileDownloadJobStore {
         return TileDownloadJobStore(directory: directory)
     }
 
-    public init(directory: URL) {
+    public init(directory: URL, home: String = NSHomeDirectory()) {
         fileURL = directory.appendingPathComponent("offline-download-job.json")
+        self.home = home
     }
 
     public func load() -> TileDownloadJob? {
-        guard let data = try? Data(contentsOf: fileURL) else {
+        guard let data = try? Data(contentsOf: fileURL), let stored = try? JSONDecoder().decode(StoredJob.self, from: data) else {
             return nil
         }
-        return try? JSONDecoder().decode(TileDownloadJob.self, from: data)
+        return stored.job.moved(from: stored.home, to: home)
     }
 
     public func save(_ job: TileDownloadJob) throws {
         try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try JSONEncoder().encode(job).write(to: fileURL, options: .atomic)
+        try JSONEncoder().encode(StoredJob(job: job, home: home)).write(to: fileURL, options: .atomic)
     }
+}
+
+/// A job as it is saved, with the home directory of the app at the time
+private struct StoredJob: Codable {
+    let job: TileDownloadJob
+    let home: String
 }

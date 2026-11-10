@@ -489,7 +489,9 @@ export class OfflineFilesDownloadService {
      * Asks the background download how the tile download in progress stands, when the app starts and whenever
      * it returns to the foreground. A download the app is following ends once it is found to have ended, and
      * one that a previous run of the app left is followed and finished, or forgotten when it failed.
-     * Returns whether a download is still going on, whose files in the cache must be kept.
+     * Returns whether the files in the cache must be kept: those of a download that is still going on, and those
+     * of one that iOS stopped when the app was force-quit or its process ended, which downloading the tile again
+     * goes on from.
      */
     private async resumeBackgroundDownload(): Promise<boolean> {
         const inProgress = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.tileDownloadInProgress);
@@ -511,6 +513,8 @@ export class OfflineFilesDownloadService {
                 return true;
             }
             this.logBackgroundDownloadResult(tileKey, result);
+            this.clearTileDownloadInProgress();
+            return result.state === "failed" && result.failedFiles.some(f => f.reason === "force-quit" || f.reason === "interrupted");
         } catch (ex) {
             this.loggingService.error(`[Offline Download] Failed to get the download of ${tileKey}: ${(ex as Error).message}`);
         }

@@ -143,13 +143,20 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
 
     /// A transfer that ended with an error. One that ended without an error was already handed over when it finished
     /// downloading. A cancelled transfer is either one the coordinator cancelled itself, whose events it ignores, or
-    /// one iOS cancelled since the user force-quit the app, which is continued the next time the app asks about it.
+    /// one iOS cancelled, which tells whether the user force-quit the app. The partial file iOS keeps for resuming a
+    /// transfer is deleted by cancelling a transfer made from it, since the server can not resume one anyway.
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard let error = error as NSError?, let description = task.taskDescription else {
             return
         }
+        if let resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
+            session.downloadTask(withResumeData: resumeData).cancel()
+        }
         let failure: TileTransferFailure
         switch error.code {
+        case NSURLErrorCancelled where error.userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int
+                == NSURLErrorCancelledReasonUserForceQuitApplication:
+            failure = .forceQuit
         case NSURLErrorCancelled:
             failure = .interrupted
         case NSURLErrorTimedOut:

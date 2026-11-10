@@ -20,11 +20,13 @@ public protocol TileDownloadListener: AnyObject {
     func tileFinished(_ job: TileDownloadJob)
 }
 
-/// Why a transfer failed, as the URL session tells it. A transfer the system cancelled - the user force-quit
-/// the app - is interrupted rather than failed, it is continued the next time the app asks about the job.
+/// Why a transfer failed, as the URL session tells it. A transfer the system cancelled since the user force-quit
+/// the app fails its file at once, while one it cancelled for any other reason leaves its file pending, which the
+/// next time the app asks about the job fails as interrupted unless the system still has transfers of it.
 public enum TileTransferFailure {
     case network(String)
     case timeout(String)
+    case forceQuit
     case interrupted
 }
 
@@ -43,8 +45,8 @@ public final class TileDownloadCoordinator {
     private var job: TileDownloadJob?
     /// The transfers the job runs in when they are not the coordinator's own, see start
     private weak var jobTransfers: TileTransfers?
-    /// How many files are handed over at a time, nil when all of them are
-    private var limit: Int?
+    /// Whether the app is in the foreground, see appDidBecomeActive
+    private var isActive = false
     /// The names of the files whose transfers were handed over and did not end yet
     private var inFlight: Set<String> = []
     private var lastProgress: [String: Date] = [:]
@@ -59,16 +61,19 @@ public final class TileDownloadCoordinator {
         self.now = now
         self.progressInterval = progressInterval
         job = store.load()
+        if let loaded = job, loaded.state == .running {
+            inFlight = Set(loaded.files.filter { $0.state == .pending }.map { $0.fileName })
+        }
     }
 
     public func addListener(_ listener: TileDownloadListener) {
         queue.sync { listeners.append(WeakListener(listener)) }
     }
 
-    /// Saves a new download and queues every file that is still missing, in the order of the job - the system
-    /// decides the actual order once the app is in the background. A download that is going on is cancelled first.
-    /// Transfers that are given run the job instead of the coordinator's own, and since they start whatever they
-    /// are handed at once they get at most the job's concurrency of files at a time. Returns the job as it started.
+    /// Saves a new download and queues the files that are still missing, in the order of the job, at most the job's
+    /// concurrency of them at a time while the app is in the foreground. A download that is going on is cancelled
+    /// first. Transfers that are given run the job instead of the coordinator's own, and get at most the job's
+    /// concurrency of files at a time in the background too. Returns the job as it started.
     @discardableResult
     public func start(_ newJob: TileDownloadJob, in transfers: TileTransfers? = nil) -> TileDownloadJob {
         queue.sync {
@@ -79,7 +84,6 @@ public final class TileDownloadCoordinator {
             started.markFilesFoundOnDisk(fileManager)
             job = started
             jobTransfers = transfers
-            limit = transfers == nil ? nil : max(1, started.concurrency)
             inFlight = []
             save(started)
             if !finishIfDone() {
@@ -101,9 +105,9 @@ public final class TileDownloadCoordinator {
     }
 
     /// The download of a tile as it stands, nil when there is none. A running download that the system has no
-    /// transfers of anymore, since the app was force-quit, is completed when all its files are on disk and has
-    /// the files that are still missing queued again otherwise - this is asked when the app is in the foreground,
-    /// where new transfers start without delay.
+    /// transfers of anymore, since the app was force-quit or its process ended, is completed when all its files
+    /// are on disk and fails with the files that are still missing as interrupted otherwise, without starting
+    /// anything: the user decides whether to download the tile again.
     public func get(tileKey: String, completion: @escaping (TileDownloadJob?) -> Void) {
         guard let transfers = queue.sync(execute: { activeTransfers }) else {
             completion(nil)
@@ -125,11 +129,34 @@ public final class TileDownloadCoordinator {
             return current
         }
         save(current)
-        inFlight = []
         if !finishIfDone() {
-            enqueuePending()
+            for index in current.files.indices where current.files[index].state == .pending {
+                job?.files[index].state = .failed
+                job?.files[index].reason = "interrupted"
+            }
+            if let interrupted = job {
+                end(interrupted, as: .failed)
+            }
         }
         return job
+    }
+
+    /// The app came to the foreground, where the background session starts every transfer it is handed at once,
+    /// so the files that have no transfer yet are handed over a few at a time, in the order of the job.
+    public func appDidBecomeActive() {
+        queue.sync {
+            isActive = true
+            enqueuePending()
+        }
+    }
+
+    /// The app is about to leave the foreground: every file that is still queued is handed over at once, so that
+    /// the system holds the whole tile before the app is suspended.
+    public func appWillResignActive() {
+        queue.sync {
+            isActive = false
+            enqueuePending()
+        }
     }
 
     public func didWriteData(description: String, totalBytesWritten: Int64, totalBytesExpected: Int64) {
@@ -192,6 +219,9 @@ public final class TileDownloadCoordinator {
             switch failure {
             case .interrupted:
                 return
+            case .forceQuit:
+                fail(index, reason: "force-quit")
+                return
             case .network(let message):
                 reason = "network error: \(message)"
             case .timeout(let message):
@@ -236,6 +266,14 @@ public final class TileDownloadCoordinator {
 
     private var activeTransfers: TileTransfers? {
         jobTransfers ?? transfers
+    }
+
+    /// How many files are handed over at a time, nil when all of them are
+    private var limit: Int? {
+        guard let current = job, jobTransfers != nil || isActive else {
+            return nil
+        }
+        return max(1, current.concurrency)
     }
 
     /// Hands over the pending files that are not in flight yet, in the order of the job, as many as the limit allows

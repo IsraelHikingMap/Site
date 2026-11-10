@@ -32,6 +32,28 @@ final class TileDownloadJobStoreTests: XCTestCase {
         XCTAssertEqual(loaded.state, .failed)
     }
 
+    func testShouldMoveTheDirectoryOfASavedJobUnderTheHomeTheAppHasNow() throws {
+        let storeDirectory = directories.root.appendingPathComponent("store", isDirectory: true)
+        let job = TileDownloadJob(tileKey: "7-76-51", files: [], headers: [:], concurrency: 3,
+                                  directory: URL(fileURLWithPath: "/containers/old/Library/Caches/offline-files", isDirectory: true))
+
+        try TileDownloadJobStore(directory: storeDirectory, home: "/containers/old").save(job)
+        let loaded = try XCTUnwrap(TileDownloadJobStore(directory: storeDirectory, home: "/containers/new").load())
+
+        XCTAssertEqual(loaded.directory.path, "/containers/new/Library/Caches/offline-files")
+        XCTAssertEqual(loaded.id, job.id)
+    }
+
+    func testShouldKeepTheDirectoryOfASavedJobThatIsNotUnderTheHomeItWasSavedWith() throws {
+        let storeDirectory = directories.root.appendingPathComponent("store", isDirectory: true)
+        let job = directories.jobOf("a.pmtiles")
+
+        try TileDownloadJobStore(directory: storeDirectory, home: "/containers/old").save(job)
+        let loaded = try XCTUnwrap(TileDownloadJobStore(directory: storeDirectory, home: "/containers/new").load())
+
+        XCTAssertEqual(loaded.directory, job.directory)
+    }
+
     func testShouldLoadNothingWhenNoJobWasSaved() {
         XCTAssertNil(directories.store.load())
     }
