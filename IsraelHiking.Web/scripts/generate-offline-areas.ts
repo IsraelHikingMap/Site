@@ -3,8 +3,12 @@
 import fs from "fs";
 import { createHash } from "crypto";
 import { bbox } from "@turf/bbox";
+import { bboxClip } from "@turf/bbox-clip";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
 import { simplify } from "@turf/simplify";
+import { GeometryFactory } from "jsts/org/locationtech/jts/geom.js";
+import { GeoJSONReader, GeoJSONWriter } from "jsts/org/locationtech/jts/io.js";
+import { BufferOp } from "jsts/org/locationtech/jts/operation/buffer.js";
 
 /**
  * Generates offline-areas.json, the areas the offline management screen offers for download, which the
@@ -33,6 +37,11 @@ const OUTPUT_FILE_PATH = "./offline-areas.json";
 const LANGUAGES = ["en", "he", "ar", "ru", "es", "de"];
 /** About a kilometer, an area is picked on a map that shows whole countries and is never drawn up close */
 const SIMPLIFY_TOLERANCE = 0.01;
+/**
+ * Simplifying moves a border by up to the tolerance, so an area is first grown by a bit more than that, in the same
+ * plain degrees, to keep covering all of its region and leave no gap between neighbors
+ */
+const BUFFER_DISTANCE = 1.1 * SIMPLIFY_TOLERANCE;
 const COORDINATE_DECIMALS = 3;
 /** How many statements an Overpass query is sent with, the whole list at once takes it longer than its timeout */
 const OVERPASS_BATCH_SIZE = 100;
@@ -226,7 +235,7 @@ function isOverlapping(bounds: GeoJSON.BBox, otherBounds: GeoJSON.BBox): boolean
 function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feature<GeoJSON.Geometry, Record<string, string>> {
     const englishName = getEnglishName(region.properties.name);
     const ordered = [...relations].sort((a, b) => getNamePosition(englishName, a) - getNamePosition(englishName, b));
-    const geometry = simplify(region, { tolerance: SIMPLIFY_TOLERANCE, highQuality: true }).geometry;
+    const geometry = getSimplifiedGeometry(region);
     const roundedGeometry = { ...geometry, coordinates: roundCoordinates(geometry.coordinates) };
     const properties: Record<string, string> = {
         id: createHash("sha256").update(JSON.stringify(roundedGeometry)).digest("hex").substring(0, 16),
@@ -245,7 +254,20 @@ function getNamePosition(englishName: string, relation: OsmRelation): number {
     return position < 0 ? Number.MAX_SAFE_INTEGER : position;
 }
 
+/**
+ * The region grown by BUFFER_DISTANCE and then simplified, clipped back to the world where growing it pushed it past
+ * the antimeridian
+ */
+function getSimplifiedGeometry(region: GeofabrikRegion): GeoJSON.MultiPolygon {
+    const buffered = new GeoJSONWriter().write(BufferOp.bufferOp(new GeoJSONReader(new GeometryFactory()).read(region.geometry), BUFFER_DISTANCE)) as GeoJSON.Polygon | GeoJSON.MultiPolygon;
+    const simplified = simplify(buffered, { tolerance: SIMPLIFY_TOLERANCE, highQuality: true });
+    const clipped = bboxClip(simplified, [-180, -90, 180, 90]).geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
+    return clipped.type === "Polygon" ? { type: "MultiPolygon", coordinates: [clipped.coordinates] } : clipped;
+}
+
+/** Rounding closes up a hole that growing the region left too small, which leaves it with fewer than 3 points */
 function roundCoordinates(coordinates: GeoJSON.Position[][][]): GeoJSON.Position[][][] {
     const factor = Math.pow(10, COORDINATE_DECIMALS);
-    return coordinates.map(polygon => polygon.map(ring => ring.map(([lng, lat]) => [Math.round(lng * factor) / factor, Math.round(lat * factor) / factor])));
+    return coordinates.map(polygon => polygon.map(ring => ring.map(([lng, lat]) => [Math.round(lng * factor) / factor, Math.round(lat * factor) / factor]))
+        .filter(ring => new Set(ring.map(position => position.join())).size >= 3));
 }
