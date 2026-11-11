@@ -1,7 +1,7 @@
 import { describe, beforeEach, afterEach, vi, it, expect } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
-import { provideHttpClientTesting } from "@angular/common/http/testing";
+import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { provideStore, Store } from "@ngxs/store";
 import Dexie from "dexie";
 
@@ -60,4 +60,21 @@ describe("DatabaseService", () => {
 
         expect(reset).toHaveBeenCalled();
     }));
+
+    it("Should answer a slice tile the server does not have with a 404 and not as being offline",
+        inject([DatabaseService, Store, PmTilesService, HttpTestingController],
+            async (service: DatabaseService, store: Store, pmTilesService: PmTilesService, mockBackend: HttpTestingController) => {
+                await service.initialize();
+                pmTilesService.isOfflineFileAvailable = vi.fn().mockResolvedValue(false);
+                const dispatch = vi.spyOn(store, "dispatch");
+
+                const promise = service.getSliceTile("slice://mapeak.com/vector/data/raster-dem/14/9783/6797.webp");
+                await vi.waitFor(() => mockBackend.expectOne("https://mapeak.com/vector/data/raster-dem/14/9783/6797.webp")
+                    .flush(null, { status: 404, statusText: "Not Found" }));
+
+                await expect(promise).rejects.toMatchObject({ status: 404 });
+                expect(dispatch).not.toHaveBeenCalled();
+            }
+        )
+    );
 });
