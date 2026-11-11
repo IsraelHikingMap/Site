@@ -26,6 +26,9 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
 
     override public func load() {
         coordinator.addListener(self)
+        OfflineDownloadManager.shared.log = { [weak self] message in
+            self?.notify("diagnostic", ["message": message])
+        }
     }
 
     @objc func startTileDownload(_ call: CAPPluginCall) {

@@ -47,6 +47,8 @@ export interface OfflineDownloadPlugin {
         listener: (event: { tileKey: string; fileName: string }) => void): Promise<PluginListenerHandle>;
     addListener(eventName: "tileFinished",
         listener: (event: { tileKey: string; state: TileDownloadState; failedFiles: FailedTileFile[] }) => void): Promise<PluginListenerHandle>;
+    /** What happened to a download, with the time it happened, which the app logs to tell how it went on the device */
+    addListener(eventName: "diagnostic", listener: (event: { message: string }) => void): Promise<PluginListenerHandle>;
 }
 
 export const OfflineDownload = registerPlugin<OfflineDownloadPlugin>("OfflineDownload");

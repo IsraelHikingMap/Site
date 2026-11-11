@@ -26,19 +26,30 @@ public final class ContinuedTileDownload: TileDownloadListener {
     private let timeout: TimeInterval
     private let now: () -> Date
     private let schedule: Schedule
+    private let log: (String) -> Void
     private let lock = NSLock()
     private var active: ActiveTask?
 
-    /// The clock and the scheduling are only given by tests, which decide when time passes themselves.
+    /// The clock and the scheduling are only given by tests, which decide when time passes themselves. The log tells
+    /// what happened to the task, which the system does not tell the user about.
     public init(coordinator: TileDownloadCoordinator, transfers: TileTransfers, timeout: TimeInterval = 3,
                 now: @escaping () -> Date = Date.init,
-                schedule: @escaping Schedule = { DispatchQueue.global().asyncAfter(deadline: .now() + $0, execute: DispatchWorkItem(block: $1)) }) {
+                schedule: @escaping Schedule = { DispatchQueue.global().asyncAfter(deadline: .now() + $0, execute: DispatchWorkItem(block: $1)) },
+                log: @escaping (String) -> Void = { _ in }) {
         self.coordinator = coordinator
         self.transfers = transfers
         self.timeout = timeout
         self.now = now
         self.schedule = schedule
+        self.log = log
         coordinator.addListener(self)
+    }
+
+    /// How far the task that is running got, nil when there is none
+    public var progressDescription: String? {
+        withLock {
+            active.map { "\($0.task.progress.completedUnitCount) of \($0.task.progress.totalUnitCount) units" }
+        }
     }
 
     /// Submits a continued task for the job and starts the job once the system launched it, or in the background
@@ -48,30 +59,37 @@ public final class ContinuedTileDownload: TileDownloadListener {
         let decision = Decision()
         let submittedAt = now()
         let submitted = submit { task in
+            let launchDelay = self.now().timeIntervalSince(submittedAt)
             guard decision.take(self.lock) else {
+                self.log("The continued task of \(job.tileKey) launched after \(Self.milliseconds(launchDelay)), too late, ending it")
                 task.setTaskCompleted(success: false)
                 return
             }
+            self.log("The continued task of \(job.tileKey) launched after \(Self.milliseconds(launchDelay))")
             self.run(job, in: task)
-            completion(true, self.now().timeIntervalSince(submittedAt))
+            completion(true, launchDelay)
         }
-        let fallBack = {
+        let fallBack = { (reason: String) in
             guard decision.take(self.lock) else {
                 return
             }
+            self.log("The continued task of \(job.tileKey) \(reason), downloading in the background session")
             self.coordinator.start(job)
             completion(false, nil)
         }
         guard submitted else {
-            fallBack()
+            fallBack("could not be submitted")
             return
         }
-        schedule(timeout, fallBack)
+        schedule(timeout) {
+            fallBack("did not launch within \(Self.milliseconds(self.timeout))")
+        }
     }
 
     private func run(_ job: TileDownloadJob, in task: ContinuedTask) {
         task.progress.totalUnitCount = Int64(job.files.count) * ContinuedTileDownload.unitsPerFile
         task.setExpirationHandler { [weak self] in
+            self?.log("The continued task of \(job.tileKey) expired, cancelling the download")
             self?.coordinator.cancel(tileKey: job.tileKey)
         }
         let previous = withLock { () -> ContinuedTask? in
@@ -119,7 +137,15 @@ public final class ContinuedTileDownload: TileDownloadListener {
             active = nil
             return current.task
         }
-        task?.setTaskCompleted(success: job.state == .completed)
+        guard let task = task else {
+            return
+        }
+        log("The continued task of \(job.tileKey) ended with the download \(job.state.rawValue)")
+        task.setTaskCompleted(success: job.state == .completed)
+    }
+
+    private static func milliseconds(_ interval: TimeInterval) -> String {
+        "\(Int((interval * 1000).rounded()))ms"
     }
 
     private func updateProgress() {

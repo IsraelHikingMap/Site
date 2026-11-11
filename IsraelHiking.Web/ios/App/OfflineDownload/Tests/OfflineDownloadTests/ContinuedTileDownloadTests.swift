@@ -11,6 +11,7 @@ final class ContinuedTileDownloadTests: XCTestCase {
     private var time = Date(timeIntervalSince1970: 0)
     private var scheduled: [(delay: TimeInterval, block: () -> Void)] = []
     private var results: [(background: Bool, launchDelay: TimeInterval?)] = []
+    private var logged: [String] = []
 
     override func setUp() {
         directories = TestDirectories()
@@ -20,6 +21,7 @@ final class ContinuedTileDownloadTests: XCTestCase {
         time = Date(timeIntervalSince1970: 0)
         scheduled = []
         results = []
+        logged = []
         coordinator = TileDownloadCoordinator(store: directories.store, transfers: background, progressInterval: 0)
         coordinator.addListener(events)
     }
@@ -130,9 +132,66 @@ final class ContinuedTileDownloadTests: XCTestCase {
         XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "a.pmtiles"])
     }
 
+    func testShouldLogTheLaunchAndTheEndOfTheTaskAndDescribeItsProgressMeanwhile() {
+        let continued = makeContinued()
+        let task = FakeContinuedTask()
+        var launch: ((ContinuedTask) -> Void)?
+        continued.start(directories.jobOf("a.pmtiles", "b.pmtiles"), submit: { launch = $0; return true }, completion: record)
+        time = time.addingTimeInterval(0.015)
+        launch?(task)
+
+        coordinator.didWriteData(description: inProcess.description(of: "a.pmtiles"), totalBytesWritten: 50, totalBytesExpected: 100)
+        XCTAssertEqual(continued.progressDescription, "500 of 2000 units")
+        finish("a.pmtiles", 200)
+        finish("b.pmtiles", 200)
+
+        XCTAssertNil(continued.progressDescription)
+        XCTAssertEqual(logged, [
+            "The continued task of 7-76-51 launched after 15ms",
+            "The continued task of 7-76-51 ended with the download completed"
+        ])
+    }
+
+    func testShouldLogATaskThatCouldNotBeSubmitted() {
+        let continued = makeContinued()
+
+        continued.start(directories.jobOf("a.pmtiles"), submit: { _ in false }, completion: record)
+
+        XCTAssertEqual(logged, ["The continued task of 7-76-51 could not be submitted, downloading in the background session"])
+    }
+
+    func testShouldLogATaskThatLaunchedTooLate() {
+        let continued = makeContinued()
+        var launch: ((ContinuedTask) -> Void)?
+        continued.start(directories.jobOf("a.pmtiles"), submit: { launch = $0; return true }, completion: record)
+
+        scheduled.forEach { $0.block() }
+        time = time.addingTimeInterval(4)
+        launch?(FakeContinuedTask())
+
+        XCTAssertEqual(logged, [
+            "The continued task of 7-76-51 did not launch within 3000ms, downloading in the background session",
+            "The continued task of 7-76-51 launched after 4000ms, too late, ending it"
+        ])
+    }
+
+    func testShouldLogATaskThatExpired() {
+        let continued = makeContinued()
+        let task = FakeContinuedTask()
+        continued.start(directories.jobOf("a.pmtiles"), submit: { $0(task); return true }, completion: record)
+
+        task.expirationHandler?()
+
+        XCTAssertEqual(logged, [
+            "The continued task of 7-76-51 launched after 0ms",
+            "The continued task of 7-76-51 expired, cancelling the download",
+            "The continued task of 7-76-51 ended with the download cancelled"
+        ])
+    }
+
     private func makeContinued() -> ContinuedTileDownload {
         ContinuedTileDownload(coordinator: coordinator, transfers: inProcess, now: { self.time },
-                              schedule: { self.scheduled.append(($0, $1)) })
+                              schedule: { self.scheduled.append(($0, $1)) }, log: { self.logged.append($0) })
     }
 
     private func record(_ background: Bool, _ launchDelay: TimeInterval?) {

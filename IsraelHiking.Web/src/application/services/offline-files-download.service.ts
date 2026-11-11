@@ -113,6 +113,7 @@ export class OfflineFilesDownloadService {
             return;
         }
         if (this.isBackgroundDownloadAvailable) {
+            this.offlineDownload.addListener("diagnostic", event => this.loggingService.info(`[Offline Download] [native] ${event.message}`));
             App.addListener("appStateChange", state => state.isActive && this.resumeBackgroundDownload());
         }
         if (!await this.resumeBackgroundDownload()) {

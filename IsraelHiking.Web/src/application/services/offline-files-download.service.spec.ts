@@ -1251,6 +1251,21 @@ describe("OfflineFilesDownloadService", () => {
             )
         );
 
+        it("Should log what the background download reports about how it went on the device",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+                    offlineDownload.fire("diagnostic", { message: "[21:50:01.123] The app entered the background" });
+
+                    expect(loggingService.info).toHaveBeenCalledWith("[Offline Download] [native] [21:50:01.123] The app entered the background");
+                }
+            )
+        );
+
         it("Should keep the cache on start for a background download that iOS stopped when the app was force-quit",
             inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
@@ -1314,7 +1329,7 @@ function createOfflineDownloadStandIn() {
             listeners.set(eventName, eventListeners.add(listener));
             return Promise.resolve({ remove: () => Promise.resolve(void eventListeners.delete(listener)) });
         }),
-        fire: (eventName: "fileProgress" | "fileCompleted" | "tileFinished", event: object) =>
+        fire: (eventName: "fileProgress" | "fileCompleted" | "tileFinished" | "diagnostic", event: object) =>
             listeners.get(eventName)?.forEach(listener => listener(event))
     };
 }

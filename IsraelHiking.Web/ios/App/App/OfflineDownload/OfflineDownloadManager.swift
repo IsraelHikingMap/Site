@@ -1,24 +1,35 @@
 import BackgroundTasks
 import Foundation
 import OfflineDownload
+import UIKit
 
 /// Owns the URL sessions the tile downloads run in, see `TileDownloadCoordinator`. It is owned by the app rather
 /// than by the plugin, and created at launch, so that a relaunch reconnects to the transfers of the background
 /// session that are already in flight and iOS can finish them while Mapeak is suspended or terminated.
 /// A download that runs in a continued task, see `ContinuedTileDownload`, runs in a session of the app's own
 /// process instead, which the system does not stop while the task keeps the app running.
-final class OfflineDownloadManager {
+final class OfflineDownloadManager: TileDownloadListener {
     static let shared = OfflineDownloadManager()
 
     static let sessionIdentifier = "com.mapeak.offline-download"
     /// The prefix of the identifiers of the continued tasks, which BGTaskSchedulerPermittedIdentifiers allows
     private static let continuedTaskIdentifierPrefix = "com.mapeak.offline-download."
     private static let defaultConcurrency = 3
+    private static let heartbeatInterval = 5
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss.SSS"
+        return formatter
+    }()
 
     private(set) var coordinator: TileDownloadCoordinator!
     private let backgroundSession: TileTransferSession
     private let processSession: TileTransferSession
     private var continued: ContinuedTileDownload!
+    private var heartbeat: DispatchSourceTimer?
+    private let heartbeatQueue = DispatchQueue(label: "com.mapeak.offline-download.heartbeat")
+    /// Where the diagnostics of a download in a continued task go, the plugin hands them to the app's log
+    var log: ((String) -> Void)?
 
     /// The handler iOS hands over when it relaunched the app for the session's events, see AppDelegate
     var backgroundCompletionHandler: (() -> Void)? {
@@ -37,7 +48,71 @@ final class OfflineDownloadManager {
         coordinator = TileDownloadCoordinator(store: store, transfers: backgroundSession)
         backgroundSession.coordinator = coordinator
         processSession.coordinator = coordinator
-        continued = ContinuedTileDownload(coordinator: coordinator, transfers: processSession)
+        processSession.log = { [weak self] in self?.diagnose($0) }
+        continued = ContinuedTileDownload(coordinator: coordinator, transfers: processSession, log: { [weak self] in self?.diagnose($0) })
+        coordinator.addListener(self)
+        observeAppState()
+    }
+
+    /// Hands a diagnostic to the log with the time it happened, since the app's web view only runs, and logs it,
+    /// once the app is in the foreground again.
+    private func diagnose(_ message: String) {
+        log?("[\(OfflineDownloadManager.timeFormatter.string(from: Date()))] \(message)")
+    }
+
+    /// Logs the bytes of every transfer of the continued task every few seconds while it runs: a gap between
+    /// heartbeats means the app was suspended, and heartbeats with bytes that do not grow mean the transfers stalled.
+    private func startHeartbeat() {
+        heartbeatQueue.async {
+            self.heartbeat?.cancel()
+            let timer = DispatchSource.makeTimerSource(queue: self.heartbeatQueue)
+            timer.schedule(deadline: .now() + .seconds(OfflineDownloadManager.heartbeatInterval),
+                           repeating: .seconds(OfflineDownloadManager.heartbeatInterval))
+            timer.setEventHandler { [weak self] in
+                guard let self = self else {
+                    return
+                }
+                self.diagnose("Heartbeat: \(self.continued.progressDescription ?? "no task"), \(self.processSession.transfersDescription())")
+            }
+            self.heartbeat = timer
+            timer.resume()
+        }
+    }
+
+    private func stopHeartbeat() {
+        heartbeatQueue.async {
+            self.heartbeat?.cancel()
+            self.heartbeat = nil
+        }
+    }
+
+    /// Logs the app's moves between the foreground and the background, and the device being locked and unlocked,
+    /// while a download in a continued task runs.
+    private func observeAppState() {
+        let events: [(Notification.Name, String)] = [
+            (UIApplication.didEnterBackgroundNotification, "The app entered the background"),
+            (UIApplication.willEnterForegroundNotification, "The app is entering the foreground"),
+            (UIApplication.protectedDataWillBecomeUnavailableNotification, "The device is being locked"),
+            (UIApplication.protectedDataDidBecomeAvailableNotification, "The device was unlocked")
+        ]
+        for (name, message) in events {
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { [weak self] _ in
+                guard let self = self, self.continued.progressDescription != nil else {
+                    return
+                }
+                self.diagnose(message)
+            }
+        }
+    }
+
+    func fileProgress(tileKey: String, fileName: String, fraction: Double) {
+    }
+
+    func fileCompleted(tileKey: String, fileName: String) {
+    }
+
+    func tileFinished(_ job: TileDownloadJob) {
+        stopHeartbeat()
     }
 
     /// Starts a download in a continued task that shows its progress under the given title and subtitle, see
@@ -56,6 +131,7 @@ final class OfflineDownloadManager {
                 launchHandler(SystemContinuedTask(task))
             }
             guard registered else {
+                self.diagnose("Registering the continued task failed")
                 return false
             }
             let request = BGContinuedProcessingTaskRequest(identifier: identifier, title: title, subtitle: subtitle)
@@ -64,9 +140,15 @@ final class OfflineDownloadManager {
                 try BGTaskScheduler.shared.submit(request)
                 return true
             } catch {
+                self.diagnose("Submitting the continued task failed: \(error.localizedDescription)")
                 return false
             }
-        }, completion: completion)
+        }, completion: { background, launchDelay in
+            if background {
+                self.startHeartbeat()
+            }
+            completion(background, launchDelay)
+        })
     }
 }
 
@@ -97,7 +179,12 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
     weak var coordinator: TileDownloadCoordinator?
     /// Called once a background session delivered all the events it relaunched the app for
     var finishedEventsHandler: (() -> Void)?
+    /// Where the diagnostics of the transfers go, nil when they are not wanted
+    var log: ((String) -> Void)?
     private var session: URLSession!
+    private let lock = NSLock()
+    /// The bytes received and expected so far for every transfer that did not end yet, by its description
+    private var received: [String: (bytes: Int64, expected: Int64)] = [:]
 
     init(configuration: URLSessionConfiguration) {
         super.init()
@@ -129,8 +216,46 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
         guard let description = downloadTask.taskDescription else {
             return
         }
+        let isFirst = withLock { () -> Bool in
+            let isFirst = received[description] == nil
+            received[description] = (totalBytesWritten, totalBytesExpectedToWrite)
+            return isFirst
+        }
+        if isFirst {
+            log?("\(TileTransferSession.fileName(description)) started, \(TileTransferSession.megabytes(totalBytesExpectedToWrite)) expected")
+        }
         coordinator?.didWriteData(description: description, totalBytesWritten: totalBytesWritten,
                                   totalBytesExpected: totalBytesExpectedToWrite)
+    }
+
+    /// The bytes received so far for every transfer that did not end yet
+    func transfersDescription() -> String {
+        let transfers = withLock { received }
+        guard !transfers.isEmpty else {
+            return "no transfers"
+        }
+        return transfers.sorted { $0.key < $1.key }.map {
+            "\(TileTransferSession.fileName($0.key)) \(TileTransferSession.megabytes($0.value.bytes)) of \(TileTransferSession.megabytes($0.value.expected))"
+        }.joined(separator: ", ")
+    }
+
+    private func ended(_ description: String, _ message: String) {
+        let bytes = withLock { received.removeValue(forKey: description)?.bytes }
+        log?("\(TileTransferSession.fileName(description)) \(message) after \(TileTransferSession.megabytes(bytes ?? 0))")
+    }
+
+    private static func fileName(_ description: String) -> String {
+        description.split(separator: "/").last.map(String.init) ?? description
+    }
+
+    private static func megabytes(_ bytes: Int64) -> String {
+        bytes < 0 ? "unknown" : String(format: "%.1f MB", Double(bytes) / 1_000_000)
+    }
+
+    private func withLock<T>(_ body: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return body()
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -138,6 +263,7 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
             return
         }
         let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode
+        ended(description, "finished with status \(statusCode.map(String.init) ?? "none")")
         coordinator?.didFinishDownloading(description: description, statusCode: statusCode, location: location)
     }
 
@@ -149,6 +275,7 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
         guard let error = error as NSError?, let description = task.taskDescription else {
             return
         }
+        ended(description, "failed with error \(error.code)")
         if let resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
             session.downloadTask(withResumeData: resumeData).cancel()
         }
