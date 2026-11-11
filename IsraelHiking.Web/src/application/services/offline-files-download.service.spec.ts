@@ -109,6 +109,14 @@ function createOfflineAreasService() {
     };
 }
 
+function createSquareArea(id: string, [minLng, minLat, maxLng, maxLat]: number[]): OfflineArea {
+    return {
+        type: "Feature",
+        properties: { id },
+        geometry: { type: "Polygon", coordinates: [[[minLng, minLat], [maxLng, minLat], [maxLng, maxLat], [minLng, maxLat], [minLng, minLat]]] }
+    };
+}
+
 /** The zooms the header of a file has, by the kind of area it is of */
 function getZoomsOfFile(fileName: string): { minZoom: number, maxZoom: number } {
     if (fileName.includes(`+${OfflineAreasService.ROOT_ID}.`)) {
@@ -468,7 +476,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 const request = await flushFilesToDownload(mockBackend, {});
 
@@ -492,7 +500,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -522,7 +530,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -548,7 +556,7 @@ describe("OfflineFilesDownloadService", () => {
                     return Promise.reject(new DOMException("The user aborted a request.", "AbortError"));
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
@@ -574,13 +582,13 @@ describe("OfflineFilesDownloadService", () => {
                         return new Promise(resolve => stuckDownloads.push(resolve));
                     });
 
-                const stuckPromise = service.downloadArea(AREA);
+                const stuckPromise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(1));
 
                 service.abortCurrentDownload();
-                const secondPromise = service.downloadArea(OTHER_AREA);
+                const secondPromise = service.downloadArea(OTHER_AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [`IHM-schema+${OTHER_AREA.properties.id}.pmtiles`]: "2026-06-01" }, OTHER_AREA.properties.id);
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(2));
@@ -619,7 +627,7 @@ describe("OfflineFilesDownloadService", () => {
                 };
                 const areaFile = "IHM-schema+israel-and-palestine.pmtiles";
 
-                const promise = service.downloadArea(area);
+                const promise = service.downloadArea(area, []);
                 await flushStyles(mockBackend, {});
                 const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`));
                 expect(service.downloadInProgress()).toEqual({ area, progress: 0 });
@@ -641,38 +649,53 @@ describe("OfflineFilesDownloadService", () => {
         )
     );
 
-    it("Should delete the old tiles an area overlaps once the area is downloaded, and only those",
+    it("Should replace the old tiles and the areas that are no longer offered an area overlaps, and keep an offered area inside it",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
                 offlineAreasService: OfflineAreasService) => {
                 const farTileFile = "IHM-schema+10-10.pmtiles";
+                const oldAreaFile = "IHM-schema+old-israel.pmtiles";
+                const innerAreaFile = "IHM-schema+jerusalem.pmtiles";
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
-                    [MAP_FILE, farTileFile, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                    [MAP_FILE, farTileFile, oldAreaFile, innerAreaFile, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
                 await offlineAreasService.saveAreaMetadata(TILE_AREA, {});
                 await offlineAreasService.saveAreaMetadata({ ...TILE_AREA, properties: { id: "10-10" }, geometry: SpatialHelper.getTilePolygon({ x: 10, y: 10 }, 7) }, {});
+                await offlineAreasService.saveAreaMetadata(createSquareArea("old-israel", [34, 29, 36, 34]), {});
+                await offlineAreasService.saveAreaMetadata(createSquareArea("jerusalem", [35, 31.5, 35.5, 32]), {});
                 await initialize(service, mockBackend, store, {});
-                const area: OfflineArea = {
-                    type: "Feature",
-                    properties: { id: "israel-and-palestine" },
-                    geometry: { type: "Polygon", coordinates: [[[34, 29], [36, 29], [36, 34], [34, 34], [34, 29]]] }
-                };
+                const area = createSquareArea("israel-and-palestine", [34, 29, 36, 34]);
 
-                expect(service.getOverlappedTileIds(area)).toEqual([TILE_ID]);
-
-                const promise = service.downloadArea(area);
+                const replacedAreaIds = service.getReplacedAreaIds(area, new Set(["israel-and-palestine", "jerusalem"]));
+                const promise = service.downloadArea(area, replacedAreaIds);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { "IHM-schema+israel-and-palestine.pmtiles": "2026-06-01" }, "israel-and-palestine");
 
+                expect(replacedAreaIds.sort()).toEqual([TILE_ID, "old-israel"].sort());
                 expect(await promise).toBe("downloaded");
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
-                expect(offlineAreasService.deleteAreaMetadata).toHaveBeenCalledWith(TILE_ID);
+                expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(oldAreaFile);
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(farTileFile);
-                expect(offlineAreasService.deleteAreaMetadata).not.toHaveBeenCalledWith("10-10");
+                expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(innerAreaFile);
             }
         )
     );
 
-    it("Should keep an area that was downloaded before as it is, with the name the user gave it",
+    it("Should replace only the old tiles when the areas the server offers are not known",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
+                offlineAreasService: OfflineAreasService) => {
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
+                    [MAP_FILE, "IHM-schema+old-israel.pmtiles", ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                await offlineAreasService.saveAreaMetadata(TILE_AREA, {});
+                await offlineAreasService.saveAreaMetadata(createSquareArea("old-israel", [34, 29, 36, 34]), {});
+                await initialize(service, mockBackend, store, {});
+
+                expect(service.getReplacedAreaIds(createSquareArea("israel-and-palestine", [34, 29, 36, 34]), new Set())).toEqual([TILE_ID]);
+            }
+        )
+    );
+
+    it("Should save the area it downloads again, so that its polygon is the one it was downloaded with now",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
                 offlineAreasService: OfflineAreasService) => {
@@ -686,12 +709,12 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_ID]: OfflineAreasService.createRootArea(ROOT_ZOOMS) });
 
-                const promise = service.downloadArea(namedArea);
+                const promise = service.downloadArea(namedArea, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
-                expect(offlineAreasService.saveAreaMetadata).not.toHaveBeenCalled();
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(namedArea, { minZoom: 5, maxZoom: 14 });
             }
         )
     );
@@ -745,7 +768,7 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([AREA_MAP_FILE]);
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -771,7 +794,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 const tileRequest = await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -797,7 +820,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -827,7 +850,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA);
+                const promise = service.downloadArea(AREA, []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
 

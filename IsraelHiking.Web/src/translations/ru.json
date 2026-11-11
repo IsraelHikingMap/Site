@@ -120,7 +120,7 @@
     "Download": "Загрузить",
     "Download finished successfully!": "Загрузка завершена успешно!",
     "Download Map for Offline viewing": "Загрузите карту для офлайн-использования",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "При загрузке этой области будут удалены старые фрагменты, которые она перекрывает: {{names}}. Продолжить?",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "При загрузке этой области будут удалены старые области, которые она перекрывает: {{names}}. Продолжить?",
     "Drinking Water": "Питьевая вода",
     "Duplicate Route": "Дублировать маршрут",
     "Duration": "Продолжительность",

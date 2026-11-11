@@ -248,7 +248,7 @@ export class ResourcesService {
     public imageUploadWaiver: string;
     public noDescriptionAvailableInYourLanguage: string;
     public clickTheMapToSelectAnArea: string;
-    public downloadingThisAreaDeletesOldTiles: string;
+    public downloadingThisAreaDeletesOldAreas: string;
     public oneAreaNeedsToBeDownloadedAgain: string;
     public areasNeedToBeDownloadedAgain: string;
     public updateNeededForNewFeatures: string;
@@ -505,7 +505,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1793865140553");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794400278271");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -704,7 +704,7 @@ export class ResourcesService {
         this.imageUploadWaiver = this.gettextCatalog.getString("The pictures I will upload are my own work, and they can be used without any restrictions.");
         this.noDescriptionAvailableInYourLanguage = this.gettextCatalog.getString("No description available in your language");
         this.clickTheMapToSelectAnArea = this.gettextCatalog.getString("Click the map to select an area");
-        this.downloadingThisAreaDeletesOldTiles = this.gettextCatalog.getString("Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?");
+        this.downloadingThisAreaDeletesOldAreas = this.gettextCatalog.getString("Downloading this area will delete the old areas it overlaps: {{names}}. Continue?");
         this.oneAreaNeedsToBeDownloadedAgain = this.gettextCatalog.getString("One area needs to be downloaded again");
         this.areasNeedToBeDownloadedAgain = this.gettextCatalog.getString("{{count}} areas need to be downloaded again");
         this.updateNeededForNewFeatures = this.gettextCatalog.getString("Update needed for new features");

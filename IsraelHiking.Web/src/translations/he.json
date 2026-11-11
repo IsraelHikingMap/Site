@@ -120,7 +120,7 @@
     "Download": "הורדה",
     "Download finished successfully!": "ההורדה הסתיימה בהצלחה!",
     "Download Map for Offline viewing": "הורידו מפות לצפיה ללא חיבור לרשת",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "הורדת האזור תמחק את האריחים הישנים שהוא חופף: {{names}}. להמשיך?",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "הורדת האזור תמחק את האזורים הישנים שהוא חופף: {{names}}. להמשיך?",
     "Drinking Water": "מי שתיה",
     "Duplicate Route": "שכפול מסלול",
     "Duration": "משך",

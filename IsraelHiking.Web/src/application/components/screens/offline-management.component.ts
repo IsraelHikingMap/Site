@@ -263,30 +263,33 @@ export class OfflineManagementComponent {
     }
 
     /**
-     * Downloads an area, where an area that was downloaded before is downloaded again the way it is kept on the
-     * device, which might no longer be the way the server offers it. The user confirms first when the download
-     * is going to delete old tiles, see OfflineFilesDownloadService.getOverlappedTileIds.
+     * Downloads an area in the shape the server offers it now, where an area that was downloaded before keeps the
+     * name the user gave it. The user confirms first when the download is going to delete the areas it replaces, see
+     * OfflineFilesDownloadService.getReplacedAreaIds.
      */
     public downloadArea(area: Immutable<OfflineArea>) {
-        const areaToDownload = this.downloadedAreas()[area.properties.id]?.area ?? area;
-        const overlappedTileIds = this.offlineFilesDownloadService.getOverlappedTileIds(areaToDownload);
-        if (overlappedTileIds.length === 0) {
-            this.startDownload(areaToDownload);
+        const id = area.properties.id;
+        const offeredArea = this.areas().find(offered => offered.properties.id === id) ?? area;
+        const downloadedArea = this.downloadedAreas()[id]?.area;
+        const areaToDownload = downloadedArea == null ? offeredArea : { ...offeredArea, properties: downloadedArea.properties };
+        const replacedAreaIds = this.offlineFilesDownloadService.getReplacedAreaIds(areaToDownload, this.offeredAreaIds());
+        if (replacedAreaIds.length === 0) {
+            this.startDownload(areaToDownload, replacedAreaIds);
             return;
         }
-        const names = this.downloadedAreaRows().filter(row => overlappedTileIds.includes(row.id)).map(row => row.name);
+        const names = this.downloadedAreaRows().filter(row => replacedAreaIds.includes(row.id)).map(row => row.name);
         this.toastService.confirm({
-            message: this.resources.downloadingThisAreaDeletesOldTiles.replace("{{names}}", names.join(", ")),
+            message: this.resources.downloadingThisAreaDeletesOldAreas.replace("{{names}}", names.join(", ")),
             type: "OkCancel",
-            confirmAction: () => this.startDownload(areaToDownload)
+            confirmAction: () => this.startDownload(areaToDownload, replacedAreaIds)
         });
     }
 
-    private async startDownload(areaToDownload: Immutable<OfflineArea>) {
+    private async startDownload(areaToDownload: Immutable<OfflineArea>, replacedAreaIds: string[]) {
         this.toastService.info(this.resources.dontSwitchApps);
         this.fitBounds(areaToDownload);
         this.selectedArea.set(null);
-        const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload);
+        const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload, replacedAreaIds);
         this.reportDownloadEnd(status, () => this.selectedArea.set(areaToDownload));
     }
 

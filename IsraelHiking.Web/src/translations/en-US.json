@@ -120,7 +120,7 @@
     "Download": "Download",
     "Download finished successfully!": "Download finished successfully!",
     "Download Map for Offline viewing": "Download Map for Offline viewing",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?",
     "Drinking Water": "Drinking Water",
     "Duplicate Route": "Duplicate Route",
     "Duration": "Duration",

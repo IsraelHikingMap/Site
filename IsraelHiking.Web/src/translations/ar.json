@@ -120,7 +120,7 @@
     "Download": "تنزيل",
     "Download finished successfully!": "تم الانتهاء من تحميله بنجاح!",
     "Download Map for Offline viewing": "تحميل خريطة للاستخدام غير المتصل",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "سيؤدي تنزيل هذه المنطقة إلى حذف المربعات القديمة التي تتداخل معها: {{names}}. هل تريد المتابعة؟",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "سيؤدي تنزيل هذه المنطقة إلى حذف المناطق القديمة التي تتداخل معها: {{names}}. هل تريد المتابعة؟",
     "Drinking Water": "مياه شرب",
     "Duplicate Route": "تكرار المسار",
     "Duration": "مدة",

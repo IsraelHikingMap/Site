@@ -120,7 +120,7 @@
     "Download": "Herunterladen",
     "Download finished successfully!": "Download erfolgreich abgeschlossen!",
     "Download Map for Offline viewing": "Karte für die Offline-Nutzung herunterladen",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "Beim Herunterladen dieses Gebiets werden die alten Kacheln gelöscht, die es überlappt: {{names}}. Fortfahren?",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "Beim Herunterladen dieses Gebiets werden die alten Gebiete gelöscht, die es überlappt: {{names}}. Fortfahren?",
     "Drinking Water": "Trinkwasser",
     "Duplicate Route": "Route duplizieren",
     "Duration": "Dauer",

@@ -19,7 +19,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
-import { OfflineAreasService } from "./offline-areas.service";
+import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
@@ -273,7 +273,7 @@ export class OfflineFilesDownloadService {
      * of megabytes fails when it drops, and calling that a server side error sends whoever reads the log
      * the wrong way.
      */
-    public async downloadArea(area: Immutable<OfflineArea>): Promise<DownloadStatus> {
+    public async downloadArea(area: Immutable<OfflineArea>, replacedAreaIds: string[]): Promise<DownloadStatus> {
         this.abortCurrentDownload();
         const currentDownload: CurrentDownload = { area, progress: 0, abortController: new AbortController() };
         this.currentDownload.set(currentDownload);
@@ -296,10 +296,10 @@ export class OfflineFilesDownloadService {
             }
 
             await this.moveDownloadedFilesToDataDirectory(currentDownload, fileNames);
-            await this.saveAreaMetadataIfNew(area, fileNames, downloadedAreas);
+            await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(id, fileNames));
             await this.saveRootAreaMetadataIfDownloaded(fileNames);
-            for (const tileId of this.getOverlappedTileIds(area)) {
-                await this.deleteArea(tileId);
+            for (const replacedAreaId of replacedAreaIds) {
+                await this.deleteArea(replacedAreaId);
             }
             const updatedAreas = await this.updateDownloadedAreasFromDevice();
             await this.updateVersionsOfDownloadedFiles(updatedAreas);
@@ -363,16 +363,6 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(`[Offline Download] Finished downloading offline files of ${id}`);
     }
 
-    /**
-     * Saves an area that was downloaded for the first time, with the zooms its files hold. An area that was downloaded
-     * before is not saved again, so it keeps the name the user gave it and the polygon it was downloaded with.
-     */
-    private async saveAreaMetadataIfNew(area: Immutable<OfflineArea>, fileNames: string[], downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<void> {
-        if (downloadedAreas[area.properties.id]?.area == null) {
-            await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(area.properties.id, fileNames));
-        }
-    }
-
     /** Saves the root area with the zooms its files hold, when the root files were downloaded and may hold other zooms than before */
     private async saveRootAreaMetadataIfDownloaded(fileNames: string[]): Promise<void> {
         if (fileNames.some(fileName => OfflineFilesDownloadService.getAreaId(fileName) === OfflineAreasService.ROOT_ID)) {
@@ -383,12 +373,16 @@ export class OfflineFilesDownloadService {
 
     /**
      * The zooms the map files of an area hold together, from the lowest zoom any of them starts at to the highest any
-     * of them ends at, as their headers have them.
+     * of them ends at, as their headers have them. None when no map file of the area was downloaded, so that the area
+     * keeps the zooms it has.
      */
-    private async getZooms(id: string, fileNames: string[]): Promise<{ minZoom: number, maxZoom: number }> {
+    private async getZooms(id: string, fileNames: string[]): Promise<AreaZooms> {
         const zooms = await Promise.all(fileNames
             .filter(fileName => OfflineFilesDownloadService.getAreaId(fileName) === id && fileName.endsWith(".pmtiles"))
             .map(fileName => this.pmtilesService.getZooms(fileName)));
+        if (zooms.length === 0) {
+            return {};
+        }
         return { minZoom: Math.min(...zooms.map(z => z.minZoom)), maxZoom: Math.max(...zooms.map(z => z.maxZoom)) };
     }
 
@@ -682,11 +676,16 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    /** The old tiles an area overlaps, which the area replaces, so they are deleted once it is downloaded */
-    public getOverlappedTileIds(area: Immutable<OfflineArea>): string[] {
+    /**
+     * The downloaded areas an area replaces, which are deleted once it is downloaded: the old tiles it overlaps and the
+     * areas it overlaps that the server no longer offers. An area that is offered is kept even inside another one, like
+     * Berlin in Brandenburg, and so is every area when what is offered is not known.
+     */
+    public getReplacedAreaIds(area: Immutable<OfflineArea>, offeredAreaIds: ReadonlySet<string>): string[] {
         return Object.entries(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
-            .filter(([id, { area: tileArea }]) => id !== area.properties.id && OfflineAreasService.isTileId(id) &&
-                tileArea != null && SpatialHelper.intersects(tileArea, area))
+            .filter(([id, { area: downloadedArea }]) => id !== area.properties.id && !OfflineAreasService.isRootId(id) &&
+                (OfflineAreasService.isTileId(id) || (offeredAreaIds.size > 0 && !offeredAreaIds.has(id))) &&
+                downloadedArea != null && SpatialHelper.intersects(downloadedArea, area))
             .map(([id]) => id);
     }
 

@@ -1,7 +1,6 @@
 "use strict";
 
 import fs from "fs";
-import { createHash } from "crypto";
 import { bbox } from "@turf/bbox";
 import { bboxClip } from "@turf/bbox-clip";
 import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
@@ -51,9 +50,11 @@ const regions = index.features as GeofabrikRegion[];
 const parentIds = new Set(regions.map(region => region.properties.parent));
 const leaves = regions.filter(region => !parentIds.has(region.properties.id));
 const samplePoints = new Map(leaves.map(region => [region, getSamplePoints(region)]));
-const areas = leaves.filter(region => !isGroupOfOtherAreas(region));
+const nonGroups = leaves.filter(region => !isGroupOfOtherAreas(region));
 console.log(`Got ${regions.length} regions, ${leaves.length} are not split any further, of which these are groups of the others: ` +
-    leaves.filter(region => !areas.includes(region)).map(region => region.properties.id).join(", "));
+    leaves.filter(region => !nonGroups.includes(region)).map(region => region.properties.id).join(", "));
+const areas = nonGroups.filter(region => !isInsideAnotherArea(region));
+console.log("These are inside another area, which holds them: " + nonGroups.filter(region => !areas.includes(region)).map(region => region.properties.id).join(", "));
 
 const relationsByIsoCode = await getRelationsByIsoCode(areas);
 const getIsoRelations = (region: GeofabrikRegion) => getIsoCodes(region).map(code => relationsByIsoCode.get(code)).filter(relation => relation != null);
@@ -82,6 +83,15 @@ function isGroupOfOtherAreas(region: GeofabrikRegion): boolean {
     const regionsInside = leaves.filter(other => other !== region && isOverlapping(regionBounds, bbox(other)) && isInside(other, region));
     const covered = samplePoints.get(region).filter(point => regionsInside.some(other => booleanPointInPolygon(point, other)));
     return covered.length > samplePoints.get(region).length / 2;
+}
+
+/**
+ * A region inside another one, like Berlin in Brandenburg, is not offered on its own, the files of the region around it
+ * hold all of it.
+ */
+function isInsideAnotherArea(region: GeofabrikRegion): boolean {
+    const regionBounds = bbox(region);
+    return nonGroups.some(other => other !== region && isOverlapping(regionBounds, bbox(other)) && isInside(region, other));
 }
 
 /**
@@ -229,8 +239,7 @@ function isOverlapping(bounds: GeoJSON.BBox, otherBounds: GeoJSON.BBox): boolean
 /**
  * An area as the client gets it: its names in the languages of the app, where "name" is the English one, and
  * a region of a few countries is named after all of them, in the order the Geofabrik name lists them.
- * The id is a hash of the polygon, so an area whose shape changes gets a new id and the client stops offering to
- * update the old one, which the server can no longer cut the same way, see GetOfflineFilesForArea.
+ * The id is the Geofabrik one, where the "/" of the US states, like "us/georgia", is a "-" so that it can be in a file name.
  */
 function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feature<GeoJSON.Geometry, Record<string, string>> {
     const englishName = getEnglishName(region.properties.name);
@@ -238,7 +247,7 @@ function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feat
     const geometry = getSimplifiedGeometry(region);
     const roundedGeometry = { ...geometry, coordinates: roundCoordinates(geometry.coordinates) };
     const properties: Record<string, string> = {
-        id: createHash("sha256").update(JSON.stringify(roundedGeometry)).digest("hex").substring(0, 16),
+        id: region.properties.id.replace("/", "-"),
         name: ordered.length === 0 ? englishName : ordered.map(relation => relation.tags["name:en"] ?? relation.tags.name).join(" – ")
     };
     for (const language of LANGUAGES.filter(language => language !== "en")) {

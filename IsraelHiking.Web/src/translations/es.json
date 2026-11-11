@@ -120,7 +120,7 @@
     "Download": "Descargar",
     "Download finished successfully!": "¡Descarga completada con éxito!",
     "Download Map for Offline viewing": "Descargar mapa para uso sin conexión",
-    "Downloading this area will delete the old tiles it overlaps: {{names}}. Continue?": "Al descargar esta zona se eliminarán las teselas antiguas con las que se superpone: {{names}}. ¿Continuar?",
+    "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "Al descargar esta zona se eliminarán las zonas antiguas con las que se superpone: {{names}}. ¿Continuar?",
     "Drinking Water": "Agua potable",
     "Duplicate Route": "Duplicar ruta",
     "Duration": "Duración",
