@@ -1,5 +1,5 @@
 import { inject, NgZone, Service } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 import { debounceTime, timeout } from "rxjs/operators";
@@ -9,7 +9,7 @@ import type { GetResourceResponse } from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { PmTilesService } from "./pmtiles.service";
+import { createNotFoundError, PmTilesService } from "./pmtiles.service";
 import { initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
@@ -128,7 +128,8 @@ export class DatabaseService {
 
     /**
      * Handles the "slice" protocol, registered by the map service.
-     * Falls back to the offline files when the server can not be reached.
+     * Falls back to the offline files when the server can not be reached. A tile the server answers it does not
+     * have is a 404 and not a sign of being offline, since the DEM has its higher zooms only where there is data.
      */
     public async getSliceTile(url: string): Promise<GetResourceResponse<ArrayBuffer>> {
         // slice://mapeak.com/vector/data/mapeak-schema/{z}/{x}/{y}.mvt
@@ -147,6 +148,9 @@ export class DatabaseService {
             const data = response.body ?? new ArrayBuffer(0);
             return { data, cacheControl: response.headers.get("Cache-Control"), expires: response.headers.get("Expires") };
         } catch (ex) {
+            if (ex instanceof HttpErrorResponse && ex.status === 404) {
+                throw createNotFoundError(`Tile ${z}/${x}/${y} of ${type} is not on the server`);
+            }
             // Timeout or other error
             if (offlineAvailable === false) {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {

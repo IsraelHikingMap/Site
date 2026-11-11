@@ -189,6 +189,18 @@ export class DefaultStyleService {
         contourSource.maxzoom = 16;
     }
 
+    /**
+     * Reads the hillshade from the higher zooms of the DEM. It is not set in the style on the server since older
+     * versions of the app take a tile the DEM does not have for being offline.
+     */
+    private useDemMaxZoom(styleJson: StyleSpecification) {
+        for (const source of Object.values(styleJson.sources)) {
+            if (source.type === "raster-dem") {
+                source.maxzoom = MapService.DEM_MAX_ZOOM;
+            }
+        }
+    }
+
     private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial", isBuiltInBaseLayer: boolean) {
         if (!isBuiltInBaseLayer || styleJson.sources["Contour"]?.type !== "vector") {
             return;
@@ -238,6 +250,9 @@ export class DefaultStyleService {
                 styleAsText = styleAsText.replaceAll("1.0000000", "3.28084");
             }
             const styleJson = JSON.parse(styleAsText) as StyleSpecification;
+            if (isBuiltInBaseLayer) {
+                this.useDemMaxZoom(styleJson);
+            }
             switch (mode) {
                 case "online-only":
                     this.useContourProtocol(styleJson, units, isBuiltInBaseLayer);

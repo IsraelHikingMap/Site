@@ -264,6 +264,41 @@ describe("DefaultStyleService", () => {
         expect(vector.tiles?.[0]).toBe("slice://x/{z}/{x}/{y}.pbf");
         expect(dem.url).toBeUndefined();
         expect(dem.tiles?.[0]).toBe("slice://x/dem/{z}/{x}/{y}.png");
+        expect(dem.maxzoom).toBe(MapService.DEM_MAX_ZOOM);
+    }));
+
+    it("should read the dem at its higher zooms in online mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {
+                dem: { type: "raster-dem", url: "https://x/dem.json", tiles: ["https://x/dem/{z}/{x}/{y}.png"], maxzoom: 11 }
+            },
+            layers: []
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({
+            key: builtInLayerKey,
+            address: "https://x/style.json"
+        }), true, "online-only");
+
+        expect((result.sources.dem as RasterDEMSourceSpecification).maxzoom).toBe(MapService.DEM_MAX_ZOOM);
+    }));
+
+    it("should keep the dem zoom of the style for a layer that is not a built-in base layer", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
+        (fileService.getStyleJsonContent as Mock).mockResolvedValue(JSON.stringify({
+            version: 8,
+            sources: {
+                dem: { type: "raster-dem", url: "https://x/dem.json", tiles: ["https://x/dem/{z}/{x}/{y}.png"], maxzoom: 11 }
+            },
+            layers: []
+        }));
+
+        const result = await service.getSourcesAndLayers(createLayer({
+            key: "custom",
+            address: "https://x/style.json"
+        }), true, "online-only");
+
+        expect((result.sources.dem as RasterDEMSourceSpecification).maxzoom).toBe(11);
     }));
 
     it("should append the slice query string to sources in car mode", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {
@@ -287,6 +322,7 @@ describe("DefaultStyleService", () => {
         const dem = result.sources.dem as RasterDEMSourceSpecification;
         expect(dem.url).toBeUndefined();
         expect(dem.tiles?.[0]).toBe("https://x/dem/{z}/{x}/{y}.png?use=slice");
+        expect(dem.maxzoom).toBe(MapService.DEM_MAX_ZOOM);
     }));
 
     it("should not manipulate sources for a layer that is not a built-in base layer", inject([DefaultStyleService, FileService], async (service: DefaultStyleService, fileService: FileService) => {

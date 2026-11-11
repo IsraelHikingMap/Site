@@ -3,8 +3,10 @@ package com.mapeak.car
 import com.mapeak.maplibrecontour.DemManager
 import com.mapeak.maplibrecontour.DemTileFetcher
 import com.mapeak.maplibrecontour.Encoding
+import com.mapeak.maplibrecontour.FfiException
 import com.mapeak.maplibrecontour.defaultConfig
 import com.mapeak.maplibrecontour.parseThresholdSpec
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -18,6 +20,10 @@ import okhttp3.Request
  *
  * Units (metric/imperial) change the elevation multiplier and the contour thresholds, so a manager
  * is built and cached per units string; the managers are thread-safe and shared across requests.
+ *
+ * The DEM is read up to the same zoom as on the web, `MapService.DEM_MAX_ZOOM`. It has its higher
+ * zooms only where there is data, and the library falls back to the zoom below on a tile the fetcher
+ * answers with null.
  */
 class CarContourTilesProvider internal constructor(private val okHttpClient: OkHttpClient) {
 
@@ -28,24 +34,34 @@ class CarContourTilesProvider internal constructor(private val okHttpClient: OkH
                             encoding = Encoding.TERRARIUM,
                             demUrlPattern =
                                     "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice",
-                            demMaxZoom = 11.toUByte(),
+                            demMaxZoom = 14.toUByte(),
                             overzoom = 1.toUByte(),
                             layerName = "contours",
                             elevationKey = "ele",
                             levelKey = "level",
                     )
 
-    // This needs to be provided in order to force the Rust code to use the okhttp, so that
-    // "use=slice" will route back to pmtiles/online mode
+    /**
+     * This needs to be provided in order to force the Rust code to use the okhttp, so that "use=slice"
+     * will route back to pmtiles/online mode. A 404 is a tile the DEM does not have and the library falls
+     * back to the zoom below, any other failure is an error and not missing data.
+     */
     private val fetcher =
             object : DemTileFetcher {
                 override fun fetch(url: String): ByteArray? {
                     val request = Request.Builder().url(url).build()
-                    okHttpClient.newCall(request).execute().use { response ->
-                        if (!response.isSuccessful) {
-                            return null
+                    try {
+                        okHttpClient.newCall(request).execute().use { response ->
+                            if (response.code == SliceProtocolInterceptor.HTTP_NOT_FOUND) {
+                                return null
+                            }
+                            if (!response.isSuccessful) {
+                                throw FfiException.Tiler("Failed to get $url: HTTP ${response.code}")
+                            }
+                            return response.body.bytes()
                         }
-                        return response.body.bytes()
+                    } catch (ex: IOException) {
+                        throw FfiException.Tiler("Failed to get $url: ${ex.message}")
                     }
                 }
             }

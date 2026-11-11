@@ -26,6 +26,14 @@ class CapacitorSource implements Source {
     getKey() { return this.path }
 }
 
+/**
+ * An error maplibre and maplibre-contour read as a tile the tileset does not have, the way they read a 404 of a
+ * tile server. It is a plain error and not maplibre's AJAXError so that maplibre is not loaded before a map is shown.
+ */
+export function createNotFoundError(message: string): Error {
+    return Object.assign(new Error(message), { status: 404 });
+}
+
 @Service()
 export class PmTilesService {
 
@@ -82,17 +90,16 @@ export class PmTilesService {
     }
 
     /**
-     * A pmtiles file is sparse - tiles without any data are simply not stored in it,
-     * so a missing tile is returned as an empty tile and not as an error.
+     * A pmtiles file is sparse - a tile it does not store is answered with a 404, as the server answers it, so the
+     * map shows the zoom below in place of a raster tile, like the zooms the DEM has only where there is data, and
+     * an empty tile in place of a vector one.
      */
     private async getTileFromFile(fileName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        if (fileName == null) {
-            return new ArrayBuffer(0);
+        const response = fileName == null ? undefined : await new PMTiles(await this.getSource(fileName)).getZxy(z, x, y);
+        if (response?.data == null) {
+            throw createNotFoundError(`Tile ${z}/${x}/${y} is not in ${fileName}`);
         }
-        const source = await this.getSource(fileName);
-        const pmTilesProvider = new PMTiles(source);
-        const response = await pmTilesProvider.getZxy(z, x, y);
-        return response?.data ?? new ArrayBuffer(0);
+        return response.data;
     }
 
     public async isOfflineFileAvailable(z: number, x: number, y: number, type: string): Promise<boolean> {

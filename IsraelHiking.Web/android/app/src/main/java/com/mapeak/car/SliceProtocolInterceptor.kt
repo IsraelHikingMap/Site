@@ -5,10 +5,15 @@ import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
+import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
-/** Supports service "use=silce". It also routes the "contour=units" to the contour manager. */
+/**
+ * Supports service "use=silce". It also routes the "contour=units" to the contour manager. A tile the server or the
+ * offline file does not have is answered with a 404 and not with an error, since the DEM has its higher zooms only
+ * where there is data and the contours fall back to the zoom below on a 404.
+ */
 class SliceProtocolInterceptor internal constructor(private val pmTilesService: PmTilesService) :
         Interceptor {
     var contoursProvider: CarContourTilesProvider? = null
@@ -63,7 +68,7 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         var networkError: IOException? = null
         try {
             response = timeoutChain.proceed(original)
-            if (response.isSuccessful) {
+            if (response.isSuccessful || response.code == HTTP_NOT_FOUND) {
                 return response
             }
         } catch (ex: IOException) {
@@ -85,9 +90,7 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         }
 
         // Fallback to PMTiles
-        val data =
-                pmTilesService.getTileByType(z, x, y, type)
-                        ?: throw IOException("PMTiles fallback returned no data for $url")
+        val data = pmTilesService.getTileByType(z, x, y, type) ?: return notFound(original)
         return Response.Builder()
                 .request(original)
                 .protocol(Protocol.HTTP_1_1)
@@ -97,7 +100,17 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
                 .build()
     }
 
+    private fun notFound(request: Request): Response =
+            Response.Builder()
+                    .request(request)
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(HTTP_NOT_FOUND)
+                    .message("Not Found")
+                    .body(ByteArray(0).toResponseBody(null))
+                    .build()
+
     companion object {
+        const val HTTP_NOT_FOUND = 404
         private const val ONLINE_TIMEOUT_MS = 60000
         private const val ONLINE_TIMEOUT_OFFLINE_AVAILABLE_MS = 2000
     }

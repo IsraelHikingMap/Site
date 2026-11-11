@@ -4,11 +4,15 @@ import Foundation
 /// try the network first (short timeout when an offline archive exists, long timeout otherwise), and
 /// on failure fall back to the offline PMTiles archive. Registered on MapLibre's `URLSession`
 /// configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
+/// A tile the server or the offline archive does not have is answered with a 404 and not with an
+/// error, since the DEM has its higher zooms only where there is data and the contours fall back to
+/// the zoom below on a 404.
 final class SliceURLProtocol: URLProtocol {
 
     static let pmTiles = PMTilesService()
     static let contours = CarContourTilesProvider()
 
+    static let notFoundStatusCode = 404
     private static let handledKey = "SliceURLProtocolHandled"
     private static let onlineTimeoutMs = 60_000.0
     private static let onlineTimeoutOfflineAvailableMs = 2_000.0
@@ -56,9 +60,10 @@ final class SliceURLProtocol: URLProtocol {
 
         dataTask = SliceURLProtocol.session.dataTask(with: mutable as URLRequest) { [weak self] data, response, error in
             guard let self = self else { return }
-            if let http = response as? HTTPURLResponse, http.statusCode == 200, let data = data {
+            if let http = response as? HTTPURLResponse,
+               http.statusCode == 200 || http.statusCode == SliceURLProtocol.notFoundStatusCode {
                 self.client?.urlProtocol(self, didReceive: http, cacheStoragePolicy: .notAllowed)
-                self.client?.urlProtocol(self, didLoad: data)
+                self.client?.urlProtocol(self, didLoad: data ?? Data())
                 self.client?.urlProtocolDidFinishLoading(self)
                 return
             }
@@ -78,11 +83,17 @@ final class SliceURLProtocol: URLProtocol {
                               offlineAvailable: Bool,
                               networkError: Error?,
                               response: URLResponse?) {
-        guard offlineAvailable,
-              let data = SliceURLProtocol.pmTiles.getTileByType(
-                z: parsed.z, x: parsed.x, y: parsed.y, type: parsed.type)
-        else {
+        guard offlineAvailable else {
             client?.urlProtocol(self, didFailWithError: networkError ?? URLError(.resourceUnavailable))
+            return
+        }
+        guard let data = SliceURLProtocol.pmTiles.getTileByType(
+            z: parsed.z, x: parsed.x, y: parsed.y, type: parsed.type)
+        else {
+            let notFound = HTTPURLResponse(
+                url: request.url!, statusCode: SliceURLProtocol.notFoundStatusCode, httpVersion: "HTTP/1.1", headerFields: nil)!
+            client?.urlProtocol(self, didReceive: notFound, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocolDidFinishLoading(self)
             return
         }
         let headers = ["Content-Type": "application/x-protobuf"]

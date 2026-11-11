@@ -17,6 +17,13 @@ import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 @Service()
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
+
+    /**
+     * The highest zoom the hillshade and the contours read the DEM at. The DEM has zoom 12 everywhere and higher
+     * zooms only where there is data, up to 17, and every zoom above what an area has costs a request answered
+     * with a 404 before the map falls back to the zoom below.
+     */
+    public static readonly DEM_MAX_ZOOM = 14;
     private resolve: (value?: void | PromiseLike<void>) => void;
     private readonly missingImagesArray: string[] = [];
     private currentMap: Map;
@@ -76,7 +83,7 @@ export class MapService {
                 await globalDispatcher.broadcast("contour-worker", {
                     demUrlPattern: "slice://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
-                    maxzoom: 11
+                    maxzoom: MapService.DEM_MAX_ZOOM
                 });
                 resolve();
             });
@@ -183,8 +190,12 @@ export class MapService {
         this.loggingService.info("[Map] The webgl context was restored");
     }
 
+    /**
+     * Logs the errors of the map, but not a tile answered with a 404, which is how the DEM leaves out the zooms it
+     * has no data for and is shown from the zoom below.
+     */
     private readonly onError = (e: ErrorEvent) => {
-        if (e?.error?.message?.includes("418")) {
+        if (e?.error?.message?.includes("418") || (e?.error as { status?: number })?.status === 404) {
             return;
         }
         if (e?.error?.message?.includes(NO_OFFLINE_FILE_MESSAGE)) {
