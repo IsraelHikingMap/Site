@@ -204,7 +204,8 @@ public class FilesController : ControllerBase
     /// Download an offline file of an area
     /// </summary>
     /// <remarks>Returns the content stream of one of the files listed for an area. Requires an entitled (subscribed)
-    /// user. A <c>.tar</c> file also gets its length as <c>X-Uncompressed-Length</c>, since it is compressed in transit, which drops its <c>Content-Length</c>.</remarks>
+    /// user. A <c>.tar</c> file also gets its length as <c>X-Uncompressed-Length</c>, since it is compressed in
+    /// transit, which drops its <c>Content-Length</c>.</remarks>
     /// <param name="areaId">The id of the area, as offline/areas has it</param>
     /// <param name="fileName">The name of the file</param>
     /// <returns>A file stream</returns>
