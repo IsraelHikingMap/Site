@@ -23,17 +23,17 @@ export class PurchaseService {
     private readonly store = inject(Store);
 
     private readonly isSubscribed = this.store.selectSignal((s: ApplicationState) => s.offlineState.isSubscribed);
-    private readonly downloadedTiles = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedTiles);
+    private readonly downloadedAreas = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedAreas);
     /** Whether there are any offline files on the device, i.e. whether this user ever downloaded an area */
-    private readonly hasDownloadedTiles = computed(() => Object.keys(this.downloadedTiles()).length > 0);
+    private readonly hasDownloadedAreas = computed(() => Object.keys(this.downloadedAreas()).length > 0);
 
     /** The subscription can be bought by a user that has no offline files, and renewed by one that has */
     public readonly isPurchaseAvailable = computed(() =>
-        this.runningContextService.isCapacitor && !this.isSubscribed() && !this.hasDownloadedTiles());
+        this.runningContextService.isCapacitor && !this.isSubscribed() && !this.hasDownloadedAreas());
 
     /** @see isPurchaseAvailable */
     public readonly isRenewAvailable = computed(() =>
-        this.runningContextService.isCapacitor && !this.isSubscribed() && this.hasDownloadedTiles());
+        this.runningContextService.isCapacitor && !this.isSubscribed() && this.hasDownloadedAreas());
 
     /**
      * A subscription is bought in the app store, but it belongs to the user and not to the device, so the

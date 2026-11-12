@@ -244,8 +244,7 @@ export const initialState =
         },
         inMemoryState: {
             effectiveTheme: "light",
-            downloadedTiles: {},
-            downloadedRoutingTiles: [],
+            downloadedAreas: {},
             distance: false,
             following: true,
             pannedTimestamp: null,
@@ -267,7 +266,7 @@ export const initialState =
             isSubscribed: false,
             uploadPoiQueue: [],
             lastOfflineDetectedDate: null,
-            tileDownloadInProgress: null
+            areaDownloadInProgress: null
         },
         paywallState: {
             lastPaywallShownDate: null,

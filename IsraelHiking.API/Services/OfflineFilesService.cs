@@ -1,9 +1,12 @@
 ﻿using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.Features;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -21,9 +24,26 @@ public class OfflineFilesService : IOfflineFilesService
     private const int SLICE_TILE_ZOOM = 7;
 
     /// <summary>
-    /// The zoom level of the root (non-tiled) overview files.
+    /// The zoom level up to which the root files that are listed along with an area hold the whole world. It is
+    /// kept low so they stay small enough to be downloaded with every area, which holds the zooms above it.
     /// </summary>
-    private const int ROOT_ZOOM = 6;
+    private const int ROOT_ZOOM = 4;
+
+    /// <summary>
+    /// The zoom level up to which the root files of the apps that download tiles hold the whole world, their
+    /// tiles start at the zoom after it.
+    /// </summary>
+    private const int TILES_ROOT_ZOOM = SLICE_TILE_ZOOM - 1;
+
+    /// <summary>
+    /// The id the root files that are listed along with an area are named by, the one the client keeps them under.
+    /// </summary>
+    private const string ROOT_KEY = "root";
+
+    /// <summary>
+    /// The zoom level the files of an area start at, where the root files end.
+    /// </summary>
+    private const int AREA_MIN_ZOOM = ROOT_ZOOM + 1;
 
     /// <summary>
     /// The location of the styles the map is drawn with, which the client reads them from by itself.
@@ -73,7 +93,8 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes
-    /// with, so that a route that is calculated offline is the same one that is calculated online.
+    /// with, so that a route that is calculated offline is the same one that is calculated online. It is not sliced,
+    /// so it is listed with the root files, and like the routing tiles only for clients that know how to handle it.
     /// </summary>
     private const string VALHALLA_PROFILES_FILE_NAME = "valhalla-profiles.json";
 
@@ -82,15 +103,7 @@ public class OfflineFilesService : IOfflineFilesService
     /// </summary>
     private static readonly DateTime DEM_MODIFIED_DATE = DateTimeOffset.Parse("2026-11-07T00:00:00Z", CultureInfo.InvariantCulture).UtcDateTime;
 
-    /// <summary>
-    /// The files that are needed for offline usage but are not sliced per tile - the profiles the offline
-    /// routing engine needs. They are only relevant to the root, and like the routing tiles they are only
-    /// listed for clients that ask for them, since older clients do not know how to handle them.
-    /// </summary>
-    private static readonly string[] ROOT_ONLY_FILE_NAMES =
-    [
-        VALHALLA_PROFILES_FILE_NAME
-    ];
+    private static readonly JsonSerializerOptions GEO_JSON_OPTIONS = new() { Converters = { GeoJsonExtensions.GeoJsonWritableFactory } };
 
     private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
     private readonly ILogger _logger;
@@ -143,10 +156,7 @@ public class OfflineFilesService : IOfflineFilesService
         }
         if (routingTile && !tileX.HasValue && !tileY.HasValue)
         {
-            foreach (var fileName in ROOT_ONLY_FILE_NAMES)
-            {
-                AddIfUpdated(filesDictionary, fileName, today, lastModifiedDate);
-            }
+            AddIfUpdated(filesDictionary, VALHALLA_PROFILES_FILE_NAME, today, lastModifiedDate);
         }
         return filesDictionary;
     }
@@ -173,6 +183,97 @@ public class OfflineFilesService : IOfflineFilesService
             return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyDemAddress + fileName);
         }
         return await _remoteFileFetcherGateway.GetFileStream(_options.OnTheFlyFilesAddress + fileName);
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The routing tiles are listed first, as the largest and slowest file, then the files of the area and then the
+    /// root files that come with every area. The global points have no root file, they hold nothing at its zooms.
+    /// Every file is named the way the client keeps it, so the root files are named by <see cref="ROOT_KEY"/>.
+    /// </remarks>
+    public async Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate)
+    {
+        if (await GetAreaGeometry(areaId) == null)
+        {
+            return null;
+        }
+        var filesDictionary = new Dictionary<string, DateTime>();
+        var today = DateTime.UtcNow.Date;
+        AddIfUpdated(filesDictionary, $"{VALHALLA_FILE_NAME}+{areaId}{VALHALLA_FILE_EXTENSION}", today, lastModifiedDate);
+        var sourceNames = await GetSourceNames();
+        foreach (var name in sourceNames)
+        {
+            AddIfUpdated(filesDictionary, $"{name}+{areaId}.pmtiles", IsDem(name) ? DEM_MODIFIED_DATE : today, lastModifiedDate);
+        }
+        foreach (var name in sourceNames.Where(name => !IsDem(name) && name != GLOBAL_POINTS))
+        {
+            AddIfUpdated(filesDictionary, $"{name}+{ROOT_KEY}.pmtiles", today, lastModifiedDate);
+        }
+        AddIfUpdated(filesDictionary, VALHALLA_PROFILES_FILE_NAME, today, lastModifiedDate);
+        return filesDictionary;
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The polygon of the area is posted to the service that slices the file, since the larger ones are too long for a url.
+    /// The root files are the zoom <see cref="ROOT_ZOOM"/> files of the whole world, and the profiles are this server's own file.
+    /// </remarks>
+    public async Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName)
+    {
+        var geometry = await GetAreaGeometry(areaId);
+        if (geometry == null)
+        {
+            return null;
+        }
+        if (fileName == VALHALLA_PROFILES_FILE_NAME)
+        {
+            return OpenLocalFile(_options.ValhallaProfilesFilePath);
+        }
+        var sourceName = FileNameToSourceName(fileName);
+        if (sourceName == VALHALLA_FILE_NAME)
+        {
+            return await PostForSlice($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry, fileName);
+        }
+        if (!(await GetSourceNames()).Contains(sourceName))
+        {
+            return null;
+        }
+        if (fileName == $"{sourceName}+{ROOT_KEY}.pmtiles")
+        {
+            return await _remoteFileFetcherGateway.GetFileStream($"{_options.OnTheFlyFilesAddress}{sourceName}-{ROOT_ZOOM}.pmtiles");
+        }
+        var address = IsDem(sourceName) ? _options.OnTheFlyDemAddress : _options.OnTheFlyFilesAddress;
+        return await PostForSlice($"{address}{sourceName}?minzoom={AREA_MIN_ZOOM}", geometry, fileName);
+    }
+
+    /// <summary>
+    /// Posts the polygon of an area to a service that slices a file by it, and logs how long the slicing took, which is the
+    /// time until the response starts, before its body is streamed to the client.
+    /// </summary>
+    private async Task<(Stream Content, long? Length)> PostForSlice(string url, string geometry, string fileName)
+    {
+        var stopwatch = Stopwatch.StartNew();
+        var result = await _remoteFileFetcherGateway.PostForFileStream(url, geometry);
+        _logger.LogInformation($"Sliced {fileName} in {stopwatch.ElapsedMilliseconds} ms, {result.Length?.ToString() ?? "unknown"} bytes");
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public Stream GetAreasContent()
+    {
+        return OpenLocalFile(_options.OfflineAreasFilePath).Content;
+    }
+
+    /// <summary>
+    /// The GeoJSON geometry of one of the areas, null when there is no such area. The file is read every time,
+    /// since it can be replaced while the site is running.
+    /// </summary>
+    private async Task<string> GetAreaGeometry(string areaId)
+    {
+        await using var content = GetAreasContent();
+        var areas = await JsonSerializer.DeserializeAsync<FeatureCollection>(content, GEO_JSON_OPTIONS);
+        var area = areas.FirstOrDefault(feature => feature.Attributes.GetOptionalValue("id") as string == areaId);
+        return area == null ? null : JsonSerializer.Serialize(area.Geometry, GEO_JSON_OPTIONS);
     }
 
     /// <summary>
@@ -270,9 +371,9 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <summary>
-    /// Extracts the layer name from an offline file name, dropping the zoom/tile suffix.
-    /// Tile files look like "name+7-x-y.pmtiles" and root files look like "name-6.pmtiles",
-    /// where the layer name itself may contain '-'.
+    /// Extracts the layer name from an offline file name, dropping what follows it.
+    /// The files of an area look like "name+id.pmtiles", the tiles like "name+7-x-y.pmtiles" and their root
+    /// files like "name-6.pmtiles", where the layer name itself may contain '-'.
     /// </summary>
     private static string FileNameToSourceName(string fileName)
     {
@@ -292,6 +393,6 @@ public class OfflineFilesService : IOfflineFilesService
     {
         return tileX.HasValue && tileY.HasValue
             ? $"{sourceName}+{SLICE_TILE_ZOOM}-{tileX}-{tileY}{extension}"
-            : $"{sourceName}-{ROOT_ZOOM}{extension}";
+            : $"{sourceName}-{TILES_ROOT_ZOOM}{extension}";
     }
 }

@@ -20,6 +20,9 @@
 #    #                            for any profile that is not listed, and "costingOptions" is sent to
 #    #                            Valhalla as-is, see
 #    #                            https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
+#    #   offline-areas.json     - the areas the offline screen offers, set "offlineAreasFilePath" in appsettings.json
+#    #                            to "config/offline-areas.json" to use it. It is read on every request, so it can be
+#    #                            replaced while the site is running, see IsraelHiking.Web/scripts/generate-offline-areas.ts
 #    volumes:
 #      - ./config:/israelhiking/config:ro
   elasticsearch:
@@ -62,11 +65,12 @@
     restart: always
   translation:
     image: ghcr.io/mapeak-com/translation:latest
+    platform: linux/amd64
     container_name: translation
     environment:
-      - LTENGINE_MODEL=gemma3-12b
+      - GOOGLE_API_KEY=invalid-dev-key
     volumes:
-      - ltdata:/models
+      - translationcache:/var/cache/nginx
     ports:
       - 5432:5050
     restart: always
@@ -117,7 +121,7 @@ volumes:
     driver: local
   valhalladata:
     driver: local
-  ltdata:
+  translationcache:
     driver: local
   userimagesdata:
     driver: local

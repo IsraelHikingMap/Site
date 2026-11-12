@@ -1,8 +1,4 @@
-﻿export type FileNameDateVersion = {
-    fileName: string;
-    date: string;
-    version?: string;
-}
+﻿import type { OfflineArea } from "..";
 
 export type OfflineState = {
     /**
@@ -18,8 +14,9 @@ export type OfflineState = {
      */
     lastOfflineDetectedDate: Date | null;
     /**
-     * The tile whose files the native background download is downloading, with all the files it needs, until they
-     * were moved to where the app reads them from - a download the app did not see end is finished on its next start
+     * The area whose files the native background download is downloading, with all the files it needs and the areas
+     * it replaces, until they were moved to where the app reads them from - a download the app did not see end is
+     * finished on its next start
      */
-    tileDownloadInProgress: { tileX: number; tileY: number; files: FileNameDateVersion[] } | null;
+    areaDownloadInProgress: { area: OfflineArea; files: string[]; replacedAreaIds: string[] } | null;
 };

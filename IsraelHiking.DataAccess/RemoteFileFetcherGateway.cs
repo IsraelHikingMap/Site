@@ -46,13 +46,25 @@ public class RemoteFileFetcherGateway : IRemoteFileFetcherGateway
         };
     }
 
-    public async Task<(Stream Content, long? Length)> GetFileStream(string url)
+    public Task<(Stream Content, long? Length)> GetFileStream(string url)
+    {
+        return SendForFileStream(new HttpRequestMessage(HttpMethod.Get, url));
+    }
+
+    public Task<(Stream Content, long? Length)> PostForFileStream(string url, string content)
+    {
+        return SendForFileStream(new HttpRequestMessage(HttpMethod.Post, url) { Content = new StringContent(content) });
+    }
+
+    /// <summary>
+    /// Reads only the headers of the response, so that its body is streamed to the client rather than buffered in memory.
+    /// </summary>
+    private async Task<(Stream Content, long? Length)> SendForFileStream(HttpRequestMessage request)
     {
         var client = _httpClientFactory.CreateClient();
         client.Timeout = TimeSpan.FromMinutes(20);
         client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
-        // Read only the headers so the body is streamed (proxied) instead of being buffered in memory.
-        var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         var length = response.Content.Headers.ContentLength;
         return (await response.Content.ReadAsStreamAsync(), length);

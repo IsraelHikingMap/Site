@@ -122,4 +122,65 @@ object SpatialHelper {
         }
         return points.filterIndexed { index, _ -> kept[index] }
     }
+
+    /**
+     * The square of a tile as a polygon of lng/lat rings, pulled in from its edges by [inset], a part of the size of
+     * the tile, like getTilePolygon of the web client.
+     */
+    fun getTilePolygon(x: Int, y: Int, zoom: Int, inset: Double = 0.0): List<List<DoubleArray>> {
+        val minLng = tileLng(x + inset, zoom)
+        val maxLng = tileLng(x + 1 - inset, zoom)
+        val maxLat = tileLat(y + inset, zoom)
+        val minLat = tileLat(y + 1 - inset, zoom)
+        return listOf(listOf(
+            doubleArrayOf(minLng, maxLat), doubleArrayOf(maxLng, maxLat), doubleArrayOf(maxLng, minLat),
+            doubleArrayOf(minLng, minLat), doubleArrayOf(minLng, maxLat)
+        ))
+    }
+
+    /** Even-odd ray casting over every ring of a polygon, so a point in a hole is outside */
+    fun isPointInPolygon(point: DoubleArray, polygon: List<List<DoubleArray>>): Boolean {
+        var inside = false
+        for (ring in polygon) {
+            var j = ring.size - 1
+            for (i in ring.indices) {
+                val (xi, yi) = ring[i]
+                val (xj, yj) = ring[j]
+                if ((yi > point[1]) != (yj > point[1]) && point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi) {
+                    inside = !inside
+                }
+                j = i
+            }
+        }
+        return inside
+    }
+
+    /** Whether two polygons overlap: a point of either is in the other, or one of their edges crosses the other's */
+    fun intersects(polygon: List<List<DoubleArray>>, otherPolygon: List<List<DoubleArray>>): Boolean {
+        if (polygon.flatten().any { isPointInPolygon(it, otherPolygon) } || otherPolygon.flatten().any { isPointInPolygon(it, polygon) }) {
+            return true
+        }
+        val otherEdges = edges(otherPolygon)
+        return edges(polygon).any { (start, end) -> otherEdges.any { (otherStart, otherEnd) -> crosses(start, end, otherStart, otherEnd) } }
+    }
+
+    /** How large polygons are by their bounds, in square degrees, which is enough to tell a smaller one from a larger one */
+    fun getBoundsArea(polygons: List<List<List<DoubleArray>>>): Double {
+        val points = polygons.flatten().flatten()
+        return (points.maxOf { it[0] } - points.minOf { it[0] }) * (points.maxOf { it[1] } - points.minOf { it[1] })
+    }
+
+    private fun edges(polygon: List<List<DoubleArray>>): List<Pair<DoubleArray, DoubleArray>> =
+        polygon.flatMap { ring -> ring.indices.map { ring[it] to ring[(it + 1) % ring.size] } }
+
+    private fun crosses(a: DoubleArray, b: DoubleArray, c: DoubleArray, d: DoubleArray): Boolean =
+        side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0
+
+    private fun side(a: DoubleArray, b: DoubleArray, point: DoubleArray): Double =
+        Math.signum((b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]))
+
+    private fun tileLng(x: Double, zoom: Int): Double = x / (1 shl zoom) * 360.0 - 180.0
+
+    private fun tileLat(y: Double, zoom: Int): Double =
+        Math.toDegrees(Math.atan(Math.sinh(Math.PI * (1 - 2 * y / (1 shl zoom)))))
 }

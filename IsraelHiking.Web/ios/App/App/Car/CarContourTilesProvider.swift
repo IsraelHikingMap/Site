@@ -7,6 +7,10 @@ import MaplibreContour
 ///
 /// Units (metric/imperial) change the elevation multiplier and the contour thresholds, so a manager is
 /// built and cached per units string; the managers are thread-safe and shared across requests.
+///
+/// The DEM is read up to the same zoom as on the web, `MapService.DEM_MAX_ZOOM`. It has its higher zooms
+/// only where there is data, and the library falls back to the zoom below on a tile the fetcher answers
+/// with nil.
 final class CarContourTilesProvider {
 
     private let baseConfig: ContourConfig
@@ -19,7 +23,7 @@ final class CarContourTilesProvider {
         config.encoding = .terrarium
         config.demUrlPattern =
             "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp?use=slice"
-        config.demMaxZoom = 11
+        config.demMaxZoom = 14
         config.overzoom = 1
         config.layerName = "contours"
         config.elevationKey = "ele"
@@ -62,8 +66,9 @@ final class CarContourTilesProvider {
 
 /// Downloads the raw DEM tile bytes for a fully-resolved URL. The `use=slice` marker in the DEM URL
 /// pattern routes the request through `SliceURLProtocol`, giving DEM fetches the same offline
-/// (PMTiles) fallback the rest of the map enjoys. Returns nil when there is no data, which the library
-/// renders as an empty contour tile.
+/// (PMTiles) fallback the rest of the map enjoys. Returns nil for a 404, a tile the DEM does not have,
+/// which the library replaces with the zoom below, and throws for any other failure so that it is not
+/// taken for missing data.
 private final class ContourDemTileFetcher: DemTileFetcher, @unchecked Sendable {
 
     private let session: URLSession
@@ -77,19 +82,23 @@ private final class ContourDemTileFetcher: DemTileFetcher, @unchecked Sendable {
     }
 
     /// Called synchronously by the native library; block until the tile request completes.
-    func fetch(url: String) -> Data? {
-        guard let requestUrl = URL(string: url) else { return nil }
+    func fetch(url: String) throws -> Data? {
+        guard let requestUrl = URL(string: url) else { throw FfiError.Tiler(message: "Invalid url \(url)") }
         let semaphore = DispatchSemaphore(value: 0)
-        var result: Data?
-        let task = session.dataTask(with: requestUrl) { data, response, _ in
-            if let http = response as? HTTPURLResponse, http.statusCode == 200 {
-                result = data
+        var result: Result<Data?, FfiError> = .success(nil)
+        let task = session.dataTask(with: requestUrl) { data, response, error in
+            let status = (response as? HTTPURLResponse)?.statusCode
+            if status == 200 {
+                result = .success(data)
+            } else if status != SliceURLProtocol.notFoundStatusCode {
+                let reason = error?.localizedDescription ?? "HTTP \(status ?? 0)"
+                result = .failure(FfiError.Tiler(message: "Failed to get \(url): \(reason)"))
             }
             semaphore.signal()
         }
         task.resume()
         semaphore.wait()
-        return result
+        return try result.get()
     }
 }
 

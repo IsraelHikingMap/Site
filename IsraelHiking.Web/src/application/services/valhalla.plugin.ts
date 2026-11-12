@@ -29,23 +29,24 @@ export type ValhallaRouteLeg = {
 export interface ValhallaPlugin {
     /**
      * Extracts a downloaded file of routing tiles, the tar is deleted once extracted.
-     * The files of adjacent tiles are extracted into the same directory so that routing can cross
-     * between them, the tileKey is what allows the tiles of one of them to be removed later on.
+     * Every file is extracted into the same directory so that routing can cross between them, and the
+     * tiles it held are kept under the given id, which is what removes them later on - the plugin gives
+     * the id no meaning of its own, the app uses the id of the area the file was downloaded for.
      */
-    extractFile(options: { tarFileName: string; tileKey: string }): Promise<{ extractedFiles: number; tilesDir: string }>;
+    extractFile(options: { tarFileName: string; id: string }): Promise<{ extractedFiles: number; tilesDir: string }>;
     /**
-     * Removes the routing tiles of a single tile, the ones its neighbours share with it are kept.
+     * Removes the routing tiles kept under an id, the ones that are also kept under another id stay.
      */
-    deleteTile(options: { tileKey: string }): Promise<void>;
+    deleteById(options: { id: string }): Promise<void>;
     /**
-     * The keys of the tiles whose routing tiles are on the device, i.e. the areas that can be routed
-     * in. The plugin is the one that keeps them, so this is what the app reads them from.
+     * The ids routing tiles are kept under. The plugin is the one that keeps them, so this is what the
+     * app reads them from.
      */
-    listTiles(): Promise<{ tileKeys: string[] }>;
+    listIds(): Promise<{ ids: string[] }>;
     /**
-     * Removes all the tiles from the device.
+     * Removes the routing tiles kept under every id.
      */
-    clearTiles(): Promise<void>;
+    deleteAll(): Promise<void>;
     /**
      * Stores the routing profiles, as they were downloaded, so that a route uses the same costing
      * options the server would have used.
