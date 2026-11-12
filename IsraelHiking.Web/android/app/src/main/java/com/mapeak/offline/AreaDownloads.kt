@@ -13,11 +13,11 @@ import androidx.core.content.ContextCompat
 import java.io.File
 
 /**
- * Starts, cancels and reports the tile download, whichever of the two ways it runs: a user-initiated data
+ * Starts, cancels and reports the area download, whichever of the two ways it runs: a user-initiated data
  * transfer job on Android 14 and above, and a dataSync foreground service below it. There is only ever one
  * download, a new one cancels the one before it.
  */
-object TileDownloads {
+object AreaDownloads {
     const val JOB_ID = 2026
 
     /**
@@ -25,9 +25,9 @@ object TileDownloads {
      * while the app is visible, so this is called right after the user asked for the download.
      */
     @Synchronized
-    fun start(context: Context, job: TileDownloadJob) {
-        TileDownloadJobStore.load(context)?.let { cancel(context, it.tileKey) }
-        TileDownloadJobStore.save(context, job)
+    fun start(context: Context, job: AreaDownloadJob) {
+        AreaDownloadJobStore.load(context)?.let { cancel(context, it.areaId) }
+        AreaDownloadJobStore.save(context, job)
         val failure = launch(context)
         if (failure != null) {
             fail(context, job, failure)
@@ -35,49 +35,49 @@ object TileDownloads {
     }
 
     /**
-     * Stops the transfers of a tile, deletes its partial files and marks it cancelled. The files that
+     * Stops the transfers of an area, deletes its partial files and marks it cancelled. The files that
      * already completed are kept.
      */
     @Synchronized
-    fun cancel(context: Context, tileKey: String) {
-        if (TileDownloadJobStore.load(context)?.tileKey != tileKey) {
+    fun cancel(context: Context, areaId: String) {
+        if (AreaDownloadJobStore.load(context)?.areaId != areaId) {
             return
         }
-        TileDownloader.current?.takeIf { it.job.tileKey == tileKey }?.cancel()
+        AreaDownloader.current?.takeIf { it.job.areaId == areaId }?.cancel()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             jobScheduler(context).cancel(JOB_ID)
         }
-        val job = TileDownloadJobStore.load(context) ?: return
+        val job = AreaDownloadJobStore.load(context) ?: return
         deletePartialFiles(context, job)
-        if (job.state != TileDownloadJob.RUNNING) {
+        if (job.state != AreaDownloadJob.RUNNING) {
             return
         }
-        job.state = TileDownloadJob.CANCELLED
-        TileDownloadJobStore.save(context, job)
-        TileDownloader.listeners.forEach { it.onTileFinished(job) }
+        job.state = AreaDownloadJob.CANCELLED
+        AreaDownloadJobStore.save(context, job)
+        AreaDownloader.listeners.forEach { it.onAreaFinished(job) }
     }
 
     /**
-     * The download of a tile as it stands, null when there is none. A download that is saved as running
+     * The download of an area as it stands, null when there is none. A download that is saved as running
      * while nothing runs it, since its process was killed, is completed when all its files are found on
      * disk, and continued otherwise - this is asked when the app is visible, which is when it can be.
      */
     @Synchronized
-    fun get(context: Context, tileKey: String): TileDownloadJob? {
-        val job = TileDownloadJobStore.load(context) ?: return null
-        if (job.tileKey != tileKey) {
+    fun get(context: Context, areaId: String): AreaDownloadJob? {
+        val job = AreaDownloadJobStore.load(context) ?: return null
+        if (job.areaId != areaId) {
             return null
         }
         job.markFilesFoundOnDisk(context)
-        if (job.state != TileDownloadJob.RUNNING || isRunning(context)) {
+        if (job.state != AreaDownloadJob.RUNNING || isRunning(context)) {
             return job
         }
-        if (job.files.all { it.state == TileDownloadFile.COMPLETED }) {
-            job.state = TileDownloadJob.COMPLETED
-            TileDownloadJobStore.save(context, job)
+        if (job.files.all { it.state == AreaDownloadFile.COMPLETED }) {
+            job.state = AreaDownloadJob.COMPLETED
+            AreaDownloadJobStore.save(context, job)
             return job
         }
-        TileDownloadJobStore.save(context, job)
+        AreaDownloadJobStore.save(context, job)
         val failure = launch(context)
         if (failure != null) {
             fail(context, job, failure)
@@ -86,7 +86,7 @@ object TileDownloads {
     }
 
     private fun isRunning(context: Context): Boolean {
-        if (TileDownloader.current != null) {
+        if (AreaDownloader.current != null) {
             return true
         }
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
@@ -99,7 +99,7 @@ object TileDownloads {
             return scheduleJob(context)
         }
         return try {
-            ContextCompat.startForegroundService(context, Intent(context, TileDownloadForegroundService::class.java))
+            ContextCompat.startForegroundService(context, Intent(context, AreaDownloadForegroundService::class.java))
             null
         } catch (ex: Exception) {
             "the foreground service could not be started: ${ex.message}"
@@ -116,7 +116,7 @@ object TileDownloads {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
             .build()
-        val jobInfo = JobInfo.Builder(JOB_ID, ComponentName(context, TileDownloadJobService::class.java))
+        val jobInfo = JobInfo.Builder(JOB_ID, ComponentName(context, AreaDownloadJobService::class.java))
             .setUserInitiated(true)
             .setRequiredNetwork(network)
             .build()
@@ -127,20 +127,20 @@ object TileDownloads {
         }
     }
 
-    private fun fail(context: Context, job: TileDownloadJob, reason: String) {
+    private fun fail(context: Context, job: AreaDownloadJob, reason: String) {
         synchronized(job) {
-            job.state = TileDownloadJob.FAILED
-            job.files.filter { it.state != TileDownloadFile.COMPLETED }.forEach {
-                it.state = TileDownloadFile.FAILED
+            job.state = AreaDownloadJob.FAILED
+            job.files.filter { it.state != AreaDownloadFile.COMPLETED }.forEach {
+                it.state = AreaDownloadFile.FAILED
                 it.reason = reason
             }
         }
-        TileDownloadJobStore.save(context, job)
-        TileDownloader.listeners.forEach { it.onTileFinished(job) }
+        AreaDownloadJobStore.save(context, job)
+        AreaDownloader.listeners.forEach { it.onAreaFinished(job) }
     }
 
-    private fun deletePartialFiles(context: Context, job: TileDownloadJob) {
-        val directory = TileDownloadJob.offlineFilesDirectory(context)
+    private fun deletePartialFiles(context: Context, job: AreaDownloadJob) {
+        val directory = AreaDownloadJob.offlineFilesDirectory(context)
         job.files.forEach { File(directory, "${it.fileName}.part").delete() }
     }
 

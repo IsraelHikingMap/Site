@@ -3,9 +3,9 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// The transfers of a tile download, which the background URL session runs in the app and a test runs itself.
+/// The transfers of an area download, which the background URL session runs in the app and a test runs itself.
 /// Every transfer carries a description, which comes back with every event of it.
-public protocol TileTransfers: AnyObject {
+public protocol AreaTransfers: AnyObject {
     func enqueue(_ request: URLRequest, description: String)
     /// Cancels the transfers of a job, whose events are ignored from then on anyway
     func cancelTransfers(ofJob jobId: String)
@@ -13,38 +13,38 @@ public protocol TileTransfers: AnyObject {
     func activeDescriptions(_ completion: @escaping ([String]) -> Void)
 }
 
-/// What a tile download reports, see TileDownloadCoordinator.addListener
-public protocol TileDownloadListener: AnyObject {
-    func fileProgress(tileKey: String, fileName: String, fraction: Double)
-    func fileCompleted(tileKey: String, fileName: String)
-    func tileFinished(_ job: TileDownloadJob)
+/// What an area download reports, see AreaDownloadCoordinator.addListener
+public protocol AreaDownloadListener: AnyObject {
+    func fileProgress(areaId: String, fileName: String, fraction: Double)
+    func fileCompleted(areaId: String, fileName: String)
+    func areaFinished(_ job: AreaDownloadJob)
 }
 
 /// Why a transfer failed, as the URL session tells it. A transfer the system cancelled since the user force-quit
 /// the app fails its file at once, while one it cancelled for any other reason leaves its file pending, which the
 /// next time the app asks about the job fails as interrupted unless the system still has transfers of it.
-public enum TileTransferFailure {
+public enum AreaTransferFailure {
     case network(String)
     case timeout(String)
     case forceQuit
     case interrupted
 }
 
-/// Turns the events of the transfers of a tile download into the state of its files and of the job, and
+/// Turns the events of the transfers of an area download into the state of its files and of the job, and
 /// moves every file to its place as soon as it arrives. All its methods run one at a time on a queue of its
 /// own, since the session's events and the plugin's calls come from different threads.
-public final class TileDownloadCoordinator {
+public final class AreaDownloadCoordinator {
     private static let maxRetries = 2
 
-    private let store: TileDownloadJobStore
-    private weak var transfers: TileTransfers?
+    private let store: AreaDownloadJobStore
+    private weak var transfers: AreaTransfers?
     private let fileManager: FileManager
     private let now: () -> Date
     private let progressInterval: TimeInterval
     private let queue = DispatchQueue(label: "com.mapeak.offline-download")
-    private var job: TileDownloadJob?
+    private var job: AreaDownloadJob?
     /// The transfers the job runs in when they are not the coordinator's own, see start
-    private weak var jobTransfers: TileTransfers?
+    private weak var jobTransfers: AreaTransfers?
     /// Whether the app is in the foreground, see appDidBecomeActive
     private var isActive = false
     /// The names of the files whose transfers were handed over and did not end yet
@@ -53,7 +53,7 @@ public final class TileDownloadCoordinator {
     private var listeners: [WeakListener] = []
 
     /// The clock and the interval are only given by tests, which decide when time passes themselves.
-    public init(store: TileDownloadJobStore, transfers: TileTransfers, fileManager: FileManager = .default,
+    public init(store: AreaDownloadJobStore, transfers: AreaTransfers, fileManager: FileManager = .default,
                 now: @escaping () -> Date = Date.init, progressInterval: TimeInterval = 0.25) {
         self.store = store
         self.transfers = transfers
@@ -66,7 +66,7 @@ public final class TileDownloadCoordinator {
         }
     }
 
-    public func addListener(_ listener: TileDownloadListener) {
+    public func addListener(_ listener: AreaDownloadListener) {
         queue.sync { listeners.append(WeakListener(listener)) }
     }
 
@@ -75,7 +75,7 @@ public final class TileDownloadCoordinator {
     /// first. Transfers that are given run the job instead of the coordinator's own, and get at most the job's
     /// concurrency of files at a time in the background too. Returns the job as it started.
     @discardableResult
-    public func start(_ newJob: TileDownloadJob, in transfers: TileTransfers? = nil) -> TileDownloadJob {
+    public func start(_ newJob: AreaDownloadJob, in transfers: AreaTransfers? = nil) -> AreaDownloadJob {
         queue.sync {
             if let current = job, current.state == .running {
                 end(current, as: .cancelled)
@@ -93,33 +93,33 @@ public final class TileDownloadCoordinator {
         }
     }
 
-    /// Stops the transfers of a tile and marks it cancelled. The files that already completed are kept, and
+    /// Stops the transfers of an area and marks it cancelled. The files that already completed are kept, and
     /// there is nothing partial to delete - a file is only moved to its place once all of it arrived.
-    public func cancel(tileKey: String) {
+    public func cancel(areaId: String) {
         queue.sync {
-            guard let current = job, current.tileKey == tileKey, current.state == .running else {
+            guard let current = job, current.areaId == areaId, current.state == .running else {
                 return
             }
             end(current, as: .cancelled)
         }
     }
 
-    /// The download of a tile as it stands, nil when there is none. A running download that the system has no
+    /// The download of an area as it stands, nil when there is none. A running download that the system has no
     /// transfers of anymore, since the app was force-quit or its process ended, is completed when all its files
     /// are on disk and fails with the files that are still missing as interrupted otherwise, without starting
-    /// anything: the user decides whether to download the tile again.
-    public func get(tileKey: String, completion: @escaping (TileDownloadJob?) -> Void) {
+    /// anything: the user decides whether to download the area again.
+    public func get(areaId: String, completion: @escaping (AreaDownloadJob?) -> Void) {
         guard let transfers = queue.sync(execute: { activeTransfers }) else {
             completion(nil)
             return
         }
         transfers.activeDescriptions { descriptions in
-            completion(self.queue.sync { self.resume(tileKey: tileKey, activeDescriptions: descriptions) })
+            completion(self.queue.sync { self.resume(areaId: areaId, activeDescriptions: descriptions) })
         }
     }
 
-    private func resume(tileKey: String, activeDescriptions: [String]) -> TileDownloadJob? {
-        guard var current = job, current.tileKey == tileKey else {
+    private func resume(areaId: String, activeDescriptions: [String]) -> AreaDownloadJob? {
+        guard var current = job, current.areaId == areaId else {
             return nil
         }
         current.markFilesFoundOnDisk(fileManager)
@@ -151,7 +151,7 @@ public final class TileDownloadCoordinator {
     }
 
     /// The app is about to leave the foreground: every file that is still queued is handed over at once, so that
-    /// the system holds the whole tile before the app is suspended.
+    /// the system holds the whole area before the app is suspended.
     public func appWillResignActive() {
         queue.sync {
             isActive = false
@@ -171,7 +171,7 @@ public final class TileDownloadCoordinator {
             }
             lastProgress[fileName] = time
             let fraction = totalBytesExpected > 0 ? min(1, Double(totalBytesWritten) / Double(totalBytesExpected)) : 0
-            notify { $0.fileProgress(tileKey: current.tileKey, fileName: fileName, fraction: fraction) }
+            notify { $0.fileProgress(areaId: current.areaId, fileName: fileName, fraction: fraction) }
         }
     }
 
@@ -195,14 +195,14 @@ public final class TileDownloadCoordinator {
             do {
                 try place(location, as: current.files[index].fileName, in: current.directory)
             } catch {
-                fail(index, reason: TileDownloadCoordinator.diskReason(error))
+                fail(index, reason: AreaDownloadCoordinator.diskReason(error))
                 return
             }
             job?.files[index].state = .completed
             job?.files[index].reason = nil
             inFlight.remove(current.files[index].fileName)
             saveCurrent()
-            notify { $0.fileCompleted(tileKey: current.tileKey, fileName: current.files[index].fileName) }
+            notify { $0.fileCompleted(areaId: current.areaId, fileName: current.files[index].fileName) }
             if !finishIfDone() {
                 enqueuePending()
             }
@@ -210,7 +210,7 @@ public final class TileDownloadCoordinator {
     }
 
     /// Takes a transfer that failed, trying it again on a network error up to maxRetries times.
-    public func didFail(description: String, failure: TileTransferFailure) {
+    public func didFail(description: String, failure: AreaTransferFailure) {
         queue.sync {
             guard let (current, index) = runningFile(description) else {
                 return
@@ -227,7 +227,7 @@ public final class TileDownloadCoordinator {
             case .timeout(let message):
                 reason = "timeout: \(message)"
             }
-            guard current.files[index].retries < TileDownloadCoordinator.maxRetries else {
+            guard current.files[index].retries < AreaDownloadCoordinator.maxRetries else {
                 fail(index, reason: reason)
                 return
             }
@@ -255,7 +255,7 @@ public final class TileDownloadCoordinator {
     }
 
     /// The running job and the index of the file a transfer belongs to, nil for a transfer of any other job
-    private func runningFile(_ description: String) -> (TileDownloadJob, Int)? {
+    private func runningFile(_ description: String) -> (AreaDownloadJob, Int)? {
         guard let parsed = TransferDescription(parsing: description), let current = job,
               current.state == .running, current.id == parsed.jobId,
               let index = current.files.firstIndex(where: { $0.fileName == parsed.fileName && $0.state == .pending }) else {
@@ -264,7 +264,7 @@ public final class TileDownloadCoordinator {
         return (current, index)
     }
 
-    private var activeTransfers: TileTransfers? {
+    private var activeTransfers: AreaTransfers? {
         jobTransfers ?? transfers
     }
 
@@ -290,13 +290,13 @@ public final class TileDownloadCoordinator {
         }
     }
 
-    private func enqueue(_ file: TileDownloadFile, of job: TileDownloadJob) {
+    private func enqueue(_ file: AreaDownloadFile, of job: AreaDownloadJob) {
         guard let url = URL(string: file.url) else {
             return
         }
         var request = URLRequest(url: url)
         job.headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.key) }
-        activeTransfers?.enqueue(request, description: TransferDescription(jobId: job.id, tileKey: job.tileKey, fileName: file.fileName).text)
+        activeTransfers?.enqueue(request, description: TransferDescription(jobId: job.id, areaId: job.areaId, fileName: file.fileName).text)
     }
 
     private func fail(_ index: Int, reason: String) {
@@ -312,7 +312,7 @@ public final class TileDownloadCoordinator {
     }
 
     /// Fails every file that is not whole yet with the reason the token was rejected, and stops the rest.
-    private func reject(_ current: TileDownloadJob, reason: String) {
+    private func reject(_ current: AreaDownloadJob, reason: String) {
         for index in current.files.indices where current.files[index].state != .completed {
             job?.files[index].state = .failed
             job?.files[index].reason = reason
@@ -331,7 +331,7 @@ public final class TileDownloadCoordinator {
         return true
     }
 
-    private func end(_ ended: TileDownloadJob, as state: TileDownloadState) {
+    private func end(_ ended: AreaDownloadJob, as state: AreaDownloadState) {
         var finished = ended
         finished.state = state
         job = finished
@@ -339,7 +339,7 @@ public final class TileDownloadCoordinator {
         activeTransfers?.cancelTransfers(ofJob: finished.id)
         inFlight = []
         lastProgress = [:]
-        notify { $0.tileFinished(finished) }
+        notify { $0.areaFinished(finished) }
     }
 
     private func saveCurrent() {
@@ -348,25 +348,25 @@ public final class TileDownloadCoordinator {
         }
     }
 
-    private func save(_ job: TileDownloadJob) {
+    private func save(_ job: AreaDownloadJob) {
         try? store.save(job)
     }
 
-    private func notify(_ event: (TileDownloadListener) -> Void) {
+    private func notify(_ event: (AreaDownloadListener) -> Void) {
         listeners.removeAll { $0.listener == nil }
         listeners.compactMap { $0.listener }.forEach(event)
     }
 }
 
-/// The description a transfer carries: the job, the tile and the file it is of.
+/// The description a transfer carries: the job, the area and the file it is of.
 struct TransferDescription {
     let jobId: String
-    let tileKey: String
+    let areaId: String
     let fileName: String
 
-    init(jobId: String, tileKey: String, fileName: String) {
+    init(jobId: String, areaId: String, fileName: String) {
         self.jobId = jobId
-        self.tileKey = tileKey
+        self.areaId = areaId
         self.fileName = fileName
     }
 
@@ -375,18 +375,18 @@ struct TransferDescription {
         guard parts.count == 3 else {
             return nil
         }
-        self.init(jobId: parts[0], tileKey: parts[1], fileName: parts[2])
+        self.init(jobId: parts[0], areaId: parts[1], fileName: parts[2])
     }
 
     var text: String {
-        "\(jobId)/\(tileKey)/\(fileName)"
+        "\(jobId)/\(areaId)/\(fileName)"
     }
 }
 
 private final class WeakListener {
-    weak var listener: TileDownloadListener?
+    weak var listener: AreaDownloadListener?
 
-    init(_ listener: TileDownloadListener) {
+    init(_ listener: AreaDownloadListener) {
         self.listener = listener
     }
 }

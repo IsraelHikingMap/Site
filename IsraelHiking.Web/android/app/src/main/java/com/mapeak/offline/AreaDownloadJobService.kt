@@ -6,29 +6,29 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 
 /**
- * Runs the tile download as a user-initiated data transfer job, Android 14 and above. The system may
+ * Runs the area download as a user-initiated data transfer job, Android 14 and above. The system may
  * stop the job, when the network is gone for example, and runs it again later - the saved job is what
  * lets it continue the files that are still missing.
  */
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-class TileDownloadJobService : JobService() {
+class AreaDownloadJobService : JobService() {
 
     @Volatile
-    private var downloader: TileDownloader? = null
+    private var downloader: AreaDownloader? = null
 
     override fun onStartJob(params: JobParameters): Boolean {
-        val notification = TileDownloadNotification(this)
-        setNotification(params, TileDownloadNotification.NOTIFICATION_ID, notification.build(0.0),
+        val notification = AreaDownloadNotification(this)
+        setNotification(params, AreaDownloadNotification.NOTIFICATION_ID, notification.build(0.0),
             JOB_END_NOTIFICATION_POLICY_REMOVE)
-        val job = TileDownloadJobStore.load(this)
-        if (job == null || job.state != TileDownloadJob.RUNNING) {
+        val job = AreaDownloadJobStore.load(this)
+        if (job == null || job.state != AreaDownloadJob.RUNNING) {
             return false
         }
-        val downloader = TileDownloader(this, job)
+        val downloader = AreaDownloader(this, job)
         this.downloader = downloader
         Thread {
             val ended = downloader.run { notification.update(it) }
-            if (ended && job.state != TileDownloadJob.CANCELLED) {
+            if (ended && job.state != AreaDownloadJob.CANCELLED) {
                 jobFinished(params, false)
             }
         }.start()
@@ -42,6 +42,6 @@ class TileDownloadJobService : JobService() {
     override fun onStopJob(params: JobParameters): Boolean {
         val downloader = this.downloader ?: return false
         downloader.stop()
-        return downloader.job.state == TileDownloadJob.RUNNING
+        return downloader.job.state == AreaDownloadJob.RUNNING
     }
 }

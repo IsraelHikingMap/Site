@@ -16,9 +16,9 @@ import com.getcapacitor.annotation.PermissionCallback
 import org.json.JSONObject
 
 /**
- * Downloads the offline files of a tile to completion while the app is in the background, see
- * TileDownloads. The files are written where the app already reads them from, and the app moves them
- * once the whole tile arrived.
+ * Downloads the offline files of an area to completion while the app is in the background, see
+ * AreaDownloads. The files are written where the app already reads them from, and the app moves them
+ * once the whole area arrived.
  *
  * The saved job is the source of truth for whatever the app missed while it was not listening, the
  * events are only what it hears while it is.
@@ -27,106 +27,106 @@ import org.json.JSONObject
     name = "OfflineDownload",
     permissions = [Permission(alias = OfflineDownloadPlugin.NOTIFICATIONS, strings = [Manifest.permission.POST_NOTIFICATIONS])]
 )
-class OfflineDownloadPlugin : Plugin(), TileDownloader.Listener {
+class OfflineDownloadPlugin : Plugin(), AreaDownloader.Listener {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun load() {
-        TileDownloader.listeners.add(this)
+        AreaDownloader.listeners.add(this)
     }
 
     override fun handleOnDestroy() {
-        TileDownloader.listeners.remove(this)
+        AreaDownloader.listeners.remove(this)
     }
 
     /**
-     * Starts the download of a tile, asking for the notifications permission first on Android 13 and above -
+     * Starts the download of an area, asking for the notifications permission first on Android 13 and above -
      * the download shows its progress in a notification. It is started whether or not it was granted.
      */
     @Suppress("unused")
     @PluginMethod
-    fun startTileDownload(call: PluginCall) {
+    fun startAreaDownload(call: PluginCall) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && getPermissionState(NOTIFICATIONS) != PermissionState.GRANTED) {
             requestPermissionForAlias(NOTIFICATIONS, call, "notificationsPermissionCallback")
             return
         }
-        startTileDownloadWithPermission(call)
+        startAreaDownloadWithPermission(call)
     }
 
     @Suppress("unused")
     @PermissionCallback
     fun notificationsPermissionCallback(call: PluginCall) {
-        startTileDownloadWithPermission(call)
+        startAreaDownloadWithPermission(call)
     }
 
-    private fun startTileDownloadWithPermission(call: PluginCall) {
-        val tileKey = call.getString("tileKey")
-        if (tileKey.isNullOrBlank()) {
-            call.reject("tileKey is required")
+    private fun startAreaDownloadWithPermission(call: PluginCall) {
+        val areaId = call.getString("areaId")
+        if (areaId.isNullOrBlank()) {
+            call.reject("areaId is required")
             return
         }
         val files = call.getArray("files") ?: return call.reject("files is required")
         val downloadFiles = (0 until files.length()).map {
             val file = files.getJSONObject(it)
-            TileDownloadFile(file.getString("fileName"), file.getString("url"))
+            AreaDownloadFile(file.getString("fileName"), file.getString("url"))
         }
         if (downloadFiles.any { it.fileName.isBlank() || it.fileName.contains('/') || it.fileName.startsWith(".") }) {
             call.reject("A file name must be a plain file name")
             return
         }
         val headers = call.getObject("headers") ?: JSObject()
-        val job = TileDownloadJob(
-            tileKey,
+        val job = AreaDownloadJob(
+            areaId,
             downloadFiles,
             headers.keys().asSequence().associateWith { headers.getString(it).orEmpty() },
             call.getInt("concurrency") ?: DEFAULT_CONCURRENCY
         )
         try {
-            TileDownloads.start(context, job)
+            AreaDownloads.start(context, job)
             call.resolve(JSObject().put("background", true))
         } catch (ex: Exception) {
-            call.reject("Failed to start the download of $tileKey: ${ex.message}", ex)
+            call.reject("Failed to start the download of $areaId: ${ex.message}", ex)
         }
     }
 
     @Suppress("unused")
     @PluginMethod
-    fun cancelTileDownload(call: PluginCall) {
-        val tileKey = call.getString("tileKey")
-        if (tileKey.isNullOrBlank()) {
-            call.reject("tileKey is required")
+    fun cancelAreaDownload(call: PluginCall) {
+        val areaId = call.getString("areaId")
+        if (areaId.isNullOrBlank()) {
+            call.reject("areaId is required")
             return
         }
-        TileDownloads.cancel(context, tileKey)
+        AreaDownloads.cancel(context, areaId)
         call.resolve()
     }
 
     @Suppress("unused")
     @PluginMethod
-    fun getTileDownload(call: PluginCall) {
-        val tileKey = call.getString("tileKey")
-        if (tileKey.isNullOrBlank()) {
-            call.reject("tileKey is required")
+    fun getAreaDownload(call: PluginCall) {
+        val areaId = call.getString("areaId")
+        if (areaId.isNullOrBlank()) {
+            call.reject("areaId is required")
             return
         }
-        val job = TileDownloads.get(context, tileKey)
+        val job = AreaDownloads.get(context, areaId)
         if (job == null) {
-            call.resolve(JSObject().put("state", TileDownloadJob.NONE).put("completedFiles", JSArray()).put("failedFiles", JSArray()))
+            call.resolve(JSObject().put("state", AreaDownloadJob.NONE).put("completedFiles", JSArray()).put("failedFiles", JSArray()))
             return
         }
         call.resolve(toResult(job))
     }
 
-    override fun onFileProgress(tileKey: String, fileName: String, fraction: Double) {
-        notify("fileProgress", JSObject().put("tileKey", tileKey).put("fileName", fileName).put("fraction", fraction))
+    override fun onFileProgress(areaId: String, fileName: String, fraction: Double) {
+        notify("fileProgress", JSObject().put("areaId", areaId).put("fileName", fileName).put("fraction", fraction))
     }
 
-    override fun onFileCompleted(tileKey: String, fileName: String) {
-        notify("fileCompleted", JSObject().put("tileKey", tileKey).put("fileName", fileName))
+    override fun onFileCompleted(areaId: String, fileName: String) {
+        notify("fileCompleted", JSObject().put("areaId", areaId).put("fileName", fileName))
     }
 
-    override fun onTileFinished(job: TileDownloadJob) {
+    override fun onAreaFinished(job: AreaDownloadJob) {
         val result = toResult(job)
-        notify("tileFinished", JSObject().put("tileKey", job.tileKey).put("state", result.getString("state"))
+        notify("areaFinished", JSObject().put("areaId", job.areaId).put("state", result.getString("state"))
             .put("failedFiles", result.getJSONArray("failedFiles")))
     }
 
@@ -134,11 +134,11 @@ class OfflineDownloadPlugin : Plugin(), TileDownloader.Listener {
         mainHandler.post { notifyListeners(eventName, data) }
     }
 
-    private fun toResult(job: TileDownloadJob): JSObject = synchronized(job) {
+    private fun toResult(job: AreaDownloadJob): JSObject = synchronized(job) {
         JSObject()
             .put("state", job.state)
-            .put("completedFiles", JSArray(job.files.filter { it.state == TileDownloadFile.COMPLETED }.map { it.fileName }))
-            .put("failedFiles", JSArray(job.files.filter { it.state == TileDownloadFile.FAILED }.map {
+            .put("completedFiles", JSArray(job.files.filter { it.state == AreaDownloadFile.COMPLETED }.map { it.fileName }))
+            .put("failedFiles", JSArray(job.files.filter { it.state == AreaDownloadFile.FAILED }.map {
                 JSONObject().put("fileName", it.fileName).put("reason", it.reason)
             }))
     }

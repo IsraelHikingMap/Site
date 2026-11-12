@@ -19,23 +19,23 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /**
- * Downloads the files of a tile job with OkHttp for whichever of the job service or the foreground
+ * Downloads the files of an area job with OkHttp for whichever of the job service or the foreground
  * service runs it. The files are started in the order of the job by a fixed pool of its concurrency,
  * since the server lists the files that take it longest first.
  * The client and the retry delay are only given by tests, which answer the requests themselves.
  */
-class TileDownloader(
+class AreaDownloader(
     private val context: Context,
-    val job: TileDownloadJob,
+    val job: AreaDownloadJob,
     private val client: OkHttpClient = sharedClient,
     private val retryDelayMs: Long = RETRY_DELAY_MS
 ) {
 
-    /** What a download reports, see TileDownloader.listeners */
+    /** What a download reports, see AreaDownloader.listeners */
     interface Listener {
-        fun onFileProgress(tileKey: String, fileName: String, fraction: Double)
-        fun onFileCompleted(tileKey: String, fileName: String)
-        fun onTileFinished(job: TileDownloadJob)
+        fun onFileProgress(areaId: String, fileName: String, fraction: Double)
+        fun onFileCompleted(areaId: String, fileName: String)
+        fun onAreaFinished(job: AreaDownloadJob)
     }
 
     /** Why a single attempt to download a file failed, and whether trying it again could help */
@@ -56,7 +56,7 @@ class TileDownloader(
     @Volatile
     private var rejection: String? = null
 
-    /** How much of the tile was downloaded, from 0 to 1, where every one of its files weighs the same */
+    /** How much of the area was downloaded, from 0 to 1, where every one of its files weighs the same */
     val progress: Double
         get() = if (job.files.isEmpty()) 1.0 else job.files.sumOf { fractions[it.fileName] ?: 0.0 } / job.files.size
 
@@ -68,7 +68,7 @@ class TileDownloader(
         current = this
         try {
             val queue = prepareQueue()
-            TileDownloadJobStore.save(context, job)
+            AreaDownloadJobStore.save(context, job)
             val pool = Executors.newFixedThreadPool(job.concurrency.coerceAtLeast(1))
             repeat(job.concurrency.coerceAtLeast(1)) {
                 pool.execute {
@@ -81,7 +81,7 @@ class TileDownloader(
             pool.shutdown()
             pool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS)
             if (stopped && !cancelled) {
-                TileDownloadJobStore.save(context, job)
+                AreaDownloadJobStore.save(context, job)
                 return false
             }
             finish()
@@ -98,15 +98,15 @@ class TileDownloader(
      * Marks the files that are already whole as completed and queues the rest in the order of the job. A
      * file that failed in a run that was stopped is tried again.
      */
-    private fun prepareQueue(): ConcurrentLinkedQueue<TileDownloadFile> = synchronized(job) {
+    private fun prepareQueue(): ConcurrentLinkedQueue<AreaDownloadFile> = synchronized(job) {
         job.markFilesFoundOnDisk(context)
-        val queue = ConcurrentLinkedQueue<TileDownloadFile>()
+        val queue = ConcurrentLinkedQueue<AreaDownloadFile>()
         for (file in job.files) {
-            if (file.state == TileDownloadFile.COMPLETED) {
+            if (file.state == AreaDownloadFile.COMPLETED) {
                 fractions[file.fileName] = 1.0
                 continue
             }
-            file.state = TileDownloadFile.PENDING
+            file.state = AreaDownloadFile.PENDING
             file.reason = null
             queue.add(file)
         }
@@ -137,7 +137,7 @@ class TileDownloader(
      * Downloads a file, trying it again on a network error up to MAX_RETRIES times. A file that was
      * interrupted is left as it is, it is the job that decides what that means.
      */
-    private fun download(file: TileDownloadFile, onProgress: (Double) -> Unit) {
+    private fun download(file: AreaDownloadFile, onProgress: (Double) -> Unit) {
         var retries = 0
         while (!isInterrupted()) {
             val failure = attemptDownload(file, onProgress) ?: return completeFile(file, onProgress)
@@ -163,8 +163,8 @@ class TileDownloader(
      * never continued - the server does not serve byte ranges - so it is deleted whenever the attempt fails.
      * Returns null when the file was downloaded.
      */
-    private fun attemptDownload(file: TileDownloadFile, onProgress: (Double) -> Unit): Failure? {
-        val directory = TileDownloadJob.offlineFilesDirectory(context)
+    private fun attemptDownload(file: AreaDownloadFile, onProgress: (Double) -> Unit): Failure? {
+        val directory = AreaDownloadJob.offlineFilesDirectory(context)
         directory.mkdirs()
         val partialFile = File(directory, "${file.fileName}.part")
         val request = Request.Builder().url(file.url).apply {
@@ -253,29 +253,29 @@ class TileDownloader(
             ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
     }
 
-    private fun reportProgress(file: TileDownloadFile, fraction: Double, onProgress: (Double) -> Unit) {
+    private fun reportProgress(file: AreaDownloadFile, fraction: Double, onProgress: (Double) -> Unit) {
         fractions[file.fileName] = fraction
-        listeners.forEach { it.onFileProgress(job.tileKey, file.fileName, fraction) }
+        listeners.forEach { it.onFileProgress(job.areaId, file.fileName, fraction) }
         onProgress(progress)
     }
 
-    private fun completeFile(file: TileDownloadFile, onProgress: (Double) -> Unit) {
+    private fun completeFile(file: AreaDownloadFile, onProgress: (Double) -> Unit) {
         synchronized(job) {
-            file.state = TileDownloadFile.COMPLETED
+            file.state = AreaDownloadFile.COMPLETED
             file.reason = null
         }
-        TileDownloadJobStore.save(context, job)
+        AreaDownloadJobStore.save(context, job)
         fractions[file.fileName] = 1.0
-        listeners.forEach { it.onFileCompleted(job.tileKey, file.fileName) }
+        listeners.forEach { it.onFileCompleted(job.areaId, file.fileName) }
         onProgress(progress)
     }
 
-    private fun failFile(file: TileDownloadFile, reason: String) {
+    private fun failFile(file: AreaDownloadFile, reason: String) {
         synchronized(job) {
-            file.state = TileDownloadFile.FAILED
+            file.state = AreaDownloadFile.FAILED
             file.reason = reason
         }
-        TileDownloadJobStore.save(context, job)
+        AreaDownloadJobStore.save(context, job)
     }
 
     /**
@@ -285,19 +285,19 @@ class TileDownloader(
     private fun finish() {
         synchronized(job) {
             job.state = when {
-                cancelled -> TileDownloadJob.CANCELLED
-                job.files.all { it.state == TileDownloadFile.COMPLETED } -> TileDownloadJob.COMPLETED
-                else -> TileDownloadJob.FAILED
+                cancelled -> AreaDownloadJob.CANCELLED
+                job.files.all { it.state == AreaDownloadFile.COMPLETED } -> AreaDownloadJob.COMPLETED
+                else -> AreaDownloadJob.FAILED
             }
-            if (job.state == TileDownloadJob.FAILED) {
-                job.files.filter { it.state == TileDownloadFile.PENDING }.forEach {
-                    it.state = TileDownloadFile.FAILED
+            if (job.state == AreaDownloadJob.FAILED) {
+                job.files.filter { it.state == AreaDownloadFile.PENDING }.forEach {
+                    it.state = AreaDownloadFile.FAILED
                     it.reason = rejection ?: "not downloaded"
                 }
             }
         }
-        TileDownloadJobStore.save(context, job)
-        listeners.forEach { it.onTileFinished(job) }
+        AreaDownloadJobStore.save(context, job)
+        listeners.forEach { it.onAreaFinished(job) }
     }
 
     companion object {
@@ -317,7 +317,7 @@ class TileDownloader(
 
         /** The download that is running in this process, null when there is none */
         @Volatile
-        var current: TileDownloader? = null
+        var current: AreaDownloader? = null
             private set
 
         /** Whoever wants to hear about the downloads of this process, the plugin when the app is running */

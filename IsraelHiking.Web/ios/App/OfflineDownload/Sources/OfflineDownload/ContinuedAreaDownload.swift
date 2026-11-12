@@ -9,10 +9,10 @@ public protocol ContinuedTask: AnyObject {
     func setTaskCompleted(success: Bool)
 }
 
-/// Starts a tile download in a continued task, where it runs in transfers of the app's own process, and in the
+/// Starts an area download in a continued task, where it runs in transfers of the app's own process, and in the
 /// coordinator's background session when the system does not launch the task within the timeout. The task follows
 /// the job: it shows how much of the files arrived, ends with the job, and cancels the job when it is stopped.
-public final class ContinuedTileDownload: TileDownloadListener {
+public final class ContinuedAreaDownload: AreaDownloadListener {
     /// How many units of the task's progress a file is, so that a file that is part way through moves it
     public static let unitsPerFile: Int64 = 1000
 
@@ -21,8 +21,8 @@ public final class ContinuedTileDownload: TileDownloadListener {
     /// Runs the given block once the given number of seconds passed
     public typealias Schedule = (_ delay: TimeInterval, _ block: @escaping () -> Void) -> Void
 
-    private let coordinator: TileDownloadCoordinator
-    private let transfers: TileTransfers
+    private let coordinator: AreaDownloadCoordinator
+    private let transfers: AreaTransfers
     private let timeout: TimeInterval
     private let now: () -> Date
     private let schedule: Schedule
@@ -32,7 +32,7 @@ public final class ContinuedTileDownload: TileDownloadListener {
 
     /// The clock and the scheduling are only given by tests, which decide when time passes themselves. The log tells
     /// what happened to the task, which the system does not tell the user about.
-    public init(coordinator: TileDownloadCoordinator, transfers: TileTransfers, timeout: TimeInterval = 3,
+    public init(coordinator: AreaDownloadCoordinator, transfers: AreaTransfers, timeout: TimeInterval = 3,
                 now: @escaping () -> Date = Date.init,
                 schedule: @escaping Schedule = { DispatchQueue.global().asyncAfter(deadline: .now() + $0, execute: DispatchWorkItem(block: $1)) },
                 log: @escaping (String) -> Void = { _ in }) {
@@ -48,17 +48,17 @@ public final class ContinuedTileDownload: TileDownloadListener {
     /// Submits a continued task for the job and starts the job once the system launched it, or in the background
     /// session once the submission failed or the timeout passed. The completion tells whether the job runs in the
     /// task, and how long the system took to launch it. A task launched after the timeout is ended at once.
-    public func start(_ job: TileDownloadJob, submit: Submit, completion: @escaping (_ background: Bool, _ launchDelay: TimeInterval?) -> Void) {
+    public func start(_ job: AreaDownloadJob, submit: Submit, completion: @escaping (_ background: Bool, _ launchDelay: TimeInterval?) -> Void) {
         let decision = Decision()
         let submittedAt = now()
         let submitted = submit { task in
             let launchDelay = self.now().timeIntervalSince(submittedAt)
             guard decision.take(self.lock) else {
-                self.log("The continued task of \(job.tileKey) launched after \(Self.milliseconds(launchDelay)), too late, ending it")
+                self.log("The continued task of \(job.areaId) launched after \(Self.milliseconds(launchDelay)), too late, ending it")
                 task.setTaskCompleted(success: false)
                 return
             }
-            self.log("The continued task of \(job.tileKey) launched after \(Self.milliseconds(launchDelay))")
+            self.log("The continued task of \(job.areaId) launched after \(Self.milliseconds(launchDelay))")
             self.run(job, in: task)
             completion(true, launchDelay)
         }
@@ -66,7 +66,7 @@ public final class ContinuedTileDownload: TileDownloadListener {
             guard decision.take(self.lock) else {
                 return
             }
-            self.log("The continued task of \(job.tileKey) \(reason), downloading in the background session")
+            self.log("The continued task of \(job.areaId) \(reason), downloading in the background session")
             self.coordinator.start(job)
             completion(false, nil)
         }
@@ -79,15 +79,15 @@ public final class ContinuedTileDownload: TileDownloadListener {
         }
     }
 
-    private func run(_ job: TileDownloadJob, in task: ContinuedTask) {
-        task.progress.totalUnitCount = Int64(job.files.count) * ContinuedTileDownload.unitsPerFile
+    private func run(_ job: AreaDownloadJob, in task: ContinuedTask) {
+        task.progress.totalUnitCount = Int64(job.files.count) * ContinuedAreaDownload.unitsPerFile
         task.setExpirationHandler { [weak self] in
-            self?.log("The continued task of \(job.tileKey) expired, cancelling the download")
-            self?.coordinator.cancel(tileKey: job.tileKey)
+            self?.log("The continued task of \(job.areaId) expired, cancelling the download")
+            self?.coordinator.cancel(areaId: job.areaId)
         }
         let previous = withLock { () -> ContinuedTask? in
             let previous = active?.task
-            active = ActiveTask(task: task, jobId: job.id, tileKey: job.tileKey)
+            active = ActiveTask(task: task, jobId: job.id, areaId: job.areaId)
             return previous
         }
         previous?.setTaskCompleted(success: false)
@@ -101,9 +101,9 @@ public final class ContinuedTileDownload: TileDownloadListener {
         }
     }
 
-    public func fileProgress(tileKey: String, fileName: String, fraction: Double) {
+    public func fileProgress(areaId: String, fileName: String, fraction: Double) {
         withLock {
-            guard active?.tileKey == tileKey else {
+            guard active?.areaId == areaId else {
                 return
             }
             active?.fractions[fileName] = fraction
@@ -111,9 +111,9 @@ public final class ContinuedTileDownload: TileDownloadListener {
         }
     }
 
-    public func fileCompleted(tileKey: String, fileName: String) {
+    public func fileCompleted(areaId: String, fileName: String) {
         withLock {
-            guard active?.tileKey == tileKey else {
+            guard active?.areaId == areaId else {
                 return
             }
             active?.fractions.removeValue(forKey: fileName)
@@ -122,7 +122,7 @@ public final class ContinuedTileDownload: TileDownloadListener {
         }
     }
 
-    public func tileFinished(_ job: TileDownloadJob) {
+    public func areaFinished(_ job: AreaDownloadJob) {
         let task = withLock { () -> ContinuedTask? in
             guard let current = active, current.jobId == job.id else {
                 return nil
@@ -133,7 +133,7 @@ public final class ContinuedTileDownload: TileDownloadListener {
         guard let task = task else {
             return
         }
-        log("The continued task of \(job.tileKey) ended with the download \(job.state.rawValue)")
+        log("The continued task of \(job.areaId) ended with the download \(job.state.rawValue)")
         task.setTaskCompleted(success: job.state == .completed)
     }
 
@@ -145,8 +145,8 @@ public final class ContinuedTileDownload: TileDownloadListener {
         guard let current = active else {
             return
         }
-        let partial = current.fractions.values.reduce(0, +) * Double(ContinuedTileDownload.unitsPerFile)
-        current.task.progress.completedUnitCount = Int64(current.completedFiles.count) * ContinuedTileDownload.unitsPerFile + Int64(partial)
+        let partial = current.fractions.values.reduce(0, +) * Double(ContinuedAreaDownload.unitsPerFile)
+        current.task.progress.completedUnitCount = Int64(current.completedFiles.count) * ContinuedAreaDownload.unitsPerFile + Int64(partial)
     }
 
     private func withLock<T>(_ body: () -> T) -> T {
@@ -160,7 +160,7 @@ public final class ContinuedTileDownload: TileDownloadListener {
 private struct ActiveTask {
     let task: ContinuedTask
     let jobId: String
-    let tileKey: String
+    let areaId: String
     var completedFiles: Set<String> = []
     var fractions: [String: Double] = [:]
 }

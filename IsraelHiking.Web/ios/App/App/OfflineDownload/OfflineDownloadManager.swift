@@ -2,10 +2,10 @@ import BackgroundTasks
 import Foundation
 import OfflineDownload
 
-/// Owns the URL sessions the tile downloads run in, see `TileDownloadCoordinator`. It is owned by the app rather
+/// Owns the URL sessions the area downloads run in, see `AreaDownloadCoordinator`. It is owned by the app rather
 /// than by the plugin, and created at launch, so that a relaunch reconnects to the transfers of the background
 /// session that are already in flight and iOS can finish them while Mapeak is suspended or terminated.
-/// A download that runs in a continued task, see `ContinuedTileDownload`, runs in a session of the app's own
+/// A download that runs in a continued task, see `ContinuedAreaDownload`, runs in a session of the app's own
 /// process instead, which the system does not stop while the task keeps the app running.
 final class OfflineDownloadManager {
     static let shared = OfflineDownloadManager()
@@ -20,10 +20,10 @@ final class OfflineDownloadManager {
         return formatter
     }()
 
-    private(set) var coordinator: TileDownloadCoordinator!
-    private let backgroundSession: TileTransferSession
-    private let processSession: TileTransferSession
-    private var continued: ContinuedTileDownload!
+    private(set) var coordinator: AreaDownloadCoordinator!
+    private let backgroundSession: AreaTransferSession
+    private let processSession: AreaTransferSession
+    private var continued: ContinuedAreaDownload!
     /// Where the diagnostics of a download in a continued task go, the plugin hands them to the app's log
     var log: ((String) -> Void)?
 
@@ -34,18 +34,18 @@ final class OfflineDownloadManager {
     }
 
     private init() {
-        let store = TileDownloadJobStore.applicationSupport()
+        let store = AreaDownloadJobStore.applicationSupport()
         let configuration = URLSessionConfiguration.background(withIdentifier: OfflineDownloadManager.sessionIdentifier)
         configuration.sessionSendsLaunchEvents = true
         configuration.isDiscretionary = false
         configuration.httpMaximumConnectionsPerHost = store.load()?.concurrency ?? OfflineDownloadManager.defaultConcurrency
-        backgroundSession = TileTransferSession(configuration: configuration)
-        processSession = TileTransferSession(configuration: .default)
-        coordinator = TileDownloadCoordinator(store: store, transfers: backgroundSession)
+        backgroundSession = AreaTransferSession(configuration: configuration)
+        processSession = AreaTransferSession(configuration: .default)
+        coordinator = AreaDownloadCoordinator(store: store, transfers: backgroundSession)
         backgroundSession.coordinator = coordinator
         processSession.coordinator = coordinator
         processSession.log = { [weak self] in self?.diagnose($0) }
-        continued = ContinuedTileDownload(coordinator: coordinator, transfers: processSession, log: { [weak self] in self?.diagnose($0) })
+        continued = ContinuedAreaDownload(coordinator: coordinator, transfers: processSession, log: { [weak self] in self?.diagnose($0) })
     }
 
     /// Hands a diagnostic to the log with the time it happened, since the app's web view only runs, and logs it,
@@ -55,10 +55,10 @@ final class OfflineDownloadManager {
     }
 
     /// Starts a download in a continued task that shows its progress under the given title and subtitle, see
-    /// `ContinuedTileDownload.start`. The task is registered right before it is submitted, under an identifier of its
+    /// `ContinuedAreaDownload.start`. The task is registered right before it is submitted, under an identifier of its
     /// own, since a launch handler can only be registered once for an identifier.
     @available(iOS 26.0, *)
-    func startContinued(_ job: TileDownloadJob, title: String, subtitle: String,
+    func startContinued(_ job: AreaDownloadJob, title: String, subtitle: String,
                         completion: @escaping (_ background: Bool, _ launchDelay: TimeInterval?) -> Void) {
         continued.start(job, submit: { launchHandler in
             let identifier = OfflineDownloadManager.continuedTaskIdentifierPrefix + UUID().uuidString
@@ -107,10 +107,10 @@ private final class SystemContinuedTask: ContinuedTask {
     }
 }
 
-/// A URL session the transfers of a tile download run in, which hands their events to the coordinator.
+/// A URL session the transfers of an area download run in, which hands their events to the coordinator.
 /// Every transfer carries the description the coordinator gave it, which is how its events find their job.
-final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTransfers {
-    weak var coordinator: TileDownloadCoordinator?
+final class AreaTransferSession: NSObject, URLSessionDownloadDelegate, AreaTransfers {
+    weak var coordinator: AreaDownloadCoordinator?
     /// Called once a background session delivered all the events it relaunched the app for
     var finishedEventsHandler: (() -> Void)?
     /// Where the diagnostics of the transfers go, nil when they are not wanted
@@ -171,11 +171,11 @@ final class TileTransferSession: NSObject, URLSessionDownloadDelegate, TileTrans
         guard let error = error as NSError?, let description = task.taskDescription else {
             return
         }
-        log?("\(TileTransferSession.fileName(description)) failed with error \(error.code)")
+        log?("\(AreaTransferSession.fileName(description)) failed with error \(error.code)")
         if let resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData] as? Data {
             session.downloadTask(withResumeData: resumeData).cancel()
         }
-        let failure: TileTransferFailure
+        let failure: AreaTransferFailure
         switch error.code {
         case NSURLErrorCancelled where error.userInfo[NSURLErrorBackgroundTaskCancelledReasonKey] as? Int
                 == NSURLErrorCancelledReasonUserForceQuitApplication:

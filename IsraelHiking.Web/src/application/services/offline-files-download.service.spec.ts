@@ -18,7 +18,7 @@ import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
 import { SpatialHelper } from "./spatial.helper";
-import { OFFLINE_DOWNLOAD, type FailedTileFile, type OfflineDownloadPlugin, type TileDownloadState } from "./offline-download.plugin";
+import { OFFLINE_DOWNLOAD, type FailedAreaFile, type OfflineDownloadPlugin, type AreaDownloadState } from "./offline-download.plugin";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
@@ -1025,12 +1025,12 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [ROOT_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01", [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
-                    expect(offlineDownload.startTileDownload).toHaveBeenCalledWith({
-                        tileKey: AREA_ID,
+                    expect(offlineDownload.startAreaDownload).toHaveBeenCalledWith({
+                        areaId: AREA_ID,
                         files: [
                             { fileName: ROOT_MAP_FILE, url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}` },
                             { fileName: AREA_ROUTING_TILES_FILE, url: `${Urls.offlineArea}/${AREA_ID}/${AREA_ROUTING_TILES_FILE}` }
@@ -1057,8 +1057,8 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
                     expect(toastService.info).not.toHaveBeenCalled();
@@ -1071,13 +1071,13 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                     toastService: ToastService, loggingService: LoggingService) => {
                     resetStoreForDownload(store);
-                    offlineDownload.startTileDownload.mockResolvedValue({ background: false });
+                    offlineDownload.startAreaDownload.mockResolvedValue({ background: false });
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
                     await vi.waitFor(() => expect(toastService.info).toHaveBeenCalledExactlyOnceWith("dont-switch-apps"));
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
                     expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("it stops while the app is in the background"));
@@ -1089,13 +1089,13 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
                     resetStoreForDownload(store);
-                    offlineDownload.startTileDownload.mockResolvedValue({ background: true, launchDelay: 420 });
+                    offlineDownload.startAreaDownload.mockResolvedValue({ background: true, launchDelay: 420 });
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
                     expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("its continued task launched after 420ms"));
@@ -1111,9 +1111,9 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
                     // The user stopped the download from the progress iOS shows, or iOS stopped it
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "cancelled", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "cancelled", failedFiles: [] });
 
                     expect(await promise).toBe("aborted");
                     expect(service.downloadInProgress()).toBeNull();
@@ -1128,20 +1128,20 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                     resetStoreForDownload(store);
                     let started: (value: { background: boolean }) => void;
-                    offlineDownload.startTileDownload.mockReturnValue(new Promise(resolve => started = resolve));
-                    offlineDownload.getTileDownload.mockResolvedValue({
+                    offlineDownload.startAreaDownload.mockReturnValue(new Promise(resolve => started = resolve));
+                    offlineDownload.getAreaDownload.mockResolvedValue({
                         state: "failed", completedFiles: [], failedFiles: [{ fileName: AREA_MAP_FILE, reason: "HTTP 404" }]
                     });
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
                     // The app returned to the foreground before the new download was saved, so the saved one is the previous
                     await service["resumeBackgroundDownload"]();
                     started({ background: true });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
                 }
@@ -1156,20 +1156,20 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
 
-                    offlineDownload.fire("fileProgress", { tileKey: AREA_ID, fileName: AREA_MAP_FILE, fraction: 0.5 });
+                    offlineDownload.fire("fileProgress", { areaId: AREA_ID, fileName: AREA_MAP_FILE, fraction: 0.5 });
                     expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 25 });
-                    offlineDownload.fire("fileCompleted", { tileKey: AREA_ID, fileName: AREA_MAP_FILE });
+                    offlineDownload.fire("fileCompleted", { areaId: AREA_ID, fileName: AREA_MAP_FILE });
                     expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
                     // The events of another tile, a download that was replaced, say nothing about this one
-                    offlineDownload.fire("fileCompleted", { tileKey: OTHER_AREA.properties.id, fileName: AREA_ROUTING_TILES_FILE });
+                    offlineDownload.fire("fileCompleted", { areaId: OTHER_AREA.properties.id, fileName: AREA_ROUTING_TILES_FILE });
                     expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
                     // A file that is not one of the area's says nothing about it either
-                    offlineDownload.fire("fileCompleted", { tileKey: AREA_ID, fileName: ROOT_MAP_FILE });
+                    offlineDownload.fire("fileCompleted", { areaId: AREA_ID, fileName: ROOT_MAP_FILE });
                     expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
 
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
                     expect(await promise).toBe("downloaded");
                     expect(service.downloadInProgress()).toBeNull();
                 }
@@ -1184,11 +1184,11 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
 
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress))
                         .toEqual({ area: AREA, files: [AREA_MAP_FILE], replacedAreaIds: [] });
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
                     await promise;
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
                 }
@@ -1204,8 +1204,8 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "HTTP 401" }] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "HTTP 401" }] });
 
                     expect(await promise).toBe("error");
                     expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${AREA_MAP_FILE} (HTTP 401)`));
@@ -1223,11 +1223,11 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
                     service.abortCurrentDownload();
 
                     expect(await promise).toBe("aborted");
-                    expect(offlineDownload.cancelTileDownload).toHaveBeenCalledWith({ tileKey: AREA_ID });
+                    expect(offlineDownload.cancelAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
                     expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
                 }
@@ -1239,13 +1239,13 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                     fileService: FileService, routingProvider: RoutingProvider) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
 
                     const promise = service.initialize();
                     await flushStyles(mockBackend, {});
                     await promise;
 
-                    expect(offlineDownload.getTileDownload).toHaveBeenCalledWith({ tileKey: AREA_ID });
+                    expect(offlineDownload.getAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
                     expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
                     await vi.waitFor(() => expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull());
                     expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
@@ -1259,7 +1259,7 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
 
                     const promise = service.initialize();
                     await flushStyles(mockBackend, {});
@@ -1268,8 +1268,8 @@ describe("OfflineFilesDownloadService", () => {
                     expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
                     expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
                     expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
-                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("tileFinished", expect.any(Function)));
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     await vi.waitFor(() => expect(service.downloadInProgress()).toBeNull());
                     expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
@@ -1284,7 +1284,7 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                     fileService: FileService, loggingService: LoggingService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({
+                    offlineDownload.getAreaDownload.mockResolvedValue({
                         state: "failed", completedFiles: [AREA_MAP_FILE], failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "network error: timeout" }]
                     });
 
@@ -1308,8 +1308,8 @@ describe("OfflineFilesDownloadService", () => {
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "network error: timeout" }] });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "network error: timeout" }] });
 
                     expect(await promise).toBe("error");
                     expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${AREA_MAP_FILE} (network error: timeout)`));
@@ -1321,7 +1321,7 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
                     resetStoreForDownload(store);
-                    offlineDownload.startTileDownload.mockRejectedValue(new Error("files is required"));
+                    offlineDownload.startAreaDownload.mockRejectedValue(new Error("files is required"));
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
@@ -1338,12 +1338,12 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
                     resetStoreForDownload(store);
-                    offlineDownload.cancelTileDownload.mockRejectedValue(new Error("no plugin"));
+                    offlineDownload.cancelAreaDownload.mockRejectedValue(new Error("no plugin"));
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveBeenCalled());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
                     service.abortCurrentDownload();
 
                     expect(await promise).toBe("aborted");
@@ -1356,15 +1356,15 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                     resetStoreForDownload(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
                     expect(await service["resumeBackgroundDownload"]()).toBe(true);
                     expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
 
                     expect(await promise).toBe("downloaded");
                 }
@@ -1375,13 +1375,13 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
 
                     const promise = service.initialize();
                     await flushStyles(mockBackend, {});
                     await promise;
-                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("tileFinished", expect.any(Function)));
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "HTTP 500" }] });
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "HTTP 500" }] });
 
                     await vi.waitFor(() => expect(service.downloadInProgress()).toBeNull());
                     expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
@@ -1394,22 +1394,22 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
                     const initialized = service.initialize();
                     await flushStyles(mockBackend, {});
                     await initialized;
-                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("tileFinished", expect.any(Function)));
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
 
                     const promise = service.downloadArea(AREA, []);
                     await flushStyles(mockBackend, {});
                     await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
-                    await vi.waitFor(() => expect(offlineDownload.startTileDownload).toHaveReturned());
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
 
-                    expect(offlineDownload.cancelTileDownload).toHaveBeenCalledWith({ tileKey: AREA_ID });
+                    expect(offlineDownload.cancelAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
                     expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)?.files)
                         .toEqual([AREA_MAP_FILE]);
-                    offlineDownload.fire("tileFinished", { tileKey: AREA_ID, state: "completed", failedFiles: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
                     expect(await promise).toBe("downloaded");
                 }
             )
@@ -1420,7 +1420,7 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                     fileService: FileService, loggingService: LoggingService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
                     vi.mocked(fileService.moveFileFromCacheToDataDirectory).mockRejectedValue(new Error("disk full"));
 
                     const promise = service.initialize();
@@ -1439,7 +1439,7 @@ describe("OfflineFilesDownloadService", () => {
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                     fileService: FileService, loggingService: LoggingService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockRejectedValue(new Error("no plugin"));
+                    offlineDownload.getAreaDownload.mockRejectedValue(new Error("no plugin"));
 
                     const promise = service.initialize();
                     await flushStyles(mockBackend, {});
@@ -1471,7 +1471,7 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({
+                    offlineDownload.getAreaDownload.mockResolvedValue({
                         state: "failed", completedFiles: [AREA_MAP_FILE], failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "force-quit" }]
                     });
 
@@ -1480,7 +1480,7 @@ describe("OfflineFilesDownloadService", () => {
                     await promise;
 
                     expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
-                    expect(offlineDownload.startTileDownload).not.toHaveBeenCalled();
+                    expect(offlineDownload.startAreaDownload).not.toHaveBeenCalled();
                     expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
                 }
@@ -1491,7 +1491,7 @@ describe("OfflineFilesDownloadService", () => {
             inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
                 async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
                     resetStoreWithAreaDownloadInProgress(store);
-                    offlineDownload.getTileDownload.mockResolvedValue({
+                    offlineDownload.getAreaDownload.mockResolvedValue({
                         state: "failed", completedFiles: [], failedFiles: [
                             { fileName: AREA_MAP_FILE, reason: "interrupted" }, { fileName: AREA_ROUTING_TILES_FILE, reason: "interrupted" }
                         ]
@@ -1502,7 +1502,7 @@ describe("OfflineFilesDownloadService", () => {
                     await promise;
 
                     expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
-                    expect(offlineDownload.startTileDownload).not.toHaveBeenCalled();
+                    expect(offlineDownload.startAreaDownload).not.toHaveBeenCalled();
                     expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
                 }
             )
@@ -1520,17 +1520,17 @@ type OfflineDownloadStandIn = ReturnType<typeof createOfflineDownloadStandIn>;
 function createOfflineDownloadStandIn() {
     const listeners = new Map<string, Set<(event: object) => void>>();
     return {
-        startTileDownload: vi.fn((_options: Parameters<OfflineDownloadPlugin["startTileDownload"]>[0]) =>
+        startAreaDownload: vi.fn((_options: Parameters<OfflineDownloadPlugin["startAreaDownload"]>[0]) =>
             Promise.resolve<{ background: boolean; launchDelay?: number }>({ background: true })),
-        cancelTileDownload: vi.fn((_options: { tileKey: string }) => Promise.resolve()),
-        getTileDownload: vi.fn((_options: { tileKey: string }) => Promise.resolve(
-            { state: "none" as TileDownloadState, completedFiles: [] as string[], failedFiles: [] as FailedTileFile[] })),
+        cancelAreaDownload: vi.fn((_options: { areaId: string }) => Promise.resolve()),
+        getAreaDownload: vi.fn((_options: { areaId: string }) => Promise.resolve(
+            { state: "none" as AreaDownloadState, completedFiles: [] as string[], failedFiles: [] as FailedAreaFile[] })),
         addListener: vi.fn((eventName: string, listener: (event: object) => void) => {
             const eventListeners = listeners.get(eventName) ?? new Set();
             listeners.set(eventName, eventListeners.add(listener));
             return Promise.resolve({ remove: () => Promise.resolve(void eventListeners.delete(listener)) });
         }),
-        fire: (eventName: "fileProgress" | "fileCompleted" | "tileFinished" | "diagnostic", event: object) =>
+        fire: (eventName: "fileProgress" | "fileCompleted" | "areaFinished" | "diagnostic", event: object) =>
             listeners.get(eventName)?.forEach(listener => listener(event))
     };
 }

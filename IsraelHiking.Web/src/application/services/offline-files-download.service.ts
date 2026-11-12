@@ -21,7 +21,7 @@ import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
 import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
-import { OFFLINE_DOWNLOAD, type FailedTileFile, type TileDownloadState } from "./offline-download.plugin";
+import { OFFLINE_DOWNLOAD, type FailedAreaFile, type AreaDownloadState } from "./offline-download.plugin";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
 import { SetAreaDownloadInProgressAction } from "../reducers/offline.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
@@ -55,7 +55,7 @@ export type DownloadStatus = "up-to-date" | "downloaded" | "error" | "aborted";
 export type DownloadInProgress = { area: Immutable<OfflineArea>; progress: number };
 
 /** How a download of the native background download ended */
-type BackgroundDownloadResult = { state: TileDownloadState; failedFiles: FailedTileFile[] };
+type BackgroundDownloadResult = { state: AreaDownloadState; failedFiles: FailedAreaFile[] };
 
 @Service()
 export class OfflineFilesDownloadService {
@@ -419,8 +419,8 @@ export class OfflineFilesDownloadService {
         const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
         const directory = await this.fileService.getOfflineCacheUri();
         const result = await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile,
-            async () => this.reportBackgroundDownloadStart(id, await this.offlineDownload.startTileDownload({
-                tileKey: id,
+            async () => this.reportBackgroundDownloadStart(id, await this.offlineDownload.startAreaDownload({
+                areaId: id,
                 files,
                 headers: { Authorization: `Bearer ${token}` },
                 concurrency: OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY,
@@ -472,9 +472,9 @@ export class OfflineFilesDownloadService {
         let finish: (result: BackgroundDownloadResult) => void;
         const finished = new Promise<BackgroundDownloadResult>(resolve => finish = resolve);
         const handles = await Promise.all([
-            this.offlineDownload.addListener("fileProgress", event => event.tileKey === id && updateFileProgress(event.fileName, event.fraction)),
-            this.offlineDownload.addListener("fileCompleted", event => event.tileKey === id && updateFileProgress(event.fileName, 1)),
-            this.offlineDownload.addListener("tileFinished", event => event.tileKey === id && finish(event))
+            this.offlineDownload.addListener("fileProgress", event => event.areaId === id && updateFileProgress(event.fileName, event.fraction)),
+            this.offlineDownload.addListener("fileCompleted", event => event.areaId === id && updateFileProgress(event.fileName, 1)),
+            this.offlineDownload.addListener("areaFinished", event => event.areaId === id && finish(event))
         ]);
         const onAbort = () => finish({ state: "cancelled", failedFiles: [] });
         currentDownload.abortController.signal.addEventListener("abort", onAbort);
@@ -506,7 +506,7 @@ export class OfflineFilesDownloadService {
         }
         const id = inProgress.area.properties.id;
         try {
-            const result = await this.offlineDownload.getTileDownload({ tileKey: id });
+            const result = await this.offlineDownload.getAreaDownload({ areaId: id });
             if (this.currentDownload() != null) {
                 if (result.state !== "running") {
                     this.finishBackgroundDownload?.(result);
@@ -533,7 +533,7 @@ export class OfflineFilesDownloadService {
      * its files are in the cache they are moved and read into the state.
      */
     private async finishLeftBackgroundDownload(inProgress: Immutable<NonNullable<ApplicationState["offlineState"]["areaDownloadInProgress"]>>,
-        result: { state: TileDownloadState; completedFiles: string[]; failedFiles: FailedTileFile[] }): Promise<void> {
+        result: { state: AreaDownloadState; completedFiles: string[]; failedFiles: FailedAreaFile[] }): Promise<void> {
         const { area, files: fileNames, replacedAreaIds } = inProgress;
         const id = area.properties.id;
         const currentDownload: CurrentDownload = { area, progress: 0, abortController: new AbortController() };
@@ -689,7 +689,7 @@ export class OfflineFilesDownloadService {
         this.clearAreaDownloadInProgress();
         if (this.isBackgroundDownloadAvailable) {
             const id = currentDownload.area.properties.id;
-            this.offlineDownload.cancelTileDownload({ tileKey: id }).catch(ex =>
+            this.offlineDownload.cancelAreaDownload({ areaId: id }).catch(ex =>
                 this.loggingService.error(`[Offline Download] Failed to cancel the background download of ${id}: ${(ex as Error).message}`));
         }
     }

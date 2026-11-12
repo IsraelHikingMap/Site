@@ -10,10 +10,10 @@ import androidx.core.app.NotificationManagerCompat
 import com.mapeak.R
 
 /**
- * The one notification of a tile download, with its combined progress. Both the job and the foreground
+ * The one notification of an area download, with its combined progress. Both the job and the foreground
  * service are required to show one while they run, and tapping it brings the app back.
  */
-class TileDownloadNotification(private val context: Context) {
+class AreaDownloadNotification(private val context: Context) {
     private val notificationManager = NotificationManagerCompat.from(context)
     private var lastUpdate = 0L
 

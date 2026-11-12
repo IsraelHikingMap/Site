@@ -6,9 +6,9 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * A file of a tile download and how far it got, the reason is set only once the file failed.
+ * A file of an area download and how far it got, the reason is set only once the file failed.
  */
-class TileDownloadFile(
+class AreaDownloadFile(
     val fileName: String,
     val url: String,
     var state: String = PENDING,
@@ -25,7 +25,7 @@ class TileDownloadFile(
         const val COMPLETED = "completed"
         const val FAILED = "failed"
 
-        fun fromJson(json: JSONObject) = TileDownloadFile(
+        fun fromJson(json: JSONObject) = AreaDownloadFile(
             json.getString("fileName"),
             json.getString("url"),
             json.getString("state"),
@@ -35,21 +35,21 @@ class TileDownloadFile(
 }
 
 /**
- * The download of the files of one tile, as one job. It is kept in a file of its own so that a process
+ * The download of the files of one area, as one job. It is kept in a file of its own so that a process
  * that was restarted can still report it and continue the files that are still missing - it is the source
  * of truth, while whatever is held in memory is only a copy of it.
  * Its fields are changed by several downloading threads at once, so they are changed and read while
  * holding the job itself.
  */
-class TileDownloadJob(
-    val tileKey: String,
-    val files: List<TileDownloadFile>,
+class AreaDownloadJob(
+    val areaId: String,
+    val files: List<AreaDownloadFile>,
     val headers: Map<String, String>,
     val concurrency: Int,
     var state: String = RUNNING
 ) {
     fun toJson(): JSONObject = JSONObject()
-        .put("tileKey", tileKey)
+        .put("areaId", areaId)
         .put("files", JSONArray(files.map { it.toJson() }))
         .put("headers", JSONObject(headers))
         .put("concurrency", concurrency)
@@ -62,8 +62,8 @@ class TileDownloadJob(
     fun markFilesFoundOnDisk(context: Context) {
         val directory = offlineFilesDirectory(context)
         for (file in files) {
-            if (file.state != TileDownloadFile.COMPLETED && File(directory, file.fileName).isFile) {
-                file.state = TileDownloadFile.COMPLETED
+            if (file.state != AreaDownloadFile.COMPLETED && File(directory, file.fileName).isFile) {
+                file.state = AreaDownloadFile.COMPLETED
                 file.reason = null
             }
         }
@@ -82,12 +82,12 @@ class TileDownloadJob(
          */
         fun offlineFilesDirectory(context: Context) = File(context.cacheDir, "offline-files")
 
-        fun fromJson(json: JSONObject): TileDownloadJob {
+        fun fromJson(json: JSONObject): AreaDownloadJob {
             val files = json.getJSONArray("files")
             val headers = json.getJSONObject("headers")
-            return TileDownloadJob(
-                json.getString("tileKey"),
-                (0 until files.length()).map { TileDownloadFile.fromJson(files.getJSONObject(it)) },
+            return AreaDownloadJob(
+                json.getString("areaId"),
+                (0 until files.length()).map { AreaDownloadFile.fromJson(files.getJSONObject(it)) },
                 headers.keys().asSequence().associateWith { headers.getString(it) },
                 json.getInt("concurrency"),
                 json.getString("state")
@@ -97,27 +97,27 @@ class TileDownloadJob(
 }
 
 /**
- * Keeps the one tile download there is in a json file. It is written to a file next to it first and then
+ * Keeps the one area download there is in a json file. It is written to a file next to it first and then
  * renamed over it, so that a process that is killed while writing never leaves a file that can not be read.
  */
-object TileDownloadJobStore {
+object AreaDownloadJobStore {
     private const val FILE_NAME = "offline-download-job.json"
 
     @Synchronized
-    fun load(context: Context): TileDownloadJob? {
+    fun load(context: Context): AreaDownloadJob? {
         val file = File(context.filesDir, FILE_NAME)
         if (!file.isFile) {
             return null
         }
         return try {
-            TileDownloadJob.fromJson(JSONObject(file.readText()))
+            AreaDownloadJob.fromJson(JSONObject(file.readText()))
         } catch (_: Exception) {
             null
         }
     }
 
     @Synchronized
-    fun save(context: Context, job: TileDownloadJob) {
+    fun save(context: Context, job: AreaDownloadJob) {
         val json = synchronized(job) { job.toJson().toString() }
         val file = File(context.filesDir, FILE_NAME)
         val temporaryFile = File(context.filesDir, "$FILE_NAME.tmp")

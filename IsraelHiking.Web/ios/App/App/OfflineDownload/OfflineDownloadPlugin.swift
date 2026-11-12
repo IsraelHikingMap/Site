@@ -2,25 +2,25 @@ import Capacitor
 import Foundation
 import OfflineDownload
 
-/// Downloads the offline files of a tile to completion while the app is in the background, mirroring
+/// Downloads the offline files of an area to completion while the app is in the background, mirroring
 /// `OfflineDownloadPlugin.kt`. The files are written to the directory the app passes, where it already reads
-/// them from, and the app moves them once the whole tile arrived.
+/// them from, and the app moves them once the whole area arrived.
 ///
 /// The saved job is the source of truth for whatever the app missed while it was not listening, the events
 /// are only what it hears while it is.
 @objc(OfflineDownloadPlugin)
-public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadListener {
+public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, AreaDownloadListener {
     public let identifier = "OfflineDownloadPlugin"
     public let jsName = "OfflineDownload"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "startTileDownload", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "cancelTileDownload", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "getTileDownload", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "startAreaDownload", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "cancelAreaDownload", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getAreaDownload", returnType: CAPPluginReturnPromise)
     ]
 
     private static let defaultConcurrency = 3
 
-    private var coordinator: TileDownloadCoordinator {
+    private var coordinator: AreaDownloadCoordinator {
         OfflineDownloadManager.shared.coordinator
     }
 
@@ -31,9 +31,9 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
         }
     }
 
-    @objc func startTileDownload(_ call: CAPPluginCall) {
-        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
-            call.reject("tileKey is required")
+    @objc func startAreaDownload(_ call: CAPPluginCall) {
+        guard let areaId = call.getString("areaId"), !areaId.isEmpty else {
+            call.reject("areaId is required")
             return
         }
         guard let files = call.getArray("files", JSObject.self) else {
@@ -44,11 +44,11 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
             call.reject("directory is required, as a file URI")
             return
         }
-        let downloadFiles = files.compactMap { file -> TileDownloadFile? in
+        let downloadFiles = files.compactMap { file -> AreaDownloadFile? in
             guard let fileName = file["fileName"] as? String, let url = file["url"] as? String else {
                 return nil
             }
-            return TileDownloadFile(fileName: fileName, url: url)
+            return AreaDownloadFile(fileName: fileName, url: url)
         }
         guard downloadFiles.count == files.count,
               !downloadFiles.contains(where: { $0.fileName.isEmpty || $0.fileName.contains("/") || $0.fileName.hasPrefix(".") }) else {
@@ -56,8 +56,8 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
             return
         }
         let headers = (call.getObject("headers") ?? [:]).compactMapValues { $0 as? String }
-        let job = TileDownloadJob(
-            tileKey: tileKey,
+        let job = AreaDownloadJob(
+            areaId: areaId,
             files: downloadFiles,
             headers: headers,
             concurrency: call.getInt("concurrency") ?? OfflineDownloadPlugin.defaultConcurrency,
@@ -77,21 +77,21 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
         call.resolve(["background": false])
     }
 
-    @objc func cancelTileDownload(_ call: CAPPluginCall) {
-        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
-            call.reject("tileKey is required")
+    @objc func cancelAreaDownload(_ call: CAPPluginCall) {
+        guard let areaId = call.getString("areaId"), !areaId.isEmpty else {
+            call.reject("areaId is required")
             return
         }
-        coordinator.cancel(tileKey: tileKey)
+        coordinator.cancel(areaId: areaId)
         call.resolve()
     }
 
-    @objc func getTileDownload(_ call: CAPPluginCall) {
-        guard let tileKey = call.getString("tileKey"), !tileKey.isEmpty else {
-            call.reject("tileKey is required")
+    @objc func getAreaDownload(_ call: CAPPluginCall) {
+        guard let areaId = call.getString("areaId"), !areaId.isEmpty else {
+            call.reject("areaId is required")
             return
         }
-        coordinator.get(tileKey: tileKey) { job in
+        coordinator.get(areaId: areaId) { job in
             guard let job = job else {
                 call.resolve(["state": "none", "completedFiles": [String](), "failedFiles": [[String: Any]]()])
                 return
@@ -100,19 +100,19 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
         }
     }
 
-    public func fileProgress(tileKey: String, fileName: String, fraction: Double) {
-        notify("fileProgress", ["tileKey": tileKey, "fileName": fileName, "fraction": fraction])
+    public func fileProgress(areaId: String, fileName: String, fraction: Double) {
+        notify("fileProgress", ["areaId": areaId, "fileName": fileName, "fraction": fraction])
     }
 
-    public func fileCompleted(tileKey: String, fileName: String) {
-        notify("fileCompleted", ["tileKey": tileKey, "fileName": fileName])
+    public func fileCompleted(areaId: String, fileName: String) {
+        notify("fileCompleted", ["areaId": areaId, "fileName": fileName])
     }
 
-    public func tileFinished(_ job: TileDownloadJob) {
+    public func areaFinished(_ job: AreaDownloadJob) {
         var data = OfflineDownloadPlugin.result(of: job)
-        data["tileKey"] = job.tileKey
+        data["areaId"] = job.areaId
         data.removeValue(forKey: "completedFiles")
-        notify("tileFinished", data)
+        notify("areaFinished", data)
     }
 
     private func notify(_ eventName: String, _ data: [String: Any]) {
@@ -121,7 +121,7 @@ public class OfflineDownloadPlugin: CAPPlugin, CAPBridgedPlugin, TileDownloadLis
         }
     }
 
-    private static func result(of job: TileDownloadJob) -> [String: Any] {
+    private static func result(of job: AreaDownloadJob) -> [String: Any] {
         [
             "state": job.state.rawValue,
             "completedFiles": job.files.filter { $0.state == .completed }.map { $0.fileName },
