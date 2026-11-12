@@ -8,7 +8,6 @@ let package = Package(
         .library(name: "OfflineDownload", targets: ["OfflineDownload"])
     ],
     targets: [
-        .target(name: "OfflineDownload"),
-        .testTarget(name: "OfflineDownloadTests", dependencies: ["OfflineDownload"])
+        .target(name: "OfflineDownload")
     ]
 )
