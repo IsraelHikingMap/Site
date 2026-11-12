@@ -132,7 +132,7 @@ final class ContinuedTileDownloadTests: XCTestCase {
         XCTAssertEqual(inProcess.enqueuedFileNames, ["a.pmtiles", "a.pmtiles"])
     }
 
-    func testShouldLogTheLaunchAndTheEndOfTheTaskAndDescribeItsProgressMeanwhile() {
+    func testShouldLogTheLaunchAndTheEndOfTheTask() {
         let continued = makeContinued()
         let task = FakeContinuedTask()
         var launch: ((ContinuedTask) -> Void)?
@@ -140,12 +140,9 @@ final class ContinuedTileDownloadTests: XCTestCase {
         time = time.addingTimeInterval(0.015)
         launch?(task)
 
-        coordinator.didWriteData(description: inProcess.description(of: "a.pmtiles"), totalBytesWritten: 50, totalBytesExpected: 100)
-        XCTAssertEqual(continued.progressDescription, "500 of 2000 units")
         finish("a.pmtiles", 200)
         finish("b.pmtiles", 200)
 
-        XCTAssertNil(continued.progressDescription)
         XCTAssertEqual(logged, [
             "The continued task of 7-76-51 launched after 15ms",
             "The continued task of 7-76-51 ended with the download completed"

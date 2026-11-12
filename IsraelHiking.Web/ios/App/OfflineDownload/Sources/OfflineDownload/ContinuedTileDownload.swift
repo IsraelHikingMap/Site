@@ -45,13 +45,6 @@ public final class ContinuedTileDownload: TileDownloadListener {
         coordinator.addListener(self)
     }
 
-    /// How far the task that is running got, nil when there is none
-    public var progressDescription: String? {
-        withLock {
-            active.map { "\($0.task.progress.completedUnitCount) of \($0.task.progress.totalUnitCount) units" }
-        }
-    }
-
     /// Submits a continued task for the job and starts the job once the system launched it, or in the background
     /// session once the submission failed or the timeout passed. The completion tells whether the job runs in the
     /// task, and how long the system took to launch it. A task launched after the timeout is ended at once.
