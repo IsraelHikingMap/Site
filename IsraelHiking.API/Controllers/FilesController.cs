@@ -183,11 +183,12 @@ public class FilesController : ControllerBase
     /// Requires an entitled (subscribed) user.</remarks>
     /// <param name="areaId">The id of the area, as offline/areas has it</param>
     /// <param name="lastModified">The last time this area was downloaded</param>
+    /// <param name="routingTar">Whether to list the routing tiles as a plain tar, which the client gets compressed in transit</param>
     /// <returns>The names of the files that changed since then, and when they did</returns>
     [HttpGet]
     [Route("offline/area/{areaId}")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified)
+    public async Task<IActionResult> GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified, [FromQuery] bool routingTar = false)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -195,7 +196,7 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files of area {areaId} for user: {User.Identity?.Name}, date: {lastModified}");
-        var files = await _offlineFilesService.GetUpdatedFilesListForArea(areaId, lastModified);
+        var files = await _offlineFilesService.GetUpdatedFilesListForArea(areaId, lastModified, routingTar);
         return files == null ? NotFound() : Ok(files);
     }
 
@@ -203,7 +204,7 @@ public class FilesController : ControllerBase
     /// Download an offline file of an area
     /// </summary>
     /// <remarks>Returns the content stream of one of the files listed for an area. Requires an entitled (subscribed)
-    /// user.</remarks>
+    /// user. A <c>.tar</c> file also gets its length as <c>X-Uncompressed-Length</c>, since it is compressed in transit, which drops its <c>Content-Length</c>.</remarks>
     /// <param name="areaId">The id of the area, as offline/areas has it</param>
     /// <param name="fileName">The name of the file</param>
     /// <returns>A file stream</returns>
@@ -225,6 +226,10 @@ public class FilesController : ControllerBase
         if (length.HasValue)
         {
             Response.ContentLength = length;
+            if (Path.GetExtension(fileName) == ".tar")
+            {
+                Response.Headers["X-Uncompressed-Length"] = length.ToString();
+            }
         }
         return File(content, "application/octet-stream", fileName);
     }

@@ -312,7 +312,7 @@ public class OfflineFilesServiceTests
     [TestMethod]
     public async Task GetUpdatedFilesListForArea_ShouldListTheRoutingTilesEverySourceByTheAreaAndTheRootFiles()
     {
-        var results = await _service.GetUpdatedFilesListForArea("5a46cb2cd3d6abed", DateTime.MinValue);
+        var results = await _service.GetUpdatedFilesListForArea("5a46cb2cd3d6abed", DateTime.MinValue, false);
 
         CollectionAssert.AreEqual(new[]
         {
@@ -325,9 +325,18 @@ public class OfflineFilesServiceTests
     }
 
     [TestMethod]
+    public async Task GetUpdatedFilesListForArea_RoutingTar_ShouldListTheRoutingTilesAsTar()
+    {
+        var results = await _service.GetUpdatedFilesListForArea("5a46cb2cd3d6abed", DateTime.MinValue, true);
+
+        Assert.AreEqual("valhalla+5a46cb2cd3d6abed.tar", results.Keys.First());
+        Assert.IsFalse(results.ContainsKey("valhalla+5a46cb2cd3d6abed.tgz"));
+    }
+
+    [TestMethod]
     public async Task GetUpdatedFilesListForArea_AreaThatIsNotOffered_ShouldReturnNull()
     {
-        Assert.IsNull(await _service.GetUpdatedFilesListForArea("0000000000000000", DateTime.MinValue));
+        Assert.IsNull(await _service.GetUpdatedFilesListForArea("0000000000000000", DateTime.MinValue, false));
     }
 
     [TestMethod]
@@ -349,6 +358,17 @@ public class OfflineFilesServiceTests
         await _service.GetFileContentForArea("5a46cb2cd3d6abed", "valhalla+5a46cb2cd3d6abed.tgz");
 
         await _remoteFileFetcherGateway.Received(1).PostForFileStream(RoutingTilesAddress + "valhalla.tgz", AreaGeometry);
+    }
+
+    [TestMethod]
+    public async Task GetFileContentForArea_RoutingTar_ShouldBePostedToTheRoutingTilesServerAsTar()
+    {
+        _remoteFileFetcherGateway.PostForFileStream(Arg.Any<string>(), Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
+
+        var result = await _service.GetFileContentForArea("5a46cb2cd3d6abed", "valhalla+5a46cb2cd3d6abed.tar");
+
+        Assert.AreEqual(42, result?.Length);
+        await _remoteFileFetcherGateway.Received(1).PostForFileStream(RoutingTilesAddress + "valhalla.tar", AreaGeometry);
     }
 
     [TestMethod]
