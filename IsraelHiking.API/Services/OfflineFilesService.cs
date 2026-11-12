@@ -82,8 +82,9 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// The offline routing (valhalla) tiles of a slice, a gzipped tar that is sliced on the fly like the
-    /// other files - the client unpacks it. Clients that ask for it get a plain tar instead, which starts streaming immediately with its exact size. It is not a part of the style, and it is only listed for clients that ask for it since
-    /// older clients do not know how to handle it.
+    /// other files - the client unpacks it. Clients that ask for it get a plain tar instead, which starts
+    /// streaming immediately with its exact size. It is not a part of the style, and it is only listed for
+    /// clients that ask for it since older clients do not know how to handle it.
     /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
     private const string VALHALLA_FILE_NAME = "valhalla";
