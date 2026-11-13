@@ -346,5 +346,21 @@ public class FilesControllerTests
         Assert.IsNotNull(results);
         Assert.AreSame(content, results.FileStream);
         Assert.AreEqual(42, _controller.Response.ContentLength);
+        Assert.IsFalse(_controller.Response.Headers.ContainsKey("X-Uncompressed-Length"));
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_Tar_ShouldServeTheFileWithItsUncompressedLength()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var content = new MemoryStream();
+        _offlineFilesService.GetFileContentForArea("area", "valhalla+area.tar").Returns((content, (long?)42));
+
+        var results = _controller.GetOfflineFileForArea("area", "valhalla+area.tar").Result as FileStreamResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreEqual(42, _controller.Response.ContentLength);
+        Assert.AreEqual("42", _controller.Response.Headers["X-Uncompressed-Length"].ToString());
     }
 }

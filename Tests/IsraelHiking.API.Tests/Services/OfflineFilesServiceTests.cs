@@ -316,7 +316,7 @@ public class OfflineFilesServiceTests
 
         CollectionAssert.AreEqual(new[]
         {
-            "valhalla+5a46cb2cd3d6abed.tgz",
+            "valhalla+5a46cb2cd3d6abed.tar",
             "IHM-schema+5a46cb2cd3d6abed.pmtiles", "IHM-code+5a46cb2cd3d6abed.pmtiles", "raster-dem+5a46cb2cd3d6abed.pmtiles",
             "global_points+5a46cb2cd3d6abed.pmtiles", "IHM-schema+root.pmtiles", "IHM-code+root.pmtiles",
             "valhalla-profiles.json"
@@ -346,9 +346,9 @@ public class OfflineFilesServiceTests
     {
         _remoteFileFetcherGateway.PostForFileStream(Arg.Any<string>(), Arg.Any<string>()).Returns(((Stream)new MemoryStream(), (long?)42));
 
-        await _service.GetFileContentForArea("5a46cb2cd3d6abed", "valhalla+5a46cb2cd3d6abed.tgz");
+        await _service.GetFileContentForArea("5a46cb2cd3d6abed", "valhalla+5a46cb2cd3d6abed.tar");
 
-        await _remoteFileFetcherGateway.Received(1).PostForFileStream(RoutingTilesAddress + "valhalla.tgz", AreaGeometry);
+        await _remoteFileFetcherGateway.Received(1).PostForFileStream(RoutingTilesAddress + "valhalla.tar", AreaGeometry);
     }
 
     [TestMethod]

@@ -82,14 +82,18 @@ public class OfflineFilesService : IOfflineFilesService
 
     /// <summary>
     /// The offline routing (valhalla) tiles of a slice, a gzipped tar that is sliced on the fly like the
-    /// other files - the client unpacks it, so it is served compressed rather than as a plain tar. It is not a part of the style, and it is only listed for clients that ask for it since
-    /// older clients do not know how to handle it.
+    /// other files - the client unpacks it. An area gets it as a plain tar instead, which starts
+    /// streaming immediately with its exact size. It is not a part of the style, and it is only listed for
+    /// clients that ask for it since older clients do not know how to handle it.
     /// It is the largest file of a tile and the slowest one to generate, which is why it is listed first.
     /// </summary>
     private const string VALHALLA_FILE_NAME = "valhalla";
 
     /// <inheritdoc cref="VALHALLA_FILE_NAME"/>
     private const string VALHALLA_FILE_EXTENSION = ".tgz";
+
+    /// <inheritdoc cref="VALHALLA_FILE_NAME"/>
+    private const string VALHALLA_TAR_FILE_EXTENSION = ".tar";
 
     /// <summary>
     /// The routing profiles (costing options) the client routes offline with, the same file this server routes
@@ -199,7 +203,7 @@ public class OfflineFilesService : IOfflineFilesService
         }
         var filesDictionary = new Dictionary<string, DateTime>();
         var today = DateTime.UtcNow.Date;
-        AddIfUpdated(filesDictionary, $"{VALHALLA_FILE_NAME}+{areaId}{VALHALLA_FILE_EXTENSION}", today, lastModifiedDate);
+        AddIfUpdated(filesDictionary, $"{VALHALLA_FILE_NAME}+{areaId}{VALHALLA_TAR_FILE_EXTENSION}", today, lastModifiedDate);
         var sourceNames = await GetSourceNames();
         foreach (var name in sourceNames)
         {
@@ -232,7 +236,7 @@ public class OfflineFilesService : IOfflineFilesService
         var sourceName = FileNameToSourceName(fileName);
         if (sourceName == VALHALLA_FILE_NAME)
         {
-            return await PostForSlice($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_FILE_EXTENSION}", geometry, fileName);
+            return await PostForSlice($"{_options.RoutingTilesAddress}{VALHALLA_FILE_NAME}{VALHALLA_TAR_FILE_EXTENSION}", geometry, fileName);
         }
         if (!(await GetSourceNames()).Contains(sourceName))
         {
