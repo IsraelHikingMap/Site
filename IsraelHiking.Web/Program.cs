@@ -53,7 +53,7 @@ void SetupApplication(WebApplication app)
         application.UseDeveloperExceptionPage();
     }
     app.UseResponseCompression();
-    app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("X-Uncompressed-Length"));
     app.MapControllers();
     app.MapHealthChecks("/api/health");
     // wwwroot
