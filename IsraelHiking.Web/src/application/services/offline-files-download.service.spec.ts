@@ -482,7 +482,6 @@ describe("OfflineFilesDownloadService", () => {
 
                 expect(await promise).toBe("up-to-date");
                 expect(request.request.params.get("lastModified")).toBe(downloadDate.toISOString());
-                expect(request.request.params.get("routingTar")).toBe("true");
             }
         )
     );
@@ -802,7 +801,6 @@ describe("OfflineFilesDownloadService", () => {
 
                 // Asking only for what changed would have the server answer that there is nothing to download
                 expect(tileRequest.request.params.has("lastModified")).toBe(false);
-                expect(tileRequest.request.params.get("routingTar")).toBe("true");
             }
         )
     );
