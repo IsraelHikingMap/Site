@@ -9,7 +9,6 @@ import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import { MailComposer } from "@capawesome/capacitor-mail-composer"
-import Bowser from "bowser";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -122,6 +121,7 @@ export class MainMenuComponent {
         try {
             if (!this.runningContextService.isCapacitor) {
 
+                const { default: Bowser } = await import("bowser");
                 const browserInfo = Bowser.parse(navigator.userAgent);
                 infoString += [
                     `Browser: ${browserInfo.browser.name} ${browserInfo.browser.version}`,

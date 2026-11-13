@@ -1,5 +1,6 @@
 import { inject, Service } from "@angular/core";
-import { load, dump, insert, setErrorByPass, GPSHelper, TagValues, type IExif } from "piexif-ts";
+import type * as Piexif from "piexif-ts";
+import type { IExif } from "piexif-ts";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,25 +27,30 @@ export class ImageResizeService {
         return this.resizeImageAndConvertToAny<DataContainer>(file, this.createDataContainerFromBinaryString, throwIfNoLocation);
     }
 
+    /**
+     * piexif is imported here, on first use, to keep it out of the initial bundle - images are only resized when the
+     * user adds one, and the module is handed down to the methods below that need it.
+     */
     private async resizeImageAndConvertToAny<TReturn>(file: File,
         convertMethod: (data: string, name: string, geoLocation: LatLngAltTime) => TReturn,
         throwIfNoLocation = true,
         maxSize = 1920): Promise<TReturn> {
 
+        const piexif = await import("piexif-ts");
         const arrayBuffer = await file.arrayBuffer();
         const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
         let exifData: IExif = null;
         if (file.type === ImageResizeService.JPEG) {
-            exifData = this.loadExifData(base64, file.name);
+            exifData = this.loadExifData(piexif, base64, file.name);
         }
-        const latLng = this.getGeoLocation(exifData);
+        const latLng = this.getGeoLocation(piexif, exifData);
         if (latLng == null && throwIfNoLocation) {
             throw new Error("Image does not contain geolocation information");
         }
         const image = new Image();
         return new Promise<TReturn>((resolve, reject) => {
             image.onload = () => {
-                const binaryStringData = this.resizeImageWithExif(image, exifData, maxSize);
+                const binaryStringData = this.resizeImageWithExif(piexif, image, exifData, maxSize);
                 const data = convertMethod(binaryStringData, file.name, latLng);
                 resolve(data);
             };
@@ -64,11 +70,11 @@ export class ImageResizeService {
      * geolocation included. The tags that failed come back as null and are dropped since "dump"
      * can't write them back.
      */
-    private loadExifData(base64: string, name: string): IExif {
+    private loadExifData(piexif: typeof Piexif, base64: string, name: string): IExif {
         try {
-            setErrorByPass(true, (message: string) => this.loggingService.warning(
+            piexif.setErrorByPass(true, (message: string) => this.loggingService.warning(
                 `[Image] Ignoring an EXIF error in ${name}: ${message}`));
-            const exifData = load(base64);
+            const exifData = piexif.load(base64);
             for (const ifd of Object.values(exifData)) {
                 if (ifd == null || typeof ifd !== "object") {
                     continue;
@@ -84,16 +90,16 @@ export class ImageResizeService {
             this.loggingService.error(`[Image] Failed to read the EXIF data of ${name}: ${(ex as Error).message}`);
             return null;
         } finally {
-            setErrorByPass(false);
+            piexif.setErrorByPass(false);
         }
     }
 
-    private getGeoLocation(exifData: IExif): LatLngAltTime {
+    private getGeoLocation(piexif: typeof Piexif, exifData: IExif): LatLngAltTime {
         try {
-            const lat = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLatitude],
-                exifData.GPS[TagValues.GPSIFD.GPSLatitudeRef]);
-            const lng = GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLongitude],
-                exifData.GPS[TagValues.GPSIFD.GPSLongitudeRef]);
+            const lat = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.TagValues.GPSIFD.GPSLatitude],
+                exifData.GPS[piexif.TagValues.GPSIFD.GPSLatitudeRef]);
+            const lng = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.TagValues.GPSIFD.GPSLongitude],
+                exifData.GPS[piexif.TagValues.GPSIFD.GPSLongitudeRef]);
             if (isNaN(lat) || isNaN(lng)) {
                 return null;
             }
@@ -105,12 +111,13 @@ export class ImageResizeService {
 
     /**
      * Resizes an image to a maximum size while preserving EXIF data.
+     * @param piexif - The piexif module, imported on first use.
      * @param image - The HTML image to resize.
      * @param exifData - The EXIF data of the image.
      * @param maxSize - The maximum size of the image.
      * @returns The resized image as a base64 string.
      */
-    private resizeImageWithExif(image: HTMLImageElement, exifData: IExif, maxSize: number): string {
+    private resizeImageWithExif(piexif: typeof Piexif, image: HTMLImageElement, exifData: IExif, maxSize: number): string {
         const canvas = document.createElement("canvas") as HTMLCanvasElement;
 
         const width = image.naturalWidth;
@@ -126,9 +133,9 @@ export class ImageResizeService {
 
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
         if (exifData != null && exifData["0th"] != null) {
-            exifData["0th"][TagValues.ImageIFD.Orientation] = 1;
-            const exifbytes = dump(exifData);
-            dataUrl = insert(exifbytes, dataUrl);
+            exifData["0th"][piexif.TagValues.ImageIFD.Orientation] = 1;
+            const exifbytes = piexif.dump(exifData);
+            dataUrl = piexif.insert(exifbytes, dataUrl);
         }
         return dataUrl;
     }
