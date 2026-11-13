@@ -449,6 +449,8 @@ export class FileService {
      * A download that failed is logged with the file it died on and how far it got, neither of which is in
      * the error itself - without them a log only says that the download of the tile failed, and every file
      * of it is a suspect.
+     * The expected length is taken from X-Uncompressed-Length when the server sends it, since a response that
+     * was compressed in transit has no Content-Length, and a file whose bytes received differ from it fails.
      */
     public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
@@ -467,7 +469,7 @@ export class FileService {
             throw new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`);
         }
         const reader = response.body.getReader();
-        const contentLength = Number(response.headers.get("Content-Length"));
+        const contentLength = Number(response.headers.get("X-Uncompressed-Length") || response.headers.get("Content-Length"));
         let receivedLength = 0;
         const pending: PendingChunks = { chunks: [], length: 0, wroteAnything: false };
         let done: boolean;
@@ -500,6 +502,9 @@ export class FileService {
                 }
             } while (!done);
             await this.writePendingChunks(path, pending);
+            if (contentLength > 0 && receivedLength !== contentLength) {
+                throw new Error(`Received ${receivedLength} bytes instead of ${contentLength}`);
+            }
         } catch (ex) {
             this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
                 `${(receivedLength / 1024 / 1024).toFixed(1)} of ${(contentLength / 1024 / 1024).toFixed(1)} MB: ` +

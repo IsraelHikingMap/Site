@@ -39,7 +39,7 @@ const AREA: OfflineArea = {
 };
 const OTHER_AREA: OfflineArea = { ...AREA, properties: { id: "0f1e2d3c4b5a6978", name: "Other area" } };
 const AREA_MAP_FILE = `IHM-schema+${AREA_ID}.pmtiles`;
-const AREA_ROUTING_TILES_FILE = `valhalla+${AREA_ID}.tgz`;
+const AREA_ROUTING_TILES_FILE = `valhalla+${AREA_ID}.tar`;
 const ROOT_MAP_FILE = "IHM-schema+root.pmtiles";
 const DOWNLOAD_DATE = new Date("2026-01-01T10:00:00.000Z");
 const FILE_SIZE = 1024 * 1024;
@@ -482,6 +482,7 @@ describe("OfflineFilesDownloadService", () => {
 
                 expect(await promise).toBe("up-to-date");
                 expect(request.request.params.get("lastModified")).toBe(downloadDate.toISOString());
+                expect(request.request.params.get("routingTar")).toBe("true");
             }
         )
     );
@@ -801,6 +802,7 @@ describe("OfflineFilesDownloadService", () => {
 
                 // Asking only for what changed would have the server answer that there is nothing to download
                 expect(tileRequest.request.params.has("lastModified")).toBe(false);
+                expect(tileRequest.request.params.get("routingTar")).toBe("true");
             }
         )
     );

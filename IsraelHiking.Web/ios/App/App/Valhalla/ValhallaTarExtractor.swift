@@ -1,33 +1,18 @@
-import Compression
 import Foundation
 
 enum ValhallaTarError: Error {
     case tarNotFound(String)
     case invalidHeader
-    case invalidGzipHeader
     case entryOutsideDirectory(String)
 }
 
-/// Reads the contents of a gzipped file as they are asked for, so that neither the file nor what it
-/// holds is ever held in memory - an area is hundreds of megabytes packed and more than that unpacked.
-///
-/// The compression framework's zlib is raw deflate, which is what a gzip file holds between its header
-/// and its trailer, so the header is read here and the trailer, which is only a checksum and a length,
-/// is simply never asked for.
-private final class GzipReader {
-    private static let compressedChunkSize = 1 << 16
-    private static let decompressedChunkSize = 1 << 20
-
+/// Reads the contents of a file as they are asked for, so that the file is never held in memory - an
+/// area is more than a gigabyte unpacked.
+private final class TarFileReader {
     private let handle: FileHandle
-    private var filter: InputFilter<Data>!
-    private var pending = Data()
 
     init(url: URL) throws {
         handle = try FileHandle(forReadingFrom: url)
-        try skipHeader()
-        filter = try InputFilter(.decompress, using: .zlib) { [handle] length in
-            try handle.read(upToCount: min(length, GzipReader.compressedChunkSize))
-        }
     }
 
     func close() {
@@ -37,59 +22,19 @@ private final class GzipReader {
     /// The next bytes of the file, as many as were asked for and fewer only at its end, where nil says
     /// that there is nothing left.
     func read(count: Int) throws -> Data? {
-        while pending.count < count {
-            guard let chunk = try filter.readData(ofLength: GzipReader.decompressedChunkSize), !chunk.isEmpty else {
-                break
-            }
-            pending.append(chunk)
-        }
-        guard !pending.isEmpty else {
+        guard let data = try handle.read(upToCount: count), !data.isEmpty else {
             return nil
         }
-        let taken = Data(pending.prefix(count))
-        pending = pending.dropFirst(taken.count)
-        return taken
+        return data
     }
 
-    /// Passes over the next bytes, which a compressed file can only do by reading them.
+    /// Passes over the next bytes.
     func skip(_ count: Int) throws {
-        var remaining = count
-        while remaining > 0 {
-            guard let chunk = try read(count: min(remaining, GzipReader.decompressedChunkSize)), !chunk.isEmpty else {
-                return
-            }
-            remaining -= chunk.count
-        }
-    }
-
-    /// Reads past the gzip header, which is ten bytes and then whatever its flags say it also carries.
-    private func skipHeader() throws {
-        guard let header = try handle.read(upToCount: 10), header.count == 10,
-              header[0] == 0x1F, header[1] == 0x8B, header[2] == 8 else {
-            throw ValhallaTarError.invalidGzipHeader
-        }
-        let flags = header[3]
-        if flags & 0b0000_0100 != 0 { // An extra field, of the length that comes before it
-            guard let length = try handle.read(upToCount: 2), length.count == 2 else {
-                throw ValhallaTarError.invalidGzipHeader
-            }
-            _ = try handle.read(upToCount: Int(length[0]) | Int(length[1]) << 8)
-        }
-        for flag in [UInt8(0b0000_1000), UInt8(0b0001_0000)] { // The original name and a comment, null terminated
-            guard flags & flag != 0 else {
-                continue
-            }
-            while let byte = try handle.read(upToCount: 1), byte.count == 1, byte[0] != 0 {
-                continue
-            }
-        }
-        if flags & 0b0000_0010 != 0 { // A checksum of the header itself
-            _ = try handle.read(upToCount: 2)
-        }
+        try handle.seek(toOffset: try handle.offset() + UInt64(count))
     }
 }
 
-/// A minimal streaming reader for the gzipped tar files that hold the routing tiles, mirroring what
+/// A minimal streaming reader for the tar files that hold the routing tiles, mirroring what
 /// commons-compress does on android. It is streaming on purpose - an area can be hundreds of megabytes,
 /// so neither the archive nor a single tile is ever held in memory.
 ///
@@ -121,7 +66,7 @@ enum ValhallaTarExtractor {
         try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
         let directoryPath = directoryURL.standardizedFileURL.path
 
-        let reader = try GzipReader(url: archiveURL)
+        let reader = try TarFileReader(url: archiveURL)
         defer { reader.close() }
 
         var paths: [String] = []
@@ -172,7 +117,7 @@ enum ValhallaTarExtractor {
         return paths
     }
 
-    private static func write(from reader: GzipReader, byteCount: Int, to url: URL) throws {
+    private static func write(from reader: TarFileReader, byteCount: Int, to url: URL) throws {
         FileManager.default.createFile(atPath: url.path, contents: nil)
         let outputHandle = try FileHandle(forWritingTo: url)
         defer { try? outputHandle.close() }

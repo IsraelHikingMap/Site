@@ -364,6 +364,68 @@ describe("FileService", () => {
         }
     ));
 
+    it("Should take the expected length from X-Uncompressed-Length when the response has no Content-Length", inject([FileService],
+        async (service: FileService) => {
+            const progressSpy = vi.fn();
+            const url = "http://valhalla+7-76-51.tar";
+            const mockReader = {
+                read: vi
+                    .fn()
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([3, 4]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: true }))
+            };
+
+            const mockResponse = {
+                ok: true,
+                body: {
+                    getReader: vi.fn().mockReturnValue(mockReader)
+                },
+                headers: {
+                    get: vi.fn((name: string) => name === "X-Uncompressed-Length" ? "4" : null)
+                }
+            };
+
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
+
+            await service.downloadFileToCacheAuthenticated(url, "valhalla+7-76-51.tar", null, progressSpy, new AbortController());
+
+            expect(progressSpy).toHaveBeenNthCalledWith(1, 0.5);
+            expect(await service.listFilesInOfflineCache()).toContain("valhalla+7-76-51.tar");
+            fetchSpy.mockRestore();
+        }
+    ));
+
+    it("Should fail a file whose bytes received differ from its expected length", inject([FileService],
+        async (service: FileService) => {
+            const url = "http://valhalla+7-76-52.tar";
+            const mockReader = {
+                read: vi
+                    .fn()
+                    .mockReturnValueOnce(Promise.resolve({ done: false, value: new Uint8Array([1, 2]) }))
+                    .mockReturnValueOnce(Promise.resolve({ done: true }))
+            };
+
+            const mockResponse = {
+                ok: true,
+                body: {
+                    getReader: vi.fn().mockReturnValue(mockReader)
+                },
+                headers: {
+                    get: vi.fn((name: string) => name === "X-Uncompressed-Length" ? "4" : null)
+                }
+            };
+
+            const fetchSpy = vi.spyOn(window, "fetch").mockReturnValue(Promise.resolve(mockResponse as unknown as Response));
+
+            await expect(service.downloadFileToCacheAuthenticated(url, "valhalla+7-76-52.tar", null, vi.fn(), new AbortController()))
+                .rejects.toThrow("Received 2 bytes instead of 4");
+
+            expect((await service.listFilesInOfflineCache()).some(f => f.startsWith("valhalla+7-76-52.tar"))).toBe(false);
+            fetchSpy.mockRestore();
+        }
+    ));
+
     it("Should not throw if delete file fails", inject([FileService],
         async (service: FileService) => {
             await expect(service.deleteFileInDataDirectory("file")).resolves.not.toThrow();

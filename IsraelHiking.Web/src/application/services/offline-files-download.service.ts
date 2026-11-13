@@ -449,6 +449,7 @@ export class OfflineFilesDownloadService {
      * every download, since they are small and that is simpler than asking for them on their own.
      * The order the server lists them in is kept as it is: it lists the files that take it longest first,
      * and they are downloaded in the order they are listed in, see downloadOfflineFilesProgressAction.
+     * The routing file is asked for as a plain tar, which the server starts sending at once rather than after compressing it.
      */
     private async getFilesToDownload(area: Immutable<OfflineArea>, downloadedFiles: Immutable<FileNameDateVersion[]> | undefined): Promise<string[]> {
         const id = area.properties.id;
@@ -457,7 +458,7 @@ export class OfflineFilesDownloadService {
             this.loggingService.info(`[Offline Download] Asking for every file of ${id}, what it holds can not be used`);
         }
         const lastModifiedString = isCompatible ? this.getLastModifiedDate(downloadedFiles)?.toISOString() : undefined;
-        const params: Record<string, string> = lastModifiedString ? { lastModified: lastModifiedString } : {};
+        const params: Record<string, string> = lastModifiedString ? { lastModified: lastModifiedString, routingTar: "true" } : { routingTar: "true" };
         const request = this.httpClient.get<Record<string, string>>(`${Urls.offlineArea}/${id}`, { params });
         const fileNames = await firstValueFrom(request.pipe(timeout(5000)));
         this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that need to be downloaded for ${id}, ` +

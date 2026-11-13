@@ -300,4 +300,10 @@ describe("RoutingProvider", () => {
 
         expect(() => RoutingProvider.parseValhallaResponse(raw)).toThrow("No suitable edges near location");
     });
+
+    it("Should tell the routing tiles file by its plain tar extension", () => {
+        expect(RoutingProvider.isRoutingTilesFile("valhalla+7-76-51.tar")).toBe(true);
+        expect(RoutingProvider.isRoutingTilesFile("valhalla+7-76-51.tgz")).toBe(false);
+        expect(RoutingProvider.isRoutingTilesFile("IHM+7-76-51.pmtiles")).toBe(false);
+    });
 });
