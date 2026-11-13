@@ -6,7 +6,8 @@ import Foundation
 /// configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
 /// A tile the server or the offline archive does not have is answered with a 404 and not with an
 /// error, since the DEM has its higher zooms only where there is data and the contours fall back to
-/// the zoom below on a 404.
+/// the zoom below on a 404. Once the server could not be reached, a tile that has an offline file is read
+/// from it without asking the server for a while, see `skipServerAfterFailure`.
 final class SliceURLProtocol: URLProtocol {
 
     static let pmTiles = PMTilesService()
@@ -16,6 +17,22 @@ final class SliceURLProtocol: URLProtocol {
     private static let handledKey = "SliceURLProtocolHandled"
     private static let onlineTimeoutMs = 60_000.0
     private static let onlineTimeoutOfflineAvailableMs = 2_000.0
+    /// How long after the server could not be reached a tile that has an offline file is read from it without
+    /// asking the server first. Without it every zoom the map falls back through for a tile the file does not have
+    /// would wait for the server again on a slow connection.
+    private static let skipServerAfterFailure: TimeInterval = 30
+    private static let serverFailureLock = NSLock()
+    private static var lastServerFailure = Date.distantPast
+
+    private static func secondsSinceServerFailure() -> TimeInterval {
+        serverFailureLock.lock(); defer { serverFailureLock.unlock() }
+        return Date().timeIntervalSince(lastServerFailure)
+    }
+
+    private static func recordServerFailure() {
+        serverFailureLock.lock(); defer { serverFailureLock.unlock() }
+        lastServerFailure = Date()
+    }
 
     private var dataTask: URLSessionDataTask?
     private var isStopped = false
@@ -51,6 +68,11 @@ final class SliceURLProtocol: URLProtocol {
             ? SliceURLProtocol.onlineTimeoutOfflineAvailableMs
             : SliceURLProtocol.onlineTimeoutMs
 
+        if offlineAvailable && SliceURLProtocol.secondsSinceServerFailure() < SliceURLProtocol.skipServerAfterFailure {
+            serveOffline(parsed: parsed, offlineAvailable: true, networkError: nil, response: nil)
+            return
+        }
+
         guard let mutable = (request as NSURLRequest).mutableCopy() as? NSMutableURLRequest else {
             client?.urlProtocol(self, didFailWithError: URLError(.unknown))
             return
@@ -67,6 +89,7 @@ final class SliceURLProtocol: URLProtocol {
                 self.client?.urlProtocolDidFinishLoading(self)
                 return
             }
+            SliceURLProtocol.recordServerFailure()
             self.serveOffline(parsed: parsed, offlineAvailable: offlineAvailable,
                               networkError: error, response: response)
         }

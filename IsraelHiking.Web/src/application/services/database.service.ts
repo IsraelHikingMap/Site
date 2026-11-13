@@ -49,6 +49,12 @@ export class DatabaseService {
     private static readonly SHARE_URLS_TABLE_NAME = "shareUrls";
     private static readonly TRACES_DB_NAME = "Traces";
     private static readonly TRACES_TABLE_NAME = "traces";
+    /**
+     * How long after the server could not be reached a tile that has an offline file is read from it without asking
+     * the server first. Without it every zoom the map falls back through for a tile the file does not have would wait
+     * for the server again on a slow connection.
+     */
+    private static readonly SKIP_SERVER_AFTER_FAILURE_MS = 30000;
 
     private stateDatabase: Dexie;
     private uploadQueueDatabase: Dexie;
@@ -57,6 +63,7 @@ export class DatabaseService {
     private tracesDatabase: Dexie;
     private updating = false;
     private stateSubscriptionTimeout: ReturnType<typeof setTimeout>;
+    private lastServerFailureTime = 0;
 
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
@@ -128,8 +135,9 @@ export class DatabaseService {
 
     /**
      * Handles the "slice" protocol, registered by the map service.
-     * Falls back to the offline files when the server can not be reached. A tile the server answers it does not
-     * have is a 404 and not a sign of being offline, since the DEM has its higher zooms only where there is data.
+     * Falls back to the offline files when the server can not be reached, and reads them without asking the server
+     * for a while after that, see SKIP_SERVER_AFTER_FAILURE_MS. A tile the server answers it does not have is a 404
+     * and not a sign of being offline, since the DEM has its higher zooms only where there is data.
      */
     public async getSliceTile(url: string): Promise<GetResourceResponse<ArrayBuffer>> {
         // slice://mapeak.com/vector/data/mapeak-schema/{z}/{x}/{y}.mvt
@@ -139,6 +147,12 @@ export class DatabaseService {
         const x = +splitUrl[splitUrl.length - 2];
         const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
         const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
+        const sinceServerFailureMs = Date.now() - this.lastServerFailureTime;
+        if (offlineAvailable && sinceServerFailureMs < DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS) {
+            this.loggingService.info(`[Slice] Reading ${z}/${x}/${y} of ${type} from the offline file without asking the server, ` +
+                `which could not be reached ${Math.round(sinceServerFailureMs / 1000)}s ago`);
+            return await this.getOfflineTile(z, x, y, type);
+        }
         try {
             const response = await firstValueFrom(this.httpClient.get(url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
                 .pipe(offlineAvailable ? timeout(2000) : timeout(60000)));
@@ -152,6 +166,7 @@ export class DatabaseService {
                 throw createNotFoundError(`Tile ${z}/${x}/${y} of ${type} is not on the server`);
             }
             // Timeout or other error
+            this.lastServerFailureTime = Date.now();
             if (offlineAvailable === false) {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
                     this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
@@ -159,8 +174,19 @@ export class DatabaseService {
                 throw new Error(`${NO_OFFLINE_FILE_MESSAGE} for tile ${z}/${x}/${y} of ${type}, ` +
                     `and the server could not be reached: ${(ex as Error).message}`, { cause: ex });
             }
-            const data = await this.pmTilesService.getTileByType(z, x, y, type);
-            return { data };
+            this.loggingService.info(`[Slice] The server could not be reached for ${z}/${x}/${y} of ${type}, reading the offline files ` +
+                `without asking it for the next ${DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS / 1000}s: ${(ex as Error).message}`);
+            return await this.getOfflineTile(z, x, y, type);
+        }
+    }
+
+    /** Reads a tile from the offline file, logging a tile it does not have, which the map replaces with the zoom below */
+    private async getOfflineTile(z: number, x: number, y: number, type: string): Promise<GetResourceResponse<ArrayBuffer>> {
+        try {
+            return { data: await this.pmTilesService.getTileByType(z, x, y, type) };
+        } catch (ex) {
+            this.loggingService.info(`[Slice] ${z}/${x}/${y} of ${type} is not in the offline file: ${(ex as Error).message}`);
+            throw ex;
         }
     }
 
