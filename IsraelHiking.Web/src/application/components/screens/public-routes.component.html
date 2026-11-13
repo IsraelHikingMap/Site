@@ -152,7 +152,7 @@
             </div>
             @if (isFromOsm(selectedRoutePoint())) {
             <div class="flex flex-row">
-                <button class="mt-2" (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
+                <button class="mt-2" mat-button (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
                     <i class="fa icon-pencil"></i>
                     {{resources.editProperties}}
