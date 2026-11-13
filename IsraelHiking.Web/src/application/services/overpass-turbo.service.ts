@@ -1,7 +1,6 @@
 import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, timeout } from "rxjs";
-import osmtogeojson from "osm2geojson-lite";
 import type { GetResourceResponse } from "maplibre-gl";
 
 import { SpatialHelper } from "./spatial.helper";
@@ -34,8 +33,8 @@ export class OverpassTurboService {
         if (!query.match(/out.*geom;/)) {
             query += "out geom;";
         }
-        const content = await firstValueFrom(this.httpClient.post<string | Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(20000)));
-        const geojson = osmtogeojson(content, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection;
+        const content = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(20000)));
+        const geojson = await this.toGeoJson(content);
         return { data: geojson };
     }
 
@@ -45,7 +44,7 @@ export class OverpassTurboService {
         if (type === "relation") {
             await this.handleNestedRelations(id, content, new Set<string>());
         }
-        return this.processFeature(content);
+        return await this.processFeature(content);
     }
 
     /**
@@ -74,14 +73,23 @@ export class OverpassTurboService {
     private async getFeatureFromQuery(query: string, timeoutInMilliseconds = 2000): Promise<GeoJSON.Feature> {
         try {
             const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, `[out: json];${query}out geom;`).pipe(timeout(timeoutInMilliseconds)));
-            return this.processFeature(json);
+            return await this.processFeature(json);
         } catch {
             return null;
         }
     }
 
-    private processFeature(content: Record<string, unknown>): GeoJSON.Feature {
-        const geojson = osmtogeojson(content, { completeFeature: true, excludeWay: false });
+    /**
+     * Converts an OSM or Overpass json response to geojson. The converter is imported on first use to keep it
+     * out of the initial bundle, as it is only needed once the user opens a feature or an overpass layer.
+     */
+    private async toGeoJson(content: Record<string, unknown>): Promise<GeoJSON.FeatureCollection> {
+        const { default: osmtogeojson } = await import("osm2geojson-lite/json");
+        return osmtogeojson(content, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection;
+    }
+
+    private async processFeature(content: Record<string, unknown>): Promise<GeoJSON.Feature> {
+        const geojson = await this.toGeoJson(content);
         if (geojson.features.length === 1 && geojson.features[0].geometry.type !== "MultiLineString") {
             return geojson.features[0];
         }
@@ -142,6 +150,6 @@ export class OverpassTurboService {
         out geom qt;
         `;
         const json = await firstValueFrom(this.httpClient.post<Record<string, unknown>>(Urls.overpassApi, query).pipe(timeout(3000)));
-        return osmtogeojson(json, { completeFeature: true, excludeWay: false }) as GeoJSON.FeatureCollection<GeoJSON.Point>;
+        return await this.toGeoJson(json) as GeoJSON.FeatureCollection<GeoJSON.Point>;
     }
 }

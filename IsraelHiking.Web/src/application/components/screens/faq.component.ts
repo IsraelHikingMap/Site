@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation, inject, signal } from "@angular/core";
-import { MarkdownComponent } from "ngx-markdown";
+import { MarkdownComponent, provideMarkdown } from "ngx-markdown";
 import { skip } from "rxjs";
 
 import { Router } from "@angular/router";
@@ -12,7 +12,8 @@ import { ApplicationState } from "../../models";
     templateUrl: "./faq.component.html",
     styleUrls: ["./faq.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [MarkdownComponent]
+    imports: [MarkdownComponent],
+    providers: [provideMarkdown()]
 })
 export class FaqComponent {
     public readonly direction = signal<string>("ltr");

@@ -1,7 +1,5 @@
 import { Service } from "@angular/core";
 import { minBy, maxBy, flatten, last } from "lodash-es";
-import { XMLParser } from "fast-xml-parser";
-import Builder from "fast-xml-builder";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -91,10 +89,6 @@ const XML_OPTIONS = {
 export class GpxDataContainerConverterService {
     private static readonly XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>";
 
-    private readonly builder = new Builder({ ...XML_OPTIONS, format: true, indentBy: "  ", suppressEmptyNode: true });
-
-    private readonly parser = new XMLParser({ ...XML_OPTIONS, parseTagValue: false, parseAttributeValue: false });
-
     public static getSegmentsFromLatlngs(latlngs: Immutable<LatLngAltTime[]>, routingType: RoutingType): RouteSegmentData[] {
         const segments = [];
         const firstLatlng = latlngs[0];
@@ -139,6 +133,21 @@ export class GpxDataContainerConverterService {
             }
         }
         return newSegments;
+    }
+
+    /**
+     * The xml builder and parser are imported on first use to keep them out of the initial bundle, as gpx is only
+     * read or written when the user opens or saves a file.
+     */
+    private async createBuilder() {
+        const { default: Builder } = await import("fast-xml-builder");
+        return new Builder({ ...XML_OPTIONS, format: true, indentBy: "  ", suppressEmptyNode: true });
+    }
+
+    /** See {@link createBuilder}. */
+    private async createParser() {
+        const { XMLParser } = await import("fast-xml-parser");
+        return new XMLParser({ ...XML_OPTIONS, parseTagValue: false, parseAttributeValue: false });
     }
 
     public canConvert(gpxXmlString: string) {
@@ -237,14 +246,14 @@ export class GpxDataContainerConverterService {
             };
         }
         this.updateBoundingBox(gpx);
-        const gpxString = "\uFEFF" + GpxDataContainerConverterService.XML_DECLARATION + "\n" + this.builder.build({ gpx });
+        const gpxString = "\uFEFF" + GpxDataContainerConverterService.XML_DECLARATION + "\n" + (await this.createBuilder()).build({ gpx });
         return encode(await new Response(gpxString).arrayBuffer());
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
         // removing namespace since they can be invalid, and the leading BOM written by toGpx
         gpxXmlString = gpxXmlString.replace(/^\uFEFF/, "").replace(/xmlns="(.*?)"/g, "");
-        const gpxJsonObject: Gpx = this.parser.parse(gpxXmlString).gpx;
+        const gpxJsonObject: Gpx = (await this.createParser()).parse(gpxXmlString).gpx;
         this.convertToArrays(gpxJsonObject);
         this.updateBoundingBox(gpxJsonObject);
         const dataContainer = {
