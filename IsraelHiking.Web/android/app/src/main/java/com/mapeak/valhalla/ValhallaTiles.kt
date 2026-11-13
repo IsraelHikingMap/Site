@@ -2,7 +2,6 @@ package com.mapeak.valhalla
 
 import android.content.Context
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -61,7 +60,7 @@ class ValhallaTiles(private val context: Context) {
         ?: emptyList()
 
     /**
-     * Extracts the given archive, a gzipped tar which is expected to be in the app's files directory,
+     * Extracts the given archive, a plain tar which is expected to be in the app's files directory,
      * into the tiles directory, and records the tiles it holds under [id]. The archive is deleted
      * afterwards - it is large and is of no use once extracted.
      * An entry whose name would escape the tiles directory is rejected. An archive that was packed from
@@ -79,7 +78,7 @@ class ValhallaTiles(private val context: Context) {
         val extractedPaths = mutableListOf<String>()
 
         try {
-            TarArchiveInputStream(GzipCompressorInputStream(BufferedInputStream(FileInputStream(tar)))).use { tarIn ->
+            TarArchiveInputStream(BufferedInputStream(FileInputStream(tar))).use { tarIn ->
                 var entry = tarIn.nextEntry
                 while (entry != null) {
                     val outFile = File(tilesDir, entry.name)

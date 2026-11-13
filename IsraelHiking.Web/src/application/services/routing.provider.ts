@@ -34,7 +34,7 @@ export class RoutingProvider {
     private static readonly ONLINE_TIMEOUT_WITH_TILES_MS = 1500;
 
     private static readonly ROUTING_TILES_PREFIX = "valhalla";
-    private static readonly ROUTING_TILES_EXTENSION = ".tgz";
+    private static readonly ROUTING_TILES_EXTENSION = ".tar";
 
     /** The file the offline routing engine is set up with, as the server names it */
     private static readonly PROFILES_FILE_NAME = "valhalla-profiles.json";

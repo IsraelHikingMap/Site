@@ -61,7 +61,7 @@ final class ValhallaTiles {
             .map { $0.deletingPathExtension().lastPathComponent }
     }
 
-    /// Extracts the given archive, a gzipped tar which is expected to be in the data directory, into
+    /// Extracts the given archive, a plain tar which is expected to be in the data directory, into
     /// the tiles directory, and records the tiles it holds under `id`. The archive is deleted
     /// afterwards - it is large and is of no use once extracted.
     /// Extracts an area's tiles, dropping the ones it used to hold and no longer does.
