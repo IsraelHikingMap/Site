@@ -6,8 +6,8 @@ enum ValhallaTarError: Error {
     case entryOutsideDirectory(String)
 }
 
-/// Reads the contents of a file as they are asked for, so that the file is never held in memory - an
-/// area is more than a gigabyte unpacked.
+/// Reads the contents of a file as they are asked for, so that the file is never held in memory - the tar
+/// of an area may be more than two gigabytes.
 private final class TarFileReader {
     private let handle: FileHandle
 
