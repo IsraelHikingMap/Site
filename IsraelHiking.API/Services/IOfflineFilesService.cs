@@ -41,9 +41,8 @@ public interface IOfflineFilesService
     /// </summary>
     /// <param name="areaId">The id of one of the areas of <see cref="GetAreasContent"/></param>
     /// <param name="lastModifiedDate">The date to check against</param>
-    /// <param name="routingTar">Whether to list the routing tiles as a plain tar rather than a gzipped one</param>
     /// <returns>The names of the files and when they changed, null when there is no such area</returns>
-    Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate, bool routingTar);
+    Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate);
 
     /// <summary>
     /// Get the content of a file of an area

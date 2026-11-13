@@ -183,12 +183,11 @@ public class FilesController : ControllerBase
     /// Requires an entitled (subscribed) user.</remarks>
     /// <param name="areaId">The id of the area, as offline/areas has it</param>
     /// <param name="lastModified">The last time this area was downloaded</param>
-    /// <param name="routingTar">Whether to list the routing tiles as a plain tar, which the client gets compressed in transit</param>
     /// <returns>The names of the files that changed since then, and when they did</returns>
     [HttpGet]
     [Route("offline/area/{areaId}")]
     [Authorize]
-    public async Task<IActionResult> GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified, [FromQuery] bool routingTar = false)
+    public async Task<IActionResult> GetOfflineFilesForArea(string areaId, [FromQuery] DateTime lastModified)
     {
         if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
         {
@@ -196,7 +195,7 @@ public class FilesController : ControllerBase
             return Forbid();
         }
         _logger.LogInformation($"Getting the list of offline files of area {areaId} for user: {User.Identity?.Name}, date: {lastModified}");
-        var files = await _offlineFilesService.GetUpdatedFilesListForArea(areaId, lastModified, routingTar);
+        var files = await _offlineFilesService.GetUpdatedFilesListForArea(areaId, lastModified);
         return files == null ? NotFound() : Ok(files);
     }
 

@@ -295,7 +295,7 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>(), false).Returns((Dictionary<string, DateTime>)null);
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns((Dictionary<string, DateTime>)null);
 
         Assert.IsInstanceOfType<NotFoundResult>(_controller.GetOfflineFilesForArea("area", DateTime.Now).Result);
     }
@@ -306,23 +306,9 @@ public class FilesControllerTests
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
         var files = new Dictionary<string, DateTime>();
-        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>(), false).Returns(files);
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns(files);
 
         var results = _controller.GetOfflineFilesForArea("area", DateTime.Now).Result as OkObjectResult;
-
-        Assert.IsNotNull(results);
-        Assert.AreSame(files, results.Value);
-    }
-
-    [TestMethod]
-    public void GetOfflineFilesForArea_RoutingTar_ShouldAskForTheTarList()
-    {
-        _controller.SetupIdentity();
-        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        var files = new Dictionary<string, DateTime>();
-        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>(), true).Returns(files);
-
-        var results = _controller.GetOfflineFilesForArea("area", DateTime.Now, true).Result as OkObjectResult;
 
         Assert.IsNotNull(results);
         Assert.AreSame(files, results.Value);
