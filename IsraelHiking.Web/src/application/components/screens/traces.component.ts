@@ -2,6 +2,9 @@ import { Component, HostListener, DestroyRef, OnInit, ViewEncapsulation, inject,
 import { Router } from "@angular/router";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
+import { MatFormField } from "@angular/material/form-field";
+import { MatSelect } from "@angular/material/select";
+import { MatOption } from "@angular/material/core";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { ClusterPointDirective, ControlComponent, GeoJSONSourceComponent, LayerComponent, MapComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, PopupComponent } from "@maplibre/ngx-maplibre-gl";
 import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
@@ -12,7 +15,6 @@ import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
-import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
 import type { Immutable } from "immer";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
@@ -42,19 +44,23 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { AnalyticsService } from "../../services/analytics.service";
 import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
 import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
-import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
+import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility, SortOption } from "../../models";
 
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, MatIconButton, AnalyticsDirective, TraceThumbnailComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent, BottomSheetComponent]
+    imports: [Dir, MatButton, MatAnchor, MatIconButton, AnalyticsDirective, TraceThumbnailComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent, BottomSheetComponent, MatFormField, MatSelect, MatOption]
 })
 export class TracesComponent implements OnInit {
 
     public readonly showMap = signal(false);
     public readonly sortBy = signal<"timeStamp" | "name">("timeStamp");
+    public readonly sortOptions: SortOption<"timeStamp" | "name">[] = [
+        { value: "timeStamp", label: "date", analyticsLabel: "Sort by date" },
+        { value: "name", label: "name", analyticsLabel: "Sort by name" }
+    ];
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
     public readonly filteredTraces = signal<Immutable<Trace[]>>([]);

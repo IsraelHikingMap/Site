@@ -44,3 +44,4 @@ export type { RecordedRouteState } from "./state/recorded-route-state";
 export type { StateWithHistory } from "./state/state-with-history";
 export type { PaywallState } from "./state/paywall-state";
 export type { LocationState } from "./state/location-state";
+export type { SortOption } from "./sort-option";

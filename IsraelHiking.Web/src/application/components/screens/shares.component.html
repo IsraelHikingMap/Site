@@ -16,40 +16,25 @@
     <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
         class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
         <div class="flex flex-row items-center gap-2 p-2 sticky top-0 z-10 bg-surface">
-            <mat-form-field subscriptSizing="dynamic" class="flex-1 min-w-0">
-                <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
-                    analyticsCategory="Shares" analyticsLabel="Open sort menu">
-                    <mat-option value="lastModifiedDate" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Sort by date">
-                        {{resources.date}}
-                    </mat-option>
-                    <mat-option value="difficulty" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Sort by difficulty">
-                        {{resources.difficulty}}
-                    </mat-option>
-                    <mat-option value="type" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Sort by type">
-                        {{resources.routeType}}
-                    </mat-option>
-                    <mat-option value="length" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Sort by length">
-                        {{resources.length}}
-                    </mat-option>
-                    <mat-option value="title" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="Sort by name">
-                        {{resources.name}}
-                    </mat-option>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pill-select w-40 min-w-0">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" [aria-label]="resources.sort"
+                    analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Open sort menu">
+                    @for (option of sortOptions; track option.value) {
+                    <mat-option [value]="option.value" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="{{option.analyticsLabel}}">{{resources[option.label]}}</mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
             <button mat-icon-button class="shrink-0" (click)="onSortDirectionChange()" analyticsOn="click"
                 analyticsCategory="Shares" analyticsLabel="Chnage sort direction">
                 <i class="fa icon-sort"></i>
             </button>
-            <button mat-button class="shrink-0 whitespace-nowrap" [matMenuTriggerFor]="filterMenu" analyticsOn="click"
+            <span class="flex-1"></span>
+            <button mat-stroked-button class="shrink-0 px-3!" [matMenuTriggerFor]="filterMenu" analyticsOn="click"
                 analyticsCategory="Shares" analyticsLabel="Open filter menu">
-                <i class="fa icon-sliders mx-2 fa-lg"></i>
-                {{resources.filter}}
+                <i class="fa icon-sliders"></i>
+                <span class="mx-1">{{resources.filter}}</span>
+                <i class="fa icon-chevron-down text-[10px]! opacity-60"></i>
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">

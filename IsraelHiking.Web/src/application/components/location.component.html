@@ -1,5 +1,5 @@
 <div class="maplibregl-ctrl flex flex-col gap-2 print:hidden!">
-  <button mat-mini-fab class="map-fab" (click)="toggleTracking()" [class.active]="isActive()"
+  <button mat-mini-fab class="round-fab" (click)="toggleTracking()" [class.active]="isActive()"
     matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" analyticsOn="click"
     analyticsCategory="Location" analyticsLabel="Toggle GPS location">
     @if (isDisabled() || isActive()) {
@@ -9,13 +9,13 @@
     <mat-spinner diameter="24"></mat-spinner>
     }
   </button>
-  <button mat-mini-fab class="map-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
+  <button mat-mini-fab class="round-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
     <div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
       analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up"><i class="icon-north text-xl!"></i>
     </div>
   </button>
   @if (canRecord()) {
-  <button mat-mini-fab class="map-fab" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
+  <button mat-mini-fab class="round-fab" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
     analyticsCategory="Location" analyticsLabel="Toggle recording">
     @if (isRecording()) {
     <i class="fa icon-stop text-xl!"></i>
@@ -25,7 +25,7 @@
   </button>
   }
   @if (isRecording()) {
-  <button mat-mini-fab class="map-fab" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
+  <button mat-mini-fab class="round-fab" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
     analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
     <i class="fa icon-map-marker text-xl!" [style.color]="resources.recordedRouteColor"></i>
   </button>

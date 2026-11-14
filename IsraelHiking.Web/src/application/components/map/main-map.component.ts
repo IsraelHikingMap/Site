@@ -53,11 +53,13 @@ export class MainMapComponent {
 
     public readonly sidenavVisible = signal(false);
     public readonly sidenavViewName = signal("");
-    /** A narrow screen shows a point's details in a sheet at the bottom instead of the side drawer. */
+    /** A narrow screen shows a point's details and the routes list in a sheet at the bottom instead of the side drawer. */
     public readonly isNarrowScreen = toSignal(inject(BreakpointObserver).observe("(max-width: 550px)")
         .pipe(map(state => state.matches)), { initialValue: false });
-    public readonly isPoiSheetShown = computed(() =>
-        this.isNarrowScreen() && this.sidenavVisible() && this.sidenavViewName() === "public-poi");
+    public readonly sheetViewName = computed(() =>
+        this.isNarrowScreen() && this.sidenavVisible() && ["public-poi", "private-routes"].includes(this.sidenavViewName())
+            ? this.sidenavViewName()
+            : "");
     public readonly location: LocationState;
     public readonly initialStyle: StyleSpecification;
 

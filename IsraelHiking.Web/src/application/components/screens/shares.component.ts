@@ -4,9 +4,11 @@ import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { FormsModule } from "@angular/forms";
 import { MatButton, MatIconButton } from "@angular/material/button";
+import { MatFormField } from "@angular/material/form-field";
+import { MatSelect } from "@angular/material/select";
+import { MatOption } from "@angular/material/core";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatCheckbox } from "@angular/material/checkbox";
-import { MatFormField, MatLabel, MatOption, MatSelect } from "@angular/material/select";
 import { MatDivider } from "@angular/material/divider";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { Dir } from "@angular/cdk/bidi";
@@ -39,13 +41,13 @@ import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RouteStrings } from "../../services/hash.service";
 import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
-import type { ApplicationState, ShareUrl } from "../../models";
+import type { ApplicationState, ShareUrl, SortOption } from "../../models";
 
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);
@@ -56,6 +58,13 @@ export class SharesComponent implements OnInit {
     public readonly searchTerm = signal("");
     public readonly routesGeoJson = signal<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
     public readonly sortBy = signal<keyof ShareUrl>("lastModifiedDate");
+    public readonly sortOptions: SortOption<keyof ShareUrl>[] = [
+        { value: "lastModifiedDate", label: "date", analyticsLabel: "Sort by date" },
+        { value: "difficulty", label: "difficulty", analyticsLabel: "Sort by difficulty" },
+        { value: "type", label: "routeType", analyticsLabel: "Sort by type" },
+        { value: "length", label: "length", analyticsLabel: "Sort by length" },
+        { value: "title", label: "name", analyticsLabel: "Sort by name" }
+    ];
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly filter: Record<string, string[]> = {
         difficulty: ["Easy", "Moderate", "Hard", "Very Hard", "Unknown"],

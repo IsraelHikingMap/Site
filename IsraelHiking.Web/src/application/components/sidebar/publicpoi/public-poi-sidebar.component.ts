@@ -2,12 +2,12 @@ import { Component, inject, OnDestroy, ViewEncapsulation, signal, computed } fro
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
-import { MatButton, MatAnchor } from "@angular/material/button";
+import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
-import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from "@angular/material/card";
+import { MatDivider } from "@angular/material/divider";
 import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
 import { Share } from "@capacitor/share";
@@ -66,7 +66,7 @@ const SOURCE_IMAGE_URL_BY_DOMAIN = [
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, MatCard, PublicPointOfInterestEditComponent, FormsModule, MatCardHeader, MatCardTitle, NgClass, MatCardContent, ImageScrollerComponent, DistancePipe, DescriptionComponent]
+    imports: [Dir, MatButton, MatIconButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, PublicPointOfInterestEditComponent, FormsModule, NgClass, MatDivider, ImageScrollerComponent, DistancePipe, DescriptionComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public readonly isLoading = signal(true);

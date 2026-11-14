@@ -142,9 +142,9 @@ body {
     color: rgba(0, 0, 0, 0.87);
 }
 
-/* Buttons that float over the map: round and on the surface colour, so they read as part of the map
-   and not as a block of brand chrome stacked on top of it. */
-.map-fab {
+/* Round fab buttons on the surface colour, like the ones floating over the map, which read as part of the
+   map and not as a block of brand chrome stacked on top of it. A background set on the button still wins. */
+.round-fab {
     @include mat.fab-overrides((container-shape: 9999px,
             extended-container-shape: 9999px,
             small-container-shape: 9999px,
@@ -153,6 +153,14 @@ body {
             small-container-color: var(--mat-sys-surface),
             small-foreground-color: var(--mat-sys-on-surface),
         ));
+}
+
+/* Material's own dropdown in the outlined style, at the height and with the shape of the pill buttons it
+   sits next to in the list headers. The corner is half the 40px height rather than a "full" radius, since
+   the outlined field also sizes its side padding from this value. */
+.pill-select {
+    @include mat.form-field-density(-4);
+    @include mat.form-field-overrides((outlined-container-shape: 20px));
 }
 
 /* A toggled round button is filled with the brand tone, the way Material marks a selected icon button -
