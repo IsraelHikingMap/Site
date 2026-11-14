@@ -28,6 +28,15 @@ export class ImageResizeService {
     }
 
     /**
+     * piexif-ts ships only a UMD build, so the app bundle hands its exports back under `default` while the tests,
+     * running in node, get them as named exports - reading the wrong one leaves every method undefined.
+     */
+    private async importPiexif(): Promise<typeof Piexif> {
+        const module = await import("piexif-ts");
+        return ("default" in module ? module.default : module) as typeof Piexif;
+    }
+
+    /**
      * piexif is imported here, on first use, to keep it out of the initial bundle - images are only resized when the
      * user adds one, and the module is handed down to the methods below that need it.
      */
@@ -36,7 +45,7 @@ export class ImageResizeService {
         throwIfNoLocation = true,
         maxSize = 1920): Promise<TReturn> {
 
-        const piexif = await import("piexif-ts");
+        const piexif = await this.importPiexif();
         const arrayBuffer = await file.arrayBuffer();
         const base64 = "data:" + file.type + ";base64," + encode(arrayBuffer);
         let exifData: IExif = null;
