@@ -1,9 +1,17 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { dump, insert, TagValues, type IExif } from "piexif-ts";
+import * as piexifModule from "piexif-ts";
+import type { IExif } from "piexif-ts";
 import { decode } from "base64-arraybuffer";
 
 import { ImageResizeService } from "./image-resize.service";
+
+/**
+ * Reproduces the app bundle, which hands piexif-ts exports back under `default` only - see ImageResizeService.importPiexif.
+ * The exports sit on the prototype so that the test runner's interop can't copy them to the top level.
+ */
+vi.mock("piexif-ts", async (importOriginal) => Object.create(await importOriginal()));
+const { dump, insert, TagValues } = (piexifModule as unknown as { default: typeof piexifModule }).default;
 
 const IMAGE_BASE_64 =
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wCEAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAf/CABEIAAEAAQMBIgACEQEDEQH/xAAUAAEAAAAAAAAAAAAAAAAAAAAK/9oACAEBAAAAAH8f/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAhAAAAB//8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAxAAAAB//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k=";
