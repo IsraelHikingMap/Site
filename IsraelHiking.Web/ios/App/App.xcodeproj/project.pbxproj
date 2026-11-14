@@ -35,6 +35,9 @@
 		0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000007 /* ValhallaTarExtractor.swift */; };
 		0DFA1100000000000000005D /* Valhalla in Frameworks */ = {isa = PBXBuildFile; productRef = 0DFA1100000000000000005C /* Valhalla */; };
 		0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000064 /* ValhallaProfiles.swift */; };
+		0DFB11000000000000000002 /* OfflineDownloadPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFB11000000000000000001 /* OfflineDownloadPlugin.swift */; };
+		0DFB11000000000000000004 /* OfflineDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFB11000000000000000003 /* OfflineDownloadManager.swift */; };
+		0DFB11000000000000000006 /* OfflineDownload in Frameworks */ = {isa = PBXBuildFile; productRef = 0DFB11000000000000000005 /* OfflineDownload */; };
 		18B43CFDAC8C4CECAD876E75 /* CarManeuverIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963B4A8177CD4E3AA791EBCE /* CarManeuverIcons.swift */; };
 		242A4B25E0FE4CDAB9E865D9 /* CarBackendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1568390AF42F4AAAA4290510 /* CarBackendService.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
@@ -105,6 +108,8 @@
 		0DFA11000000000000000005 /* ValhallaRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaRouter.swift; sourceTree = "<group>"; };
 		0DFA11000000000000000007 /* ValhallaTarExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTarExtractor.swift; sourceTree = "<group>"; };
 		0DFA11000000000000000064 /* ValhallaProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaProfiles.swift; sourceTree = "<group>"; };
+		0DFB11000000000000000001 /* OfflineDownloadPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineDownloadPlugin.swift; sourceTree = "<group>"; };
+		0DFB11000000000000000003 /* OfflineDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineDownloadManager.swift; sourceTree = "<group>"; };
 		1568390AF42F4AAAA4290510 /* CarBackendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarBackendService.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		3F6A9941331649EC9FF56E86 /* CarManeuver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarManeuver.swift; sourceTree = "<group>"; };
@@ -143,6 +148,7 @@
 				0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */,
 				0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */,
 				0DFA1100000000000000005D /* Valhalla in Frameworks */,
+				0DFB11000000000000000006 /* OfflineDownload in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +206,15 @@
 			path = Valhalla;
 			sourceTree = "<group>";
 		};
+		0DFB11000000000000000007 /* OfflineDownload */ = {
+			isa = PBXGroup;
+			children = (
+				0DFB11000000000000000001 /* OfflineDownloadPlugin.swift */,
+				0DFB11000000000000000003 /* OfflineDownloadManager.swift */,
+			);
+			path = OfflineDownload;
+			sourceTree = "<group>";
+		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
@@ -227,6 +242,7 @@
 				0DAA0113000000000000AA13 /* Translations.swift */,
 				0D46EA0A2FCC67430033E098 /* Car */,
 				0DFA1100000000000000005A /* Valhalla */,
+				0DFB11000000000000000007 /* OfflineDownload */,
 				F15F05A52935486900827848 /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -280,6 +296,7 @@
 				0DCC0105000000000000CC05 /* MapLibre */,
 				0DD5D9582FDBDBB300983BAA /* PMTiles */,
 				0D6243242FDEC57E00B2C10A /* MaplibreContour */,
+				0DFB11000000000000000005 /* OfflineDownload */,
 			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
@@ -319,6 +336,7 @@
 				0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
 				0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */,
 				0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */,
+				0DFB11000000000000000008 /* XCLocalSwiftPackageReference "OfflineDownload" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
@@ -398,6 +416,8 @@
 				0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */,
 				0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */,
 				0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */,
+				0DFB11000000000000000002 /* OfflineDownloadPlugin.swift in Sources */,
+				0DFB11000000000000000004 /* OfflineDownloadManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -707,6 +727,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = "CapApp-SPM";
 		};
+		0DFB11000000000000000008 /* XCLocalSwiftPackageReference "OfflineDownload" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = OfflineDownload;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -764,6 +788,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
 			productName = PMTiles;
+		};
+		0DFB11000000000000000005 /* OfflineDownload */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DFB11000000000000000008 /* XCLocalSwiftPackageReference "OfflineDownload" */;
+			productName = OfflineDownload;
 		};
 		0DFA1100000000000000005C /* Valhalla */ = {
 			isa = XCSwiftPackageProductDependency;

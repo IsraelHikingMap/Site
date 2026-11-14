@@ -1,4 +1,6 @@
-﻿export type OfflineState = {
+﻿import type { OfflineArea } from "..";
+
+export type OfflineState = {
     /**
      * `true` after a user made a purchase of the subscription 
      */
@@ -11,4 +13,10 @@
      * The last time the app detected that the user is offline
      */
     lastOfflineDetectedDate: Date | null;
+    /**
+     * The area whose files the native background download is downloading, with all the files it needs and the areas
+     * it replaces, until they were moved to where the app reads them from - a download the app did not see end is
+     * finished on its next start
+     */
+    areaDownloadInProgress: { area: OfflineArea; files: string[]; replacedAreaIds: string[] } | null;
 };

@@ -25,6 +25,11 @@ export class SetLastOfflineDetectedDate {
     constructor(public readonly lastOfflineDetectedDate: Date | null) { }
 }
 
+export class SetAreaDownloadInProgressAction {
+    public static readonly type = "[Offline] SetAreaDownloadInProgressAction";
+    constructor(public readonly areaDownloadInProgress: OfflineState["areaDownloadInProgress"]) { }
+}
+
 @State<OfflineState>({
     name: "offlineState",
     defaults: initialState.offlineState
@@ -60,6 +65,13 @@ export class OfflineReducer {
     setLastOfflineDetectedDate(ctx: StateContext<OfflineState>, action: SetLastOfflineDetectedDate) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastOfflineDetectedDate = action.lastOfflineDetectedDate;
+        }));
+    }
+
+    @Action(SetAreaDownloadInProgressAction)
+    public setAreaDownloadInProgress(ctx: StateContext<OfflineState>, action: SetAreaDownloadInProgressAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.areaDownloadInProgress = action.areaDownloadInProgress;
         }));
     }
 }

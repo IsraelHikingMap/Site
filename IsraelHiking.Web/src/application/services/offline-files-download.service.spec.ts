@@ -18,6 +18,7 @@ import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
 import { SpatialHelper } from "./spatial.helper";
+import { OFFLINE_DOWNLOAD, type FailedAreaFile, type OfflineDownloadPlugin, type AreaDownloadState } from "./offline-download.plugin";
 import { Urls } from "../urls";
 import type { ApplicationState, OfflineArea } from "../models";
 
@@ -130,7 +131,14 @@ describe("OfflineFilesDownloadService", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([OfflineReducer, InMemoryReducer]),
-                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download" } },
+                {
+                    provide: ResourcesService, useValue: {
+                        recommendOfflineDownload: "recommend-offline-download",
+                        dontSwitchApps: "dont-switch-apps",
+                        downloadMapForOfflineViewing: "download-map-for-offline-viewing",
+                        mapeakPro: "mapeak-pro"
+                    }
+                },
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
@@ -142,11 +150,12 @@ describe("OfflineFilesDownloadService", () => {
                         renameFileInDataDirectory: vi.fn(() => Promise.resolve()),
                         listOfflineFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
                         listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as string[])),
-                        clearOfflineCache: vi.fn(() => Promise.resolve())
+                        clearOfflineCache: vi.fn(() => Promise.resolve()),
+                        getOfflineCacheUri: vi.fn(() => Promise.resolve("file:///cache/offline-files"))
                     }
                 },
                 { provide: LoggingService, useValue: { info: vi.fn(), debug: vi.fn(), warning: vi.fn(), error: vi.fn(), getErrorTypeAndMessage: () => ({ type: "client", message: "" }) } },
-                { provide: ToastService, useValue: { confirm: vi.fn() } },
+                { provide: ToastService, useValue: { confirm: vi.fn(), info: vi.fn() } },
                 {
                     provide: PmTilesService, useValue: {
                         getVersion: vi.fn((): Promise<string> => Promise.resolve(undefined)),
@@ -514,6 +523,45 @@ describe("OfflineFilesDownloadService", () => {
             }
         )
     );
+
+    it("Should tell the user to keep the app open while the files are downloaded with fetch",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = service.downloadArea(AREA, []);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+
+                expect(await promise).toBe("downloaded");
+                expect(toastService.info).toHaveBeenCalledExactlyOnceWith("dont-switch-apps");
+            }
+        )
+    );
+
+    it("Should not tell the user to keep the app open when there is nothing to download",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = service.downloadArea(AREA, []);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, {});
+
+                expect(await promise).toBe("up-to-date");
+                expect(toastService.info).not.toHaveBeenCalled();
+            }
+        )
+    );
+
 
     it("Should finish a download whose routing tiles could not be handed over and remove the file holding them",
         inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
@@ -959,4 +1007,551 @@ describe("OfflineFilesDownloadService", () => {
             }
         )
     );
+
+    describe("with the background download", () => {
+        let offlineDownload: OfflineDownloadStandIn;
+
+        beforeEach(() => {
+            offlineDownload = createOfflineDownloadStandIn();
+            TestBed.overrideProvider(OFFLINE_DOWNLOAD, { useValue: offlineDownload });
+        });
+
+        it("Should hand the files that are not in the cache to the background download, in the order the server listed them",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreForDownload(store);
+                    vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([AREA_MAP_FILE]);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [ROOT_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01", [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(offlineDownload.startAreaDownload).toHaveBeenCalledWith({
+                        areaId: AREA_ID,
+                        files: [
+                            { fileName: ROOT_MAP_FILE, url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}` },
+                            { fileName: AREA_ROUTING_TILES_FILE, url: `${Urls.offlineArea}/${AREA_ID}/${AREA_ROUTING_TILES_FILE}` }
+                        ],
+                        headers: { Authorization: "Bearer token" },
+                        concurrency: 3,
+                        directory: "file:///cache/offline-files",
+                        title: "download-map-for-offline-viewing",
+                        subtitle: "mapeak-pro"
+                    });
+                    expect(fileService.downloadFileToCacheAuthenticated).not.toHaveBeenCalled();
+                    for (const fileName of [ROOT_MAP_FILE, AREA_ROUTING_TILES_FILE, AREA_MAP_FILE]) {
+                        expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(fileName);
+                    }
+                }
+            )
+        );
+
+        it("Should not tell the user to keep the app open when the download goes on in the background",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(toastService.info).not.toHaveBeenCalled();
+                }
+            )
+        );
+
+        it("Should tell the user to keep the app open once the download started when it does not go on in the background",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, ToastService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    toastService: ToastService, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startAreaDownload.mockResolvedValue({ background: false });
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(toastService.info).toHaveBeenCalledExactlyOnceWith("dont-switch-apps"));
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("it stops while the app is in the background"));
+                }
+            )
+        );
+
+        it("Should log how long iOS took to launch the task the download goes on in",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startAreaDownload.mockResolvedValue({ background: true, launchDelay: 420 });
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                    expect(loggingService.info).toHaveBeenCalledWith(expect.stringContaining("its continued task launched after 420ms"));
+                }
+            )
+        );
+
+        it("Should abort the download when the background download was cancelled without the app asking for it",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    // The user stopped the download from the progress iOS shows, or iOS stopped it
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "cancelled", failedFiles: [] });
+
+                    expect(await promise).toBe("aborted");
+                    expect(service.downloadInProgress()).toBeNull();
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should not end a download with what the app found out about the download before it, while it was being started",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+                    let started: (value: { background: boolean }) => void;
+                    offlineDownload.startAreaDownload.mockReturnValue(new Promise(resolve => started = resolve));
+                    offlineDownload.getAreaDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [], failedFiles: [{ fileName: AREA_MAP_FILE, reason: "HTTP 404" }]
+                    });
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    // The app returned to the foreground before the new download was saved, so the saved one is the previous
+                    await service["resumeBackgroundDownload"]();
+                    started({ background: true });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                }
+            )
+        );
+
+        it("Should report the progress of the background download with every file of the area weighing the same",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+
+                    offlineDownload.fire("fileProgress", { areaId: AREA_ID, fileName: AREA_MAP_FILE, fraction: 0.5 });
+                    expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 25 });
+                    offlineDownload.fire("fileCompleted", { areaId: AREA_ID, fileName: AREA_MAP_FILE });
+                    expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
+                    // The events of another tile, a download that was replaced, say nothing about this one
+                    offlineDownload.fire("fileCompleted", { areaId: OTHER_AREA.properties.id, fileName: AREA_ROUTING_TILES_FILE });
+                    expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
+                    // A file that is not one of the area's says nothing about it either
+                    offlineDownload.fire("fileCompleted", { areaId: AREA_ID, fileName: ROOT_MAP_FILE });
+                    expect(service.downloadInProgress()).toEqual({ area: AREA, progress: 50 });
+
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+                    expect(await promise).toBe("downloaded");
+                    expect(service.downloadInProgress()).toBeNull();
+                }
+            )
+        );
+
+        it("Should keep the area in progress in the state until its files were moved",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress))
+                        .toEqual({ area: AREA, files: [AREA_MAP_FILE], replacedAreaIds: [] });
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+                    await promise;
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should report a background download that ended with missing files as an error, with what each file failed on",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "HTTP 401" }] });
+
+                    expect(await promise).toBe("error");
+                    expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${AREA_MAP_FILE} (HTTP 401)`));
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should cancel the background download of the area when the download is aborted",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    service.abortCurrentDownload();
+
+                    expect(await promise).toBe("aborted");
+                    expect(offlineDownload.cancelAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should finish on start a background download that completed while the app was not running, keeping its files in the cache",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, RoutingProvider],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, routingProvider: RoutingProvider) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(offlineDownload.getAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    await vi.waitFor(() => expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull());
+                    expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
+                    expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_ROUTING_TILES_FILE);
+                    expect(routingProvider.extractOfflineRoutingTiles).toHaveBeenCalledWith(AREA_ROUTING_TILES_FILE, AREA_ID);
+                }
+            )
+        );
+
+        it("Should follow on start a background download that is still running, and finish it once it completes",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    await vi.waitFor(() => expect(service.downloadInProgress()).toBeNull());
+                    expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
+                    expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_ROUTING_TILES_FILE);
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should report on start a background download that failed while the app was not running, and clear the cache",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [AREA_MAP_FILE], failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "network error: timeout" }]
+                    });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${AREA_ROUTING_TILES_FILE} (network error: timeout)`));
+                    expect(fileService.clearOfflineCache).toHaveBeenCalled();
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should report a background download that ended with a file missing for a reason other than an HTTP status as an error",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_MAP_FILE, reason: "network error: timeout" }] });
+
+                    expect(await promise).toBe("error");
+                    expect(loggingService.warning).toHaveBeenCalledWith(expect.stringContaining(`${AREA_MAP_FILE} (network error: timeout)`));
+                }
+            )
+        );
+
+        it("Should report a background download that could not be started as an error, forgetting the area in progress",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.startAreaDownload.mockRejectedValue(new Error("files is required"));
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+
+                    expect(await promise).toBe("error");
+                    expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining(AREA_ID));
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should log a background download that could not be cancelled when the download is aborted",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.cancelAreaDownload.mockRejectedValue(new Error("no plugin"));
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveBeenCalled());
+                    service.abortCurrentDownload();
+
+                    expect(await promise).toBe("aborted");
+                    await vi.waitFor(() => expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("no plugin")));
+                }
+            )
+        );
+
+        it("Should keep following a background download that is still running when the app returns to the foreground",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreForDownload(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
+                    expect(await service["resumeBackgroundDownload"]()).toBe(true);
+                    expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+
+                    expect(await promise).toBe("downloaded");
+                }
+            )
+        );
+
+        it("Should forget on start a background download that a previous run left once it ends without completing",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [AREA_MAP_FILE], failedFiles: [] });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "failed", failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "HTTP 500" }] });
+
+                    await vi.waitFor(() => expect(service.downloadInProgress()).toBeNull());
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should leave the download the user started alone when the download of a previous run it replaced unwinds",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "running", completedFiles: [], failedFiles: [] });
+                    const initialized = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await initialized;
+                    await vi.waitFor(() => expect(offlineDownload.addListener).toHaveBeenCalledWith("areaFinished", expect.any(Function)));
+
+                    const promise = service.downloadArea(AREA, []);
+                    await flushStyles(mockBackend, {});
+                    await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                    await vi.waitFor(() => expect(offlineDownload.startAreaDownload).toHaveReturned());
+
+                    expect(offlineDownload.cancelAreaDownload).toHaveBeenCalledWith({ areaId: AREA_ID });
+                    expect(service.downloadInProgress()?.area.properties.id).toBe(AREA_ID);
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)?.files)
+                        .toEqual([AREA_MAP_FILE]);
+                    offlineDownload.fire("areaFinished", { areaId: AREA_ID, state: "completed", failedFiles: [] });
+                    expect(await promise).toBe("downloaded");
+                }
+            )
+        );
+
+        it("Should log on start a background download of a previous run whose files could not be moved",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({ state: "completed", completedFiles: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], failedFiles: [] });
+                    vi.mocked(fileService.moveFileFromCacheToDataDirectory).mockRejectedValue(new Error("disk full"));
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    await vi.waitFor(() => expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("disk full")));
+                    expect(service.downloadInProgress()).toBeNull();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should clear the cache on start when the background download of a previous run can not be asked about",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                    fileService: FileService, loggingService: LoggingService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockRejectedValue(new Error("no plugin"));
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(loggingService.error).toHaveBeenCalledWith(expect.stringContaining("no plugin"));
+                    expect(fileService.clearOfflineCache).toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should log what the background download reports about how it went on the device",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, LoggingService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, loggingService: LoggingService) => {
+                    resetStoreForDownload(store);
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+                    offlineDownload.fire("diagnostic", { message: "[21:50:01.123] The app entered the background" });
+
+                    expect(loggingService.info).toHaveBeenCalledWith("[Offline Download] [native] [21:50:01.123] The app entered the background");
+                }
+            )
+        );
+
+        it("Should keep the cache on start for a background download that iOS stopped when the app was force-quit",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [AREA_MAP_FILE], failedFiles: [{ fileName: AREA_ROUTING_TILES_FILE, reason: "force-quit" }]
+                    });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    expect(offlineDownload.startAreaDownload).not.toHaveBeenCalled();
+                    expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+
+        it("Should keep the cache on start for a background download whose process ended while it was going on",
+            inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService],
+                async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService) => {
+                    resetStoreWithAreaDownloadInProgress(store);
+                    offlineDownload.getAreaDownload.mockResolvedValue({
+                        state: "failed", completedFiles: [], failedFiles: [
+                            { fileName: AREA_MAP_FILE, reason: "interrupted" }, { fileName: AREA_ROUTING_TILES_FILE, reason: "interrupted" }
+                        ]
+                    });
+
+                    const promise = service.initialize();
+                    await flushStyles(mockBackend, {});
+                    await promise;
+
+                    expect(fileService.clearOfflineCache).not.toHaveBeenCalled();
+                    expect(offlineDownload.startAreaDownload).not.toHaveBeenCalled();
+                    expect(store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress)).toBeNull();
+                }
+            )
+        );
+    });
 });
+
+/** The background download plugin as the tests hand it to the app, with a way to fire the events the plugin would */
+type OfflineDownloadStandIn = ReturnType<typeof createOfflineDownloadStandIn>;
+
+/**
+ * A stand-in for the app's own background download plugin, given to the service through the test bed: it records
+ * what it was asked and leaves the events, which the native download fires, to the test.
+ */
+function createOfflineDownloadStandIn() {
+    const listeners = new Map<string, Set<(event: object) => void>>();
+    return {
+        startAreaDownload: vi.fn((_options: Parameters<OfflineDownloadPlugin["startAreaDownload"]>[0]) =>
+            Promise.resolve<{ background: boolean; launchDelay?: number }>({ background: true })),
+        cancelAreaDownload: vi.fn((_options: { areaId: string }) => Promise.resolve()),
+        getAreaDownload: vi.fn((_options: { areaId: string }) => Promise.resolve(
+            { state: "none" as AreaDownloadState, completedFiles: [] as string[], failedFiles: [] as FailedAreaFile[] })),
+        addListener: vi.fn((eventName: string, listener: (event: object) => void) => {
+            const eventListeners = listeners.get(eventName) ?? new Set();
+            listeners.set(eventName, eventListeners.add(listener));
+            return Promise.resolve({ remove: () => Promise.resolve(void eventListeners.delete(listener)) });
+        }),
+        fire: (eventName: "fileProgress" | "fileCompleted" | "areaFinished" | "diagnostic", event: object) =>
+            listeners.get(eventName)?.forEach(listener => listener(event))
+    };
+}
+
+/** A subscribed user with nothing downloaded, the way the download tests start */
+function resetStoreForDownload(store: Store) {
+    store.reset({
+        userState: { token: "token" },
+        offlineState: { isSubscribed: true, areaDownloadInProgress: null },
+        inMemoryState: { downloadedAreas: {} }
+    });
+}
+
+/** A subscribed user whose previous run of the app left the background download of the area going */
+function resetStoreWithAreaDownloadInProgress(store: Store) {
+    store.reset({
+        userState: { token: "token" },
+        offlineState: {
+            isSubscribed: true,
+            areaDownloadInProgress: { area: AREA, files: [AREA_MAP_FILE, AREA_ROUTING_TILES_FILE], replacedAreaIds: [] }
+        },
+        inMemoryState: { downloadedAreas: {} }
+    });
+}

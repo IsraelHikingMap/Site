@@ -27,6 +27,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let bridgeViewController = rootViewController as? CAPBridgeViewController {
             bridgeViewController.bridge?.registerPluginInstance(ReactivePreferencesPlugin())
             bridgeViewController.bridge?.registerPluginInstance(ValhallaPlugin())
+            bridgeViewController.bridge?.registerPluginInstance(OfflineDownloadPlugin())
         }
 
         if let urlContext = connectionOptions.urlContexts.first {
@@ -48,5 +49,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         _ = ApplicationDelegateProxy.shared.application(
             UIApplication.shared, continue: userActivity) { _ in }
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        OfflineDownloadManager.shared.coordinator.appDidBecomeActive()
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        OfflineDownloadManager.shared.coordinator.appWillResignActive()
     }
 }

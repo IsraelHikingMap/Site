@@ -265,7 +265,8 @@ export const initialState =
         offlineState: {
             isSubscribed: false,
             uploadPoiQueue: [],
-            lastOfflineDetectedDate: null
+            lastOfflineDetectedDate: null,
+            areaDownloadInProgress: null
         },
         paywallState: {
             lastPaywallShownDate: null,

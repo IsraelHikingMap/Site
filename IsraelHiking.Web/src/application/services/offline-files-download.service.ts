@@ -8,6 +8,7 @@ import { last } from "lodash-es";
 import { Immutable } from "immer";
 import pLimit from "p-limit";
 import type { StyleSpecification } from "maplibre-gl";
+import { App } from "@capacitor/app";
 
 import { Urls } from "../urls";
 import { FileService, type DataDirectoryFile } from "./file.service";
@@ -20,7 +21,9 @@ import { RoutingProvider } from "./routing.provider";
 import { RunningContextService } from "./running-context.service";
 import { RouteStrings } from "./hash.service";
 import { OfflineAreasService, type AreaZooms } from "./offline-areas.service";
+import { OFFLINE_DOWNLOAD, type FailedAreaFile, type AreaDownloadState } from "./offline-download.plugin";
 import { SetDownloadedAreasAction } from "../reducers/in-memory.reducer";
+import { SetAreaDownloadInProgressAction } from "../reducers/offline.reducer";
 import type { ApplicationState, DownloadedArea, FileNameDateVersion, OfflineArea } from "../models";
 
 /** What the styles need from the offline files, see readStyleRequirements */
@@ -51,6 +54,9 @@ export type DownloadStatus = "up-to-date" | "downloaded" | "error" | "aborted";
 /** The area that is being downloaded and how much of it was downloaded so far, from 0 to 100 */
 export type DownloadInProgress = { area: Immutable<OfflineArea>; progress: number };
 
+/** How a download of the native background download ended */
+type BackgroundDownloadResult = { state: AreaDownloadState; failedFiles: FailedAreaFile[] };
+
 @Service()
 export class OfflineFilesDownloadService {
     /** The metadata id a style uses to declare the minimal version it needs from one of its sources */
@@ -61,6 +67,9 @@ export class OfflineFilesDownloadService {
      * Their files are downloaded and needed like the files of the style's own sources.
      */
     private static readonly APPLICATION_SOURCE_FILE_NAMES = ["global_points"];
+
+    /** How many files are downloaded at a time */
+    private static readonly DOWNLOAD_CONCURRENCY = 3;
 
     /** The zoom the old tiles were cut at, which the migration makes their squares at */
     private static readonly TILES_ZOOM = 7;
@@ -80,6 +89,8 @@ export class OfflineFilesDownloadService {
     private readonly store = inject(Store);
     private readonly router = inject(Router);
     private readonly offlineAreasService = inject(OfflineAreasService);
+    /** The native background download, which goes on while the app is in the background, null where files are downloaded with fetch */
+    private readonly offlineDownload = inject(OFFLINE_DOWNLOAD);
 
     /** What the styles that were downloaded now need from the offline files, read every time they are downloaded */
     private onlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
@@ -90,6 +101,9 @@ export class OfflineFilesDownloadService {
      */
     private offlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
     private readonly currentDownload = signal<CurrentDownload | null>(null);
+    private readonly isBackgroundDownloadAvailable = this.offlineDownload != null;
+    /** Ends the background download the app is following, see followBackgroundDownload */
+    private finishBackgroundDownload: ((result: BackgroundDownloadResult) => void) | null = null;
 
     /** The area that is being downloaded right now and how far it got, null when there is no download */
     public readonly downloadInProgress = computed<DownloadInProgress | null>(() => {
@@ -108,7 +122,13 @@ export class OfflineFilesDownloadService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        await this.fileService.clearOfflineCache();
+        if (this.isBackgroundDownloadAvailable) {
+            this.offlineDownload.addListener("diagnostic", event => this.loggingService.info(`[Offline Download] [native] ${event.message}`));
+            App.addListener("appStateChange", state => state.isActive && this.resumeBackgroundDownload());
+        }
+        if (!await this.resumeBackgroundDownload()) {
+            await this.fileService.clearOfflineCache();
+        }
         await this.migrateToAreas();
         let downloadedAreas = await this.updateDownloadedAreasFromDevice();
         downloadedAreas = await this.deleteUnusedRootFiles(downloadedAreas);
@@ -289,20 +309,13 @@ export class OfflineFilesDownloadService {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
             }
-            await this.downloadOfflineFilesProgressAction(currentDownload, fileNames);
+            await this.downloadOfflineFilesProgressAction(currentDownload, fileNames, replacedAreaIds);
 
             if (currentDownload.abortController.signal.aborted) {
                 return "aborted";
             }
 
-            await this.moveDownloadedFilesToDataDirectory(currentDownload, fileNames);
-            await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(id, fileNames));
-            await this.saveRootAreaMetadataIfDownloaded(fileNames);
-            for (const replacedAreaId of replacedAreaIds) {
-                await this.deleteArea(replacedAreaId);
-            }
-            const updatedAreas = await this.updateDownloadedAreasFromDevice();
-            await this.updateVersionsOfDownloadedFiles(updatedAreas);
+            await this.completeDownload(currentDownload, fileNames, replacedAreaIds);
             return "downloaded";
         } catch (ex) {
             if (currentDownload.abortController.signal.aborted) {
@@ -322,8 +335,25 @@ export class OfflineFilesDownloadService {
             // A download that was aborted might only get here after the next one started, and it is not its to clear
             if (this.isCurrent(currentDownload)) {
                 this.currentDownload.set(null);
+                this.clearAreaDownloadInProgress();
             }
         }
+    }
+
+    /**
+     * Puts the files of an area that were all downloaded where the app reads them from, keeps the area with the zooms
+     * they hold, deletes the areas it replaces and reads what the device holds now.
+     */
+    private async completeDownload(currentDownload: CurrentDownload, fileNames: string[], replacedAreaIds: Immutable<string[]>): Promise<void> {
+        const { area } = currentDownload;
+        await this.moveDownloadedFilesToDataDirectory(currentDownload, fileNames);
+        await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(area.properties.id, fileNames));
+        await this.saveRootAreaMetadataIfDownloaded(fileNames);
+        for (const replacedAreaId of replacedAreaIds) {
+            await this.deleteArea(replacedAreaId);
+        }
+        const updatedAreas = await this.updateDownloadedAreasFromDevice();
+        await this.updateVersionsOfDownloadedFiles(updatedAreas);
     }
 
     /**
@@ -334,7 +364,7 @@ export class OfflineFilesDownloadService {
      * on its own once every other file is done.
      * A file that is already whole in the cache is not downloaded again.
      */
-    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
+    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: string[], replacedAreaIds: string[]): Promise<void> {
         const { area, abortController } = currentDownload;
         const id = area.properties.id;
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${id}`);
@@ -342,7 +372,8 @@ export class OfflineFilesDownloadService {
         const progressPerFile: Record<number, number> = {};
         const alreadyDownloaded = await this.fileService.listFilesInOfflineCache();
         const fileDownloadPromises: Promise<void>[] = [];
-        const limit = pLimit(3);
+        const backgroundFiles: { fileName: string; url: string }[] = [];
+        const limit = pLimit(OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY);
         for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
             const fileName = fileNames[fileNameIndex];
             if (abortController.signal.aborted) {
@@ -356,11 +387,192 @@ export class OfflineFilesDownloadService {
             }
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
             const fileDownloadUrl = `${Urls.offlineArea}/${id}/${fileName}`;
+            if (this.isBackgroundDownloadAvailable) {
+                backgroundFiles.push({ fileName, url: fileDownloadUrl });
+                continue;
+            }
             fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
                 value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
         }
+        if (backgroundFiles.length > 0) {
+            await this.downloadInBackground(currentDownload, fileNames, backgroundFiles, progressPerFile, replacedAreaIds);
+        }
+        if (fileDownloadPromises.length > 0) {
+            this.toastService.info(this.resources.dontSwitchApps);
+        }
         await Promise.all(fileDownloadPromises);
         this.loggingService.info(`[Offline Download] Finished downloading offline files of ${id}`);
+    }
+
+    /**
+     * Downloads the files with the native background download, which goes on while the app is in the
+     * background. The area and all its files are kept in the state until they were moved, so that a download
+     * the app did not see end is finished on its next start, see resumeBackgroundDownload.
+     * A download that failed on an HTTP status throws with that status, so that downloadArea tells the server
+     * apart from the connection the same way it does for a fetch download. A download that was cancelled without
+     * the app asking for it, from the progress iOS shows, is aborted the way the app aborts one.
+     */
+    private async downloadInBackground(currentDownload: CurrentDownload, fileNames: string[],
+        files: { fileName: string; url: string }[], progressPerFile: Record<number, number>, replacedAreaIds: string[]): Promise<void> {
+        const id = currentDownload.area.properties.id;
+        this.store.dispatch(new SetAreaDownloadInProgressAction({ area: currentDownload.area as OfflineArea, files: fileNames, replacedAreaIds }));
+        const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+        const directory = await this.fileService.getOfflineCacheUri();
+        const result = await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile,
+            async () => this.reportBackgroundDownloadStart(id, await this.offlineDownload.startAreaDownload({
+                areaId: id,
+                files,
+                headers: { Authorization: `Bearer ${token}` },
+                concurrency: OfflineFilesDownloadService.DOWNLOAD_CONCURRENCY,
+                directory,
+                title: this.resources.downloadMapForOfflineViewing,
+                subtitle: this.resources.mapeakPro
+            })));
+        this.logBackgroundDownloadResult(id, result);
+        if (result.state === "cancelled" && !currentDownload.abortController.signal.aborted) {
+            this.abortCurrentDownload();
+            return;
+        }
+        if (result.state !== "completed" && !currentDownload.abortController.signal.aborted) {
+            const statusCode = result.failedFiles.map(f => /^HTTP (\d+)$/.exec(f.reason)?.[1]).find(code => code != null);
+            throw Object.assign(new Error(`The background download of ${id} ended ${result.state}: ` +
+                result.failedFiles.map(f => `${f.fileName} - ${f.reason}`).join(", ")), { status: statusCode == null ? undefined : +statusCode });
+        }
+    }
+
+    /**
+     * Tells the user to keep the app in the foreground when the download does not go on in the background, which
+     * is the case on iOS before 26 and when iOS did not launch the continued task in time.
+     */
+    private reportBackgroundDownloadStart(id: string, started: { background: boolean; launchDelay?: number }): void {
+        this.loggingService.info(`[Offline Download] The download of ${id} started, ` +
+            `${started.background ? "it goes on in the background" : "it stops while the app is in the background"}` +
+            `${started.launchDelay == null ? "" : `, its continued task launched after ${started.launchDelay}ms`}`);
+        if (!started.background) {
+            this.toastService.info(this.resources.dontSwitchApps);
+        }
+    }
+
+    /**
+     * Follows the background download of an area until it ends, with its progress reported like the one of a
+     * fetch download. It also ends when the download is aborted, or when the app finds out how it ended
+     * without having heard it, see resumeBackgroundDownload. The listeners are added before the download is
+     * started, so that not even a download that ends at once is missed, while what the app finds out is only taken
+     * once the download was started, before that it is about the download that came before.
+     */
+    private async followBackgroundDownload(currentDownload: CurrentDownload, fileNames: Immutable<string[]>,
+        progressPerFile: Record<number, number>, start: () => Promise<void>): Promise<BackgroundDownloadResult> {
+        const id = currentDownload.area.properties.id;
+        const fileNameIndexes = new Map(fileNames.map((fileName, index) => [fileName, index]));
+        const updateFileProgress = (fileName: string, fraction: number) => {
+            if (fileNameIndexes.has(fileName)) {
+                this.updateProgress(currentDownload, progressPerFile, fileNameIndexes.get(fileName), fraction, fileNames.length);
+            }
+        };
+        let finish: (result: BackgroundDownloadResult) => void;
+        const finished = new Promise<BackgroundDownloadResult>(resolve => finish = resolve);
+        const handles = await Promise.all([
+            this.offlineDownload.addListener("fileProgress", event => event.areaId === id && updateFileProgress(event.fileName, event.fraction)),
+            this.offlineDownload.addListener("fileCompleted", event => event.areaId === id && updateFileProgress(event.fileName, 1)),
+            this.offlineDownload.addListener("areaFinished", event => event.areaId === id && finish(event))
+        ]);
+        const onAbort = () => finish({ state: "cancelled", failedFiles: [] });
+        currentDownload.abortController.signal.addEventListener("abort", onAbort);
+        try {
+            await start();
+            this.finishBackgroundDownload = finish;
+            return await finished;
+        } finally {
+            currentDownload.abortController.signal.removeEventListener("abort", onAbort);
+            if (this.finishBackgroundDownload === finish) {
+                this.finishBackgroundDownload = null;
+            }
+            await Promise.all(handles.map(handle => handle.remove()));
+        }
+    }
+
+    /**
+     * Asks the background download how the area download in progress stands, when the app starts and whenever
+     * it returns to the foreground. A download the app is following ends once it is found to have ended, and
+     * one that a previous run of the app left is followed and finished, or forgotten when it failed.
+     * Returns whether the files in the cache must be kept: those of a download that is still going on, and those
+     * of one that iOS stopped when the app was force-quit or its process ended, which downloading the area again
+     * goes on from.
+     */
+    private async resumeBackgroundDownload(): Promise<boolean> {
+        const inProgress = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress);
+        if (!this.isBackgroundDownloadAvailable || inProgress == null) {
+            return false;
+        }
+        const id = inProgress.area.properties.id;
+        try {
+            const result = await this.offlineDownload.getAreaDownload({ areaId: id });
+            if (this.currentDownload() != null) {
+                if (result.state !== "running") {
+                    this.finishBackgroundDownload?.(result);
+                }
+                return true;
+            }
+            this.loggingService.info(`[Offline Download] The download of ${id} that a previous run of the app started is ${result.state}`);
+            if (result.state === "running" || result.state === "completed") {
+                this.finishLeftBackgroundDownload(inProgress, result);
+                return true;
+            }
+            this.logBackgroundDownloadResult(id, result);
+            this.clearAreaDownloadInProgress();
+            return result.state === "failed" && result.failedFiles.some(f => f.reason === "force-quit" || f.reason === "interrupted");
+        } catch (ex) {
+            this.loggingService.error(`[Offline Download] Failed to get the download of ${id}: ${(ex as Error).message}`);
+        }
+        this.clearAreaDownloadInProgress();
+        return false;
+    }
+
+    /**
+     * Finishes a download that a previous run of the app left, the way downloadArea finishes its own: once all
+     * its files are in the cache they are moved and read into the state.
+     */
+    private async finishLeftBackgroundDownload(inProgress: Immutable<NonNullable<ApplicationState["offlineState"]["areaDownloadInProgress"]>>,
+        result: { state: AreaDownloadState; completedFiles: string[]; failedFiles: FailedAreaFile[] }): Promise<void> {
+        const { area, files: fileNames, replacedAreaIds } = inProgress;
+        const id = area.properties.id;
+        const currentDownload: CurrentDownload = { area, progress: 0, abortController: new AbortController() };
+        this.currentDownload.set(currentDownload);
+        const progressPerFile: Record<number, number> = {};
+        fileNames.forEach((fileName, index) => progressPerFile[index] = result.completedFiles.includes(fileName) ? 1 : 0);
+        try {
+            const finalResult = result.state === "running"
+                ? await this.followBackgroundDownload(currentDownload, fileNames, progressPerFile, () => Promise.resolve())
+                : result;
+            this.logBackgroundDownloadResult(id, finalResult);
+            if (finalResult.state !== "completed" || currentDownload.abortController.signal.aborted) {
+                return;
+            }
+            await this.completeDownload(currentDownload, [...fileNames], replacedAreaIds);
+        } catch (ex) {
+            this.loggingService.error(`[Offline Download] Failed to finish the download of ${id}: ${(ex as Error).message}`);
+        } finally {
+            if (this.isCurrent(currentDownload)) {
+                this.currentDownload.set(null);
+                this.clearAreaDownloadInProgress();
+            }
+        }
+    }
+
+    private logBackgroundDownloadResult(id: string, result: BackgroundDownloadResult): void {
+        if (result.state === "completed") {
+            this.loggingService.info(`[Offline Download] The background download of ${id} completed`);
+            return;
+        }
+        this.loggingService.warning(`[Offline Download] The background download of ${id} ended ${result.state}` +
+            `${result.failedFiles.length === 0 ? "" : `, missing: ${result.failedFiles.map(f => `${f.fileName} (${f.reason})`).join(", ")}`}`);
+    }
+
+    /** Forgets the area download in progress, once its files were moved or there is nothing left to move */
+    private clearAreaDownloadInProgress(): void {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.areaDownloadInProgress) != null) {
+            this.store.dispatch(new SetAreaDownloadInProgressAction(null));
+        }
     }
 
     /** Saves the root area with the zooms its files hold, when the root files were downloaded and may hold other zooms than before */
@@ -474,6 +686,12 @@ export class OfflineFilesDownloadService {
         this.loggingService.info("[Offline Download] Aborting the download of " + currentDownload.area.properties.id);
         currentDownload.abortController.abort();
         this.currentDownload.set(null);
+        this.clearAreaDownloadInProgress();
+        if (this.isBackgroundDownloadAvailable) {
+            const id = currentDownload.area.properties.id;
+            this.offlineDownload.cancelAreaDownload({ areaId: id }).catch(ex =>
+                this.loggingService.error(`[Offline Download] Failed to cancel the background download of ${id}: ${(ex as Error).message}`));
+        }
     }
 
     /**

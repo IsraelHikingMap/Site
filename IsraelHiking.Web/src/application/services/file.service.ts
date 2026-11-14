@@ -596,6 +596,14 @@ export class FileService {
     }
 
     /**
+     * Where the offline files cache is, for the native background download to write the files into it, where
+     * listFilesInOfflineCache and moveFileFromCacheToDataDirectory look for them.
+     */
+    public async getOfflineCacheUri(): Promise<string> {
+        return (await Filesystem.getUri({ path: FileService.OFFLINE_CACHE_DIRECTORY, directory: Directory.Cache })).uri;
+    }
+
+    /**
      * Removes whatever is left in the offline files cache, so that a download never continues from files
      * that were downloaded in a previous run of the app and might not be the current ones anymore.
      */

@@ -8,6 +8,7 @@ import androidx.activity.EdgeToEdge;
 
 import com.getcapacitor.BridgeActivity;
 import com.mapeak.car.ReactivePreferencesPlugin;
+import com.mapeak.offline.OfflineDownloadPlugin;
 import com.mapeak.valhalla.ValhallaPlugin;
 
 public class MainActivity extends BridgeActivity {
@@ -15,6 +16,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(ReactivePreferencesPlugin.class);
         registerPlugin(ValhallaPlugin.class);
+        registerPlugin(OfflineDownloadPlugin.class);
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) { // Android 9 and below

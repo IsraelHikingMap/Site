@@ -286,7 +286,6 @@ export class OfflineManagementComponent {
     }
 
     private async startDownload(areaToDownload: Immutable<OfflineArea>, replacedAreaIds: string[]) {
-        this.toastService.info(this.resources.dontSwitchApps);
         this.fitBounds(areaToDownload);
         this.selectedArea.set(null);
         const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload, replacedAreaIds);
