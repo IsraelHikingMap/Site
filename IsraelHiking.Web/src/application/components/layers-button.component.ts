@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatButton } from "@angular/material/button";
+import { MatMiniFabButton } from "@angular/material/button";
 
 import { SidebarService } from "../services/sidebar.service";
 import { ResourcesService } from "../services/resources.service";
@@ -8,7 +8,7 @@ import { ResourcesService } from "../services/resources.service";
 @Component({
     selector: "layers-button",
     templateUrl: "./layers-button.component.html",
-    imports: [MatTooltipModule, MatButton]
+    imports: [MatTooltipModule, MatMiniFabButton]
 })
 export class LayersButtonComponent {
 

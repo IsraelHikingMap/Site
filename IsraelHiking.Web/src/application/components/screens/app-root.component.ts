@@ -34,12 +34,31 @@ export class AppRootComponent {
         this.currentUrl() === RouteStrings.ROUTE_ABOUT);
 
     /**
-     * The search is shown on the screens that are about the map. The settings, which are about the app
-     * itself, show the logo instead, since searching for a place is not what a user who got there is
-     * after - and the search does not leave the menu room to breathe on a narrow screen.
+     * The search is shown on the screens that are about the map. The text screens - settings, faq,
+     * attribution and privacy policy - show the logo instead, since searching for a place is not what a
+     * user who got there is after, and the floating search over a page of text looks out of place.
      */
-    public readonly isSearchShown = computed(() =>
-        !this.isHome() && !(this.currentUrl() ?? "").startsWith(RouteStrings.ROUTE_SETTINGS));
+    public readonly isSearchShown = computed(() => {
+        const path = (this.currentUrl() ?? "").split("?")[0];
+        return !this.isHome() &&
+            ![RouteStrings.ROUTE_SETTINGS, "/attribution", "/privacy-policy"].some(r => path.startsWith(r)) &&
+            !path.endsWith("/faq");
+    });
+
+    /**
+     * Over a map the toolbar has no background of its own: the search and the menu float on it as pills,
+     * and the space between them lets clicks through to the map underneath.
+     */
+    public readonly isFloating = computed(() => this.isSearchShown() || this.isIFrame());
+
+    public readonly toolbarClass = computed(() => {
+        if (this.isHome()) {
+            return this.isScrolled()
+                ? "transition-all duration-300 text-white! bg-black/40! backdrop-blur-md"
+                : "transition-all duration-300 text-white! bg-transparent!";
+        }
+        return this.isFloating() ? "pointer-events-none bg-transparent! [--toolbar-side-gap:10px]!" : "shadow-sm";
+    });
 
     constructor() {
         afterNextRender(() => {

@@ -1,0 +1,31 @@
+@keyframes tools-expand {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    to {
+        max-height: 170px;
+        opacity: 1;
+    }
+}
+
+@keyframes tools-collapse {
+    from {
+        max-height: 170px;
+        opacity: 1;
+    }
+
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
+}
+
+.tools-enter {
+    animation: tools-expand 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.tools-leave {
+    animation: tools-collapse 200ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}

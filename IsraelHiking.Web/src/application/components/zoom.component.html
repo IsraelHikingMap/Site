@@ -1,8 +1,6 @@
-﻿﻿<div class="side-control maplibregl-ctrl hidden md:block">
-    <button mat-button class="p-0!" (click)="zoomIn()" matTooltip="{{resources.zoomIn}}" matTooltipPosition="right"
-        analyticsOn="click" analyticsCategory="Zoom" analyticsLabel="Zoom-in"><i
-            class="fa fa-lg icon-plus"></i></button>
-    <button mat-button class="p-0!" (click)="zoomOut()" matTooltip="{{resources.zoomOut}}" matTooltipPosition="right"
-        analyticsOn="click" analyticsCategory="Zoom" analyticsLabel="Zoom-out"><i
-            class="fa fa-lg icon-minus"></i></button>
+<div class="maplibregl-ctrl hidden flex-col rounded-full bg-surface shadow-md [--mat-icon-button-icon-size:20px] md:flex print:hidden!">
+    <button mat-icon-button (click)="zoomIn()" matTooltip="{{resources.zoomIn}}" matTooltipPosition="right"
+        analyticsOn="click" analyticsCategory="Zoom" analyticsLabel="Zoom-in"><i class="fa icon-plus"></i></button>
+    <button mat-icon-button (click)="zoomOut()" matTooltip="{{resources.zoomOut}}" matTooltipPosition="right"
+        analyticsOn="click" analyticsCategory="Zoom" analyticsLabel="Zoom-out"><i class="fa icon-minus"></i></button>
 </div>

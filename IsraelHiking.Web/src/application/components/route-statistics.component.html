@@ -1,7 +1,8 @@
 ﻿@if (isVisible()) {
-<div class="table side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
+<div class="maplibregl-ctrl relative [--mat-icon-button-icon-size:20px] print:hidden!" [dir]="resources.direction"
+  (window:resize)="redrawChart()">
   @if (isOpen()) {
-  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
+  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated overflow-hidden rounded-3xl bg-surface shadow-md"
     [class.expanded]="isExpanded()" [class.sidebar]="isSidebarVisible()">
     @if (isTable()) {
     <div class="chart-container">
@@ -79,9 +80,9 @@
       @if (subRouteRange() && subRouteRange().xEnd) {
       <div class="sub-route-statistics-container">
         <div class="flex flex-row justify-center items-center">
-          <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
+          <button mat-icon-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
             matTooltipPosition="above" analyticsOn="click" analyticsCategory="Route statistics"
-            analyticsLabel="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
+            analyticsLabel="Clear sub route selection"><i class="fa icon-close"></i></button>
           <span class="label-margin">
             <i class="fa icon-arrow-up"></i>
             <span class="mx-1">{{gain() | distance:'elevation'}}</span>
@@ -101,20 +102,20 @@
     }
     <div class="absolute start-0 bottom-0 flex flex-col m-1">
       @if (!isExpanded()) {
-      <button mat-button (click)="changeState('table')" [class.active]="isTable()" analyticsOn="click"
+      <button mat-icon-button (click)="changeState('table')" [class.active]="isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle table view"><i
-          class="fa icon-table fa-lg"></i></button>
+          class="fa icon-table"></i></button>
       }
-      <button mat-button (click)="changeState('graph')" [class.active]="!isTable()" analyticsOn="click"
+      <button mat-icon-button (click)="changeState('graph')" [class.active]="!isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle graph view"><i
-          class="fa icon-area-chart fa-lg"></i></button>
+          class="fa icon-area-chart"></i></button>
     </div>
     <div class="absolute top-0 end-0 flex flex-col">
-      <button mat-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
-        analyticsLabel="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
+      <button mat-icon-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+        analyticsLabel="Route statistics close"><i class="fa icon-close"></i></button>
       @if (!isTable()) {
-      <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
-        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa fa-lg"
+      <button mat-icon-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
+        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa"
           [ngClass]="{ 'icon-chevron-right' : isExpanded() && resources.end === 'left' || !isExpanded() && resources.end === 'right', 'icon-chevron-left' : !isExpanded() && resources.end === 'left' || isExpanded() && resources.end === 'right'}"></i></button>
       }
       <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
@@ -129,16 +130,17 @@
           <span class="ms-2">{{resources.showSlopes}}</span>
         </button>
       </mat-menu>
-      <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
+      <button mat-icon-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
         matTooltipPosition="below" analyticsOn="click" analyticsCategory="Route statistics" analyticsLabel="More"><i
-          class="fa icon-ellipsis-v fa-lg"></i></button>
+          class="fa icon-ellipsis-v"></i></button>
     </div>
   </div>
   } @else {
-  <div class="flex flex-row" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+  <div animate.enter="summary-enter" class="flex flex-row items-center rounded-full bg-surface p-1 pe-3 shadow-md"
+    (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
     analyticsLabel="Route statistics open">
-    <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
-      matTooltipPosition="above"><i class="fa {{isTable() ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
+    <button mat-icon-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
+      matTooltipPosition="above"><i class="fa {{isTable() ? 'icon-table' : 'icon-area-chart'}}"></i></button>
     @if (!isFollowing()) {
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
       <span class="control-container-item">

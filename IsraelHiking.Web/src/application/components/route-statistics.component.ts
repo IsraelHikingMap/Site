@@ -4,7 +4,7 @@ import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatGridList, MatGridTile } from "@angular/material/grid-list";
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton } from "@angular/material/button";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { SourceDirective, GeoJSONSourceComponent, LayerComponent } from "@maplibre/ngx-maplibre-gl";
 import { interval, switchMap, distinctUntilChanged, EMPTY } from "rxjs";
@@ -77,7 +77,7 @@ interface IChartElements {
     templateUrl: "./route-statistics.component.html",
     styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
+    imports: [Dir, NgClass, MatGridList, MatGridTile, MatTooltip, MatIconButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 110;

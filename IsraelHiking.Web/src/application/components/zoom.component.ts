@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
@@ -9,7 +9,7 @@ import { ResourcesService } from "../services/resources.service";
 @Component({
     selector: "zoom",
     templateUrl: "./zoom.component.html",
-    imports: [MatButton, AnalyticsDirective, MatTooltip]
+    imports: [MatIconButton, AnalyticsDirective, MatTooltip]
 })
 export class ZoomComponent {
     public readonly resources = inject(ResourcesService);

@@ -1,34 +1,33 @@
-﻿<div class="side-control maplibregl-ctrl">
-  <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}"
-    matTooltipPosition="right" analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle GPS location">
+<div class="maplibregl-ctrl flex flex-col gap-2 print:hidden!">
+  <button mat-mini-fab class="map-fab" (click)="toggleTracking()" [class.active]="isActive()"
+    matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" analyticsOn="click"
+    analyticsCategory="Location" analyticsLabel="Toggle GPS location">
     @if (isDisabled() || isActive()) {
-    <i class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
+    <i class="fa icon-crosshairs text-xl!" [class.following]="isActive() && isFollowingLocation()"></i>
     }
     @if (isLoading()) {
-    <div class="spinner-container">
-      <mat-spinner diameter="30"></mat-spinner>
-    </div>
+    <mat-spinner diameter="24"></mat-spinner>
     }
   </button>
-  <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
+  <button mat-mini-fab class="map-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
     <div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
-      analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up"><i class="icon-north"></i>
+      analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up"><i class="icon-north text-xl!"></i>
     </div>
   </button>
   @if (canRecord()) {
-  <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
+  <button mat-mini-fab class="map-fab" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
     analyticsCategory="Location" analyticsLabel="Toggle recording">
     @if (isRecording()) {
-    <i class="fa fa-lg icon-stop"></i>
+    <i class="fa icon-stop text-xl!"></i>
     } @else {
-    <i class="fa fa-lg icon-circle recording-button"></i>
+    <i class="fa icon-circle recording-button text-xl!"></i>
     }
   </button>
   }
   @if (isRecording()) {
-  <button mat-button class="mt-1" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
+  <button mat-mini-fab class="map-fab" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
     analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
-    <i class="fa fa-lg icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
+    <i class="fa icon-map-marker text-xl!" [style.color]="resources.recordedRouteColor"></i>
   </button>
   }
 </div>

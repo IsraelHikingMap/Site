@@ -1,7 +1,9 @@
 import { Component, DestroyRef, inject, signal, computed } from "@angular/core";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { NgClass } from "@angular/common";
 import { MatButton } from "@angular/material/button";
+import { MatTooltip } from "@angular/material/tooltip";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatSlider, MatSliderRangeThumb } from "@angular/material/slider";
 import { Store } from "@ngxs/store";
@@ -16,7 +18,7 @@ import type { ApplicationState, CategoryType, Difficulty } from "../models";
 @Component({
     selector: "public-routes-filter",
     templateUrl: "./public-routes-filter.component.html",
-    imports: [MatCheckbox, MatMenu, MatMenuItem, MatSliderRangeThumb, MatSlider, MatMenuTrigger, MatButton]
+    imports: [MatCheckbox, MatMenu, MatMenuItem, MatSliderRangeThumb, MatSlider, MatMenuTrigger, MatButton, NgClass, MatTooltip]
 })
 export class PublicRoutesFilterComponent {
     public readonly resources = inject(ResourcesService);

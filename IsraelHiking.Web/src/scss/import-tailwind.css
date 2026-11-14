@@ -12,5 +12,6 @@
     --color-on-surface: var(--mat-sys-on-surface);
     --color-outline-variant: var(--mat-sys-outline-variant);
     --color-brand: var(--brand-color);
+    --color-brand-tonal: color-mix(in srgb, var(--brand-color) 25%, var(--mat-sys-surface));
     --color-warning: var(--warning-color);
 }

@@ -142,37 +142,26 @@ body {
     color: rgba(0, 0, 0, 0.87);
 }
 
-.side-control {
-    position: relative;
-    padding: 2px;
-    clear: both;
-    background-color: var(--mat-sys-surface);
-    margin: 0 !important;
-    border: 2px solid var(--mat-sys-outline-variant);
-
-    & button,
-    a {
-        min-width: unset !important;
-        padding: 0 !important;
-        display: block;
-        width: v.$app-button-size;
-        height: v.$app-button-size;
-        border-radius: 0;
-
-        & i {
-            vertical-align: middle !important;
-        }
-    }
-
-    .mat-mdc-button-persistent-ripple,
-    .mat-mdc-button-persistent-ripple::before,
-    .mat-mdc-button-ripple {
-        border-radius: 0; // avoid pill-shaped hover state for side buttons
-    }
+/* Buttons that float over the map: round and on the surface colour, so they read as part of the map
+   and not as a block of brand chrome stacked on top of it. */
+.map-fab {
+    @include mat.fab-overrides((container-shape: 9999px,
+            extended-container-shape: 9999px,
+            small-container-shape: 9999px,
+            container-color: var(--mat-sys-surface),
+            foreground-color: var(--mat-sys-on-surface),
+            small-container-color: var(--mat-sys-surface),
+            small-foreground-color: var(--mat-sys-on-surface),
+        ));
 }
 
-.side-control.maplibregl-ctrl button:last-of-type {
-    overflow: hidden;
+/* A toggled round button is filled with the brand tone, the way Material marks a selected icon button -
+   an outline drawn around a circle reads as a focus ring. The surface is mixed in so a button floating
+   over the map stays opaque. */
+.mat-mdc-icon-button.active,
+.mat-mdc-mini-fab.active {
+    outline: none !important;
+    background-color: color-mix(in srgb, var(--brand-color) 35%, var(--mat-sys-surface)) !important;
 }
 
 .active {
@@ -371,10 +360,6 @@ mgl-map {
     object-fit: cover;
 }
 
-.maplibregl-ctrl {
-    margin: 0 !important;
-}
-
 .maplibregl-popup-content {
     background: var(--mat-sys-surface);
 }
@@ -401,27 +386,7 @@ mgl-map {
 
 @media print {
 
-    .mat-mdc-tooltip,
-    .side-control {
-        display: none !important;
-    }
-}
-
-// Strips the toolbar sizing and filled-field chrome off the search when the landing hero hosts it.
-// !important since search.component is ViewEncapsulation.None and injects its styles after this sheet.
-.landing-search {
-
-    .search-input-container,
-    .search-input-container.logged-in {
-        width: 100% !important;
-    }
-
-    .mat-mdc-text-field-wrapper {
-        background-color: transparent !important;
-    }
-
-    .mat-mdc-form-field-focus-overlay,
-    .mdc-line-ripple {
+    .mat-mdc-tooltip {
         display: none !important;
     }
 }
