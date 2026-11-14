@@ -22,6 +22,7 @@ import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
 import { DescriptionComponent } from "../description.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -44,7 +45,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent]
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {

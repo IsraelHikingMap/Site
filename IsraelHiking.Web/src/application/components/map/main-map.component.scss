@@ -22,16 +22,4 @@ mat-sidenav-container.main-map-sidenav-overlay {
     :root {
         @include mat.sidenav-overrides((container-width: 100vw));
     }
-
-    mat-sidenav:has(public-poi-sidebar) {
-        top: unset !important;
-        bottom: 0 !important;
-        height: 55vh;
-    }
-
-    mat-sidenav:has(public-poi-sidebar .minimized) {
-        top: unset !important;
-        bottom: 0 !important;
-        height: 15vh;
-    }
 }

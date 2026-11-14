@@ -25,6 +25,7 @@ import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
 import { ZoomComponent } from "../zoom.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { DistancePipe } from "../../pipes/distance.pipe";
@@ -44,7 +45,7 @@ import type { ApplicationState, ShareUrl } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, MatSelect, MatOption, MatLabel, MatFormField, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);

@@ -24,6 +24,7 @@ import { EditTraceDialogComponent } from "../dialogs/edit-trace-dialog.component
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { HighlightedTextComponent } from "../highlighted-text.component";
 import { ZoomComponent } from "../zoom.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
@@ -48,7 +49,7 @@ import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "..
     templateUrl: "./traces.component.html",
     styleUrls: ["./traces.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatAnchor, MatIconButton, AnalyticsDirective, TraceThumbnailComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent]
+    imports: [Dir, MatButton, MatAnchor, MatIconButton, AnalyticsDirective, TraceThumbnailComponent, MatProgressSpinner, DatePipe, MatMenu, MatMenuTrigger, MatMenuItem, MapComponent, PopupComponent, LayersComponent, RoutesPathComponent, MarkersForClustersComponent, GeoJSONSourceComponent, ClusterPointDirective, PointDirective, MarkerComponent, MissingPartOverlayComponent, LayerComponent, GeoJSONSourceComponent, MatButtonToggle, MatButtonToggleGroup, FormsModule, MatOption, MatLabel, MatFormField, MatSelect, OsmAttributionComponent, ControlComponent, ZoomComponent, NgClass, HighlightedTextComponent, BottomSheetComponent]
 })
 export class TracesComponent implements OnInit {
 

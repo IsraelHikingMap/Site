@@ -70,7 +70,6 @@ const SOURCE_IMAGE_URL_BY_DOMAIN = [
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public readonly isLoading = signal(true);
-    public readonly isMinimized = signal(false);
     public readonly sourceImageUrls = signal<SourceImageUrlPair[]>(undefined);
     public readonly shareLinks = signal({} as PoiSocialLinks);
     public readonly length = signal<number>(null);

@@ -1,4 +1,5 @@
-import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal, computed } from "@angular/core";
+import { BreakpointObserver } from "@angular/cdk/layout";
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
@@ -6,7 +7,8 @@ import { type StyleSpecification, type Map, ScaleControl, IControl, ControlPosit
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
 
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
@@ -23,6 +25,7 @@ import { OsmAttributionComponent } from "../osm-attribution.component";
 import { LayersSidebarComponent } from "../sidebar/layers/layers-sidebar.component";
 import { PublicPoiSidebarComponent } from "../sidebar/publicpoi/public-poi-sidebar.component";
 import { PrivateRoutesSidebarComponent } from "../sidebar/privateroutes/private-routes-sidebar.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
@@ -39,7 +42,7 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent, BottomSheetComponent]
 })
 export class MainMapComponent {
 
@@ -50,6 +53,11 @@ export class MainMapComponent {
 
     public readonly sidenavVisible = signal(false);
     public readonly sidenavViewName = signal("");
+    /** A narrow screen shows a point's details in a sheet at the bottom instead of the side drawer. */
+    public readonly isNarrowScreen = toSignal(inject(BreakpointObserver).observe("(max-width: 550px)")
+        .pipe(map(state => state.matches)), { initialValue: false });
+    public readonly isPoiSheetShown = computed(() =>
+        this.isNarrowScreen() && this.sidenavVisible() && this.sidenavViewName() === "public-poi");
     public readonly location: LocationState;
     public readonly initialStyle: StyleSpecification;
 
@@ -84,6 +92,10 @@ export class MainMapComponent {
         });
         this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
+    }
+
+    public closeSidebar() {
+        this.sidebarService.hide();
     }
 
     @HostListener("window:keydown", ["$event"])

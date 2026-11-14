@@ -28,13 +28,15 @@
 </div>
 <mat-sidenav-container class="main-map-sidenav-overlay" [dir]="resources.direction" [hasBackdrop]="false"
   [autosize]="false">
-  <mat-sidenav [opened]="sidenavVisible()" position="end" class="magrin-top-with-toolbar pb-safe px-safe" autoFocus="dialog">
+  <mat-sidenav [opened]="sidenavVisible() && !isPoiSheetShown()" position="end" class="magrin-top-with-toolbar pb-safe px-safe" autoFocus="dialog">
     @switch (sidenavViewName()) {
     @case ('layers') {
     <layers-sidebar></layers-sidebar>
     }
     @case ('public-poi') {
+    @if (!isNarrowScreen()) {
     <public-poi-sidebar></public-poi-sidebar>
+    }
     }
     @case ('private-routes') {
     <private-routes-sidebar></private-routes-sidebar>
@@ -42,3 +44,8 @@
     }
   </mat-sidenav>
 </mat-sidenav-container>
+@if (isPoiSheetShown()) {
+<bottom-sheet [minimizable]="true" (closed)="closeSidebar()" [dir]="resources.direction">
+  <public-poi-sidebar></public-poi-sidebar>
+</bottom-sheet>
+}

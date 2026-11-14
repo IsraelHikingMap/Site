@@ -3,7 +3,7 @@
   <public-poi-edit [(info)]="osmEditableInfo"></public-poi-edit>
 </div>
 } @else {
-<div [dir]="resources.direction" [class.minimized]="isMinimized()">
+<div [dir]="resources.direction">
   <div class="flex flex-row sticky top-0 z-10 bg-surface">
     @if (!isHideEditMode()) {
     <div class="flex-1">
@@ -67,20 +67,6 @@
       </mat-menu>
       <button mat-button class="w-full min-w-[unset]! p-0!" [matMenuTriggerFor]="appMenu"
         matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
-    </div>
-    }
-    @if (!isMinimized() && isApp()) {
-    <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized.set(!isMinimized())"
-        matTooltip="{{resources.minimize}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
-        analyticsLabel="Minimize POI window"><i class="fa icon-chevron-down"></i></button>
-    </div>
-    }
-    @if (isMinimized() && isApp()) {
-    <div class="flex-1">
-      <button mat-button class="w-full min-w-[unset]! p-0!" (click)="isMinimized.set(!isMinimized())"
-        matTooltip="{{resources.restore}}" matTooltipPosition="below" analyticsOn="click" analyticsCategory="POI"
-        analyticsLabel="Restore POI window"><i class="fa icon-chevron-up"></i></button>
     </div>
     }
     <div class="flex-1">
