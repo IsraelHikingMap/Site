@@ -62,21 +62,30 @@ html {
     margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 
     &.success-snackbar {
-        --mat-snack-bar-container-color: var(--brand-color);
+        @include mat.snack-bar-overrides((container-color: var(--brand-color)));
     }
 
     &.warn-snackbar {
-        --mat-snack-bar-container-color: #ffeb3b;
-        --mat-snack-bar-supporting-text-color: #000;
+        @include mat.snack-bar-overrides((container-color: #ffeb3b, supporting-text-color: #000));
     }
 
     &.error-snackbar {
-        --mat-snack-bar-container-color: #f44336;
+        @include mat.snack-bar-overrides((container-color: #f44336));
     }
 
     &.confirm-snackbar {
-        --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
+        @include mat.snack-bar-overrides((button-color: var(--mat-sys-inverse-on-surface)));
     }
+}
+
+/* A count on a badge in the brand color, used where the badge marks something to look at rather than an error. */
+.brand-badge {
+    @include mat.badge-overrides((background-color: var(--brand-color), text-color: #003018));
+}
+
+/* Icon buttons grouped into the floating map controls, whose icons are drawn smaller than Material's default. */
+.compact-icon-buttons {
+    @include mat.icon-button-overrides((icon-size: 20px));
 }
 
 /* Latin slice first: browsers only fetch a face whose unicode-range matches text they
