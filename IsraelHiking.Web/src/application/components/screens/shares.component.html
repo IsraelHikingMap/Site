@@ -19,10 +19,26 @@
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pill-select w-40 min-w-0">
                 <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" [aria-label]="resources.sort"
                     analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Open sort menu">
-                    @for (option of sortOptions; track option.value) {
-                    <mat-option [value]="option.value" analyticsOn="click" analyticsCategory="Shares"
-                        analyticsLabel="{{option.analyticsLabel}}">{{resources[option.label]}}</mat-option>
-                    }
+                    <mat-option value="lastModifiedDate" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by date">
+                        {{resources.date}}
+                    </mat-option>
+                    <mat-option value="difficulty" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by difficulty">
+                        {{resources.difficulty}}
+                    </mat-option>
+                    <mat-option value="type" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by type">
+                        {{resources.routeType}}
+                    </mat-option>
+                    <mat-option value="length" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by length">
+                        {{resources.length}}
+                    </mat-option>
+                    <mat-option value="title" analyticsOn="click" analyticsCategory="Shares"
+                        analyticsLabel="Sort by name">
+                        {{resources.name}}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <button mat-icon-button class="shrink-0" (click)="onSortDirectionChange()" analyticsOn="click"
