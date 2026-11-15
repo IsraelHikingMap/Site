@@ -45,7 +45,7 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { AnalyticsService } from "../../services/analytics.service";
 import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
 import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
-import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility, SortOption } from "../../models";
+import type { ApplicationState, LatLngAltTime, Trace, TraceVisibility } from "../../models";
 
 @Component({
     selector: "traces",
@@ -58,10 +58,6 @@ export class TracesComponent implements OnInit {
 
     public readonly showMap = signal(false);
     public readonly sortBy = signal<"timeStamp" | "name">("timeStamp");
-    public readonly sortOptions: SortOption<"timeStamp" | "name">[] = [
-        { value: "timeStamp", label: "date", analyticsLabel: "Sort by date" },
-        { value: "name", label: "name", analyticsLabel: "Sort by name" }
-    ];
     private readonly sortDirection = signal<"asc" | "desc">("desc");
     public readonly mapStyle: StyleSpecification;
     public readonly filteredTraces = signal<Immutable<Trace[]>>([]);

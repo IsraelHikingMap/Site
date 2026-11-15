@@ -19,10 +19,14 @@
             <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pill-select w-40 min-w-0">
                 <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" [aria-label]="resources.sort"
                     analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Open sort menu">
-                    @for (option of sortOptions; track option.value) {
-                    <mat-option [value]="option.value" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="{{option.analyticsLabel}}">{{resources[option.label]}}</mat-option>
-                    }
+                    <mat-option value="timeStamp" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Sort by date">
+                        {{resources.date}}
+                    </mat-option>
+                    <mat-option value="name" analyticsOn="click" analyticsCategory="Traces"
+                        analyticsLabel="Sort by name">
+                        {{resources.name}}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             <button mat-icon-button class="shrink-0" (click)="onSortDirectionChange()" analyticsOn="click"
