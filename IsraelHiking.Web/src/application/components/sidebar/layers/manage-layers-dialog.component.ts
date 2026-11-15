@@ -1,4 +1,4 @@
-import { afterNextRender, Component, effect, ElementRef, inject, Injector, signal } from "@angular/core";
+import { afterNextRender, Component, inject, Injector, signal } from "@angular/core";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatIconButton } from "@angular/material/button";
@@ -12,6 +12,7 @@ import type { Immutable } from "immer";
 
 import { LayerPropertiesComponent } from "./layer-properties.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
+import { ScrollToDirective } from "../../../directives/scroll-to.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { LayersService } from "../../../services/layers.service";
 import { RunningContextService } from "../../../services/running-context.service";
@@ -52,7 +53,6 @@ export class ManageLayersDialogComponent {
     public readonly copiedKey = signal<string>(null);
     public readonly isApp = inject(RunningContextService).isCapacitor;
 
-    private readonly host = inject(ElementRef);
     private readonly injector = inject(Injector);
 
     /**
@@ -63,11 +63,9 @@ export class ManageLayersDialogComponent {
     }
 
     constructor() {
-        effect(() => {
-            if (this.editing() != null) {
-                afterNextRender(() => this.scrollToOpenCard(), { injector: this.injector });
-            }
-        });
+        if (this.editing() != null) {
+            this.scrollToOpenCardAfterRender();
+        }
     }
 
     public isShownInPanel(layer: Immutable<EditableLayer>): boolean {
@@ -95,6 +93,9 @@ export class ManageLayersDialogComponent {
 
     public toggleEditing(key: string | null) {
         this.editing.set(this.isEditing(key) ? null : { key });
+        if (this.editing() != null) {
+            this.scrollToOpenCardAfterRender();
+        }
     }
 
     public getShareAddress(layer: Immutable<EditableLayer>): string {
@@ -120,7 +121,21 @@ export class ManageLayersDialogComponent {
         });
     }
 
+    /**
+     * The card is only marked as open once the dialog has rendered the change, so the scroll waits for it.
+     */
+    private scrollToOpenCardAfterRender() {
+        afterNextRender(() => this.scrollToOpenCard(), { injector: this.injector });
+    }
+
+    /**
+     * The id of a layer's card, or of the card for a layer being added when the key is null.
+     */
+    public getCardId(key: string | null): string {
+        return key == null ? "manage-layer-new" : `manage-layer-${key}`;
+    }
+
     private scrollToOpenCard() {
-        this.host.nativeElement.querySelector("[data-editing]")?.scrollIntoView({ block: "start", behavior: "smooth" });
+        ScrollToDirective.scrollTo(this.getCardId(this.editing().key));
     }
 }

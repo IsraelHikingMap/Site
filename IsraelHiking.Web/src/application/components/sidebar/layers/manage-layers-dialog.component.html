@@ -13,15 +13,14 @@
         </div>
         <div class="flex flex-col gap-2">
             @if (isEditing(null)) {
-            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" data-editing>
+            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" [id]="getCardId(null)">
                 <mat-expansion-panel [expanded]="true" class="rounded-none! bg-transparent! shadow-none! [&_.mat-expansion-panel-body]:p-0!">
                     <layer-properties [isOverlay]="isOverlay" (added)="editing.set(null)"></layer-properties>
                 </mat-expansion-panel>
             </div>
             }
             @for (layer of layers(); track layer.key) {
-            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant"
-                [attr.data-editing]="isEditing(layer.key) || null">
+            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" [id]="getCardId(layer.key)">
                 <div class="flex flex-row items-center gap-1 ps-1 pe-1">
                     <mat-checkbox class="min-w-0 flex-1 wrap-anywhere" [checked]="isShownInPanel(layer)"
                         [disabled]="isLocked(layer)" (change)="setShownInPanel(layer, $event.checked)">
