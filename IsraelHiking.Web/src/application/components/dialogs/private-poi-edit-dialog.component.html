@@ -50,7 +50,7 @@
         @if (imageLink()) {
         <div class="flex flex-row">
           <button mat-button class="w-full" (click)="clearImage()" matTooltip="{{resources.clear}}"
-            matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+            matTooltipPosition="above"><i class="fa fa-action icon-trash"></i></button>
         </div>
         }
         @if (showIcons()) {
@@ -113,22 +113,22 @@
       </mat-menu>
       <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above"
         analyticsOn="click" analyticsCategory="Private POI" analyticsLabel="More"><i
-          class="fa icon-ellipsis-v fa-lg"></i></button>
+          class="fa fa-action icon-ellipsis-v"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button class="w-full" type="button" mat-dialog-close (click)="remove()"
-        matTooltip="{{resources.deletePoint}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+        matTooltip="{{resources.deletePoint}}" matTooltipPosition="above"><i class="fa fa-action icon-trash"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button class="w-full" type="button" mat-dialog-close (click)="uploadPoint()"
         matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" analyticsOn="click"
         analyticsCategory="Private POI" analyticsLabel="Open upload point dialog"><i
-          class="fa icon-cloud-upload"></i></button>
+          class="fa fa-action icon-cloud-upload"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button class="w-full" type="button" mat-dialog-close (click)="save()" matTooltip="{{resources.save}}"
         matTooltipPosition="above" analyticsOn="click" analyticsCategory="Private POI" analyticsLabel="Save"><i
-          class="fa icon-check"></i></button>
+          class="fa fa-action icon-check"></i></button>
     </div>
   </div>
 </div>

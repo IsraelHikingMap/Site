@@ -3,12 +3,12 @@
     <div class="w-1/2">
       <button mat-button class="w-full" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}"
         matTooltipPosition="above" analyticsOn="click" analyticsCategory="Location"
-        analyticsLabel="Convert location to point"><i class="fa icon-plus"></i></button>
+        analyticsLabel="Convert location to point"><i class="fa fa-action icon-plus"></i></button>
     </div>
     <div class="w-1/2">
       <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance()"
         matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" analyticsOn="click"
-        analyticsCategory="Location" analyticsLabel="Measure distance"><i class="fa icon-measure"></i></button>
+        analyticsCategory="Location" analyticsLabel="Measure distance"><i class="fa fa-action icon-measure"></i></button>
     </div>
   </div>
   <div class="flex flex-row">
@@ -16,13 +16,13 @@
       <button mat-button class="w-full" type="button" (click)="hideCoordinates.set(!hideCoordinates())"
         [class.active]="!hideCoordinates()" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"
         analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle coordinates"><i
-          class="fa icon-globe"></i></button>
+          class="fa fa-action icon-globe"></i></button>
     </div>
     <div class="w-1/2">
       <button mat-button class="w-full" type="button" (click)="openAddSimplePointDialog()"
         matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" analyticsOn="click"
         analyticsCategory="Location" analyticsLabel="Open upload point dialog"><i
-          class="fa icon-cloud-upload"></i></button>
+          class="fa fa-action icon-cloud-upload"></i></button>
     </div>
   </div>
   @if (canShareLocation()) {

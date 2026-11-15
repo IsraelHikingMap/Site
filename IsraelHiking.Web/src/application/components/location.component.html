@@ -1,14 +1,4 @@
-<div class="flex flex-col gap-2 print:hidden!">
-  <button mat-mini-fab class="round-fab" (click)="toggleTracking()" [class.active]="isActive()"
-    matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" analyticsOn="click"
-    analyticsCategory="Location" analyticsLabel="Toggle GPS location">
-    @if (isDisabled() || isActive()) {
-    <i class="fa icon-crosshairs text-xl!" [class.following]="isActive() && isFollowingLocation()"></i>
-    }
-    @if (isLoading()) {
-    <mat-spinner diameter="24"></mat-spinner>
-    }
-  </button>
+<div class="flex flex-col items-center gap-2.5 print:hidden!">
   <button mat-mini-fab class="round-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"
     [attr.aria-label]="resources.northUp" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
     analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up">
@@ -22,22 +12,34 @@
       <path d="M0 11 L3.5 0 L-3.5 0 Z" fill="currentColor" opacity="0.8" />
     </svg>
   </button>
-  @if (canRecord()) {
-  <button mat-mini-fab class="round-fab" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
-    analyticsCategory="Location" analyticsLabel="Toggle recording">
-    @if (isRecording()) {
-    <i class="fa icon-stop text-xl!"></i>
-    } @else {
-    <i class="fa icon-circle recording-button text-xl!"></i>
+  <div class="flex flex-col rounded-full bg-surface shadow-md compact-icon-buttons">
+    <button mat-icon-button (click)="toggleTracking()" [class.active]="isActive()"
+      matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" analyticsOn="click"
+      analyticsCategory="Location" analyticsLabel="Toggle GPS location">
+      @if (isDisabled() || isActive()) {
+      <i class="fa icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
+      }
+      @if (isLoading()) {
+      <mat-spinner diameter="24"></mat-spinner>
+      }
+    </button>
+    @if (canRecord()) {
+    <button mat-icon-button (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
+      analyticsCategory="Location" analyticsLabel="Toggle recording">
+      @if (isRecording()) {
+      <i class="fa icon-stop"></i>
+      } @else {
+      <i class="fa icon-circle recording-button"></i>
+      }
+    </button>
     }
-  </button>
-  }
-  @if (isRecording()) {
-  <button mat-mini-fab class="round-fab" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
-    analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
-    <i class="fa icon-map-marker text-xl!" [style.color]="resources.recordedRouteColor"></i>
-  </button>
-  }
+    @if (isRecording()) {
+    <button mat-icon-button (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
+      analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
+      <i class="fa icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
+    </button>
+    }
+  </div>
 </div>
 
 <mgl-geojson-source id="location-source" [data]="locationFeatures()"></mgl-geojson-source>

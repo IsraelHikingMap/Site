@@ -222,6 +222,12 @@ body {
     vertical-align: -15%;
 }
 
+/* The icon of a button that shows nothing but the icon. A text button draws it at the size of its label, far
+   smaller than the same icon in an icon button, so it is given the icon button's size to read the same. */
+.fa-action {
+    font-size: 24px;
+}
+
 .fa-2x {
     font-size: 2em;
 }

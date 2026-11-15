@@ -50,7 +50,7 @@
         <div class="flex flex-col text-center">
           <a mat-button class="w-full" [href]="nonEditRoutePointPopupData().wazeAddress" target="_blank"
             analyticsOn="click" analyticsCategory="Route" analyticsLabel="Navigate with waze from map"
-            matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
+            matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa fa-action icon-waze"></i></a>
           {{resources.navigateWithWaze}}
         </div>
       </div>
@@ -59,7 +59,7 @@
           <a mat-button class="w-full" [href]="nonEditRoutePointPopupData().googleMapsAddress" target="_blank"
             analyticsOn="click" analyticsCategory="Route" analyticsLabel="Navigate with google maps from map"
             matTooltip="{{resources.navigateWithGoogleMaps}}" matTooltipPosition="above"><i
-              class="fa icon-map-marker"></i>
+              class="fa fa-action icon-map-marker"></i>
           </a>
           {{resources.navigateWithGoogleMaps}}
         </div>
@@ -68,7 +68,7 @@
         <div class="flex flex-col text-center">
           <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData().routeId)"
             analyticsOn="click" analyticsCategory="Route" analyticsLabel="Edit route from map"
-            matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
+            matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa fa-action icon-pencil"></i></button>
           {{resources.edit}}
         </div>
       </div>

@@ -60,19 +60,6 @@ $buttons-margin: 5px;
     opacity: 0.6;
 }
 
-.chart-table {
-    height: 100%;
-}
-
-.chart-table i,
-.chart-table span {
-    font-size: x-large;
-}
-
-.units {
-    font-size: small !important;
-}
-
 .chart-control-container.expanded .chart-container {
     height: $container-height-expanded;
 }
