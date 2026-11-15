@@ -16,7 +16,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { Store } from "@ngxs/store";
 import { Immutable } from "immer";
-import { ControlComponent, MapComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
+import { MapComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
 import { orderBy } from "lodash-es";
 import type { StyleSpecification, Map } from "maplibre-gl";
 
@@ -26,6 +26,7 @@ import { LayersComponent } from "../map/layers.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
 import { ShareEditDialogComponent, ShareEditDialogComponentData } from "../dialogs/share-edit-dialog.component";
 import { ZoomComponent } from "../zoom.component";
+import { MapOverlayComponent } from "../map/map-overlay.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { BottomSheetComponent } from "../bottom-sheet.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
@@ -47,7 +48,7 @@ import type { ApplicationState, ShareUrl, SortOption } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, ControlComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);

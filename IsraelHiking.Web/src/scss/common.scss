@@ -164,13 +164,6 @@ body {
         ));
 }
 
-/* maplibre paints any button inside a map control with a 5% black on hover and press, which outranks the
-   fab's own background and leaves a see-through button. Material marks the hover with its state layer. */
-.maplibregl-ctrl button.round-fab:not(:disabled):hover,
-.maplibregl-ctrl button.round-fab:not(:disabled):active {
-    background-color: var(--mat-sys-surface);
-}
-
 /* Material's own dropdown in the outlined style, at the height and with the shape of the pill buttons it
    sits next to in the list headers. The corner is half the 40px height rather than a "full" radius, since
    the outlined field also sizes its side padding from this value. */
@@ -350,28 +343,6 @@ body {
 .px-safe {
     padding-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
     padding-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
-}
-
-/* Every corner keeps clear of the system bars on both axes: in landscape the navigation bar sits on
-   one of the sides, and without the horizontal margins its buttons cover the controls in that corner. */
-.maplibregl-ctrl-top-left {
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-top-right {
-    margin-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0)) !important;
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-    margin-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0)) !important;
-}
-
-.maplibregl-ctrl-bottom-left {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
 }
 
 .magrin-top-with-toolbar {

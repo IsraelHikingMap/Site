@@ -1,5 +1,5 @@
-﻿@if (isVisible()) {
-<div class="maplibregl-ctrl relative compact-icon-buttons print:hidden!" [dir]="resources.direction"
+@if (isVisible()) {
+<div class="relative compact-icon-buttons print:hidden!" [dir]="resources.direction"
   (window:resize)="redrawChart()">
   @if (isOpen()) {
   <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated overflow-hidden rounded-3xl bg-surface shadow-md"

@@ -138,6 +138,8 @@ export class RouteStatisticsComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
 
     public isVisible = this.store.selectSignal((state: ApplicationState) => state.recordedRouteState.isRecording || state.routes.present.length > 0);
+    /** Whether the chart is on screen, for the map controls that have to make room for it. */
+    public readonly isChartShown = computed(() => this.isVisible() && this.isOpen());
     private readonly configurationUnits = this.store.selectSignal((state: ApplicationState) => state.configuration.units);
 
     constructor() {

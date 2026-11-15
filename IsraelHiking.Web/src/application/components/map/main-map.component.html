@@ -9,21 +9,43 @@
     <routes></routes>
     @if (!isIFrame()) {
     <recorded-route></recorded-route>
-    <drawing #topStartControl></drawing>
     }
-    <zoom #topEndControl></zoom>
-    @if (isMobile() || !isIFrame()) {
-    <location #topEndControl></location>
-    }
-    @if (!isIFrame()) {
-    <layers-button #topEndControl></layers-button>
-    }
-    <route-statistics #bottomStartControl></route-statistics>
-    <osm-attribution #bottomStartControl></osm-attribution>
-    <center-me #bottomStartControl></center-me>
-    @if (!isApp()) {
-    <mapeak-link #bottomEndControl></mapeak-link>
-    }
+    <map-overlay>
+      <div class="absolute inset-0 magrin-top-with-toolbar pb-safe px-safe" [dir]="resources.direction">
+        <div class="relative size-full">
+          <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 start-2.5 items-start">
+            @if (!isIFrame()) {
+            <drawing></drawing>
+            }
+          </div>
+          <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 end-2.5 items-end">
+            <zoom class="max-md:hidden"></zoom>
+            @if (isMobile() || !isIFrame()) {
+            <location></location>
+            }
+            @if (!isIFrame()) {
+            <layers-button></layers-button>
+            }
+          </div>
+          <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto bottom-2.5 start-2.5 items-start">
+            <center-me class="empty:hidden"></center-me>
+            <osm-attribution></osm-attribution>
+            @if (isNarrowScreen() && stats.isChartShown()) {
+            <scale-bar class="self-end" [unit]="units()"></scale-bar>
+            }
+            <route-statistics #stats class="empty:hidden"></route-statistics>
+          </div>
+          <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto bottom-2.5 end-2.5 items-end">
+            @if (!stats.isChartShown() || (!isNarrowScreen() && !stats.isExpanded())) {
+            @if (!isApp()) {
+            <mapeak-link></mapeak-link>
+            }
+            <scale-bar [unit]="units()"></scale-bar>
+            }
+          </div>
+        </div>
+      </div>
+    </map-overlay>
   </mgl-map>
 </div>
 <mat-sidenav-container class="main-map-sidenav-overlay" [dir]="resources.direction" [hasBackdrop]="false"

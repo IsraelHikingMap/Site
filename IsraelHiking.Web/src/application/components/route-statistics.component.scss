@@ -108,8 +108,9 @@ $buttons-margin: 5px;
 }
 
 @media (width <=550px) {
+    /* The full width between the map overlay's 10px side margins. */
     .chart-control-container {
-        width: calc(100vw - 2 * #{$control-border});
+        width: calc(100vw - 20px);
         height: $container-height-small-screen;
     }
 

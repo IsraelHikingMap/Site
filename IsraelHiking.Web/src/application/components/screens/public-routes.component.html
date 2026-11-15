@@ -13,20 +13,26 @@
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
-    <div class="w-2/3" [ngClass]="{'max-md:hidden': !showMap(), 'max-md:w-full': showMap()}">
+    <div class="min-w-0 flex-1" [ngClass]="{'max-md:hidden': !showMap(), 'max-md:w-full': showMap()}">
         <div class="pointer-events-none absolute w-full top-0 magrin-top-with-toolbar z-10 hidden max-md:block">
             <public-routes-filter></public-routes-filter>
         </div>
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [allowOffline]="false"></layers>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
-                <zoom></zoom>
-            </mgl-control>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-right' : 'top-left'">
-                <div class="max-md:mt-[56px]">
-                    <osm-attribution></osm-attribution>
+            <map-overlay>
+                <div class="absolute inset-0 magrin-top-with-toolbar pb-safe px-safe" [dir]="resources.direction">
+                    <div class="relative size-full">
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 end-2.5 items-end">
+                            <zoom class="max-md:hidden"></zoom>
+                        </div>
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 start-2.5 items-start">
+                            <div class="max-md:mt-[56px]">
+                                <osm-attribution></osm-attribution>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </mgl-control>
+            </map-overlay>
             <mgl-vector-source [id]="routesSrouceId" [tiles]="poisVectorTileAddress" [maxzoom]="14"
                 [minzoom]="minZoom"></mgl-vector-source>
             <mgl-layer [id]="resources.globalPointsLayer" [source]="routesSrouceId" type="circle"
@@ -215,7 +221,7 @@
         }
     </div>
     <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
-        class="overflow-y-auto z-10 w-1/3 magrin-top-with-toolbar pb-safe-w-button">
+        class="overflow-y-auto z-10 w-1/3 shrink-0 magrin-top-with-toolbar pb-safe-w-button md:min-w-[400px]">
         <div class="sticky top-0 z-10 bg-surface">
             <public-routes-filter></public-routes-filter>
         </div>
