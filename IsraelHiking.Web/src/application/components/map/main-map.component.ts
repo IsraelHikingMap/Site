@@ -72,7 +72,6 @@ export class MainMapComponent {
     private readonly analyticsService = inject(AnalyticsService);
     private readonly matDialog = inject(MatDialog);
 
-    public readonly units = this.store.selectSignal((state: ApplicationState) => state.configuration.units);
 
     private map: Map;
     private isTerrainOn = false;

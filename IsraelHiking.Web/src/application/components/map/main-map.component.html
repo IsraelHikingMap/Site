@@ -31,7 +31,7 @@
             <center-me class="empty:hidden"></center-me>
             <osm-attribution></osm-attribution>
             @if (isNarrowScreen() && stats.isChartShown()) {
-            <scale-bar class="self-end" [unit]="units()"></scale-bar>
+            <scale-bar class="self-end"></scale-bar>
             }
             <route-statistics #stats class="empty:hidden"></route-statistics>
           </div>
@@ -40,7 +40,7 @@
             @if (!isApp()) {
             <mapeak-link></mapeak-link>
             }
-            <scale-bar [unit]="units()"></scale-bar>
+            <scale-bar></scale-bar>
             }
           </div>
         </div>
