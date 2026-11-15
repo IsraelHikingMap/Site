@@ -17,10 +17,25 @@
   <div animate.enter="tools-enter" animate.leave="tools-leave" class="flex flex-col overflow-hidden">
     <hr class="mx-2 my-1 border-0 border-t border-solid border-outline-variant" />
     @if (isRouteEditActive()) {
+    @let routingType = getRoutingType();
     <div class="relative">
-      <button mat-icon-button (click)="routingTrigger.openMenu()" matTooltip="{{resources[getRoutingOption().label]}}"
-        matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Routing menu">
-        <i class="fa" [ngClass]="getRoutingOption().icon"></i>
+      <button mat-icon-button (click)="routingTrigger.openMenu()" matTooltipPosition="after" analyticsOn="click"
+        analyticsCategory="Drawing" analyticsLabel="Routing menu"
+        matTooltip="{{routingType === 'Hike' ? resources.hikeRouting : routingType === 'Bike' ? resources.bikeRouting : routingType === '4WD' ? resources.fourWheelDriveRouting : resources.straightLines}}">
+        @switch (routingType) {
+        @case ("Hike") {
+        <i class="fa icon-hike"></i>
+        }
+        @case ("Bike") {
+        <i class="fa icon-bike"></i>
+        }
+        @case ("4WD") {
+        <i class="fa icon-four-by-four"></i>
+        }
+        @default {
+        <i class="fa icon-none"></i>
+        }
+        }
         <i class="fa absolute end-0.5 top-1/2 -translate-y-1/2 text-[8px]! opacity-70"
           [ngClass]="resources.direction === 'rtl' ? 'icon-chevron-left' : 'icon-chevron-right'"></i>
       </button>
@@ -28,13 +43,26 @@
         #routingTrigger="matMenuTrigger"></span>
     </div>
     <mat-menu #routingMenu="matMenu" xPosition="after" [overlapTrigger]="true">
-      @for (option of routingOptions; track option.type) {
-      <button mat-menu-item (click)="setRouting(option.type)" [ngClass]="{'bg-brand/20!': getRoutingType() === option.type}"
-        analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Routing {{option.type}}">
-        <i class="fa fa-lg mat-icon" [ngClass]="option.icon"></i>
-        <span class="mx-1">{{resources[option.label]}}</span>
+      <button mat-menu-item (click)="setRouting('Hike')" [class.bg-brand/20!]="routingType === 'Hike'" analyticsOn="click"
+        analyticsCategory="Drawing" analyticsLabel="Routing Hike">
+        <i class="fa fa-lg icon-hike mat-icon"></i>
+        <span class="mx-1">{{resources.hikeRouting}}</span>
       </button>
-      }
+      <button mat-menu-item (click)="setRouting('Bike')" [class.bg-brand/20!]="routingType === 'Bike'" analyticsOn="click"
+        analyticsCategory="Drawing" analyticsLabel="Routing Bike">
+        <i class="fa fa-lg icon-bike mat-icon"></i>
+        <span class="mx-1">{{resources.bikeRouting}}</span>
+      </button>
+      <button mat-menu-item (click)="setRouting('4WD')" [class.bg-brand/20!]="routingType === '4WD'" analyticsOn="click"
+        analyticsCategory="Drawing" analyticsLabel="Routing 4WD">
+        <i class="fa fa-lg icon-four-by-four mat-icon"></i>
+        <span class="mx-1">{{resources.fourWheelDriveRouting}}</span>
+      </button>
+      <button mat-menu-item (click)="setRouting('None')" [class.bg-brand/20!]="routingType === 'None'" analyticsOn="click"
+        analyticsCategory="Drawing" analyticsLabel="Routing None">
+        <i class="fa fa-lg icon-none mat-icon"></i>
+        <span class="mx-1">{{resources.straightLines}}</span>
+      </button>
     </mat-menu>
     }
     <button mat-icon-button (click)="undo()" [disabled]="undoQueueLength() === 0" matTooltip="{{resources.undo}}"

@@ -39,23 +39,6 @@ const ROUTING_TYPE_BY_DIGIT: Record<string, RoutingType> = {
     "4": "None"
 };
 
-type RoutingOption = {
-    type: RoutingType;
-    icon: string;
-    label: "hikeRouting" | "bikeRouting" | "fourWheelDriveRouting" | "straightLines";
-};
-
-/**
- * The routing types in the order of their keyboard shortcuts. They share a single button that shows the
- * current one, so the drawing bar stays short enough for a phone.
- */
-const ROUTING_OPTIONS: RoutingOption[] = [
-    { type: "Hike", icon: "icon-hike", label: "hikeRouting" },
-    { type: "Bike", icon: "icon-bike", label: "bikeRouting" },
-    { type: "4WD", icon: "icon-four-by-four", label: "fourWheelDriveRouting" },
-    { type: "None", icon: "icon-none", label: "straightLines" }
-];
-
 @Component({
     selector: "drawing",
     templateUrl: "./drawing.component.html",
@@ -63,7 +46,6 @@ const ROUTING_OPTIONS: RoutingOption[] = [
     imports: [Dir, MatIconButton, AnalyticsDirective, NgClass, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class DrawingComponent {
-    public readonly routingOptions = ROUTING_OPTIONS;
 
     public readonly resources = inject(ResourcesService);
 
@@ -211,10 +193,6 @@ export class DrawingComponent {
             return "None";
         }
         return this.routeEditingState().routingType;
-    }
-
-    public getRoutingOption(): RoutingOption {
-        return ROUTING_OPTIONS.find(o => o.type === this.getRoutingType());
     }
 
     public deleteAllRoutes() {
