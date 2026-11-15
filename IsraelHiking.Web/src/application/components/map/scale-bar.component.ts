@@ -14,21 +14,23 @@ import { ScaleControl } from "maplibre-gl";
 export class ScaleBarComponent {
     public readonly unit = input.required<"metric" | "imperial">();
 
+    private readonly mglMapService = inject(MglMapService);
+    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+    private readonly destroyRef = inject(DestroyRef);
+
     private control: ScaleControl = null;
 
     constructor() {
-        const mapService = inject(MglMapService);
-        const host = inject<ElementRef<HTMLElement>>(ElementRef);
         afterNextRender(() => {
-            mapService.mapCreated$.subscribe(() => {
+            this.mglMapService.mapCreated$.subscribe(() => {
                 this.control = new ScaleControl({ unit: this.unit() });
-                host.nativeElement.appendChild(this.control.onAdd(mapService.mapInstance));
+                this.host.nativeElement.appendChild(this.control.onAdd(this.mglMapService.mapInstance));
             });
         });
         effect(() => {
             const unit = this.unit();
             this.control?.setUnit(unit);
         });
-        inject(DestroyRef).onDestroy(() => this.control?.onRemove());
+        this.destroyRef.onDestroy(() => this.control?.onRemove());
     }
 }

@@ -13,11 +13,14 @@ import { MapService as MglMapService } from "@maplibre/ngx-maplibre-gl";
 export class MapOverlayComponent {
     private readonly overlay = viewChild.required<ElementRef<HTMLElement>>("overlay");
 
+    private readonly mglMapService = inject(MglMapService);
+    private readonly destroyRef = inject(DestroyRef);
+
     constructor() {
-        const mapService = inject(MglMapService);
         afterNextRender(() => {
-            mapService.mapCreated$.subscribe(() => mapService.mapInstance.getContainer().appendChild(this.overlay().nativeElement));
+            this.mglMapService.mapCreated$.subscribe(() =>
+                this.mglMapService.mapInstance.getContainer().appendChild(this.overlay().nativeElement));
         });
-        inject(DestroyRef).onDestroy(() => this.overlay().nativeElement.remove());
+        this.destroyRef.onDestroy(() => this.overlay().nativeElement.remove());
     }
 }
