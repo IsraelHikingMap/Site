@@ -10,6 +10,7 @@ import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
 import { MailComposer } from "@capawesome/capacitor-mail-composer"
+import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -148,6 +149,10 @@ export class MainMenuComponent {
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
                 `Downloaded Areas: ${Object.values(downloadedAreas).map(a => a.area.properties.name).join(", ")}`
             ].join("\n");
+            if (!this.runningContextService.isIos) {
+                const { enabled } = await BatteryOptimization.isBatteryOptimizationEnabled();
+                infoString += `\nBattery Optimization Enabled: ${enabled}`;
+            }
             // The log goes over as a file - inline it takes the saved plugin call over android's
             // binder limit and crashes the app when the mail app opens. The info is small enough.
             const generalLogFileUri = await this.fileService.storeFileToCache("log.txt", generalLogs, false);
