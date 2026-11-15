@@ -8,9 +8,9 @@
 </div>
 <div class="layers-sidebar pb-2" [dir]="resources.direction">
   <mat-accordion multi="true">
-    <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')"
+    <mat-expansion-panel class="overflow-visible!" [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')"
       (closed)="collapse('Base Layers')">
-      <mat-expansion-panel-header>
+      <mat-expansion-panel-header class="sticky! top-13 z-5 bg-surface">
         <mat-panel-title>{{resources.baseMaps}}</mat-panel-title>
       </mat-expansion-panel-header>
       <div class="grid grid-cols-3 gap-1">
@@ -48,9 +48,9 @@
       </button>
     </mat-expansion-panel>
     <mat-divider></mat-divider>
-    <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')"
+    <mat-expansion-panel class="overflow-visible!" [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')"
       (closed)="collapse('Overlays')">
-      <mat-expansion-panel-header>
+      <mat-expansion-panel-header class="sticky! top-13 z-5 bg-surface">
         <mat-panel-title>{{resources.overlays}}</mat-panel-title>
         <button mat-icon-button (click)="hideAllOverlays($event)" [attr.aria-label]="resources.overlays"
           analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Hide all overlays">

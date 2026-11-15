@@ -1,10 +1,12 @@
 @use "@angular/material" as mat;
 
-/* The sections lie flat on the panel, divided by lines, instead of being cards on it. */
+/* The sections lie flat on the panel, divided by lines, instead of being cards on it. They take the panel's own
+   surface color rather than none: an open header that is hovered or focused takes its section's background, and
+   it has to stay solid while the section scrolls under it. */
 .layers-sidebar {
     @include mat.expansion-overrides((container-elevation-shadow: none,
             container-shape: 0,
-            container-background-color: transparent,
+            container-background-color: var(--mat-sys-surface),
         ));
 }
 

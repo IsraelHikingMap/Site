@@ -1,5 +1,4 @@
 import { Component, inject, computed } from "@angular/core";
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatIconButton } from "@angular/material/button";
 import { MatChipListbox, MatChipOption } from "@angular/material/chips";
 import { NgClass } from "@angular/common";
@@ -7,19 +6,14 @@ import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
-import {
-    CollapseGroupAction,
-    ExpandGroupAction,
-    TogglePoisCategoriesVisibilityAction,
-    ToggleCategoryVisibilityAction
-} from "../../../reducers/layers.reducer";
-import { POINTS_OF_INTEREST, POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
+import { TogglePoisCategoriesVisibilityAction, ToggleCategoryVisibilityAction } from "../../../reducers/layers.reducer";
+import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { ApplicationState, Category } from "../../../models";
 
 @Component({
     selector: "points-of-interest-categories",
     templateUrl: "./points-of-interest-categories.component.html",
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatChipListbox, MatChipOption, AnalyticsDirective, NgClass]
+    imports: [MatIconButton, MatChipListbox, MatChipOption, AnalyticsDirective, NgClass]
 })
 export class PointsOfInterestCategoriesComponent {
 
@@ -31,24 +25,13 @@ export class PointsOfInterestCategoriesComponent {
 
     private readonly layersState = this.store.selectSignal((s: ApplicationState) => s.layersState);
 
-    public readonly getExpandState = computed(() => this.layersState().expanded.find(l => l === POINTS_OF_INTEREST) != null);
-
     public readonly isCategoryGroupVisible = computed(() => this.layersState().visiblePoisCategories.length > 0);
-
-    public expand() {
-        this.store.dispatch(new ExpandGroupAction(POINTS_OF_INTEREST));
-    }
-
-    public collapse() {
-        this.store.dispatch(new CollapseGroupAction(POINTS_OF_INTEREST));
-    }
 
     public toggleCategory(category: Category) {
         this.store.dispatch(new ToggleCategoryVisibilityAction(category.name));
     }
 
-    public toggleVisibility(event: Event) {
-        event.stopPropagation();
+    public toggleVisibility() {
         this.store.dispatch(new TogglePoisCategoriesVisibilityAction());
     }
 

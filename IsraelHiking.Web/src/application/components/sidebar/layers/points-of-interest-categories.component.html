@@ -1,11 +1,11 @@
-<mat-expansion-panel [expanded]="getExpandState()" (opened)="expand()" (closed)="collapse()">
-  <mat-expansion-panel-header>
-    <mat-panel-title>{{resources.legendPoi}}</mat-panel-title>
-    <button mat-icon-button (click)="toggleVisibility($event)" [attr.aria-label]="resources.legendPoi"
+<div class="px-6 pb-4">
+  <div class="flex h-12 flex-row items-center">
+    <h3 class="m-0 flex-1 text-base font-normal">{{resources.legendPoi}}</h3>
+    <button mat-icon-button (click)="toggleVisibility()" [attr.aria-label]="resources.legendPoi"
       analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle visibility of points of interest">
       <i class="fa" [ngClass]="isCategoryGroupVisible() ? 'icon-eye' : 'icon-eye-slash'"></i>
     </button>
-  </mat-expansion-panel-header>
+  </div>
   <mat-chip-listbox multiple="true" [attr.aria-label]="resources.legendPoi">
     @for (category of categories; track category) {
     <mat-chip-option [selected]="isCategoryVisible(category)"
@@ -16,4 +16,4 @@
     </mat-chip-option>
     }
   </mat-chip-listbox>
-</mat-expansion-panel>
+</div>
