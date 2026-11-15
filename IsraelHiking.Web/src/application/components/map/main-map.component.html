@@ -63,9 +63,7 @@
     }
     }
     @case ('private-routes') {
-    @if (!isNarrowScreen()) {
     <private-routes-sidebar></private-routes-sidebar>
-    }
     }
     }
   </mat-sidenav>
@@ -74,11 +72,6 @@
 @case ('public-poi') {
 <bottom-sheet [minimizable]="true" (closed)="closeSidebar()" [dir]="resources.direction">
   <public-poi-sidebar></public-poi-sidebar>
-</bottom-sheet>
-}
-@case ('private-routes') {
-<bottom-sheet (closed)="closeSidebar()" [dir]="resources.direction">
-  <private-routes-sidebar></private-routes-sidebar>
 </bottom-sheet>
 }
 @case ('layers') {

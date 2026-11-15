@@ -1,6 +1,9 @@
 import { Component, HostListener, inject, computed } from "@angular/core";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
+import { BreakpointObserver } from "@angular/cdk/layout";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
 import { MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
@@ -62,6 +65,9 @@ export class DrawingComponent {
     private readonly routeEditingState = this.store.selectSignal((state: ApplicationState) => state.routeEditingState);
     private readonly presentRoutes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
     private readonly selectedRoute = computed(() => this.presentRoutes().find(r => r.id === this.routeEditingState().selectedRouteId));
+    /** A screen tall enough to show the routing types in the panel itself, rather than behind a menu. */
+    public readonly isTallScreen = toSignal(inject(BreakpointObserver).observe("(min-height: 700px)")
+        .pipe(map(state => state.matches)), { initialValue: false });
     public readonly routeColor = computed(() => this.selectedRoute()?.color ?? "unset");
 
     public readonly isPoiEditActive = computed(() => {
