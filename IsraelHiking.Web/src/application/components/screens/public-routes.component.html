@@ -138,21 +138,21 @@
             <div class="flex flex-row">
                 <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Add to routes">
-                    <i class="fa icon-plus"></i>
+                    <i class="fa fa-lg icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
                 <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Open share menu">
-                    <i class="fa icon-share-alt"></i>
+                    <i class="fa fa-lg icon-share-alt"></i>
                     {{resources.share}}
                 </button>
             </div>
             <div class="flex flex-row">
                 <button class="mt-2" mat-button (click)="navigateToPoi(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore">
-                    <i class="fa icon-external-link-square"></i>
+                    <i class="fa fa-lg icon-external-link-square"></i>
                     {{resources.openInPlanAndExplore}}
                 </button>
             </div>
@@ -160,7 +160,7 @@
             <div class="flex flex-row">
                 <button class="mt-2" mat-button (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
-                    <i class="fa icon-pencil"></i>
+                    <i class="fa fa-lg icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>

@@ -15,7 +15,7 @@
             <label>
               <a matMiniFab color="" (changed)="addImage($event)" analyticsOn="click" analyticsCategory="Share"
                 analyticsLabel="Upload image">
-                <i class="fa icon-image fa-2x pt-1"></i>
+                <i class="fa fa-action icon-image pt-1"></i>
               </a>
               <input type="file" (change)="addImage($event)" [style.display]="'none'" />
             </label>
@@ -26,7 +26,7 @@
           <img [src]="base64Preview()" class="w-full object-contain img-center" (error)="removeImage()" />
           <button matMiniFab color="" class="absolute! top-2 end-2" (click)="removeImage()" analyticsOn="click"
             analyticsCategory="Share" analyticsLabel="Remove image">
-            <i class="fa icon-trash fa-2x pt-1"></i>
+            <i class="fa fa-action icon-trash pt-1"></i>
           </button>
         </div>
         }

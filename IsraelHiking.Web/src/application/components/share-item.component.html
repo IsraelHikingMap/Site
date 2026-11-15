@@ -76,7 +76,7 @@
             <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress()" (click)="copiedToClipboard.set(true)"
                 matTooltip="{{resources.copyLink}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard">
-                <i class="fa icon-clipboard fa-lg"></i>
+                <i class="fa fa-lg icon-clipboard"></i>
                 @if (copiedToClipboard()) {
                 <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
                 }

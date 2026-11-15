@@ -44,7 +44,7 @@
       <button mat-stroked-button type="button" (click)="openManage(false)" [matBadge]="hiddenBaseLayersCount()"
         [matBadgeHidden]="hiddenBaseLayersCount() === 0" class="mt-2 brand-badge"
         analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Manage maps from base layers">
-        <i class="fa icon-sliders"></i> {{resources.manage}}
+        <i class="fa fa-lg icon-sliders"></i> {{resources.manage}}
       </button>
     </mat-expansion-panel>
     <mat-divider></mat-divider>
@@ -80,7 +80,7 @@
       <button mat-stroked-button type="button" (click)="openManage(true)" [matBadge]="hiddenOverlaysCount()"
         [matBadgeHidden]="hiddenOverlaysCount() === 0" class="mt-2 brand-badge"
         analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Manage maps from overlays">
-        <i class="fa icon-sliders"></i> {{resources.manage}}
+        <i class="fa fa-lg icon-sliders"></i> {{resources.manage}}
       </button>
     </mat-expansion-panel>
     <mat-divider></mat-divider>

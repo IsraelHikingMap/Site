@@ -8,7 +8,7 @@
     <div class="mt-2 flex flex-row flex-wrap items-center gap-1">
         <button mat-flat-button class="shrink-0 whitespace-nowrap px-4!" (click)="addRoute($event)" analyticsOn="click"
             analyticsCategory="Private Routes" analyticsLabel="Add route">
-            <i class="fa icon-plus"></i>
+            <i class="fa fa-lg icon-plus"></i>
             <span class="ms-1">{{resources.addRoute}}</span>
         </button>
         <span class="flex-1"></span>
@@ -128,7 +128,7 @@
                                 <button mat-mini-fab class="round-fab shadow-none!" type="button" [style.backgroundColor]="currentColor"
                                     (click)="updateProperty(route, 'color', currentColor)">
                                     @if (currentColor === route.color) {
-                                    <i class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
+                                    <i class="fa fa-action icon-check" [style.color]="getCheckIconColor(currentColor)"></i>
                                     }
                                 </button>
                                 }

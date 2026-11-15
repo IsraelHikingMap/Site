@@ -83,11 +83,6 @@ html {
     @include mat.badge-overrides((background-color: var(--brand-color), text-color: #003018));
 }
 
-/* Icon buttons grouped into the floating map controls, whose icons are drawn smaller than Material's default. */
-.compact-icon-buttons {
-    @include mat.icon-button-overrides((icon-size: 20px));
-}
-
 /* Latin slice first: browsers only fetch a face whose unicode-range matches text they
    actually render, so latin readers never download the full multi-script file. No coverage
    is lost - the full font still backs every other script. */
@@ -222,8 +217,9 @@ body {
     vertical-align: -15%;
 }
 
-/* The icon of a button that shows nothing but the icon. A text button draws it at the size of its label, far
-   smaller than the same icon in an icon button, so it is given the icon button's size to read the same. */
+/* The icon of a fab or of a button that shows nothing but the icon. These draw a font icon at the size of their
+   label, far smaller than the same icon in an icon button, so they are given the icon button's size. An icon beside
+   a label stays at fa-lg. */
 .fa-action {
     font-size: 24px;
 }

@@ -8,7 +8,7 @@
         <div class="mb-2 flex flex-row justify-end">
             <button mat-button type="button" (click)="toggleEditing(null)" [class.active]="isEditing(null)"
                 analyticsOn="click" analyticsCategory="Layers" [analyticsLabel]="isOverlay ? 'Add overlay' : 'Add base layer'">
-                <i class="fa icon-plus"></i> {{isOverlay ? resources.addOverlay : resources.addBaseLayer}}
+                <i class="fa fa-lg icon-plus"></i> {{isOverlay ? resources.addOverlay : resources.addBaseLayer}}
             </button>
         </div>
         <div class="flex flex-col gap-2">

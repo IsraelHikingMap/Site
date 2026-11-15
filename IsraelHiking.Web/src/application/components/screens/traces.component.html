@@ -37,7 +37,7 @@
             <label class="shrink-0">
                 <a class="whitespace-nowrap" mat-flat-button analyticsOn="click" analyticsCategory="Traces"
                     analyticsLabel="Upload OSM trace">
-                    <i class="fa icon-cloud-upload"></i>
+                    <i class="fa fa-lg icon-cloud-upload"></i>
                     <span class="mx-1">{{resources.uploadTrace}}</span>
                 </a>
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
@@ -193,28 +193,28 @@
             <div class="flex flex-row">
                 <button mat-button (click)="editTrace(selectedTrace())" analyticsOn="click" analyticsCategory="Traces"
                     analyticsLabel="Edit OSM trace properties from popup">
-                    <i class="fa icon-pencil"></i>
+                    <i class="fa fa-lg icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>
             <div class="flex flex-row">
                 <button mat-button (click)="addTraceToRoutes(selectedTrace())" analyticsOn="click"
                     analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes from popup">
-                    <i class="fa icon-plus"></i>
+                    <i class="fa fa-lg icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
                 <button mat-button (click)="deleteTrace(selectedTrace())" analyticsOn="click" analyticsCategory="Traces"
                     analyticsLabel="Delete OSM trace parts from popup">
-                    <i class="fa icon-trash"></i>
+                    <i class="fa fa-lg icon-trash"></i>
                     {{resources.delete}}
                 </button>
             </div>
             <div class="flex flex-row">
                 <button mat-button (click)="findUnmappedRoutes(selectedTrace())" analyticsOn="click"
                     analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts from popup">
-                    <i class="fa icon-search"></i>
+                    <i class="fa fa-lg icon-search"></i>
                     {{resources.findUnmappedRoutes}}
                 </button>
             </div>
