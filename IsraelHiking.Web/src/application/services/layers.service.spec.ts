@@ -633,26 +633,34 @@ describe("LayersService", () => {
         expect(store.dispatch).not.toHaveBeenCalled();
     }));
 
-    it("should update base layer and select it", inject([LayersService, Store], (service: LayersService, store: Store) => {
+    it("should keep the selected base layer selected when it is renamed", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = vi.spyOn(store, "dispatch");
         const layer = { key: "layer1", id: "1" } as EditableLayer;
         store.reset({
-            offlineState: {
-                isSubscribed: false
-            },
-            layersState: {
-                baseLayers: [layer],
-                overlays: []
-            },
-            userState: {
-                userInfo: null
-            }
+            offlineState: { isSubscribed: false },
+            layersState: { baseLayers: [layer], overlays: [], selectedBaseLayerKey: "layer1" },
+            userState: { userInfo: null }
+        });
+
+        service.updateBaseLayer(layer, { ...layer, key: "renamed" });
+
+        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect((vi.mocked(spy).mock.calls[1][0] as SelectBaseLayerAction).key).toBe("renamed");
+    }));
+
+    it("should not select a base layer that is edited while another one is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = vi.spyOn(store, "dispatch");
+        const layer = { key: "layer1", id: "1" } as EditableLayer;
+        store.reset({
+            offlineState: { isSubscribed: false },
+            layersState: { baseLayers: [layer], overlays: [], selectedBaseLayerKey: "Hiking Map" },
+            userState: { userInfo: null }
         });
 
         service.updateBaseLayer(layer, layer);
 
-        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateBaseLayerAction);
-        expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(vi.mocked(spy).mock.calls.some(call => call[0] instanceof SelectBaseLayerAction)).toBe(false);
     }));
 
     it("should update overlay when user is logged in", inject([LayersService, Store, HttpTestingController], (service: LayersService, store: Store, backend: HttpTestingController) => {

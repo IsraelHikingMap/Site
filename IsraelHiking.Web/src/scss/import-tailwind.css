@@ -12,5 +12,29 @@
     --color-on-surface: var(--mat-sys-on-surface);
     --color-outline-variant: var(--mat-sys-outline-variant);
     --color-brand: var(--brand-color);
+    --color-brand-tonal: color-mix(in srgb, var(--brand-color) 25%, var(--mat-sys-surface));
     --color-warning: var(--warning-color);
+}
+
+/* The panels that sit at the bottom of a phone's screen slide in from below and back down when closed.
+   The way out starts from --sheet-offset, which the sheet handle sets to where a swipe let go of it. */
+@theme {
+    --animate-sheet-in: sheet-in 250ms cubic-bezier(0.2, 0, 0, 1);
+    --animate-sheet-out: sheet-out 200ms cubic-bezier(0.3, 0, 1, 1) forwards;
+
+    @keyframes sheet-in {
+        from {
+            transform: translateY(100%);
+        }
+    }
+
+    @keyframes sheet-out {
+        from {
+            transform: translateY(var(--sheet-offset, 0));
+        }
+
+        to {
+            transform: translateY(100%);
+        }
+    }
 }

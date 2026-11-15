@@ -1,15 +1,19 @@
-import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, inject, DestroyRef, signal, computed } from "@angular/core";
+import { BreakpointObserver } from "@angular/cdk/layout";
 import { NgStyle } from "@angular/common";
 import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
-import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { type StyleSpecification, type Map, ScaleControl, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
+import type { StyleSpecification, Map, RasterDEMSourceSpecification } from "maplibre-gl";
 
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
+import { MapOverlayComponent } from "./map-overlay.component";
+import { ScaleBarComponent } from "./scale-bar.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
 import { ZoomComponent } from "../zoom.component";
 import { LocationComponent } from "../location.component";
@@ -23,6 +27,7 @@ import { OsmAttributionComponent } from "../osm-attribution.component";
 import { LayersSidebarComponent } from "../sidebar/layers/layers-sidebar.component";
 import { PublicPoiSidebarComponent } from "../sidebar/publicpoi/public-poi-sidebar.component";
 import { PrivateRoutesSidebarComponent } from "../sidebar/privateroutes/private-routes-sidebar.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
@@ -39,17 +44,19 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, MapOverlayComponent, ScaleBarComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent, BottomSheetComponent]
 })
 export class MainMapComponent {
 
-    public readonly topStartControls = viewChildren("topStartControl", { read: ElementRef });
-    public readonly topEndControls = viewChildren("topEndControl", { read: ElementRef });
-    public readonly bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
-    public readonly bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
-
     public readonly sidenavVisible = signal(false);
     public readonly sidenavViewName = signal("");
+    /** A narrow screen shows a point's details and the layers in a sheet at the bottom instead of the side drawer. */
+    public readonly isNarrowScreen = toSignal(inject(BreakpointObserver).observe("(max-width: 550px)")
+        .pipe(map(state => state.matches)), { initialValue: false });
+    public readonly sheetViewName = computed(() =>
+        this.isNarrowScreen() && this.sidenavVisible() && ["public-poi", "layers"].includes(this.sidenavViewName())
+            ? this.sidenavViewName()
+            : "");
     public readonly location: LocationState;
     public readonly initialStyle: StyleSpecification;
 
@@ -65,7 +72,7 @@ export class MainMapComponent {
     private readonly analyticsService = inject(AnalyticsService);
     private readonly matDialog = inject(MatDialog);
 
-    private addedControls: IControl[] = [];
+
     private map: Map;
     private isTerrainOn = false;
 
@@ -84,6 +91,10 @@ export class MainMapComponent {
         });
         this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
+    }
+
+    public closeSidebar() {
+        this.sidebarService.hide();
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -115,43 +126,6 @@ export class MainMapComponent {
         this.mapService.setMap(this.map);
         this.mapService.addArrowToMap(this.map);
         this.map.doubleClickZoom.enable();
-        this.store.select((state: ApplicationState) => state.configuration.language.rtl).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.initControls();
-        });
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.initControls();
-        });
-    }
-
-    private initControls() {
-        for (const control of this.addedControls) {
-            this.map.removeControl(control);
-        }
-        this.addedControls = [];
-        for (const c of this.topStartControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "top-" + this.resources.start as ControlPosition);
-            this.addedControls.push(control);
-        }
-        for (const c of this.topEndControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(new CustomControl(c.nativeElement), "top-" + this.resources.end as ControlPosition);
-            this.addedControls.push(control);
-        }
-        const control = new ScaleControl({ unit: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units) });
-        this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
-        this.addedControls.push(control);
-
-        for (const c of this.bottomEndControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
-            this.addedControls.push(control);
-        }
-        for (const c of this.bottomStartControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "bottom-" + this.resources.start as ControlPosition);
-            this.addedControls.push(control);
-        }
     }
 
     public isMobile() {

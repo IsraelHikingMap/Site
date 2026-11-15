@@ -22,7 +22,7 @@ $buttons-margin: 5px;
 
 .chart-container {
     height: $container-height;
-    padding: 0 36px;
+    padding: 0 48px;
     background: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);
     position: relative;
@@ -34,24 +34,30 @@ $buttons-margin: 5px;
 
 .chart-container .hover-line {
     stroke: var(--mat-sys-on-surface);
+    stroke-dasharray: 3 3;
+    opacity: 0.5;
 }
 
 .chart-container .hover-box {
-    stroke: var(--mat-sys-on-surface);
-    fill: var(--mat-sys-surface);
+    stroke: var(--mat-sys-outline-variant);
+    fill: var(--mat-sys-surface-container-high);
+    filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.15));
 }
 
-.chart-table {
-    height: 100%;
+/* The axes draw no lines of their own: the elevation ticks stretch across the chart as faint dashed grid
+   lines and the distance ticks are only their labels. */
+.chart-container .domain,
+.chart-container .x-axis .tick line {
+    display: none;
 }
 
-.chart-table i,
-.chart-table span {
-    font-size: x-large;
+.chart-container .y-axis .tick line {
+    stroke: var(--mat-sys-outline-variant);
+    stroke-dasharray: 2 4;
 }
 
-.units {
-    font-size: small !important;
+.chart-container .tick text {
+    opacity: 0.6;
 }
 
 .chart-control-container.expanded .chart-container {
@@ -63,7 +69,8 @@ $buttons-margin: 5px;
     bottom: 0px;
     left: 50%;
     transform: translate(-50%, 0);
-    border: 1px solid var(--mat-sys-on-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 9999px;
     background: var(--mat-sys-surface);
     display: inline;
 }
@@ -88,8 +95,9 @@ $buttons-margin: 5px;
 }
 
 @media (width <=550px) {
+    /* The full width between the map overlay's 10px side margins. */
     .chart-control-container {
-        width: calc(100vw - 2 * #{$control-border});
+        width: calc(100vw - 20px);
         height: $container-height-small-screen;
     }
 
@@ -119,6 +127,7 @@ $buttons-margin: 5px;
 
     to {
         transform: scale(0.2);
+        opacity: 0;
     }
 }
 
@@ -134,6 +143,26 @@ $buttons-margin: 5px;
     animation: scale-in 200ms ease-out forwards;
 }
 
+/* Taken out of the flow while it shrinks, so the summary row takes its place at once instead of
+   jumping up once the chart is gone. */
 .chart-leave {
-    animation: scale-out 200ms ease-out forwards;
+    position: absolute;
+    bottom: 0;
+    inset-inline-start: 0;
+    z-index: 1;
+    animation: scale-out 200ms ease-in forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.summary-enter {
+    animation: fade-in 200ms ease-out;
 }

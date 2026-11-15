@@ -1,7 +1,10 @@
 import { Component, HostListener, inject, computed } from "@angular/core";
-import { NgClass, NgStyle } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton } from "@angular/material/button";
+import { BreakpointObserver } from "@angular/cdk/layout";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
+import { MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
@@ -42,7 +45,8 @@ const ROUTING_TYPE_BY_DIGIT: Record<string, RoutingType> = {
 @Component({
     selector: "drawing",
     templateUrl: "./drawing.component.html",
-    imports: [Dir, MatButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
+    styleUrls: ["./drawing.component.scss"],
+    imports: [Dir, MatIconButton, AnalyticsDirective, NgClass, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class DrawingComponent {
 
@@ -61,6 +65,10 @@ export class DrawingComponent {
     private readonly routeEditingState = this.store.selectSignal((state: ApplicationState) => state.routeEditingState);
     private readonly presentRoutes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
     private readonly selectedRoute = computed(() => this.presentRoutes().find(r => r.id === this.routeEditingState().selectedRouteId));
+    /** A screen tall enough to show the routing types in the panel itself, rather than behind a menu. */
+    public readonly isTallScreen = toSignal(inject(BreakpointObserver).observe("(min-height: 700px)")
+        .pipe(map(state => state.matches)), { initialValue: false });
+    public readonly routeColor = computed(() => this.selectedRoute()?.color ?? "unset");
 
     public readonly isPoiEditActive = computed(() => {
         const selectedRoute = this.selectedRoute();
@@ -191,14 +199,6 @@ export class DrawingComponent {
             return "None";
         }
         return this.routeEditingState().routingType;
-    }
-
-    public getRouteColor(): string {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null) {
-            return "unset";
-        }
-        return selectedRoute.color;
     }
 
     public deleteAllRoutes() {

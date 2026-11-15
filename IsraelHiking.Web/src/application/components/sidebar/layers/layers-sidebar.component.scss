@@ -1,19 +1,16 @@
-﻿.row-button {
-    line-height: unset !important;
-    height: unset !important;
-    & .fa {
-        padding: 0 16px;
-        width: 14px;
-    }
+@use "@angular/material" as mat;
+
+/* The sections lie flat on the panel, divided by lines, instead of being cards on it. They take the panel's own
+   surface color rather than none: an open header that is hovered or focused takes its section's background, and
+   it has to stay solid while the section scrolls under it. */
+.layers-sidebar {
+    @include mat.expansion-overrides((container-elevation-shadow: none,
+            container-shape: 0,
+            container-background-color: var(--mat-sys-surface),
+        ));
 }
 
-.short-button {
-    height: unset !important;
-    min-width: unset;
-    line-height: unset !important;
-    padding: 0;
-
-    & .mat-mdc-button-touch-target {
-        height: unset !important;
-    }
+/* The action in the corner of a layer's image is smaller than a regular icon button, to leave the image seen. */
+.tile-action {
+    @include mat.icon-button-overrides((state-layer-size: 32px, icon-size: 16px));
 }

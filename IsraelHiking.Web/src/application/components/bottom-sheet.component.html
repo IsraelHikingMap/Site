@@ -1,0 +1,10 @@
+<div cdkDrag cdkDragLockAxis="y" cdkDragRootElement="bottom-sheet" [cdkDragConstrainPosition]="keepBelowStart"
+    (cdkDragStarted)="onDragStarted()" (cdkDragMoved)="onDragMoved($event)"
+    (cdkDragEnded)="onDragEnded($event)">
+    <div cdkDragHandle class="flex cursor-grab touch-none justify-center py-2.5">
+        <span class="h-[3px] w-9 rounded-full bg-on-surface/30"></span>
+    </div>
+</div>
+<div class="min-h-0 flex-1 overflow-y-auto">
+    <ng-content></ng-content>
+</div>

@@ -4,25 +4,25 @@
       <button mat-button class="w-full min-w-[unset]!" (click)="setHighwayType('footway')" analyticsOn="click"
         analyticsCategory="OSM" analyticsLabel="Missing part type footway"
         [ngClass]="{'active' : getHighwayType() === 'footway' }" matTooltip="{{resources.legendFootPath}}"
-        matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
+        matTooltipPosition="below"><i class="fa fa-action icon-hike"></i></button>
     </div>
     <div class="w-1/4">
       <button mat-button class="w-full min-w-[unset]!" (click)="setHighwayType('cycleway')" analyticsOn="click"
         analyticsCategory="OSM" analyticsLabel="Missing part type cycleway"
         [ngClass]="{'active' : getHighwayType() === 'cycleway' }" matTooltip="{{resources.legendBicyclePath}}"
-        matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
+        matTooltipPosition="below"><i class="fa fa-action icon-bike"></i></button>
     </div>
     <div class="w-1/4">
       <button mat-button class="w-full min-w-[unset]!" (click)="setHighwayType('path')" analyticsOn="click"
         analyticsCategory="OSM" analyticsLabel="Missing part type path"
         [ngClass]="{'active' : getHighwayType() === 'path' }" matTooltip="{{resources.legendPath}}"
-        matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i><i class="fa icon-bike fa-lg"></i></button>
+        matTooltipPosition="below"><i class="fa fa-action icon-hike"></i><i class="fa fa-action icon-bike"></i></button>
     </div>
     <div class="w-1/4">
       <button mat-button class="w-full min-w-[unset]!" (click)="setHighwayType('track')" analyticsOn="click"
         analyticsCategory="OSM" analyticsLabel="Missing part type track"
         [ngClass]="{'active' : getHighwayType() === 'track' }" matTooltip="{{resources.dirtRoad}}"
-        matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
+        matTooltipPosition="below"><i class="fa fa-action icon-four-by-four"></i></button>
     </div>
   </div>
   <br />
@@ -84,17 +84,17 @@
     <div class="w-1/3">
       <button mat-button class="w-full min-w-[unset]!" (click)="addMissingPartToOsm()"
         matTooltip="{{resources.addThisRouteToOsm}}" matTooltipPosition="above" analyticsOn="click"
-        analyticsCategory="OSM" analyticsLabel="Add missing part to OSM"><i class="fa icon-plus"></i></button>
+        analyticsCategory="OSM" analyticsLabel="Add missing part to OSM"><i class="fa fa-action icon-plus"></i></button>
     </div>
     <div class="w-1/3">
       <button mat-button class="w-full min-w-[unset]!" (click)="remove()" analyticsOn="click" analyticsCategory="OSM"
         analyticsLabel="Delete missing part" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above"><i
-          class="fa icon-trash"></i></button>
+          class="fa fa-action icon-trash"></i></button>
     </div>
     <div class="w-1/3">
       <button mat-button class="w-full min-w-[unset]!" (click)="hideCoordinates.set(!hideCoordinates())"
         analyticsOn="click" analyticsCategory="OSM" analyticsLabel="Toggle coordinates"
-        matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa fa-action icon-globe"></i></button>
     </div>
   </div>
   @if (!hideCoordinates()) {

@@ -1,77 +1,58 @@
-﻿@if (isVisible()) {
-<div class="table side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
+@if (isVisible()) {
+<div class="relative print:hidden!" [dir]="resources.direction"
+  (window:resize)="redrawChart()">
   @if (isOpen()) {
-  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
+  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated overflow-hidden rounded-3xl bg-surface shadow-md"
     [class.expanded]="isExpanded()" [class.sidebar]="isSidebarVisible()">
     @if (isTable()) {
-    <div class="chart-container">
-      <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
-        @if (!isFollowing()) {
-        <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain() | distance:'elevation':'value'}} <span class="units">{{gain() | distance:'elevation':'unit'}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss() | distance:'elevation':'value'}} <span class="units">{{loss() | distance:'elevation':'unit'}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{length() | distance:'distance':'value'}} <span class="units">{{length() | distance:'distance':'unit'}}</span></span>
-          </div>
-        </mat-grid-tile>
-        } @else {
-        <mat-grid-tile>
-          <div class="flex flex-col items-center">
-            ETA
-            <span><span dir="ltr">{{ETA()}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-circle-right"></i>
-            <span class="mx-1">{{remainingDistance() | distance:'distance':'value'}} <span class="units">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{traveledDistance() | distance:'distance':'value'}} <span class="units">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
-          </div>
-        </mat-grid-tile>
-        }
-        <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-clock-o"></i>
-            <span>{{duration()}} <span class="units">{{durationUnits()}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-avg-speed"></i>
-            @if (averageSpeed()) {
-            <span>{{getSpeedString(averageSpeed())}} <span class="units">{{speedUnitString()}}</span></span>
-            } @else {
-            <span>--</span>
-            }
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-speed"></i>
-            @if (currentSpeed()) {
-            <span>{{getSpeedString(currentSpeed())}} <span class="units">{{speedUnitString()}}</span></span>
-            } @else {
-            <span>--</span>
-            }
-          </div>
-        </mat-grid-tile>
-      </mat-grid-list>
+    <div class="chart-container grid grid-cols-3 grid-rows-2 place-items-center py-2">
+      @if (!isFollowing()) {
+      <div matTooltip="{{resources.gain}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-up"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{gain() | distance:'elevation':'value'}} <span class="text-xs font-normal opacity-70">{{gain() | distance:'elevation':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.loss}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-down"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{loss() | distance:'elevation':'value'}} <span class="text-xs font-normal opacity-70">{{loss() | distance:'elevation':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.length}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{length() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{length() | distance:'distance':'unit'}}</span></span>
+      </div>
+      } @else {
+      <div class="flex min-w-0 flex-col items-center gap-1">
+          <span class="text-sm opacity-70">ETA</span>
+          <span class="whitespace-nowrap text-xl font-medium"><span dir="ltr">{{ETA()}}</span></span>
+      </div>
+      <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-circle-right"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{remainingDistance() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{traveledDistance() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
+      </div>
+      }
+      <div matTooltip="{{resources.duration}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-clock-o"></i>
+          <span class="whitespace-nowrap text-xl font-medium">{{duration()}} <span class="text-xs font-normal opacity-70">{{durationUnits()}}</span></span>
+      </div>
+      <div matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-avg-speed"></i>
+          @if (averageSpeed()) {
+          <span class="whitespace-nowrap text-xl font-medium">{{getSpeedString(averageSpeed())}} <span class="text-xs font-normal opacity-70">{{speedUnitString()}}</span></span>
+          } @else {
+          <span class="whitespace-nowrap text-xl font-medium">--</span>
+          }
+      </div>
+      <div matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-speed"></i>
+          @if (currentSpeed()) {
+          <span class="whitespace-nowrap text-xl font-medium">{{getSpeedString(currentSpeed())}} <span class="text-xs font-normal opacity-70">{{speedUnitString()}}</span></span>
+          } @else {
+          <span class="whitespace-nowrap text-xl font-medium">--</span>
+          }
+      </div>
     </div>
     } @else {
     <div class="chart-container" #lineChartContainer>
@@ -79,9 +60,9 @@
       @if (subRouteRange() && subRouteRange().xEnd) {
       <div class="sub-route-statistics-container">
         <div class="flex flex-row justify-center items-center">
-          <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
+          <button mat-icon-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
             matTooltipPosition="above" analyticsOn="click" analyticsCategory="Route statistics"
-            analyticsLabel="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
+            analyticsLabel="Clear sub route selection"><i class="fa icon-close"></i></button>
           <span class="label-margin">
             <i class="fa icon-arrow-up"></i>
             <span class="mx-1">{{gain() | distance:'elevation'}}</span>
@@ -101,20 +82,20 @@
     }
     <div class="absolute start-0 bottom-0 flex flex-col m-1">
       @if (!isExpanded()) {
-      <button mat-button (click)="changeState('table')" [class.active]="isTable()" analyticsOn="click"
+      <button mat-icon-button (click)="changeState('table')" [class.active]="isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle table view"><i
-          class="fa icon-table fa-lg"></i></button>
+          class="fa icon-table"></i></button>
       }
-      <button mat-button (click)="changeState('graph')" [class.active]="!isTable()" analyticsOn="click"
+      <button mat-icon-button (click)="changeState('graph')" [class.active]="!isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle graph view"><i
-          class="fa icon-area-chart fa-lg"></i></button>
+          class="fa icon-area-chart"></i></button>
     </div>
     <div class="absolute top-0 end-0 flex flex-col">
-      <button mat-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
-        analyticsLabel="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
+      <button mat-icon-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+        analyticsLabel="Route statistics close"><i class="fa icon-close"></i></button>
       @if (!isTable()) {
-      <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
-        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa fa-lg"
+      <button mat-icon-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
+        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa"
           [ngClass]="{ 'icon-chevron-right' : isExpanded() && resources.end === 'left' || !isExpanded() && resources.end === 'right', 'icon-chevron-left' : !isExpanded() && resources.end === 'left' || isExpanded() && resources.end === 'right'}"></i></button>
       }
       <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
@@ -129,16 +110,17 @@
           <span class="ms-2">{{resources.showSlopes}}</span>
         </button>
       </mat-menu>
-      <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
+      <button mat-icon-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
         matTooltipPosition="below" analyticsOn="click" analyticsCategory="Route statistics" analyticsLabel="More"><i
-          class="fa icon-ellipsis-v fa-lg"></i></button>
+          class="fa icon-ellipsis-v"></i></button>
     </div>
   </div>
   } @else {
-  <div class="flex flex-row" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+  <div animate.enter="summary-enter" class="flex flex-row items-center rounded-full bg-surface p-1 pe-3 shadow-md"
+    (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
     analyticsLabel="Route statistics open">
-    <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
-      matTooltipPosition="above"><i class="fa {{isTable() ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
+    <button mat-icon-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
+      matTooltipPosition="above"><i class="fa {{isTable() ? 'icon-table' : 'icon-area-chart'}}"></i></button>
     @if (!isFollowing()) {
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
       <span class="control-container-item">

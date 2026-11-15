@@ -14,12 +14,11 @@
         </mat-button-toggle-group>
     </div>
     <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
-        class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
+        class="w-1/3 shrink-0 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button md:min-w-[400px]">
         <div class="flex flex-row items-center gap-2 p-2 sticky top-0 z-10 bg-surface">
-            <mat-form-field subscriptSizing="dynamic" class="flex-1 min-w-0">
-                <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
-                    analyticsCategory="Shares" analyticsLabel="Open sort menu">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pill-select w-40 min-w-0">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" [aria-label]="resources.sort"
+                    analyticsOn="click" analyticsCategory="Shares" analyticsLabel="Open sort menu">
                     <mat-option value="lastModifiedDate" analyticsOn="click" analyticsCategory="Shares"
                         analyticsLabel="Sort by date">
                         {{resources.date}}
@@ -46,10 +45,12 @@
                 analyticsCategory="Shares" analyticsLabel="Chnage sort direction">
                 <i class="fa icon-sort"></i>
             </button>
-            <button mat-button class="shrink-0 whitespace-nowrap" [matMenuTriggerFor]="filterMenu" analyticsOn="click"
+            <span class="flex-1"></span>
+            <button mat-stroked-button class="shrink-0 px-3!" [matMenuTriggerFor]="filterMenu" analyticsOn="click"
                 analyticsCategory="Shares" analyticsLabel="Open filter menu">
-                <i class="fa icon-sliders mx-2 fa-lg"></i>
-                {{resources.filter}}
+                <i class="fa fa-lg icon-sliders"></i>
+                <span class="mx-1">{{resources.filter}}</span>
+                <i class="fa icon-chevron-down text-[10px]! opacity-60"></i>
             </button>
             <mat-menu #filterMenu="matMenu">
                 <div mat-menu-item (click)="$event.stopPropagation()">
@@ -213,16 +214,22 @@
         <mat-spinner></mat-spinner>
         }
     </div>
-    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="w-2/3">
+    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="min-w-0 flex-1">
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [allowOffline]="true"></layers>
             <routes-path [routesGeoJson]="routesGeoJson()"></routes-path>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
-                <zoom></zoom>
-            </mgl-control>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-right' : 'top-left'">
-                <osm-attribution></osm-attribution>
-            </mgl-control>
+            <map-overlay>
+                <div class="absolute inset-0 magrin-top-with-toolbar pb-safe px-safe" [dir]="resources.direction">
+                    <div class="relative size-full">
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 end-2.5 items-end">
+                            <zoom class="max-md:hidden"></zoom>
+                        </div>
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 start-2.5 items-start">
+                            <osm-attribution></osm-attribution>
+                        </div>
+                    </div>
+                </div>
+            </map-overlay>
             @for (shareUrl of filteredShareUrls(); track shareUrl.id) {
             <mgl-marker [lngLat]="shareUrl.start">
                 <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="onStartPointClick(shareUrl)"
@@ -235,12 +242,12 @@
             }
         </mgl-map>
         @if (selectedShareUrl()) {
-        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30 animate-slide-in-up px-safe">
+        <bottom-sheet class="md:hidden" (closed)="onStartPointClick(selectedShareUrl())">
             <div class="flex flex-row justify-center items-center mx-2">
                 <div class="flex-1 text-center text-xl">{{selectedShareUrl().title}}</div>
                 <button mat-button class="w-1/6" type="button" (click)="onStartPointClick(selectedShareUrl())"
                     tabindex="-1">
-                    <i class="fa fa-lg icon-close"></i>
+                    <i class="fa fa-action icon-close"></i>
                 </button>
             </div>
             <div class="flex flex-row">
@@ -271,7 +278,7 @@
                     {{resources.delete}}
                 </button>
             </div>
-        </div>
+        </bottom-sheet>
         }
     </div>
 </div>

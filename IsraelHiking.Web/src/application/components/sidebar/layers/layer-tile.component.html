@@ -1,0 +1,25 @@
+<button type="button" matRipple
+    class="min-w-0 cursor-pointer rounded-xl border-0 bg-transparent p-1 text-inherit"
+    [class]="isRow() ? 'flex flex-1 flex-row items-center gap-3 text-start' : 'block w-full'"
+    [attr.aria-pressed]="selected()" (click)="pick.emit($event)">
+    <span class="relative block shrink-0 overflow-hidden rounded-lg border-2 border-solid"
+        [class]="(isRow() ? 'size-10 ' : 'aspect-square ') + (selected() ? 'border-brand' : 'border-outline-variant')">
+        @if (thumbnail() && !isBroken()) {
+        <img [src]="thumbnail()" alt="" loading="lazy" class="block size-full object-cover" (error)="isBroken.set(true)" />
+        } @else {
+        <span class="flex size-full items-center justify-center font-medium" [class]="isRow() ? 'text-sm' : 'text-2xl'"
+            [style.background-color]="placeholderColor()">{{initials()}}</span>
+        }
+        @if (selected()) {
+        <span class="absolute bottom-0.5 start-0.5 flex items-center justify-center rounded-full bg-brand"
+            [class]="isRow() ? 'size-4' : 'size-5'">
+            <i class="fa icon-check" [class]="isRow() ? 'text-[8px]!' : 'text-[10px]!'"></i>
+        </span>
+        }
+    </span>
+    <span class="min-w-0 leading-tight hyphens-auto wrap-break-word"
+        [class]="isRow() ? 'flex-1 text-sm' : 'mt-1 block text-center text-xs'" [class.font-medium]="selected()">
+        {{label()}}
+    </span>
+</button>
+<span class="empty:hidden" [class]="isRow() ? 'shrink-0' : 'absolute top-2 end-2 rounded-full bg-surface/90 shadow-sm'"><ng-content></ng-content></span>

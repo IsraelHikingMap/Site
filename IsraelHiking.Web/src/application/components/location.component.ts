@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { MatButton } from "@angular/material/button";
+import { MatIconButton, MatMiniFabButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
@@ -28,7 +28,7 @@ import type { LatLngAltTime, ApplicationState } from "../models";
     selector: "location",
     templateUrl: "./location.component.html",
     styleUrls: ["./location.component.scss"],
-    imports: [MatButton, AnalyticsDirective, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
+    imports: [MatMiniFabButton, MatIconButton, AnalyticsDirective, MatTooltip, MatProgressSpinner, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, GpsLocationOverlayComponent]
 })
 export class LocationComponent {
     public readonly locationFeatures = signal<GeoJSON.FeatureCollection<GeoJSON.Geometry>>({ type: "FeatureCollection", features: [] });

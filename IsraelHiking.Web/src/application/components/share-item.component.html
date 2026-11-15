@@ -58,25 +58,25 @@
     @if (isApp()) {
     <div class="flex flex-row">
         <button mat-button class="w-full" (click)="share()" analyticsOn="click" analyticsCategory="Share"
-            analyticsLabel="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+            analyticsLabel="Share mobile button"><i class="fa fa-action icon-share-alt"></i></button>
     </div>
     } @else {
     <div class="flex flex-row">
         <div class="flex-1">
             <a mat-button class="w-full" [href]="facebookShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" analyticsOn="click"
-                analyticsCategory="Share" analyticsLabel="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
+                analyticsCategory="Share" analyticsLabel="Share facebook"><i class="fa fa-action icon-facebook"></i></a>
         </div>
         <div class="flex-1">
             <a mat-button class="w-full" [href]="whatsappShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" analyticsOn="click"
-                analyticsCategory="Share" analyticsLabel="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
+                analyticsCategory="Share" analyticsLabel="Share whatsapp"><i class="fa fa-action icon-whatsapp"></i></a>
         </div>
         <div class="flex-1">
             <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress()" (click)="copiedToClipboard.set(true)"
                 matTooltip="{{resources.copyLink}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard">
-                <i class="fa icon-clipboard fa-lg"></i>
+                <i class="fa fa-lg icon-clipboard"></i>
                 @if (copiedToClipboard()) {
                 <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
                 }
