@@ -515,7 +515,7 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("fill", "none")
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
-            .attr("stroke-width", 2);
+            .attr("stroke-width", 2.5);
     }
 
     private addChartDragGroup() {
@@ -589,7 +589,8 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("y", 0)
             .attr("height", 70)
             .attr("width", RouteStatisticsComponent.HOVER_BOX_WIDTH)
-            .attr("fill-opacity", "0.9");
+            .attr("rx", 10)
+            .attr("fill-opacity", "0.95");
     }
 
     private createZoomBehavior(): d3.ZoomBehavior<SVGRectElement, unknown> {
@@ -722,6 +723,8 @@ export class RouteStatisticsComponent implements OnInit {
         chartTransition.select<SVGGElement>(".x-axis")
             .duration(duration)
             .call(d3.axisBottom(this.chartElements.xScale)
+                .tickSize(0)
+                .tickPadding(8)
                 .tickValues(distanceTicks.map(d => d * kmToDistance))
                 .tickFormat((_d, i) => distanceTicks[i].toString())
             );
@@ -734,6 +737,9 @@ export class RouteStatisticsComponent implements OnInit {
         chartTransition.select<SVGGElement>(".y-axis")
             .duration(duration)
             .call(d3.axisLeft(this.chartElements.yScale)
+                .tickSizeInner(-this.chartElements.width)
+                .tickSizeOuter(0)
+                .tickPadding(8)
                 .tickValues(heightTicks.map(d => d / mToHeight))
                 .tickFormat((_d, i) => heightTicks[i].toString())
             );

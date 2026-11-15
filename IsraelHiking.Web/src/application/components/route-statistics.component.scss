@@ -34,11 +34,30 @@ $buttons-margin: 5px;
 
 .chart-container .hover-line {
     stroke: var(--mat-sys-on-surface);
+    stroke-dasharray: 3 3;
+    opacity: 0.5;
 }
 
 .chart-container .hover-box {
-    stroke: var(--mat-sys-on-surface);
-    fill: var(--mat-sys-surface);
+    stroke: var(--mat-sys-outline-variant);
+    fill: var(--mat-sys-surface-container-high);
+    filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.15));
+}
+
+/* The axes draw no lines of their own: the elevation ticks stretch across the chart as faint dashed grid
+   lines and the distance ticks are only their labels. */
+.chart-container .domain,
+.chart-container .x-axis .tick line {
+    display: none;
+}
+
+.chart-container .y-axis .tick line {
+    stroke: var(--mat-sys-outline-variant);
+    stroke-dasharray: 2 4;
+}
+
+.chart-container .tick text {
+    opacity: 0.6;
 }
 
 .chart-table {
