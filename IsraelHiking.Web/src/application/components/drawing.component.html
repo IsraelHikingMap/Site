@@ -4,12 +4,12 @@
     <i class="fa icon-list-ul"></i>
   </button>
   <button mat-icon-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}"
-    [ngStyle]="{'color': getRouteColor()}" matTooltip="{{resources.editPoint}}" matTooltipPosition="after"
+    [style.color]="routeColor()" matTooltip="{{resources.editPoint}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw POI toggle">
-    <i class="fa icon-map-marker"></i>
+    <i class="fa icon-map-pin"></i>
   </button>
   <button mat-icon-button (click)="toggleEditRoute()" [ngClass]="{active : isRouteEditActive() }"
-    [style.color]="getRouteColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="after" analyticsOn="click"
+    [style.color]="routeColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="after" analyticsOn="click"
     analyticsCategory="Drawing" analyticsLabel="Draw route toggle">
     <i class="fa icon-pencil"></i>
   </button>
@@ -31,7 +31,7 @@
       @for (option of routingOptions; track option.type) {
       <button mat-menu-item (click)="setRouting(option.type)" [ngClass]="{'bg-brand/20!': getRoutingType() === option.type}"
         analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Routing {{option.type}}">
-        <i class="fa" [ngClass]="option.icon"></i>
+        <i class="fa fa-lg mat-icon" [ngClass]="option.icon"></i>
         <span class="mx-1">{{resources[option.label]}}</span>
       </button>
       }
@@ -51,12 +51,12 @@
   </button>
   <mat-menu #clearMenu="matMenu" overlapTrigger="false" xPosition="after">
     <button mat-menu-item (click)="clearRoute()" analyticsOn="click" analyticsCategory="Drawing"
-      analyticsLabel="Clear route"><i class="fa icon-recordings"></i>
+      analyticsLabel="Clear route"><i class="fa fa-lg icon-recordings mat-icon"></i>
       <span class="mx-1">{{resources.clearRoute}}</span>
     </button>
     <button mat-menu-item (click)="clearPois()" analyticsOn="click" analyticsCategory="Drawing"
       analyticsLabel="Clear pois">
-      <i class="fa icon-map-marker"></i>
+      <i class="fa fa-lg icon-map-pin mat-icon"></i>
       <span class="mx-1">{{resources.clearPois}}</span>
     </button>
     <button mat-menu-item (click)="clearBoth()" analyticsOn="click" analyticsCategory="Drawing"

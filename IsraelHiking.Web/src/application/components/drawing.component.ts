@@ -1,5 +1,5 @@
 import { Component, HostListener, inject, computed } from "@angular/core";
-import { NgClass, NgStyle } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -60,7 +60,7 @@ const ROUTING_OPTIONS: RoutingOption[] = [
     selector: "drawing",
     templateUrl: "./drawing.component.html",
     styleUrls: ["./drawing.component.scss"],
-    imports: [Dir, MatIconButton, AnalyticsDirective, NgClass, NgStyle, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
+    imports: [Dir, MatIconButton, AnalyticsDirective, NgClass, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class DrawingComponent {
     public readonly routingOptions = ROUTING_OPTIONS;
@@ -80,6 +80,7 @@ export class DrawingComponent {
     private readonly routeEditingState = this.store.selectSignal((state: ApplicationState) => state.routeEditingState);
     private readonly presentRoutes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
     private readonly selectedRoute = computed(() => this.presentRoutes().find(r => r.id === this.routeEditingState().selectedRouteId));
+    public readonly routeColor = computed(() => this.selectedRoute()?.color ?? "unset");
 
     public readonly isPoiEditActive = computed(() => {
         const selectedRoute = this.selectedRoute();
@@ -214,14 +215,6 @@ export class DrawingComponent {
 
     public getRoutingOption(): RoutingOption {
         return ROUTING_OPTIONS.find(o => o.type === this.getRoutingType());
-    }
-
-    public getRouteColor(): string {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null) {
-            return "unset";
-        }
-        return selectedRoute.color;
     }
 
     public deleteAllRoutes() {

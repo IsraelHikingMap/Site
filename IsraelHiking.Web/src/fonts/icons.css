@@ -398,6 +398,10 @@
   content: "\e955";
 }
 
+.icon-map-pin:before {
+  content: "\e995";
+}
+
 .icon-map-signs:before {
   content: "\e956";
 }
@@ -436,10 +440,6 @@
 
 .icon-none:before {
   content: "\e95f";
-}
-
-.icon-north:before {
-  content: "\e960";
 }
 
 .icon-parking:before {
