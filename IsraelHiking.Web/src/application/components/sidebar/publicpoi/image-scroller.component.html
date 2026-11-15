@@ -32,19 +32,19 @@
 <div class="flex flex-row">
   <div class="flex-1">
     <button mat-button class="w-full" (click)="previous()" [disabled]="!hasPrevious()"><i
-        class="fa icon-chevron-{{resources.start}}"></i></button>
+        class="fa fa-action icon-chevron-{{resources.start}}"></i></button>
   </div>
   @if (canEdit()) {
   <div class="flex-1">
     <label class="w-full">
       <a mat-button imageCapture class="w-full" (changed)="onFileInputChanged($event)" analyticsOn="click"
-        analyticsCategory="OSM" analyticsLabel="Upload non first image"><i class="fa icon-plus"></i></a>
+        analyticsCategory="OSM" analyticsLabel="Upload non first image"><i class="fa fa-action icon-plus"></i></a>
       <input type="file" (change)="onFileInputChanged($event)" [style.display]="'none'" accept="image/*;capture=camera"
         multiple />
     </label>
   </div>
   <div class="flex-1">
-    <button mat-button class="w-full" (click)="remove()"><i class="fa icon-trash"></i></button>
+    <button mat-button class="w-full" (click)="remove()"><i class="fa fa-action icon-trash"></i></button>
   </div>
   } @else {
   <div class="flex-1">
@@ -53,7 +53,7 @@
   }
   <div class="flex-1">
     <button mat-button class="w-full" (click)="next()" [disabled]="!hasNext()"><i
-        class="fa icon-chevron-{{resources.end}}"></i></button>
+        class="fa fa-action icon-chevron-{{resources.end}}"></i></button>
   </div>
 </div>
 }

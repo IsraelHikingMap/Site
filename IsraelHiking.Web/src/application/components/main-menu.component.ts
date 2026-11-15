@@ -1,6 +1,7 @@
 import { Component, inject, computed, signal, afterNextRender } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { MatButton } from "@angular/material/button";
+import { MatDivider } from "@angular/material/divider";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
 import { timer } from "rxjs";
@@ -29,7 +30,7 @@ import type { UserInfo, ApplicationState } from "../models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    imports: [MatButton, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
+    imports: [MatButton, MatDivider, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
 

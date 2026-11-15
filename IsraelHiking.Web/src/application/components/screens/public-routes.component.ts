@@ -2,7 +2,7 @@ import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, ControlComponent } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
@@ -19,9 +19,11 @@ import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification }
 
 import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
+import { MapOverlayComponent } from "../map/map-overlay.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
 import { DescriptionComponent } from "../description.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -44,7 +46,7 @@ import type { ApplicationState } from "../../models";
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, ControlComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent]
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {

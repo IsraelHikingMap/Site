@@ -1,7 +1,7 @@
 import { provideAppInitializer, ErrorHandler, importProvidersFrom, inject, ApplicationConfig } from "@angular/core";
 import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import { Title, BrowserModule } from "@angular/platform-browser";
-import { provideRouter, withInMemoryScrolling } from "@angular/router";
+import { ActivatedRouteSnapshot, provideRouter, ViewTransitionInfo, withInMemoryScrolling, withViewTransitions } from "@angular/router";
 import { provideStore, withNgxsNoopExecutionStrategy, withNgxsPlugin } from "@ngxs/store";
 import { progressInterceptor } from "ngx-progressbar/http";
 import { provideLottieOptions } from "ngx-lottie";
@@ -28,6 +28,24 @@ import { OfflineReducer } from "./reducers/offline.reducer";
 import { PaywallReducer } from "./reducers/paywall.reducer";
 import { cloneActionPlugin } from "./reducers/clone-action.plugin";
 import { routes } from "./app.routes";
+
+/**
+ * The map keeps its position in the url, so moving it navigates without changing screens. Only a navigation
+ * that shows a different screen is animated - otherwise every pan of the map would fade the whole page.
+ */
+function skipTransitionWithinScreen({ transition, from, to }: ViewTransitionInfo) {
+    if (getScreen(from) === getScreen(to)) {
+        transition.skipTransition();
+    }
+}
+
+function getScreen(snapshot: ActivatedRouteSnapshot) {
+    let leaf = snapshot;
+    while (leaf.firstChild) {
+        leaf = leaf.firstChild;
+    }
+    return leaf.component;
+}
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -56,7 +74,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withInterceptors([osmTokenInterceptor, clientDetailsInterceptor, progressInterceptor])
         ),
-        provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" })),
+        provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: "enabled" }), withViewTransitions({ skipInitialTransition: true, onViewTransitionCreated: skipTransitionWithinScreen })),
         provideLottieOptions({ player: () => import("lottie-web/build/player/lottie_light") })
     ]
 }

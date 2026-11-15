@@ -1,19 +1,23 @@
-<mat-toolbar #toolbar [dir]="resources.direction" class="toolbar fixed z-50"
-    [class]="isScrolled() && isHome() ? 'transition-all duration-300' : isHome() ? 'transition-all duration-300 bg-transparent!' : ''">
-    <div class="flex flex-grow items-center overflow-hidden">
+<mat-toolbar #toolbar [dir]="resources.direction" class="toolbar fixed z-50 gap-2" [class]="toolbarClass()">
+    <div class="flex min-w-0 flex-grow items-center">
         @if (isIFrame()) {
-        <img src="/content/logo-mark.png" alt="" width="48" height="48" class="h-10 w-10 shrink-0" />
-        <span class="text-white">MAPEAK</span>
+        <div class="pointer-events-auto flex items-center gap-2 rounded-full bg-surface pe-4 shadow-md">
+            <img src="/content/logo-mark.png" alt="" width="48" height="48" class="h-10 w-10 shrink-0" />
+            <span>MAPEAK</span>
+        </div>
         } @else if (isSearchShown()) {
-        <search></search>
+        <search class="pointer-events-auto block w-full md:max-w-sm"></search>
         } @else {
-        <a routerLink="/" class="flex items-center gap-2 overflow-hidden text-white no-underline">
+        <a routerLink="/" class="flex items-center gap-2 overflow-hidden text-current no-underline">
             <img src="/content/logo-mark.png" alt="Mapeak" width="40" height="40"
                 class="h-8 w-8 shrink-0 md:h-10 md:w-10" />
             <span class="truncate text-base font-black uppercase tracking-widest md:text-lg">Mapeak</span>
         </a>
         }
     </div>
-    <main-menu></main-menu>
+    <div class="flex shrink-0 items-center"
+        [class]="isFloating() ? 'pointer-events-auto rounded-full bg-surface p-1 shadow-md' : ''">
+        <main-menu class="flex items-center gap-1"></main-menu>
+    </div>
 </mat-toolbar>
 <router-outlet></router-outlet>

@@ -1,6 +1,7 @@
+/* The side gap is a variable so the floating toolbar over the map can line its pills up with the map controls. */
 .toolbar {
+    --toolbar-side-gap: 16px;
     top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
-    background-color: #528CFA80;
-    padding-left: calc(16px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
-    padding-right: calc(16px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
+    padding-left: calc(var(--toolbar-side-gap) + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
+    padding-right: calc(var(--toolbar-side-gap) + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)));
 }

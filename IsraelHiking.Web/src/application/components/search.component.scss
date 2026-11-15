@@ -1,12 +1,19 @@
 @use '@angular/material' as mat;
 
+/* The field sits inside a rounded pill, so its own filled background, underline and hover layer are
+   turned off - they are rectangles that would show through the pill's corners. */
 .search-input-container {
-    width: calc(100vw - 196px);
     @include mat.all-component-densities(-3);
-}
+    @include mat.form-field-overrides((filled-container-color: transparent,
+            filled-active-indicator-height: 0,
+            filled-focus-active-indicator-height: 0,
+            hover-state-layer-opacity: 0,
+        ));
 
-.search-input-container.logged-in {
-    width: calc(100vw - 146px);
+    .mat-mdc-form-field-infix {
+        width: auto;
+        min-width: 0;
+    }
 }
 
 .search-result-option {
@@ -32,14 +39,4 @@
 
 .search-result-option[dir=rtl] i {
     padding: 0 0 0 5px;
-}
-
-@media (width > 600px) {
-    .search-input-container {
-        width: 350px;
-    }
-
-    .search-input-container.logged-in {
-        width: 350px;
-    }
 }

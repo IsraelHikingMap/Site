@@ -28,7 +28,7 @@
                 <button mat-button [matMenuTriggerFor]="areaMenu" [matMenuTriggerRestoreFocus]="false"
                     (click)="$event.stopPropagation()"
                     analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Open area menu">
-                    <i class="fa icon-ellipsis-v"></i>
+                    <i class="fa fa-action icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #areaMenu="matMenu" overlapTrigger="false">
                     <button mat-menu-item [disabled]="row.area === null" (click)="editAreaName(row.id)" analyticsOn="click"
@@ -75,7 +75,7 @@
                         <button mat-button [disabled]="nameForm().invalid()" (mousedown)="$event.preventDefault()"
                             (click)="saveAreaName(row)" analyticsOn="click"
                             analyticsCategory="Offline Management" analyticsLabel="Save area name">
-                            <i class="fa fa-lg icon-check"></i>
+                            <i class="fa fa-action icon-check"></i>
                         </button>
                     </div>
                     } @else {

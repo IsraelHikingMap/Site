@@ -62,21 +62,25 @@ html {
     margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 
     &.success-snackbar {
-        --mat-snack-bar-container-color: var(--brand-color);
+        @include mat.snack-bar-overrides((container-color: var(--brand-color)));
     }
 
     &.warn-snackbar {
-        --mat-snack-bar-container-color: #ffeb3b;
-        --mat-snack-bar-supporting-text-color: #000;
+        @include mat.snack-bar-overrides((container-color: #ffeb3b, supporting-text-color: #000));
     }
 
     &.error-snackbar {
-        --mat-snack-bar-container-color: #f44336;
+        @include mat.snack-bar-overrides((container-color: #f44336));
     }
 
     &.confirm-snackbar {
-        --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
+        @include mat.snack-bar-overrides((button-color: var(--mat-sys-inverse-on-surface)));
     }
+}
+
+/* A count on a badge in the brand color, used where the badge marks something to look at rather than an error. */
+.brand-badge {
+    @include mat.badge-overrides((background-color: var(--brand-color), text-color: #003018));
 }
 
 /* Latin slice first: browsers only fetch a face whose unicode-range matches text they
@@ -142,37 +146,34 @@ body {
     color: rgba(0, 0, 0, 0.87);
 }
 
-.side-control {
-    position: relative;
-    padding: 2px;
-    clear: both;
-    background-color: var(--mat-sys-surface);
-    margin: 0 !important;
-    border: 2px solid var(--mat-sys-outline-variant);
-
-    & button,
-    a {
-        min-width: unset !important;
-        padding: 0 !important;
-        display: block;
-        width: v.$app-button-size;
-        height: v.$app-button-size;
-        border-radius: 0;
-
-        & i {
-            vertical-align: middle !important;
-        }
-    }
-
-    .mat-mdc-button-persistent-ripple,
-    .mat-mdc-button-persistent-ripple::before,
-    .mat-mdc-button-ripple {
-        border-radius: 0; // avoid pill-shaped hover state for side buttons
-    }
+/* Round fab buttons on the surface colour, like the ones floating over the map, which read as part of the
+   map and not as a block of brand chrome stacked on top of it. A background set on the button still wins. */
+.round-fab {
+    @include mat.fab-overrides((container-shape: 9999px,
+            extended-container-shape: 9999px,
+            small-container-shape: 9999px,
+            container-color: var(--mat-sys-surface),
+            foreground-color: var(--mat-sys-on-surface),
+            small-container-color: var(--mat-sys-surface),
+            small-foreground-color: var(--mat-sys-on-surface),
+        ));
 }
 
-.side-control.maplibregl-ctrl button:last-of-type {
-    overflow: hidden;
+/* Material's own dropdown in the outlined style, at the height and with the shape of the pill buttons it
+   sits next to in the list headers. The corner is half the 40px height rather than a "full" radius, since
+   the outlined field also sizes its side padding from this value. */
+.pill-select {
+    @include mat.form-field-density(-4);
+    @include mat.form-field-overrides((outlined-container-shape: 20px));
+}
+
+/* A toggled round button is filled with the brand tone, the way Material marks a selected icon button -
+   an outline drawn around a circle reads as a focus ring. The surface is mixed in so a button floating
+   over the map stays opaque. */
+.mat-mdc-icon-button.active,
+.mat-mdc-mini-fab.active {
+    outline: none !important;
+    background-color: color-mix(in srgb, var(--brand-color) 35%, var(--mat-sys-surface)) !important;
 }
 
 .active {
@@ -214,6 +215,13 @@ body {
     font-size: 1.33333333em;
     line-height: 0.75em;
     vertical-align: -15%;
+}
+
+/* The icon of a fab or of a button that shows nothing but the icon. These draw a font icon at the size of their
+   label, far smaller than the same icon in an icon button, so they are given the icon button's size. An icon beside
+   a label stays at fa-lg. */
+.fa-action {
+    font-size: 24px;
 }
 
 .fa-2x {
@@ -339,28 +347,6 @@ body {
     padding-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
 }
 
-/* Every corner keeps clear of the system bars on both axes: in landscape the navigation bar sits on
-   one of the sides, and without the horizontal margins its buttons cover the controls in that corner. */
-.maplibregl-ctrl-top-left {
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-top-right {
-    margin-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0)) !important;
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-    margin-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0)) !important;
-}
-
-.maplibregl-ctrl-bottom-left {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
-}
-
 .magrin-top-with-toolbar {
     margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0)));
 }
@@ -369,10 +355,6 @@ mgl-map {
     height: 100% !important;
     width: 100% !important;
     object-fit: cover;
-}
-
-.maplibregl-ctrl {
-    margin: 0 !important;
 }
 
 .maplibregl-popup-content {
@@ -401,27 +383,7 @@ mgl-map {
 
 @media print {
 
-    .mat-mdc-tooltip,
-    .side-control {
-        display: none !important;
-    }
-}
-
-// Strips the toolbar sizing and filled-field chrome off the search when the landing hero hosts it.
-// !important since search.component is ViewEncapsulation.None and injects its styles after this sheet.
-.landing-search {
-
-    .search-input-container,
-    .search-input-container.logged-in {
-        width: 100% !important;
-    }
-
-    .mat-mdc-text-field-wrapper {
-        background-color: transparent !important;
-    }
-
-    .mat-mdc-form-field-focus-overlay,
-    .mdc-line-ripple {
+    .mat-mdc-tooltip {
         display: none !important;
     }
 }

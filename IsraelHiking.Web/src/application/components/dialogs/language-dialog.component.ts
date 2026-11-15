@@ -5,7 +5,6 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
 import { FormsModule } from "@angular/forms";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
-import { MatTooltip } from "@angular/material/tooltip";
 import { MatDialog, MatDialogTitle, MatDialogClose, MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
@@ -17,7 +16,7 @@ import { ApplicationState, LanguageCode } from "../../models";
 @Component({
     selector: "language-dialog",
     templateUrl: "./language-dialog.component.html",
-    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, MatTooltip, LottieComponent]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatRadioGroup, FormsModule, MatRadioButton, AnalyticsDirective, MatDialogActions, LottieComponent]
 })
 export class LanguageDialogComponent {
     public readonly selectedLanguageCode = signal<LanguageCode>(null);

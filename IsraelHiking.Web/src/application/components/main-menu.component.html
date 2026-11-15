@@ -1,30 +1,30 @@
 ﻿@if (!isIFrame()) {
-<button mat-button routerLink="/map" routerLinkActive="border-b-4! border-brand!" analyticsOn="click"
-  analyticsCategory="Menu" analyticsLabel="Plan & Explore" class="max-md:hidden! text-white!">
+<button mat-button routerLink="/map" routerLinkActive="bg-brand/20!" analyticsOn="click"
+  analyticsCategory="Menu" analyticsLabel="Plan & Explore" class="max-md:hidden! text-current!">
   <i class="fa fa-lg icon-map-o mat-icon"></i>
   <span class="mx-1">{{resources.planAndExplore}}</span>
 </button>
-<button mat-button routerLink="/public-routes" routerLinkActive="border-b-4! border-brand!" analyticsOn="click"
-  analyticsCategory="Menu" analyticsLabel="Find Routes" class="max-md:hidden! text-white!">
+<button mat-button routerLink="/public-routes" routerLinkActive="bg-brand/20!" analyticsOn="click"
+  analyticsCategory="Menu" analyticsLabel="Find Routes" class="max-md:hidden! text-current!">
   <i class="fa fa-lg icon-recordings mat-icon"></i>
   <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
 }
 @if (isUserKnown() && !isIFrame() && !isLoggedIn()) {
-<button mat-raised-button (click)="login()" analyticsOn="click" analyticsCategory="User Menu"
+<button mat-flat-button (click)="login()" analyticsOn="click" analyticsCategory="User Menu"
   analyticsLabel="Login">{{resources.signIn}}</button>
 }
 <button mat-button [matMenuTriggerFor]="appMenu" analyticsOn="click" analyticsCategory="Menu"
-  analyticsLabel="Toggle main menu" class="!h-[56px] text-white!">
+  analyticsLabel="Toggle main menu" class="h-10! text-current!">
   <span class="flex flex-row justify-center items-center">
     @if (!isUserKnown()) {
     <!-- Holds the avatar's place until we know who the user is, so the toolbar does not jump -->
-    <span class="max-h-[48px] w-[48px] me-4"></span>
+    <span class="w-8 me-2"></span>
     } @else if (isLoggedIn()) {
     @if (userInfo()?.imageUrl) {
-    <img [src]="userInfo()?.imageUrl" alt="" class="max-h-[48px] w-[48px] me-4 rounded-full" />
+    <img [src]="userInfo()?.imageUrl" alt="" class="h-8 w-8 me-2 rounded-full" />
     } @else {
-    <i class="fa icon-user-circle fa-lg me-4"></i>
+    <i class="fa fa-lg icon-user-circle me-2"></i>
     }
     }
     <i class="fa fa-lg icon-bars"></i>
@@ -43,16 +43,18 @@
       <i class="fa fa-lg icon-recordings mat-icon"></i>
       <span class="mx-1">{{resources.findRoutes}}</span>
     </button>
-    <hr class="block md:hidden!" />
+    <mat-divider class="md:hidden!"></mat-divider>
     }
     @if (isLoggedIn()) {
     <button mat-menu-item routerLink="/shares" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="User shares open">
-      <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.mySavedRoutes}}</span>
+      <i class="fa fa-lg icon-mixcloud mat-icon"></i>
+      <span class="mx-1">{{resources.mySavedRoutes}}</span>
     </button>
     <button mat-menu-item routerLink="/traces" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="User traces open">
-      <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
+      <i class="fa fa-lg icon-recordings mat-icon"></i>
+      <span class="mx-1">{{resources.myTraces}}</span>
     </button>
     @if (isPurchaseAvailable()) {
     <button mat-menu-item (click)="orderOfflineMaps()" analyticsOn="click" analyticsCategory="Menu"
@@ -76,13 +78,15 @@
     </button>
     }
     <button mat-menu-item (click)="logout()" analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Logout">
-      <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
+      <i class="fa fa-lg icon-sign-out mat-icon"></i>
+      <span class="mx-1">{{resources.logout}}</span>
     </button>
-    <hr />
+    <mat-divider></mat-divider>
     }
     <button mat-menu-item routerLink="/settings" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="Settings open">
-      <span><i class="fa fa-lg icon-cogs"></i> {{resources.settings}}</span>
+      <i class="fa fa-lg icon-cogs mat-icon"></i>
+      <span class="mx-1">{{resources.settings}}</span>
     </button>
     <button mat-menu-item (click)="openLanguage()" analyticsOn="click" analyticsCategory="Menu"
       analyticsLabel="Open language selection">
@@ -92,7 +96,7 @@
     @if (!isIFrame()) {
     <button mat-menu-item routerLink="/about" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="Menu" analyticsLabel="About">
-      <i class="fa fa-lg icon-info mat-icon"></i>
+      <i class="fa fa-lg icon-info-circle mat-icon"></i>
       <span class="mx-1">{{resources.about}}</span>
     </button>
     <button mat-menu-item (click)="reportAnIssue()" analyticsOn="click" analyticsCategory="Menu"

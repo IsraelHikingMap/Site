@@ -10,7 +10,11 @@ import { ResourcesService } from "./resources.service";
 import {
     DEFAULT_BASE_LAYERS,
     DEFAULT_OVERLAYS,
-    SUBSCRIBED_BASE_LAYERS
+    SUBSCRIBED_BASE_LAYERS,
+    HIKING_MAP,
+    MTB_MAP,
+    OPEN_HEATMAP,
+    SATELLITE_MAP
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
@@ -21,7 +25,8 @@ import {
     RemoveBaseLayerAction,
     AddOverlayAction,
     SetOverlaysVisibilityAction,
-    HideAllOverlaysAction
+    HideAllOverlaysAction,
+    SetLayerShownInPanelAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,
@@ -32,7 +37,19 @@ import type {
 } from "../models";
 import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
+import { SpatialHelper } from "./spatial.helper";
 
+
+/**
+ * Images of the built-in layers, rendered from their styles at zoom 12.5 over the Carmel with the labels
+ * hidden. A vector style has no single tile a browser could show instead.
+ */
+const LAYER_THUMBNAILS: Record<string, string> = {
+    [HIKING_MAP]: "content/layer-thumbnails/hiking.webp",
+    [MTB_MAP]: "content/layer-thumbnails/mtb.webp",
+    [OPEN_HEATMAP]: "content/layer-thumbnails/heatmap.webp",
+    [SATELLITE_MAP]: "content/layer-thumbnails/satellite.webp"
+};
 
 type UserLayer = EditableLayer & {
     isOverlay: boolean;
@@ -56,12 +73,21 @@ export class LayersService {
     private readonly selectedBaseLayerKey = this.store.selectSignal((state: ApplicationState) => state.layersState.selectedBaseLayerKey);
     private readonly visibleOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.visibleOverlays);
     private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+    private readonly hiddenBaseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.hiddenBaseLayers);
+    private readonly hiddenOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.hiddenOverlays);
+    private readonly location = this.store.selectSignal((state: ApplicationState) => state.locationState);
     /**
      * The base layers that come with the application, which are the built in ones and, for a subscribed
      * user, the ones that are a part of the subscription.
      */
     public readonly defaultBaseLayers = computed<Immutable<EditableLayer[]>>(() =>
         this.isSubscribed() ? [...DEFAULT_BASE_LAYERS, ...SUBSCRIBED_BASE_LAYERS] : DEFAULT_BASE_LAYERS);
+    /**
+     * The base layers of the subscription that a user without one can not use, listed anyway so the user
+     * knows what a subscription would add.
+     */
+    public readonly lockedBaseLayers = computed<Immutable<EditableLayer[]>>(() =>
+        this.isSubscribed() ? [] : SUBSCRIBED_BASE_LAYERS);
     private readonly allBaseLayers = computed<Immutable<EditableLayer[]>>(() => [...this.defaultBaseLayers(), ...this.userBaseLayers()]);
     // Reactive derived state exposed as signals (explicit reactive contract; parameterized predicates
     // isBaseLayerSelected()/isOverlayVisible() stay methods since a signal can't take an argument).
@@ -246,8 +272,11 @@ export class LayersService {
     }
 
     public updateBaseLayer(oldLayer: EditableLayer, newLayer: EditableLayer): void {
+        const wasSelected = this.compareKeys(oldLayer.key, this.selectedBaseLayerKey());
         this.store.dispatch(new UpdateBaseLayerAction(oldLayer.key, newLayer));
-        this.selectBaseLayer(newLayer.key);
+        if (wasSelected) {
+            this.selectBaseLayer(newLayer.key);
+        }
         this.updateUserLayerInDatabase(false, newLayer);
     }
 
@@ -279,6 +308,47 @@ export class LayersService {
         const isLayerVisible = visibleOverlays.includes(overlay.key);
         this.loggingService.info(`[Layers] Changing visibility of ${overlay.key} to ${!isLayerVisible ? "visible" : "hidden"}`);
         this.store.dispatch(new SetOverlaysVisibilityAction(overlay.key, !isLayerVisible));
+    }
+
+    /**
+     * Whether the layers panel lists the layer. A layer the user hid from it is still listed while it is in
+     * use - the selected base layer or a visible overlay - so it can always be switched off from the panel.
+     */
+    public isShownInPanel(layer: Immutable<EditableLayer>, isOverlay: boolean): boolean {
+        const hiddenKeys = isOverlay ? this.hiddenOverlays() : this.hiddenBaseLayers();
+        if (!hiddenKeys.includes(layer.key)) {
+            return true;
+        }
+        return isOverlay ? this.isOverlayVisible(layer as EditableLayer) : this.isBaseLayerSelected(layer as EditableLayer);
+    }
+
+    public setShownInPanel(key: string, isOverlay: boolean, shown: boolean) {
+        this.store.dispatch(new SetLayerShownInPanelAction(key, isOverlay, shown));
+    }
+
+    /**
+     * The image a layer is shown with: a built-in layer has one rendered from its style, and a raster layer
+     * shows its own tile around the map's center. Any other layer has none, and is shown by its initials.
+     */
+    public getThumbnail(layer: Immutable<EditableLayer>): string {
+        if (LAYER_THUMBNAILS[layer.key]) {
+            return LAYER_THUMBNAILS[layer.key];
+        }
+        const address = layer.address ?? "";
+        if (!address.includes("{z}") || !address.includes("{x}") || !(address.includes("{y}") || address.includes("{-y}"))) {
+            return null;
+        }
+        const location = this.location();
+        const zoom = Math.min(Math.max(Math.round(location.zoom) - 1, layer.minZoom ?? 0), layer.maxZoom ?? 18);
+        const tile = SpatialHelper.toTile({ lat: location.latitude, lng: location.longitude }, zoom);
+        const x = Math.floor(tile.x);
+        const y = Math.floor(tile.y);
+        return address
+            .replace("{z}", `${zoom}`)
+            .replace("{x}", `${x}`)
+            .replace("{y}", `${y}`)
+            .replace("{-y}", `${Math.pow(2, zoom) - 1 - y}`)
+            .replace("{s}", "a");
     }
 
     public isOverlayVisible(overlay: EditableLayer): boolean {

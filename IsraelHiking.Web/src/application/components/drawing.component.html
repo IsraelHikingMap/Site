@@ -1,57 +1,111 @@
-﻿<div class="side-control maplibregl-ctrl" [dir]="resources.direction">
-  <button mat-button (click)="togglePrivateRoutes()" matTooltip="{{resources.privateRoutes}}" matTooltipPosition="left"
+<div class="flex flex-col rounded-full bg-surface shadow-md print:hidden!" [dir]="resources.direction">
+  <button mat-icon-button (click)="togglePrivateRoutes()" matTooltip="{{resources.privateRoutes}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Private routes">
-    <i class="fa icon-list-ul fa-lg"></i>
+    <i class="fa icon-list-ul"></i>
   </button>
-  <button mat-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}"
-    [ngStyle]="{'color': getRouteColor()}" matTooltip="{{resources.editPoint}}" matTooltipPosition="left"
+  <button mat-icon-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}"
+    [style.color]="routeColor()" matTooltip="{{resources.editPoint}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw POI toggle">
-    <i class="fa icon-map-marker fa-lg"></i>
+    <i class="fa icon-map-pin"></i>
   </button>
-  <button mat-button (click)="toggleEditRoute()" [ngClass]="{active : isRouteEditActive() }"
-    [style.color]="getRouteColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="left" analyticsOn="click"
+  <button mat-icon-button (click)="toggleEditRoute()" [ngClass]="{active : isRouteEditActive() }"
+    [style.color]="routeColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="after" analyticsOn="click"
     analyticsCategory="Drawing" analyticsLabel="Draw route toggle">
-    <i class="fa icon-pencil fa-lg"></i>
-  </button>
-  @if (isRouteEditActive()) {
-  <button mat-button class="mt-1" (click)="setRouting('Hike')" [ngClass]="{active : getRoutingType() === 'Hike' }"
-    matTooltip="{{resources.hikeRouting}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
-    analyticsLabel="Routing Hike">
-    <i class="fa icon-hike fa-lg"></i>
-  </button>
-  <button mat-button (click)="setRouting('Bike')" [ngClass]="{active : getRoutingType() === 'Bike' }"
-    matTooltip="{{resources.bikeRouting}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
-    analyticsLabel="Routing Bike">
-    <i class="fa icon-bike fa-lg"></i>
-  </button>
-  <button mat-button (click)="setRouting('4WD')" [ngClass]="{active : getRoutingType() === '4WD' }"
-    matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="left" analyticsOn="click"
-    analyticsCategory="Drawing" analyticsLabel="Routing 4WD">
-    <i class="fa icon-four-by-four fa-lg"></i>
-  </button>
-  <button mat-button (click)="setRouting('None')" [ngClass]="{active : getRoutingType() === 'None' }"
-    matTooltip="{{resources.straightLines}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
-    analyticsLabel="Routing None">
-    <i class="fa icon-none fa-lg"></i>
-  </button>
-  }
-  <button mat-button (click)="undo()" [disabled]="undoQueueLength() === 0" matTooltip="{{resources.undo}}"
-    matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw undo">
-    <i class="fa icon-mail-reply fa-lg"></i>
+    <i class="fa icon-pencil"></i>
   </button>
   @if (isEditActive()) {
-  <button mat-button [matMenuTriggerFor]="clearMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left"
+  <div animate.enter="tools-enter" animate.leave="tools-leave" class="flex flex-col overflow-hidden">
+    @if (isRouteEditActive()) {
+    @let routingType = getRoutingType();
+    @if (isTallScreen()) {
+    <button mat-icon-button (click)="setRouting('Hike')" [class.active]="routingType === 'Hike'"
+      matTooltip="{{resources.hikeRouting}}" matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing"
+      analyticsLabel="Routing Hike">
+      <i class="fa icon-hike"></i>
+    </button>
+    <button mat-icon-button (click)="setRouting('Bike')" [class.active]="routingType === 'Bike'"
+      matTooltip="{{resources.bikeRouting}}" matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing"
+      analyticsLabel="Routing Bike">
+      <i class="fa icon-bike"></i>
+    </button>
+    <button mat-icon-button (click)="setRouting('4WD')" [class.active]="routingType === '4WD'"
+      matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="after" analyticsOn="click"
+      analyticsCategory="Drawing" analyticsLabel="Routing 4WD">
+      <i class="fa icon-four-by-four"></i>
+    </button>
+    <button mat-icon-button (click)="setRouting('None')" [class.active]="routingType === 'None'"
+      matTooltip="{{resources.straightLines}}" matTooltipPosition="after" analyticsOn="click"
+      analyticsCategory="Drawing" analyticsLabel="Routing None">
+      <i class="fa icon-none"></i>
+    </button>
+    } @else {
+      <div class="relative">
+        <button mat-icon-button (click)="routingTrigger.openMenu()" matTooltipPosition="after" analyticsOn="click"
+          analyticsCategory="Drawing" analyticsLabel="Routing menu"
+          matTooltip="{{routingType === 'Hike' ? resources.hikeRouting : routingType === 'Bike' ? resources.bikeRouting : routingType === '4WD' ? resources.fourWheelDriveRouting : resources.straightLines}}">
+          @switch (routingType) {
+          @case ("Hike") {
+          <i class="fa icon-hike"></i>
+          }
+          @case ("Bike") {
+          <i class="fa icon-bike"></i>
+          }
+          @case ("4WD") {
+          <i class="fa icon-four-by-four"></i>
+          }
+          @default {
+          <i class="fa icon-none"></i>
+          }
+          }
+          <i class="fa absolute end-0.5 top-1/2 -translate-y-1/2 text-[8px]! opacity-70"
+            [ngClass]="resources.direction === 'rtl' ? 'icon-chevron-left' : 'icon-chevron-right'"></i>
+        </button>
+        <span class="absolute -end-1 top-0 h-full w-0" [matMenuTriggerFor]="routingMenu"
+          #routingTrigger="matMenuTrigger"></span>
+      </div>
+      <mat-menu #routingMenu="matMenu" xPosition="after" [overlapTrigger]="true">
+        <button mat-menu-item (click)="setRouting('Hike')" [class.bg-brand/20!]="routingType === 'Hike'" analyticsOn="click"
+          analyticsCategory="Drawing" analyticsLabel="Routing Hike">
+          <i class="fa fa-lg icon-hike mat-icon"></i>
+          <span class="mx-1">{{resources.hikeRouting}}</span>
+        </button>
+        <button mat-menu-item (click)="setRouting('Bike')" [class.bg-brand/20!]="routingType === 'Bike'" analyticsOn="click"
+          analyticsCategory="Drawing" analyticsLabel="Routing Bike">
+          <i class="fa fa-lg icon-bike mat-icon"></i>
+          <span class="mx-1">{{resources.bikeRouting}}</span>
+        </button>
+        <button mat-menu-item (click)="setRouting('4WD')" [class.bg-brand/20!]="routingType === '4WD'" analyticsOn="click"
+          analyticsCategory="Drawing" analyticsLabel="Routing 4WD">
+          <i class="fa fa-lg icon-four-by-four mat-icon"></i>
+          <span class="mx-1">{{resources.fourWheelDriveRouting}}</span>
+        </button>
+        <button mat-menu-item (click)="setRouting('None')" [class.bg-brand/20!]="routingType === 'None'" analyticsOn="click"
+          analyticsCategory="Drawing" analyticsLabel="Routing None">
+          <i class="fa fa-lg icon-none mat-icon"></i>
+          <span class="mx-1">{{resources.straightLines}}</span>
+        </button>
+      </mat-menu>
+    }
+    }
+    <button mat-icon-button (click)="undo()" [disabled]="undoQueueLength() === 0" matTooltip="{{resources.undo}}"
+      matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw undo">
+      <i class="fa icon-mail-reply"></i>
+    </button>
+  </div>
+  }
+  @if (isEditActive()) {
+  <button mat-icon-button [matMenuTriggerFor]="clearMenu" matTooltip="{{resources.clear}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw clear">
-    <i class="fa icon-trash fa-lg"></i>
+    <i class="fa icon-trash"></i>
   </button>
-  <mat-menu #clearMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+  <mat-menu #clearMenu="matMenu" overlapTrigger="false" xPosition="after">
     <button mat-menu-item (click)="clearRoute()" analyticsOn="click" analyticsCategory="Drawing"
-      analyticsLabel="Clear route"><i class="fa icon-recordings"></i>
+      analyticsLabel="Clear route"><i class="fa fa-lg icon-recordings mat-icon"></i>
       <span class="mx-1">{{resources.clearRoute}}</span>
     </button>
     <button mat-menu-item (click)="clearPois()" analyticsOn="click" analyticsCategory="Drawing"
       analyticsLabel="Clear pois">
-      <i class="fa icon-map-marker"></i>
+      <i class="fa fa-lg icon-map-pin mat-icon"></i>
       <span class="mx-1">{{resources.clearPois}}</span>
     </button>
     <button mat-menu-item (click)="clearBoth()" analyticsOn="click" analyticsCategory="Drawing"
@@ -66,18 +120,18 @@
     </button>
   </mat-menu>
   } @else {
-  <button mat-button (click)="deleteAllRoutes()" [disabled]="!hasRoutes()"
-    matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
+  <button mat-icon-button (click)="deleteAllRoutes()" [disabled]="!hasRoutes()"
+    matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing"
     analyticsLabel="Delete all routes">
-    <i class="fa icon-trash fa-lg"></i>
+    <i class="fa icon-trash"></i>
   </button>
   }
   @if (hasMultipleRoutes()) {
-  <button mat-button matTooltip="{{resources.saveRouteAndShare}}" [matMenuTriggerFor]="shareMenu"
-    matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
-    <i class="fa icon-cloud-share fa-lg"></i>
+  <button mat-icon-button matTooltip="{{resources.saveRouteAndShare}}" [matMenuTriggerFor]="shareMenu"
+    matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Share">
+    <i class="fa icon-cloud-share"></i>
   </button>
-  <mat-menu #shareMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
+  <mat-menu #shareMenu="matMenu" overlapTrigger="false" xPosition="after">
     <button mat-menu-item (click)="share('current')" analyticsOn="click" analyticsCategory="Drawing"
       analyticsLabel="Share current route"><i class="fa icon-cloud-share"></i>
       <span class="mx-1">{{resources.currentRoute}}</span>
@@ -88,10 +142,10 @@
     </button>
   </mat-menu>
   } @else {
-  <button mat-button matTooltip="{{resources.saveRouteAndShare}}" (click)="share('current')"
-    [disabled]="!hasRoutes()" matTooltipPosition="left" analyticsOn="click" analyticsCategory="Drawing"
+  <button mat-icon-button matTooltip="{{resources.saveRouteAndShare}}" (click)="share('current')"
+    [disabled]="!hasRoutes()" matTooltipPosition="after" analyticsOn="click" analyticsCategory="Drawing"
     analyticsLabel="Share">
-    <i class="fa icon-cloud-share fa-lg"></i>
+    <i class="fa icon-cloud-share"></i>
   </button>
   }
 </div>

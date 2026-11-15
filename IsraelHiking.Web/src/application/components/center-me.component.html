@@ -1,6 +1,6 @@
 @if (showButton()) {
-<div class="side-control maplibregl-ctrl">
-  <button class="w-[unset]! mx-2" mat-button (click)="centerMe()" analyticsOn="click" analyticsCategory="Location"
+<div class="print:hidden!">
+  <button mat-flat-button class="shadow-md" (click)="centerMe()" analyticsOn="click" analyticsCategory="Location"
     analyticsLabel="Center me">
     <i class="fa fa-lg icon-follow-me"></i>
     {{resources.centerMe}}

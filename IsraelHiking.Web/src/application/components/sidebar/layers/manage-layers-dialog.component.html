@@ -1,0 +1,66 @@
+<div [dir]="resources.direction">
+    <div mat-dialog-title>
+        <div>{{isOverlay ? resources.overlays : resources.baseMaps}}</div>
+        <button mat-icon-button [attr.aria-label]="resources.close" type="button" mat-dialog-close tabindex="-1"><i
+                class="fa icon-close"></i></button>
+    </div>
+    <div mat-dialog-content>
+        <div class="mb-2 flex flex-row justify-end">
+            <button mat-button type="button" (click)="toggleEditing(null)" [class.active]="isEditing(null)"
+                analyticsOn="click" analyticsCategory="Layers" [analyticsLabel]="isOverlay ? 'Add overlay' : 'Add base layer'">
+                <i class="fa fa-lg icon-plus"></i> {{isOverlay ? resources.addOverlay : resources.addBaseLayer}}
+            </button>
+        </div>
+        <div class="flex flex-col gap-2">
+            @if (isEditing(null)) {
+            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" [id]="getCardId(null)">
+                <mat-expansion-panel [expanded]="true" class="rounded-none! bg-transparent! shadow-none! [&_.mat-expansion-panel-body]:p-0!">
+                    <layer-properties [isOverlay]="isOverlay" (added)="editing.set(null)"></layer-properties>
+                </mat-expansion-panel>
+            </div>
+            }
+            @for (layer of layers(); track layer.key) {
+            <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" [id]="getCardId(layer.key)">
+                <div class="flex flex-row items-center gap-1 ps-1 pe-1">
+                    <mat-checkbox class="min-w-0 flex-1 wrap-anywhere" [checked]="isShownInPanel(layer)"
+                        [disabled]="isLocked(layer)" (change)="setShownInPanel(layer, $event.checked)">
+                        {{resources.translate(layer.key)}}
+                    </mat-checkbox>
+                    @if (isApp) {
+                    <button mat-icon-button type="button" class="shrink-0" (click)="share(layer)"
+                        [matTooltip]="resources.share" [attr.aria-label]="resources.share" analyticsOn="click"
+                        analyticsCategory="Layers" analyticsLabel="Share layer from app">
+                        <i class="fa icon-share-alt"></i>
+                    </button>
+                    } @else {
+                    <button mat-icon-button type="button" class="shrink-0" [cdkCopyToClipboard]="getShareAddress(layer)"
+                        (click)="copiedKey.set(layer.key)" [matTooltip]="resources.copyLink" [attr.aria-label]="resources.copyLink"
+                        analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Share layer from web">
+                        <i class="fa" [class]="copiedKey() === layer.key ? 'icon-check-circle text-brand' : 'icon-clipboard'"></i>
+                    </button>
+                    }
+                    <button mat-icon-button type="button" class="shrink-0" (click)="remove(layer)"
+                        matTooltip="{{resources.deleteLayer}}" [attr.aria-label]="resources.deleteLayer"
+                        analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Delete layer">
+                        <i class="fa icon-trash"></i>
+                    </button>
+                    <button mat-icon-button type="button" class="shrink-0" (click)="toggleEditing(layer.key)"
+                        matTooltip="{{isOverlay ? resources.overlayProperties : resources.baseLayerProperties}}"
+                        [attr.aria-label]="isOverlay ? resources.overlayProperties : resources.baseLayerProperties"
+                        [attr.aria-expanded]="isEditing(layer.key)" analyticsOn="click" analyticsCategory="Layers"
+                        [analyticsLabel]="isOverlay ? 'Toggle overlay properties' : 'Toggle base layer properties'">
+                        <i class="fa icon-chevron-down transition-transform duration-300"
+                            [class.rotate-180]="isEditing(layer.key)"></i>
+                    </button>
+                </div>
+                <mat-expansion-panel class="rounded-none! bg-transparent! shadow-none! [&_.mat-expansion-panel-body]:p-0!"
+                    [expanded]="isEditing(layer.key)">
+                    <ng-template matExpansionPanelContent>
+                        <layer-properties [layer]="layer" [isOverlay]="isOverlay"></layer-properties>
+                    </ng-template>
+                </mat-expansion-panel>
+            </div>
+            }
+        </div>
+    </div>
+</div>

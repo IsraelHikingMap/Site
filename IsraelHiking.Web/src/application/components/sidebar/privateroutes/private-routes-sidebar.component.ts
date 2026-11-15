@@ -1,7 +1,9 @@
-import { Component, inject, computed } from "@angular/core";
-import { MatButton, MatMiniFabButton } from "@angular/material/button";
+import { Component, inject, computed, signal } from "@angular/core";
+import { MatButton, MatIconButton, MatMiniFabButton, MatAnchor } from "@angular/material/button";
+import { MatDivider } from "@angular/material/divider";
+import { MatBadge } from "@angular/material/badge";
+import { MatExpansionPanel, MatExpansionPanelContent } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { NgClass, NgStyle } from "@angular/common";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
@@ -41,7 +43,7 @@ import type { ApplicationState, LatLngAltTime, RouteData } from "../../../models
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, MatRadioGroup, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
+    imports: [Dir, MatButton, MatIconButton, MatAnchor, MatDivider, MatBadge, MatExpansionPanel, MatExpansionPanelContent, AnalyticsDirective, MatTooltip, NgClass, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, MatRadioGroup, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
 })
 export class PrivateRoutesSidebarComponent {
     public readonly resources = inject(ResourcesService);
@@ -61,6 +63,8 @@ export class PrivateRoutesSidebarComponent {
 
     public routes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
     public readonly colors = this.routesFactory.colors;
+    /** The route whose properties are open for editing under it - one at a time, like an accordion. */
+    public readonly editedRouteId = signal<string>(null);
     public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
     public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
     public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));

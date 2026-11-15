@@ -5,7 +5,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatFormField, MatPrefix } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatOption } from "@angular/material/core";
-import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
+import { MatAutocompleteTrigger, MatAutocomplete, MatAutocompleteOrigin } from "@angular/material/autocomplete";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, distinctUntilChanged, share } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -25,7 +25,7 @@ import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgClass, Dir, MatFormField, MatPrefix, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
+    imports: [NgClass, Dir, MatFormField, MatPrefix, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatAutocompleteOrigin, ReactiveFormsModule, MatOption]
 })
 export class SearchComponent {
 
@@ -49,9 +49,6 @@ export class SearchComponent {
     private readonly analyticsService = inject(AnalyticsService);
 
     private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
-    private readonly userInfo = this.store.selectSignal((s: ApplicationState) => s.userState.userInfo);
-
-    public readonly isLoggedIn = computed(() => this.userInfo() != null);
 
     public readonly isPoisSearch = computed(() => {
         const currentUrl = this.currentUrl();

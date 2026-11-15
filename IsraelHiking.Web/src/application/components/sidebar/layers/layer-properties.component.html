@@ -1,0 +1,52 @@
+<div class="border-0 border-t border-solid border-outline-variant p-3">
+  <mat-form-field hintLabel="{{resources.layerNamePlaceHolder}}" class="w-full">
+    <mat-label>{{resources.name}}</mat-label>
+    <input matInput #keyInput="ngModel" type="text" [ngModel]="layerData().key" (ngModelChange)="onKeyChanged($event)"
+      required="" [nameInUse]="layerData().key" [isOverlay]="isOverlay()" />
+    @if (keyInput.errors && keyInput.errors.nameInUse) {
+    <mat-error>{{resources.nameIsAlreadyInUse}}</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field hintLabel="{{resources.address}}" class="w-full">
+    <input matInput type="text" dir="ltr" [ngModel]="layerData().address" (ngModelChange)="onAddressChanged($event)"
+      placeholder="https://www.somemap.com/{z}/{x}/{y}.png" required="" />
+  </mat-form-field>
+  <div class="mb-2">
+    <a class="text-sm" href="https://github.com/IsraelHikingMap/Site/wiki/Custom-maps"
+      target="_blank">{{resources.moreInfo}}</a>
+  </div>
+  <div class="flex flex-row gap-1">
+    <mat-form-field class="min-w-0 flex-1">
+      <mat-label>{{resources.minZoom}}</mat-label>
+      <input matInput type="number" [ngModel]="layerData().minZoom" (ngModelChange)="onMinZoomChanged($event)" required="" />
+    </mat-form-field>
+    <mat-form-field class="min-w-0 flex-1">
+      <mat-label>{{resources.maxZoom}}</mat-label>
+      <input matInput type="number" [ngModel]="layerData().maxZoom" (ngModelChange)="onMaxZoomChanged($event)" required="" />
+    </mat-form-field>
+    @if (isOverlay()) {
+    <div class="flex min-w-0 flex-1 flex-col">
+      <label class="text-center">{{resources.opacity}}</label>
+      <mat-slider min="0.1" max="1.0" step="0.1" class="max-md:min-w-16!">
+        <input matSliderThumb [ngModel]="layerData().opacity" (ngModelChange)="onOpacityChanged($event)" />
+      </mat-slider>
+    </div>
+    }
+  </div>
+  <div class="h-[138px] w-full overflow-hidden rounded-lg">
+    <mgl-map [zoom]="(layerData().minZoom + layerData().maxZoom) / 2"
+      [center]="[location()?.longitude, location()?.latitude]"
+      [mapStyle]='{"version": 8, "sources": {}, "layers": [] }' [attributionControl]="false">
+      <auto-layer [layerData]="layerData()" [visible]="true" [isBaselayer]="!isOverlay()" [allowOffline]="false">
+      </auto-layer>
+    </mgl-map>
+  </div>
+  @if (isNew()) {
+  <div class="mt-3 flex flex-row justify-end">
+    <button mat-flat-button type="button" (click)="add()" [disabled]="!canAdd()" analyticsOn="click"
+      analyticsCategory="Layers" analyticsLabel="Add layer">
+      {{isOverlay() ? resources.addOverlay : resources.addBaseLayer}}
+    </button>
+  </div>
+  }
+</div>
