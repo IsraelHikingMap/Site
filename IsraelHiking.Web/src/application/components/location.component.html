@@ -9,10 +9,18 @@
     <mat-spinner diameter="24"></mat-spinner>
     }
   </button>
-  <button mat-mini-fab class="round-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
-    <div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
-      analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up"><i class="icon-north text-xl!"></i>
-    </div>
+  <button mat-mini-fab class="round-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"
+    [attr.aria-label]="resources.northUp" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
+    analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up">
+    <svg viewBox="-20 -20 40 40" class="block size-10" [style.transform]="getRotationAngle()" aria-hidden="true">
+      @for (angle of [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]; track angle) {
+      <line [attr.y1]="-18" [attr.y2]="angle % 90 === 0 ? -14 : -16" [attr.transform]="'rotate(' + angle + ')'"
+        stroke="currentColor" stroke-linecap="round" [attr.stroke-width]="angle % 90 === 0 ? 1.6 : 1"
+        [attr.opacity]="angle % 90 === 0 ? 0.8 : 0.4" />
+      }
+      <path d="M0 -11 L3.5 0 L-3.5 0 Z" fill="#e53935" />
+      <path d="M0 11 L3.5 0 L-3.5 0 Z" fill="currentColor" opacity="0.8" />
+    </svg>
   </button>
   @if (canRecord()) {
   <button mat-mini-fab class="round-fab" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"

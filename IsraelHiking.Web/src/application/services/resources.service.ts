@@ -80,6 +80,7 @@ export class ResourcesService {
     public export: string;
     public deleteLayer: string;
     public mapsAndOverlays: string;
+    public manage: string;
     public baseLayerProperties: string;
     public addBaseLayer: string;
     public overlayProperties: string;
@@ -505,7 +506,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794694245855");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794733294139");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -533,6 +534,7 @@ export class ResourcesService {
         this.export = this.gettextCatalog.getString("Export");
         this.deleteLayer = this.gettextCatalog.getString("Delete Layer");
         this.mapsAndOverlays = this.gettextCatalog.getString("Maps and Overlays");
+        this.manage = this.gettextCatalog.getString("Manage");
         this.baseLayerProperties = this.gettextCatalog.getString("Base Layer Properties");
         this.addBaseLayer = this.gettextCatalog.getString("Add Base Layer");
         this.overlayProperties = this.gettextCatalog.getString("Overlay Properties");

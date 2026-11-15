@@ -1,7 +1,8 @@
-import { Component, inject, ViewEncapsulation } from "@angular/core";
+import { Component, inject, computed, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
-import { MatButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
+import { MatDivider } from "@angular/material/divider";
 import { NgClass } from "@angular/common";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
@@ -9,7 +10,9 @@ import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { PointsOfInterestCategoriesComponent } from "./points-of-interest-categories.component";
-import { LayerPropertiesDialogComponent } from "../../dialogs/layer-properties-dialog.component";
+import { LayerTileComponent } from "./layer-tile.component";
+import { ManageLayersDialogComponent } from "./manage-layers-dialog.component";
+import { MatBadge } from "@angular/material/badge";
 import { LegendDialogComponent } from "../../dialogs/legend-dialog.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
@@ -25,11 +28,9 @@ import type { ApplicationState, EditableLayer } from "../../../models";
     templateUrl: "./layers-sidebar.component.html",
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, PointsOfInterestCategoriesComponent]
+    imports: [Dir, MatButton, MatIconButton, MatDivider, MatBadge, LayerTileComponent, AnalyticsDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatTooltip, PointsOfInterestCategoriesComponent]
 })
 export class LayersSidebarComponent {
-
-    public readonly defaultOverlays = DEFAULT_OVERLAYS;
 
     public readonly resources = inject(ResourcesService);
 
@@ -40,23 +41,22 @@ export class LayersSidebarComponent {
 
     private readonly store = inject(Store);
 
+    private readonly userBaseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
+    private readonly userOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
     public readonly defaultBaseLayers = this.layersService.defaultBaseLayers;
-    public baseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
-    public overlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
+    public readonly baseLayers = computed(() => this.userBaseLayers().filter(l => this.layersService.isShownInPanel(l, false)));
+    public readonly defaultOverlays = DEFAULT_OVERLAYS;
+    public readonly overlays = computed(() => this.userOverlays().filter(l => this.layersService.isShownInPanel(l, true)));
+    /** How many base maps the panel does not list, so the user can tell some are hidden and not gone. */
+    public readonly hiddenBaseLayersCount = computed(() =>
+        this.userBaseLayers().length - this.baseLayers().length);
+    /** How many overlays the panel does not list, so the user can tell some are hidden and not gone. */
+    public readonly hiddenOverlaysCount = computed(() =>
+        this.userOverlays().length - this.overlays().length);
     private readonly expanded = this.store.selectSignal((state: ApplicationState) => state.layersState.expanded);
 
     public close() {
         this.sidebarService.hide();
-    }
-
-    public addBaseLayer(event: Event) {
-        event.stopPropagation();
-        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-baseLayer");
-    }
-
-    public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
-        e.stopPropagation();
-        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-baseLayer");
     }
 
     public expand(groupName: string) {
@@ -69,16 +69,6 @@ export class LayersSidebarComponent {
 
     public getExpandState(groupName: string): boolean {
         return this.expanded().find(l => l === groupName) != null;
-    }
-
-    public addOverlay(event: Event) {
-        event.stopPropagation();
-        LayerPropertiesDialogComponent.openDialog(this.dialog, null, "add-overlay");
-    }
-
-    public editOverlay(e: Event, layer: Immutable<EditableLayer>) {
-        e.stopPropagation();
-        LayerPropertiesDialogComponent.openDialog(this.dialog, layer, "edit-overlay");
     }
 
     public isBaseLayerSelected(baseLayer: EditableLayer): boolean {
@@ -107,6 +97,19 @@ export class LayersSidebarComponent {
             return;
         }
         this.layersService.hideAllOverlays();
+    }
+
+    public getThumbnail(layer: Immutable<EditableLayer>): string {
+        return this.layersService.getThumbnail(layer);
+    }
+
+    public openManage(isOverlay: boolean) {
+        ManageLayersDialogComponent.open(this.dialog, { isOverlay });
+    }
+
+    public editLayer(event: Event, layer: Immutable<EditableLayer>, isOverlay: boolean) {
+        event.stopPropagation();
+        ManageLayersDialogComponent.open(this.dialog, { key: layer.key, isOverlay });
     }
 
     public hasLegend(layer: Immutable<EditableLayer>): boolean {

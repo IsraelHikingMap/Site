@@ -1,27 +1,19 @@
-﻿<mat-expansion-panel [expanded]="getExpandState()" (opened)="expand()" (closed)="collapse()">
+<mat-expansion-panel [expanded]="getExpandState()" (opened)="expand()" (closed)="collapse()">
   <mat-expansion-panel-header>
-    <div class="flex flex-row w-full">
-      <div class="w-4/5">
-        <p class="w-full">{{resources.legendPoi}}</p>
-      </div>
-      <div class="w-1/5">
-        <button class="w-full h-full!" mat-button (click)="toggleVisibility($event)" analyticsOn="click"
-          analyticsCategory="Layers" analyticsLabel="Toggle visibility of points of interest">
-          <i class="fa fa-lg"
-            [ngClass]="{'icon-eye': isCategoryGroupVisible(), 'icon-eye-slash': !isCategoryGroupVisible()}"></i>
-        </button>
-      </div>
-    </div>
-  </mat-expansion-panel-header>
-  @for (category of categories; track category) {
-  <div class="flex flex-row">
-    <button mat-button class="row-button w-full justify-start!" (click)="toggleCategory(category)" analyticsOn="click"
-      analyticsCategory="Layers" analyticsLabel="Toggle category visibility {{category.name}}">
-      <i class="fa"
-        [ngClass]="{'icon-eye': isCategoryVisible(category), 'icon-eye-slash': !isCategoryVisible(category)}"></i>
-      <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
-      <span>{{resources.translate(category.name)}}</span>
+    <mat-panel-title>{{resources.legendPoi}}</mat-panel-title>
+    <button mat-icon-button (click)="toggleVisibility($event)" [attr.aria-label]="resources.legendPoi"
+      analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle visibility of points of interest">
+      <i class="fa" [ngClass]="isCategoryGroupVisible() ? 'icon-eye' : 'icon-eye-slash'"></i>
     </button>
-  </div>
-  }
+  </mat-expansion-panel-header>
+  <mat-chip-listbox multiple="true" [attr.aria-label]="resources.legendPoi">
+    @for (category of categories; track category) {
+    <mat-chip-option [selected]="isCategoryVisible(category)"
+      (selectionChange)="$event.isUserInput && toggleCategory(category)" analyticsOn="click"
+      analyticsCategory="Layers" analyticsLabel="Toggle category visibility {{category.name}}">
+      <i class="fa me-1" [ngClass]="category.icon" [style.color]="category.color"></i>
+      {{resources.translate(category.name)}}
+    </mat-chip-option>
+    }
+  </mat-chip-listbox>
 </mat-expansion-panel>

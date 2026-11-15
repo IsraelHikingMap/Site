@@ -31,7 +31,9 @@
   <mat-sidenav [opened]="sidenavVisible() && !sheetViewName()" position="end" class="magrin-top-with-toolbar pb-safe px-safe" autoFocus="dialog">
     @switch (sidenavViewName()) {
     @case ('layers') {
+    @if (!isNarrowScreen()) {
     <layers-sidebar></layers-sidebar>
+    }
     }
     @case ('public-poi') {
     @if (!isNarrowScreen()) {
@@ -55,6 +57,11 @@
 @case ('private-routes') {
 <bottom-sheet (closed)="closeSidebar()" [dir]="resources.direction">
   <private-routes-sidebar></private-routes-sidebar>
+</bottom-sheet>
+}
+@case ('layers') {
+<bottom-sheet (closed)="closeSidebar()" [dir]="resources.direction">
+  <layers-sidebar></layers-sidebar>
 </bottom-sheet>
 }
 }

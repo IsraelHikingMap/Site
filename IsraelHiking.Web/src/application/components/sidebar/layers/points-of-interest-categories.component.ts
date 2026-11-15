@@ -1,6 +1,7 @@
 import { Component, inject, computed } from "@angular/core";
-import { MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
-import { MatButton } from "@angular/material/button";
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
+import { MatIconButton } from "@angular/material/button";
+import { MatChipListbox, MatChipOption } from "@angular/material/chips";
 import { NgClass } from "@angular/common";
 import { Store } from "@ngxs/store";
 
@@ -18,7 +19,7 @@ import type { ApplicationState, Category } from "../../../models";
 @Component({
     selector: "points-of-interest-categories",
     templateUrl: "./points-of-interest-categories.component.html",
-    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatButton, AnalyticsDirective, NgClass]
+    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatChipListbox, MatChipOption, AnalyticsDirective, NgClass]
 })
 export class PointsOfInterestCategoriesComponent {
 
