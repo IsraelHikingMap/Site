@@ -18,6 +18,9 @@ import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ResourcesService } from "../../../services/resources.service";
 import { LayersService } from "../../../services/layers.service";
 import { SidebarService } from "../../../services/sidebar.service";
+import { PurchaseService } from "../../../services/purchase.service";
+import { RunningContextService } from "../../../services/running-context.service";
+import { ToastService } from "../../../services/toast.service";
 
 import { ExpandGroupAction, CollapseGroupAction } from "../../../reducers/layers.reducer";
 import { DEFAULT_OVERLAYS, HIKING_MAP, MTB_MAP } from "../../../reducers/initial-state";
@@ -38,12 +41,16 @@ export class LayersSidebarComponent {
     private readonly layersService = inject(LayersService);
 
     private readonly sidebarService = inject(SidebarService);
+    private readonly purchaseService = inject(PurchaseService);
+    private readonly runningContextService = inject(RunningContextService);
+    private readonly toastService = inject(ToastService);
 
     private readonly store = inject(Store);
 
     private readonly userBaseLayers = this.store.selectSignal((state: ApplicationState) => state.layersState.baseLayers);
     private readonly userOverlays = this.store.selectSignal((state: ApplicationState) => state.layersState.overlays);
     public readonly defaultBaseLayers = this.layersService.defaultBaseLayers;
+    public readonly lockedBaseLayers = this.layersService.lockedBaseLayers;
     public readonly baseLayers = computed(() => this.userBaseLayers().filter(l => this.layersService.isShownInPanel(l, false)));
     public readonly defaultOverlays = DEFAULT_OVERLAYS;
     public readonly overlays = computed(() => this.userOverlays().filter(l => this.layersService.isShownInPanel(l, true)));
@@ -77,6 +84,19 @@ export class LayersSidebarComponent {
 
     public selectBaseLayer(baseLayer: EditableLayer) {
         this.layersService.selectBaseLayer(baseLayer.key);
+    }
+
+    /** The subscription can only be bought in the app, so the browser tells the user where to get it instead. */
+    public orderSubscription() {
+        if (!this.runningContextService.isCapacitor) {
+            this.toastService.info(this.resources.mapeakProIsPurchasedInTheApp);
+            return;
+        }
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState.userInfo) == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
+        this.purchaseService.showPaywall();
     }
 
     public toggleVisibility(overlay: EditableLayer) {

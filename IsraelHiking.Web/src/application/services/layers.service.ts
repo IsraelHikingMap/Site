@@ -82,6 +82,12 @@ export class LayersService {
      */
     public readonly defaultBaseLayers = computed<Immutable<EditableLayer[]>>(() =>
         this.isSubscribed() ? [...DEFAULT_BASE_LAYERS, ...SUBSCRIBED_BASE_LAYERS] : DEFAULT_BASE_LAYERS);
+    /**
+     * The base layers of the subscription that a user without one can not use, listed anyway so the user
+     * knows what a subscription would add.
+     */
+    public readonly lockedBaseLayers = computed<Immutable<EditableLayer[]>>(() =>
+        this.isSubscribed() ? [] : SUBSCRIBED_BASE_LAYERS);
     private readonly allBaseLayers = computed<Immutable<EditableLayer[]>>(() => [...this.defaultBaseLayers(), ...this.userBaseLayers()]);
     // Reactive derived state exposed as signals (explicit reactive contract; parameterized predicates
     // isBaseLayerSelected()/isOverlayVisible() stay methods since a signal can't take an argument).

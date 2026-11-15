@@ -17,6 +17,8 @@ export class LayerTileComponent {
     public readonly label = input.required<string>();
     public readonly thumbnail = input<string>(null);
     public readonly selected = input(false);
+    /** A layer the user can not use yet, such as one that comes with a subscription, which is grayed out and marked as such. */
+    public readonly locked = input(false);
     public readonly variant = input<"tile" | "row">("tile");
     public readonly pick = output<Event>();
 

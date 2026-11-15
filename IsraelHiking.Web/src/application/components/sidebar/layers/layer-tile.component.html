@@ -5,10 +5,17 @@
     <span class="relative block shrink-0 overflow-hidden rounded-lg border-2 border-solid"
         [class]="(isRow() ? 'size-10 ' : 'aspect-square ') + (selected() ? 'border-brand' : 'border-outline-variant')">
         @if (thumbnail() && !isBroken()) {
-        <img [src]="thumbnail()" alt="" loading="lazy" class="block size-full object-cover" (error)="isBroken.set(true)" />
+        <img [src]="thumbnail()" alt="" loading="lazy" class="block size-full object-cover" [class.grayscale]="locked()"
+            [class.opacity-60]="locked()" (error)="isBroken.set(true)" />
         } @else {
         <span class="flex size-full items-center justify-center font-medium" [class]="isRow() ? 'text-sm' : 'text-2xl'"
             [style.background-color]="placeholderColor()">{{initials()}}</span>
+        }
+        @if (locked()) {
+        <span class="absolute bottom-0.5 start-0.5 flex items-center justify-center rounded-full bg-green-600 text-white"
+            [class]="isRow() ? 'size-4' : 'size-5'">
+            <i class="fa icon-dollar" [class]="isRow() ? 'text-[8px]!' : 'text-[10px]!'"></i>
+        </span>
         }
         @if (selected()) {
         <span class="absolute bottom-0.5 start-0.5 flex items-center justify-center rounded-full bg-brand"

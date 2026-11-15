@@ -139,6 +139,7 @@ describe("LayersService", () => {
         });
 
         expect(service.defaultBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeUndefined();
+        expect(service.lockedBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeDefined();
     }));
 
     it("should offer the subscribed base layers to a subscribed user", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -157,6 +158,7 @@ describe("LayersService", () => {
         });
 
         expect(service.defaultBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeDefined();
+        expect(service.lockedBaseLayers()).toEqual([]);
     }));
 
     it("should fall back to the first base layer when a subscribed base layer is selected without a subscription", inject([LayersService, Store], (service: LayersService, store: Store) => {

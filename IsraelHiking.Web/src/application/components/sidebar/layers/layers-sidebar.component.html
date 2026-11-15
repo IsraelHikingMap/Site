@@ -27,6 +27,11 @@
           }
         </layer-tile>
         }
+        @for (baseLayer of lockedBaseLayers(); track baseLayer.key) {
+        <layer-tile [label]="resources.translate(baseLayer.key)" [thumbnail]="getThumbnail(baseLayer)" [locked]="true"
+          [matTooltip]="resources.availableWithMapeakPro" (pick)="orderSubscription()" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Locked base layer {{baseLayer.key}}"></layer-tile>
+        }
       </div>
       <div class="mt-1 flex flex-col">
         @for (baseLayer of baseLayers(); track baseLayer.key) {
