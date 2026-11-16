@@ -251,6 +251,14 @@ export class MapService {
         return this.currentMap?.isMoving() ?? false;
     }
 
+    /** Resolves when the movement the map is in ends, whether it finished or was interrupted, and at once if it is not moving. */
+    public async waitForMoveEnd(): Promise<void> {
+        if (!this.isMoving()) {
+            return;
+        }
+        await this.currentMap.once("moveend");
+    }
+
     public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);

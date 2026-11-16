@@ -6,6 +6,8 @@ import { Store } from "@ngxs/store";
 import { AnalyticsDirective } from "../directives/analytics.directive";
 import { ResourcesService } from "../services/resources.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
+import { CENTER_ANIMATION_DURATION_MILLISECONDS, LocationService } from "../services/location.service";
+import { MapService } from "../services/map.service";
 import type { ApplicationState } from "../models";
 
 @Component({
@@ -18,6 +20,8 @@ export class CenterMeComponent {
     public readonly resources = inject(ResourcesService);
 
     private readonly store = inject(Store);
+    private readonly locationService = inject(LocationService);
+    private readonly mapService = inject(MapService);
 
     private readonly inMemoryState = this.store.selectSignal((s: ApplicationState) => s.inMemoryState);
     private readonly tracking = this.store.selectSignal((s: ApplicationState) => s.gpsState.tracking);
@@ -32,7 +36,14 @@ export class CenterMeComponent {
         this.tracking() === "tracking" &&
         !this.isEditingRoute());
 
-    public centerMe() {
+    /** Keeps the map panned until it reaches the GPS position, so compass and GPS updates can not cut the move short. */
+    public async centerMe() {
+        const pannedTimestamp = this.inMemoryState().pannedTimestamp;
+        await this.locationService.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
+        await this.mapService.waitForMoveEnd();
+        if (this.inMemoryState().pannedTimestamp !== pannedTimestamp) {
+            return;
+        }
         this.store.dispatch(new SetPannedAction(null));
     }
 }

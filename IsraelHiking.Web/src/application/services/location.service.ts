@@ -24,6 +24,13 @@ export type LocationWithBearing = {
 const COMPASS_ANIMATION_DURATION_MILLISECONDS = 150;
 
 /**
+ * The smallest change in compass heading that turns the map. Without it every reading starts a new animation that
+ * cuts off the one before it, and maplibre only lands the map exactly on the GPS position when an animation runs to
+ * its end, so a map that is never left to finish one wobbles and drifts away from the position.
+ */
+const MIN_COMPASS_BEARING_CHANGE_DEGREES = 3;
+
+/**
  * How long the map takes to move to a new GPS position. About the time between positions when on the move, so the
  * map glides from one to the next instead of stopping in between.
  */
@@ -77,6 +84,9 @@ export class LocationService {
                 return;
             }
             this.lastGpsSpeed = null;
+            if (this.isSmallBearingChange(bearing)) {
+                return;
+            }
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
             if (this.isFollowing()) {
@@ -135,7 +145,8 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    public moveMapToGpsPosition(duration: number) {
+    /** Resolves once the movement to the GPS position has started, so that the `moveend` that follows is its own. */
+    public async moveMapToGpsPosition(duration: number) {
         if (this.locationWithBearing == null) {
             return;
         }
@@ -143,7 +154,12 @@ export class LocationService {
         const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        this.mapService.moveToWithCurrentZoom(center, bearing, duration);
+        await this.mapService.moveToWithCurrentZoom(center, bearing, duration);
+    }
+
+    private isSmallBearingChange(bearing: number): boolean {
+        const delta = Math.abs(((bearing - this.locationWithBearing.bearing + 540) % 360) - 180);
+        return delta < MIN_COMPASS_BEARING_CHANGE_DEGREES;
     }
 
     private handlePositionChange(position: GeolocationPosition) {

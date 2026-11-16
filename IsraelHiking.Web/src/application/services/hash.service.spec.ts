@@ -2,6 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { NavigationEnd, provideRouter, Router, UrlCreationOptions, UrlTree } from "@angular/router";
 import { provideStore, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
+import { Location } from "@angular/common";
 import { Subject } from "rxjs";
 
 import { Urls } from "../urls";
@@ -30,6 +31,7 @@ describe("HashService", () => {
                 provideStore([InMemoryReducer]),
                 provideRouter([]),
                 { provide: Router, useValue: routerMock },
+                { provide: Location, useValue: { replaceState: vi.fn() } },
                 { provide: MapService, useValue: {} },
                 { provide: DataContainerService, useValue: {} },
                 { provide: ShareUrlsService, useValue: {} },
@@ -252,6 +254,32 @@ describe("HashService", () => {
 
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0][0]).toBe(RouteStrings.ROUTE_MAP);
+        }
+    ));
+
+    it("Should replace the address without navigating when already on the map", inject([HashService, Router, Store, MapService, Location],
+        (service: HashService, routerMock: Router, store: Store, mapService: MapService, location: Location) => {
+            const spy = vi.fn();
+            routerMock.navigate = spy;
+            (routerMock as { url: string }).url = RouteStrings.ROUTE_MAP + "/2.00/1.0000/1.0000";
+            mapService.isMoving = () => false;
+            store.reset({
+                poiState: {},
+                inMemoryState: {}
+            });
+            service.initialize();
+            store.reset({
+                poiState: {},
+                inMemoryState: {},
+                locationState: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
+            });
+
+            expect(spy).not.toHaveBeenCalled();
+            expect(location.replaceState).toHaveBeenCalledWith(RouteStrings.ROUTE_MAP + "/2.00/2.0000/3.0000");
         }
     ));
 
