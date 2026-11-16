@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "يجب تنزيل {{count}} مناطق مرة أخرى",
+    "{{count}} selected": "تم تحديد {{count}}",
     "4WD Track": "مسار للمركبات رباعية الدفع",
     "4x4 Routing": "توجيه 4x4",
     "A few words about the route you are saving.": "بضع كلمات عن المسار الذي تحفظه.",
@@ -326,6 +327,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "بحيرة موسمية أو خزان، مجرى نهر جاف، أرض رطبة",
     "Secondary": "ثانوي",
     "See Also": "انظر أيضًا",
+    "Select all": "تحديد الكل",
     "Select Icon": "اختر رمزًا",
     "Settings": "الإعدادات",
     "Share": "مشاركة",

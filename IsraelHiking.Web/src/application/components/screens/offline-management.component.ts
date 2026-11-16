@@ -8,7 +8,7 @@ import { MatError, MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatProgressBar } from "@angular/material/progress-bar";
 import { Dir } from "@angular/cdk/bidi";
-import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatCheckbox } from "@angular/material/checkbox";
 import { DatePipe, NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { form, FormField, validate } from "@angular/forms/signals";
@@ -29,8 +29,8 @@ import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, OfflineArea } from "../../models";
 
-/** A downloaded area as the list shows it, where an old tile is an area as well */
-export type DownloadedAreaRow = {
+/** What is shown of a downloaded area, where an old tile is an area as well */
+export type DownloadedAreaDetails = {
     id: string;
     /** The area as it is kept on the device, null for files whose area could not be read */
     area: Immutable<OfflineArea> | null;
@@ -49,7 +49,7 @@ export type DownloadedAreaRow = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger, DatePipe, NgClass, FormsModule, FormField, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir],
+    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatCheckbox, DatePipe, NgClass, FormsModule, FormField, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir],
     providers: [{ provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }]
 })
 export class OfflineManagementComponent {
@@ -81,11 +81,15 @@ export class OfflineManagementComponent {
     public readonly areas = signal<OfflineArea[]>([]);
     private readonly offeredAreaIds = computed(() => new Set(this.areas().map(area => area.properties.id)));
     /**
-     * The areas the user selected, ones the server offers or ones that were downloaded. Clicking an area on the map adds
-     * it or takes it out again, so that several areas are downloaded together.
+     * The ids of the areas the user selected, on the map or in the list, so that several areas are downloaded or deleted
+     * together. An id and not an area, since a downloaded area whose file could not be read has only its id and can
+     * still be deleted.
      */
-    public readonly selectedAreas = signal<Immutable<OfflineArea>[]>([]);
-    /** Whether a narrow screen shows the map rather than the list, the map is where an area is selected to be downloaded */
+    public readonly selectedIds = signal<string[]>([]);
+    /**
+     * Whether a narrow screen shows the map rather than the list. The map is where an area is selected to be downloaded,
+     * the list is shown first when areas need to be downloaded again, since that is where they are selected together.
+     */
     public readonly showMap = signal(true);
     /** The area whose name is being edited in the list */
     public readonly editedAreaId = signal<string>(null);
@@ -115,41 +119,40 @@ export class OfflineManagementComponent {
     public readonly isDownloadInProgress = computed(() => this.downloadsInProgress().length > 0);
 
     /**
-     * The areas that are on the device but can no longer be used, sorted so that moving to the next one
-     * keeps the same order every time. The root files are not of a specific area, so they are not here -
-     * they are not drawn on the map either, and they are updated along with any area that is downloaded.
-     */
-    public readonly incompatibleAreaIds = computed<string[]>(() => {
-        const downloadedAreas = this.downloadedAreas();
-        return Object.keys(downloadedAreas)
-            .filter(id => !OfflineAreasService.isRootId(id))
-            .filter(id => this.offlineFilesDownloadService.getAreaCompatibility(id, downloadedAreas[id].files) !== "compatible")
-            .sort();
-    });
-
-    /**
      * The downloaded areas, the root files are not of a specific area and are not listed. An area that is
      * downloaded for the first time is listed from the moment its download starts, at the top, so that
      * its progress shows in the list and not only on the map.
      */
-    public readonly downloadedAreaRows = computed<DownloadedAreaRow[]>(() => {
+    public readonly downloadedAreaDetails = computed<DownloadedAreaDetails[]>(() => {
         const downloadedAreas = this.downloadedAreas();
-        const rows = Object.entries(downloadedAreas)
+        const details = Object.entries(downloadedAreas)
             .filter(([id]) => !OfflineAreasService.isRootId(id))
-            .map(([id, { files }]) => this.toRow(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
+            .map(([id, { files }]) => this.toDetails(id, this.offlineFilesDownloadService.getLastModifiedDate(files),
                 this.offlineFilesDownloadService.getAreaCompatibility(id, files)));
-        rows.sort((a, b) =>
+        details.sort((a, b) =>
             OfflineManagementComponent.COMPATIBILITY_ORDER[a.compatibility] - OfflineManagementComponent.COMPATIBILITY_ORDER[b.compatibility] ||
             b.downloadedDate.getTime() - a.downloadedDate.getTime());
-        rows.unshift(...this.downloadsInProgress()
+        details.unshift(...this.downloadsInProgress()
             .filter(({ area }) => downloadedAreas[area.properties.id] == null)
-            .map(({ area }) => this.toRow(area.properties.id, null, "compatible", area)));
-        return rows;
+            .map(({ area }) => this.toDetails(area.properties.id, null, "compatible", area)));
+        return details;
     });
 
-    /** The selected areas a download brings something to: the ones that were not downloaded and the downloaded ones the server still offers */
-    public readonly downloadableSelectedAreas = computed(() =>
-        this.selectedAreas().filter(area => !this.isDownloaded(area) || this.offeredAreaIds().has(area.properties.id)));
+    /**
+     * The areas that are on the device but can no longer be used. The root files are not of a specific area, so they are not here -
+     * they are not drawn on the map either, and they are updated along with any area that is downloaded.
+     */
+    public readonly incompatibleAreaIds = computed<string[]>(() => this.downloadedAreaDetails()
+        .filter(details => details.compatibility !== "compatible")
+        .map(details => details.id));
+
+    /**
+     * The selected areas a download brings something to, which are the ones the server offers. One that was downloaded
+     * keeps the shape and the name it has on the device.
+     */
+    public readonly downloadableSelectedAreas = computed(() => this.selectedIds()
+        .filter(id => this.offeredAreaIds().has(id))
+        .map(id => this.getDownloadedArea(id) ?? this.getOfferedArea(id)));
 
     /**
      * What downloading the selected areas does, which is what the button says: a new download when one of them was not
@@ -157,7 +160,7 @@ export class OfflineManagementComponent {
      */
     public readonly downloadSelectedKind = computed<"new" | "again" | "update">(() => {
         const areas = this.downloadableSelectedAreas();
-        if (areas.some(area => !this.isDownloaded(area))) {
+        if (areas.some(area => !this.isDownloaded(area.properties.id))) {
             return "new";
         }
         return areas.some(area => this.incompatibleAreaIds().includes(area.properties.id)) ? "again" : "update";
@@ -165,31 +168,21 @@ export class OfflineManagementComponent {
 
     /** Whether the selected areas can be deleted, which is when all of them were downloaded */
     public readonly areAllSelectedDownloaded = computed(() =>
-        this.selectedAreas().length > 0 && this.selectedAreas().every(area => this.isDownloaded(area)));
+        this.selectedIds().length > 0 && this.selectedIds().every(id => this.isDownloaded(id)));
 
-    /**
-     * What to tell the user below the buttons: how many areas need to be downloaded again, falling back to
-     * explaining how an area is selected. The count is kept while an area is selected rather than being
-     * replaced by something about that area, so that the user can see how many are left as they go over
-     * them. Nothing is said during a download, the progress on the map says it.
-     */
-    public readonly statusMessage = computed<string>(() => {
-        if (this.isDownloadInProgress()) {
+    public readonly areAllDownloadedSelected = computed(() =>
+        this.downloadedAreaDetails().length > 0 && this.downloadedAreaDetails().every(details => this.isSelected(details.id)));
+
+    /** How many areas need to be downloaded again, null when none do */
+    public readonly incompatibleMessage = computed<string>(() => {
+        const incompatibleCount = this.incompatibleAreaIds().length;
+        if (incompatibleCount === 0) {
             return null;
         }
-        const incompatibleCount = this.incompatibleAreaIds().length;
-        if (incompatibleCount === 1) {
-            return this.resources.oneAreaNeedsToBeDownloadedAgain;
-        }
-        if (incompatibleCount > 1) {
-            return this.resources.areasNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
-        }
-        return this.selectedAreas().length === 0 ? this.resources.clickTheMapToSelectAnArea : null;
+        return incompatibleCount === 1
+            ? this.resources.oneAreaNeedsToBeDownloadedAgain
+            : this.resources.areasNeedToBeDownloadedAgain.replace("{{count}}", incompatibleCount.toString());
     });
-
-    /** Whether the message is about areas that need to be downloaded again and not just an explanation */
-    public readonly isStatusWarning = computed(() =>
-        !this.isDownloadInProgress() && this.incompatibleAreaIds().length > 0);
 
     /**
      * The areas that were downloaded, drawn from the files that are on the device - they are read into
@@ -201,16 +194,16 @@ export class OfflineManagementComponent {
      */
     public readonly downloadedAreasFeatures = computed<GeoJSON.FeatureCollection>(() => {
         const features: GeoJSON.Feature[] = [];
-        for (const row of this.downloadedAreaRows()) {
-            if (row.area == null || this.getDownloadInProgress(row) != null || this.isSelected(row.id)) {
+        for (const details of this.downloadedAreaDetails()) {
+            if (details.area == null || this.getDownloadInProgress(details.id) != null || this.isSelected(details.id)) {
                 continue;
             }
-            const isCompatible = row.compatibility === "compatible";
+            const isCompatible = details.compatibility === "compatible";
             const label = isCompatible
-                ? row.name + "\n" + row.downloadedDate.toLocaleDateString(this.resources.getCurrentLanguageCodeSimplified())
+                ? details.name + "\n" + details.downloadedDate.toLocaleDateString(this.resources.getCurrentLanguageCodeSimplified())
                 : "!";
-            const properties = { color: OfflineManagementComponent.AREA_COLOR[row.compatibility], incompatible: isCompatible ? "false" : "true" };
-            features.push({ ...row.area as OfflineArea, properties }, this.getLabelPoint(row.area, label, { ...properties, textSize: isCompatible ? 20 : 60 }));
+            const properties = { color: OfflineManagementComponent.AREA_COLOR[details.compatibility], incompatible: isCompatible ? "false" : "true" };
+            features.push({ ...details.area as OfflineArea, properties }, this.getLabelPoint(details.area, label, { ...properties, textSize: isCompatible ? 20 : 60 }));
         }
         return { type: "FeatureCollection", features };
     });
@@ -222,8 +215,11 @@ export class OfflineManagementComponent {
         if (this.isDownloadInProgress()) {
             return { type: "FeatureCollection", features: [] };
         }
-        const features = this.selectedAreas().flatMap(area =>
-            [area as OfflineArea, this.getLabelPoint(area, this.offlineAreasService.getName(area) ?? area.properties.id)]);
+        const features = this.selectedIds()
+            .map(id => this.getDownloadedArea(id) ?? this.getOfferedArea(id))
+            .filter(area => area != null)
+            .flatMap(area =>
+                [area as OfflineArea, this.getLabelPoint(area, this.offlineAreasService.getName(area) ?? area.properties.id)]);
         return { type: "FeatureCollection", features };
     });
 
@@ -244,6 +240,7 @@ export class OfflineManagementComponent {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
         this.offlineAreasService.getAreas().then(areas => this.areas.set(areas));
+        this.showMap.set(this.incompatibleAreaIds().length === 0);
         const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
         this.currentLocation = {
             type: "FeatureCollection",
@@ -260,7 +257,7 @@ export class OfflineManagementComponent {
 
     /** Shows every downloaded area, or where the user is when there is none */
     private initializeCenterAndZoom() {
-        const areas = this.downloadedAreaRows().map(row => row.area).filter(area => area != null);
+        const areas = this.downloadedAreaDetails().map(details => details.area).filter(area => area != null);
         if (areas.length === 0) {
             const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
             this.map.flyTo({
@@ -280,14 +277,14 @@ export class OfflineManagementComponent {
      * Downloads areas together, in the order they were selected. The user confirms first when the download is going to
      * delete the areas they replace, see OfflineFilesDownloadService.getReplacedAreaIds.
      */
-    public downloadAreas(areas: Immutable<OfflineArea>[]) {
+    private downloadAreas(areas: Immutable<OfflineArea>[]) {
         const areasToDownload = areas.map(area => this.toAreaToDownload(area));
         const replacedAreaIds = [...new Set(areasToDownload.flatMap(({ replacedAreaIds }) => replacedAreaIds))];
         if (replacedAreaIds.length === 0) {
             this.startDownload(areasToDownload);
             return;
         }
-        const names = this.downloadedAreaRows().filter(row => replacedAreaIds.includes(row.id)).map(row => row.name);
+        const names = this.downloadedAreaDetails().filter(details => replacedAreaIds.includes(details.id)).map(details => details.name);
         this.toastService.confirm({
             message: this.resources.downloadingThisAreaDeletesOldAreas.replace("{{names}}", names.join(", ")),
             type: "OkCancel",
@@ -301,7 +298,7 @@ export class OfflineManagementComponent {
      */
     private toAreaToDownload(area: Immutable<OfflineArea>): AreaToDownload {
         const id = area.properties.id;
-        const offeredArea = this.areas().find(offered => offered.properties.id === id) ?? area;
+        const offeredArea = this.getOfferedArea(id) ?? area;
         const downloadedArea = this.downloadedAreas()[id]?.area;
         const areaToDownload = downloadedArea == null ? offeredArea : { ...offeredArea, properties: downloadedArea.properties };
         return { area: areaToDownload, replacedAreaIds: this.offlineFilesDownloadService.getReplacedAreaIds(areaToDownload, this.offeredAreaIds()) };
@@ -312,9 +309,9 @@ export class OfflineManagementComponent {
         const areas = areasToDownload.map(({ area }) => area);
         this.askToTurnOffBatteryOptimization();
         this.fitBounds({ type: "FeatureCollection", features: areas });
-        this.selectedAreas.set([]);
+        this.selectedIds.set([]);
         const statuses = await this.offlineFilesDownloadService.downloadAreas(areasToDownload);
-        this.selectedAreas.set(areas.filter((_, index) => statuses[index] === "error" || statuses[index] === "aborted"));
+        this.selectedIds.set(areas.filter((_, index) => statuses[index] === "error" || statuses[index] === "aborted").map(area => area.properties.id));
         this.reportDownloadEnd(statuses);
     }
 
@@ -366,31 +363,43 @@ export class OfflineManagementComponent {
     public onMapClick(event: MapMouseEvent) {
         const area = this.offlineAreasService.findArea(this.areas(), event.lngLat);
         if (area == null) {
-            this.selectedAreas.set([]);
+            this.selectedIds.set([]);
             return;
         }
-        const id = area.properties.id;
-        if (this.isSelected(id)) {
-            this.selectedAreas.update(areas => areas.filter(selected => selected.properties.id !== id));
-            return;
-        }
-        this.selectedAreas.update(areas => [...areas, this.downloadedAreas()[id]?.area ?? area]);
+        this.toggleSelection(area.properties.id);
     }
 
     /**
-     * Shows an area of the list on the map, which on a narrow screen means switching to the map. The map
-     * is only resized once it is shown, and moving it before that centers the area on the old size.
+     * Selects a downloaded area or takes it out of the selection, the same as clicking it on the map.
      */
-    public async showOnMap(row: DownloadedAreaRow) {
-        if (this.editedAreaId() === row.id || row.area == null) {
+    public toggleDownloadedArea(details: DownloadedAreaDetails) {
+        if (this.editedAreaId() === details.id || this.getDownloadInProgress(details.id) != null) {
             return;
         }
-        this.showMap.set(true);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        this.selectArea(row.area);
+        this.toggleSelection(details.id);
+        if (this.isSelected(details.id)) {
+            this.showOnMap([details.area]);
+        }
     }
 
-    private toRow(id: string, downloadedDate: Date, compatibility: AreaCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaRow {
+    /** Moves areas into view when the map is shown next to the list, a hidden map has no size to fit them into */
+    private showOnMap(areas: Immutable<OfflineArea>[]) {
+        const features = areas.filter(area => area != null);
+        if (features.length > 0 && this.map?.getContainer().clientWidth > 0) {
+            this.fitBounds({ type: "FeatureCollection", features });
+        }
+    }
+
+    /** Selects every downloaded area, or none of them when all of them already are */
+    public toggleSelectAll() {
+        this.selectedIds.set(this.areAllDownloadedSelected() ? [] : this.downloadedAreaDetails().map(details => details.id));
+    }
+
+    private toggleSelection(id: string) {
+        this.selectedIds.update(ids => ids.includes(id) ? ids.filter(selected => selected !== id) : [...ids, id]);
+    }
+
+    private toDetails(id: string, downloadedDate: Date, compatibility: AreaCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaDetails {
         return {
             id,
             area,
@@ -406,62 +415,60 @@ export class OfflineManagementComponent {
         return this.downloadedAreas()[id]?.area ?? null;
     }
 
+    private getOfferedArea(id: string): OfflineArea | undefined {
+        return this.areas().find(area => area.properties.id === id);
+    }
+
     /**
      * Starts editing the name of an area. The input is rendered and focused while still handling the click,
      * since a mobile browser only brings up the keyboard for a focus that comes from the user's touch.
      */
     public editAreaName(id: string) {
         this.editedAreaId.set(id);
-        this.nameForm().reset(this.downloadedAreaRows().find(row => row.id === id)?.name ?? "");
+        this.nameForm().reset(this.downloadedAreaDetails().find(details => details.id === id)?.name ?? "");
         this.changeDetectorRef.detectChanges();
         this.nameInput()?.nativeElement.select();
     }
 
     /** Saves the typed name, unless another area has it, in which case the editing goes on */
-    public async saveAreaName(row: DownloadedAreaRow) {
+    public async saveAreaName(details: DownloadedAreaDetails) {
         if (this.nameForm().invalid()) {
             return;
         }
         this.editedAreaId.set(null);
-        await this.offlineAreasService.renameDownloadedArea(row.area, this.editedName().trim());
+        await this.offlineAreasService.renameDownloadedArea(details.area, this.editedName().trim());
     }
 
     /**
      * Ends the editing when the input loses the focus, dropping a name another area has rather than
      * leaving an input open that the user already moved away from.
      */
-    public endAreaNameEditing(row: DownloadedAreaRow) {
+    public endAreaNameEditing(details: DownloadedAreaDetails) {
         if (this.nameForm().invalid()) {
             this.editedAreaId.set(null);
             return;
         }
-        this.saveAreaName(row);
+        this.saveAreaName(details);
     }
 
     private isNameInUse(name: string): boolean {
-        return this.downloadedAreaRows().some(row => row.id !== this.editedAreaId() && row.name === name.trim());
+        return this.downloadedAreaDetails().some(details => details.id !== this.editedAreaId() && details.name === name.trim());
     }
 
-    public getDownloadInProgress(row: DownloadedAreaRow): DownloadInProgress | undefined {
-        return this.downloadsInProgress().find(({ area }) => area.properties.id === row.id);
+    public getDownloadInProgress(id: string): DownloadInProgress | undefined {
+        return this.downloadsInProgress().find(({ area }) => area.properties.id === id);
     }
 
-    private isSelected(id: string): boolean {
-        return this.selectedAreas().some(area => area.properties.id === id);
+    public isSelected(id: string): boolean {
+        return this.selectedIds().includes(id);
     }
 
-    private isDownloaded(area: Immutable<OfflineArea>): boolean {
-        return this.downloadedAreas()[area.properties.id] != null;
+    private isDownloaded(id: string): boolean {
+        return this.downloadedAreas()[id] != null;
     }
 
-    public getAreaColor(row: DownloadedAreaRow): string {
-        return OfflineManagementComponent.AREA_COLOR[row.compatibility];
-    }
-
-    /** Selects only the given area and moves the map to it */
-    private selectArea(area: Immutable<OfflineArea>) {
-        this.selectedAreas.set([area]);
-        this.fitBounds(area);
+    public getAreaColor(details: DownloadedAreaDetails): string {
+        return OfflineManagementComponent.AREA_COLOR[details.compatibility];
     }
 
     private fitBounds(geoJson: Immutable<GeoJSON.Feature | GeoJSON.FeatureCollection>) {
@@ -469,21 +476,11 @@ export class OfflineManagementComponent {
         this.map.fitBounds(SpatialHelper.boundsToMBBounds(bounds), { padding: { top: 100, bottom: 150, left: 50, right: 50 } });
     }
 
-    /**
-     * Moves to the area that needs to be downloaded again after the one that is selected, so that the user
-     * can go over them one at a time and download each one when they want to. It goes back to the first one
-     * after the last, since an area stays in the list until it is downloaded again or deleted.
-     */
-    public selectNextIncompatible() {
-        const incompatibleAreaIds = this.incompatibleAreaIds();
-        if (incompatibleAreaIds.length === 0) {
-            return;
-        }
-        const nextIndex = (incompatibleAreaIds.indexOf(this.selectedAreas().at(-1)?.properties.id) + 1) % incompatibleAreaIds.length;
-        const area = this.getDownloadedArea(incompatibleAreaIds[nextIndex]);
-        if (area != null) {
-            this.selectArea(area);
-        }
+    /** Selects the areas that need to be downloaded again, so that they are downloaded together */
+    public selectIncompatible() {
+        const ids = this.incompatibleAreaIds();
+        this.selectedIds.set(ids);
+        this.showOnMap(ids.map(id => this.getDownloadedArea(id)));
     }
 
     public onMapLoad(map: Map) {
@@ -494,10 +491,7 @@ export class OfflineManagementComponent {
     }
 
     public deleteSelected() {
-        this.deleteAreas(this.selectedAreas().map(area => area.properties.id));
-    }
-
-    public deleteAreas(ids: string[]) {
+        const ids = this.selectedIds();
         this.toastService.confirm({
             message: this.resources.areYouSure,
             type: "YesNo",
@@ -505,7 +499,7 @@ export class OfflineManagementComponent {
                 for (const id of ids) {
                     await this.offlineFilesDownloadService.deleteArea(id);
                 }
-                this.selectedAreas.update(areas => areas.filter(area => !ids.includes(area.properties.id)));
+                this.selectedIds.update(selected => selected.filter(id => !ids.includes(id)));
             }
         });
     }

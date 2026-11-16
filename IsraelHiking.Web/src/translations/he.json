@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "יש להוריד מחדש {{count}} אזורים",
+    "{{count}} selected": "{{count}} נבחרו",
     "4WD Track": "דרך לג'יפים",
     "4x4 Routing": "ניווט 4×4",
     "A few words about the route you are saving.": "כמה מילים על המסלול שאתם שומרים.",
@@ -326,6 +327,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "אגם ומאגר עונתיים, אפיק נחל אכזב, ביצה",
     "Secondary": "כביש משני",
     "See Also": "ראו גם",
+    "Select all": "בחר הכל",
     "Select Icon": "בחרו סמליל",
     "Settings": "הגדרות",
     "Share": "שיתוף",

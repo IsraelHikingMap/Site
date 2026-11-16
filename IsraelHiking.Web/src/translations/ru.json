@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "Областей нужно загрузить заново: {{count}}",
+    "{{count}} selected": "Выбрано: {{count}}",
     "4WD Track": "Дорога для внедорожников",
     "4x4 Routing": "4x4 Маршрутизация",
     "A few words about the route you are saving.": "Несколько слов о маршруте, который вы сохраняете.",
@@ -326,6 +327,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "Сезонное озеро или водохранилище, пересохшее русло, водно-болотные угодья",
     "Secondary": "Вторичный",
     "See Also": "Смотрите также",
+    "Select all": "Выбрать все",
     "Select Icon": "Выберите иконку",
     "Settings": "Настройки",
     "Share": "Поделиться",

@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "{{count}} areas need to be downloaded again",
+    "{{count}} selected": "{{count}} selected",
     "4WD Track": "4WD Track",
     "4x4 Routing": "4x4 Routing",
     "A few words about the route you are saving.": "A few words about the route you are saving.",
@@ -326,6 +327,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "Seasonal Lake or Reservoir, Dry Riverbed, Wetland",
     "Secondary": "Secondary",
     "See Also": "See Also",
+    "Select all": "Select all",
     "Select Icon": "Select Icon",
     "Settings": "Settings",
     "Share": "Share",
