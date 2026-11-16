@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef, inject, signal, computed, viewChild, type
 import { Store } from "@ngxs/store";
 import { GeoJSONSourceComponent, LayerComponent, MapComponent } from "@maplibre/ngx-maplibre-gl";
 import type { Map, MapMouseEvent, StyleSpecification } from "maplibre-gl";
-import { MatButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { MatError, MatFormField, MatLabel } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
@@ -49,7 +49,7 @@ export type DownloadedAreaDetails = {
 @Component({
     selector: "offline-management",
     templateUrl: "./offline-management.component.html",
-    imports: [MapComponent, AnalyticsDirective, MatButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatCheckbox, DatePipe, NgClass, FormsModule, FormField, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir],
+    imports: [MapComponent, AnalyticsDirective, MatButton, MatIconButton, LayerComponent, GeoJSONSourceComponent, AutomaticLayerPresentationComponent, MatButtonToggle, MatButtonToggleGroup, MatCheckbox, DatePipe, NgClass, FormsModule, FormField, MatFormField, MatLabel, MatError, MatInput, MatProgressBar, Dir],
     providers: [{ provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }]
 })
 export class OfflineManagementComponent {
@@ -172,6 +172,10 @@ export class OfflineManagementComponent {
 
     public readonly areAllDownloadedSelected = computed(() =>
         this.downloadedAreaDetails().length > 0 && this.downloadedAreaDetails().every(details => this.isSelected(details.id)));
+
+    /** Whether to explain how an area is selected, which a user who already downloaded an area knows */
+    public readonly isMapHintShown = computed(() =>
+        this.selectedIds().length === 0 && this.downloadedAreaDetails().length === 0);
 
     /** How many areas need to be downloaded again, null when none do */
     public readonly incompatibleMessage = computed<string>(() => {
@@ -356,10 +360,7 @@ export class OfflineManagementComponent {
         this.offlineFilesDownloadService.abortCurrentDownload();
     }
 
-    /**
-     * Adds the clicked area to the selection, or takes it out when it is already selected. The map is not moved, so that
-     * the next area can be clicked where it is. Clicking outside of every area clears the selection.
-     */
+    /** Adds the clicked area to the selection, or takes it out when it is already selected. Clicking outside of every area clears it. */
     public onMapClick(event: MapMouseEvent) {
         const area = this.offlineAreasService.findArea(this.areas(), event.lngLat);
         if (area == null) {
@@ -369,22 +370,29 @@ export class OfflineManagementComponent {
         this.toggleSelection(area.properties.id);
     }
 
-    /**
-     * Selects a downloaded area or takes it out of the selection, the same as clicking it on the map.
-     */
+    /** Selects a downloaded area or takes it out of the selection, the same as clicking it on the map */
     public toggleDownloadedArea(details: DownloadedAreaDetails) {
         if (this.editedAreaId() === details.id || this.getDownloadInProgress(details.id) != null) {
             return;
         }
         this.toggleSelection(details.id);
-        if (this.isSelected(details.id)) {
-            this.showOnMap([details.area]);
+    }
+
+    /**
+     * Switches a narrow screen between the list and the map, fitting the map to what was selected in the list. The map
+     * only gets its size once it is shown, and fitting it before that fits the areas into the old size.
+     */
+    public async setShowMap(showMap: boolean) {
+        this.showMap.set(showMap);
+        if (showMap) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            this.fitToSelection();
         }
     }
 
-    /** Moves areas into view when the map is shown next to the list, a hidden map has no size to fit them into */
-    private showOnMap(areas: Immutable<OfflineArea>[]) {
-        const features = areas.filter(area => area != null);
+    /** Fits the map to the selected areas, unless it is hidden and has no size to fit them into */
+    private fitToSelection() {
+        const features = this.selectedIds().map(id => this.getDownloadedArea(id) ?? this.getOfferedArea(id)).filter(area => area != null);
         if (features.length > 0 && this.map?.getContainer().clientWidth > 0) {
             this.fitBounds({ type: "FeatureCollection", features });
         }
@@ -392,11 +400,16 @@ export class OfflineManagementComponent {
 
     /** Selects every downloaded area, or none of them when all of them already are */
     public toggleSelectAll() {
-        this.selectedIds.set(this.areAllDownloadedSelected() ? [] : this.downloadedAreaDetails().map(details => details.id));
+        this.setSelection(this.areAllDownloadedSelected() ? [] : this.downloadedAreaDetails().map(details => details.id));
     }
 
     private toggleSelection(id: string) {
-        this.selectedIds.update(ids => ids.includes(id) ? ids.filter(selected => selected !== id) : [...ids, id]);
+        this.setSelection(this.selectedIds().includes(id) ? this.selectedIds().filter(selected => selected !== id) : [...this.selectedIds(), id]);
+    }
+
+    private setSelection(ids: string[]) {
+        this.selectedIds.set(ids);
+        this.fitToSelection();
     }
 
     private toDetails(id: string, downloadedDate: Date, compatibility: AreaCompatibility, area = this.getDownloadedArea(id)): DownloadedAreaDetails {
@@ -478,9 +491,7 @@ export class OfflineManagementComponent {
 
     /** Selects the areas that need to be downloaded again, so that they are downloaded together */
     public selectIncompatible() {
-        const ids = this.incompatibleAreaIds();
-        this.selectedIds.set(ids);
-        this.showOnMap(ids.map(id => this.getDownloadedArea(id)));
+        this.setSelection(this.incompatibleAreaIds());
     }
 
     public onMapLoad(map: Map) {

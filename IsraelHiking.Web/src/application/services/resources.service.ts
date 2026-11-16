@@ -259,6 +259,7 @@ export class ResourcesService {
     public cantBeUpdatedDownloadAnotherArea: string;
     public download: string;
     public selectAll: string;
+    public noDownloadedAreasYet: string;
     public countSelected: string;
     public translated: string;
     public clickToTranslate: string;
@@ -510,7 +511,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794850568598");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794857073538");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -720,6 +721,7 @@ export class ResourcesService {
         this.cantBeUpdatedDownloadAnotherArea = this.gettextCatalog.getString("Can't be updated, delete it and download an area instead");
         this.download = this.gettextCatalog.getString("Download");
         this.selectAll = this.gettextCatalog.getString("Select all");
+        this.noDownloadedAreasYet = this.gettextCatalog.getString("No downloaded areas yet");
         this.countSelected = this.gettextCatalog.getString("{{count}} selected");
         this.translated = this.gettextCatalog.getString("Translated, click to view original text");
         this.clickToTranslate = this.gettextCatalog.getString("Click to translate");
