@@ -476,7 +476,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 const request = await flushFilesToDownload(mockBackend, {});
 
@@ -500,7 +500,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -530,7 +530,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -555,7 +555,7 @@ describe("OfflineFilesDownloadService", () => {
                     return Promise.resolve();
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
@@ -581,31 +581,75 @@ describe("OfflineFilesDownloadService", () => {
                         return new Promise(resolve => stuckDownloads.push(resolve));
                     });
 
-                const stuckPromise = service.downloadArea(AREA, []);
+                const stuckPromise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(1));
 
                 service.abortCurrentDownload();
-                const secondPromise = service.downloadArea(OTHER_AREA, []);
+                const secondPromise = service.downloadAreas([OTHER_AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [`IHM-schema+${OTHER_AREA.properties.id}.pmtiles`]: "2026-06-01" }, OTHER_AREA.properties.id);
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(2));
 
                 // The download that was aborted reports its progress before it returns, which is not the progress of the one going on
-                progressCallbacks[0](0.5);
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 0 });
+                progressCallbacks[0](0, 0.5);
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 0 }]);
 
                 stuckDownloads[0](); // the download that was stuck finally returns
                 expect(await stuckPromise).toBe("aborted");
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 0 });
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 0 }]);
 
-                progressCallbacks[1](0.5);
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 50 });
+                progressCallbacks[1](0, 0.5);
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 50 }]);
 
                 stuckDownloads[1]();
                 expect(await secondPromise).toBe("downloaded");
-                expect(service.downloadInProgress()).toBeNull();
+                expect(service.downloadsInProgress()).toEqual([]);
+            }
+        )
+    );
+
+    it("Should download the files of several areas in one batch, area after area, taking a root file both of them list once",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
+                offlineAreasService: OfflineAreasService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+                const otherAreaId = OTHER_AREA.properties.id;
+                const otherAreaFile = `IHM-schema+${otherAreaId}.pmtiles`;
+                let progressCallback: FileDownloadProgressCallback = null;
+                let finishDownload: () => void = null;
+                vi.mocked(fileService.downloadFilesToCacheAuthenticated).mockImplementation((_files, _token, _notificationText, callback) => {
+                    progressCallback = callback;
+                    return new Promise(resolve => finishDownload = resolve);
+                });
+
+                const promise = service.downloadAreas([AREA, OTHER_AREA], []);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" });
+                await flushFilesToDownload(mockBackend, { [otherAreaFile]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" }, otherAreaId);
+                await vi.waitFor(() => expect(finishDownload).not.toBeNull());
+
+                expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
+                    { url: `${Urls.offlineArea}/${AREA_ID}/${AREA_MAP_FILE}`, fileName: AREA_MAP_FILE },
+                    { url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE },
+                    { url: `${Urls.offlineArea}/${otherAreaId}/${otherAreaFile}`, fileName: otherAreaFile }
+                ], "token", expect.any(Object), expect.any(Function), expect.any(AbortController));
+
+                progressCallback(0, 1);
+                progressCallback(2, 0.5);
+                // The root file counts as a file of the first area, which has two files and finished one of them
+                expect(service.downloadsInProgress()).toEqual([{ area: AREA, progress: 50 }, { area: OTHER_AREA, progress: 50 }]);
+
+                finishDownload();
+                expect(await promise).toBe("downloaded");
+                expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledTimes(3);
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(AREA, expect.any(Object));
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OTHER_AREA, expect.any(Object));
             }
         )
     );
@@ -626,10 +670,10 @@ describe("OfflineFilesDownloadService", () => {
                 };
                 const areaFile = "IHM-schema+israel-and-palestine.pmtiles";
 
-                const promise = service.downloadArea(area, []);
+                const promise = service.downloadAreas([area], []);
                 await flushStyles(mockBackend, {});
                 const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`));
-                expect(service.downloadInProgress()).toEqual({ area, progress: 0 });
+                expect(service.downloadsInProgress()).toEqual([{ area, progress: 0 }]);
                 areaRequest.flush({ [areaFile]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
@@ -665,7 +709,7 @@ describe("OfflineFilesDownloadService", () => {
                 const area = createSquareArea("israel-and-palestine", [34, 29, 36, 34]);
 
                 const replacedAreaIds = service.getReplacedAreaIds(area, new Set(["israel-and-palestine", "jerusalem"]));
-                const promise = service.downloadArea(area, replacedAreaIds);
+                const promise = service.downloadAreas([area], replacedAreaIds);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { "IHM-schema+israel-and-palestine.pmtiles": "2026-06-01" }, "israel-and-palestine");
 
@@ -708,7 +752,7 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_ID]: OfflineAreasService.createRootArea(ROOT_ZOOMS) });
 
-                const promise = service.downloadArea(namedArea, []);
+                const promise = service.downloadAreas([namedArea], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
@@ -767,7 +811,7 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([AREA_MAP_FILE]);
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
@@ -793,7 +837,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 const tileRequest = await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -819,7 +863,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -849,7 +893,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([AREA], []);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
 

@@ -38,16 +38,21 @@ export type AreaCompatibility = "compatible" | "outdated" | "unusable";
 
 /** The download that is going on right now, everything that lives as long as it does */
 type CurrentDownload = {
-    area: Immutable<OfflineArea>;
-    /** How much was downloaded so far, from 0 to 100 */
-    progress: number;
+    /** The areas that are downloaded, in the order they were asked for, with how far each of them got */
+    areas: DownloadInProgress[];
     /** Identifies the download - a new one gets a new controller, and only it can abort it */
     abortController: AbortController;
 };
 
+/**
+ * A file the server listed for one of the areas that are downloaded. A root file is listed for every area and is
+ * downloaded once, as a file of the first area that listed it.
+ */
+type AreaFile = { fileName: string; areaId: string };
+
 export type DownloadStatus = "up-to-date" | "downloaded" | "error" | "aborted";
 
-/** The area that is being downloaded and how much of it was downloaded so far, from 0 to 100 */
+/** An area that is being downloaded and how much of it was downloaded so far, from 0 to 100 */
 export type DownloadInProgress = { area: Immutable<OfflineArea>; progress: number };
 
 @Service()
@@ -90,11 +95,8 @@ export class OfflineFilesDownloadService {
     private offlineStyleRequirements: StyleRequirements = { minVersionPerFile: {}, sourceFileNames: [] };
     private readonly currentDownload = signal<CurrentDownload | null>(null);
 
-    /** The area that is being downloaded right now and how far it got, null when there is no download */
-    public readonly downloadInProgress = computed<DownloadInProgress | null>(() => {
-        const currentDownload = this.currentDownload();
-        return currentDownload == null ? null : { area: currentDownload.area, progress: currentDownload.progress };
-    });
+    /** The areas that are being downloaded right now and how far each of them got, empty when there is no download */
+    public readonly downloadsInProgress = computed<DownloadInProgress[]>(() => this.currentDownload()?.areas ?? []);
 
     /**
      * Reads what was downloaded into the state, and when there's a reason to, recommends downloading it
@@ -265,37 +267,44 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Downloads everything an area needs. A download that is still going on when this is called is aborted first, so that the one the user asked for
-     * last is the only one that goes on.
+     * Downloads everything the areas need, the files of all of them in one batch of the downloader plugin, so that it
+     * goes on from one area to the next while the app is in the background. The areas are only written to the device
+     * once all of their files are whole. A download that is still going on when this is called is aborted first, so
+     * that the one the user asked for last is the only one that goes on.
      * A download that failed is logged with what it failed on rather than with a status code alone: a
      * request that got no answer is the connection and not the server, which is how a download of hundreds
      * of megabytes fails when it drops, and calling that a server side error sends whoever reads the log
      * the wrong way.
      */
-    public async downloadArea(area: Immutable<OfflineArea>, replacedAreaIds: string[]): Promise<DownloadStatus> {
+    public async downloadAreas(areas: Immutable<OfflineArea>[], replacedAreaIds: string[]): Promise<DownloadStatus> {
         this.abortCurrentDownload();
-        const currentDownload: CurrentDownload = { area, progress: 0, abortController: new AbortController() };
+        const currentDownload: CurrentDownload = { areas: areas.map(area => ({ area, progress: 0 })), abortController: new AbortController() };
         this.currentDownload.set(currentDownload);
-        const id = area.properties.id;
-        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${id}`);
+        const ids = areas.map(area => area.properties.id);
+        this.loggingService.info(`[Offline Download] Starting downloading the offline files of ${ids.join(", ")}`);
         try {
             const styles = await this.downloadStyleAndUpdateMetadata();
             await this.writeStylesToDevice(styles);
-            await this.deleteFilesOfUnusedSources(id);
+            for (const id of ids) {
+                await this.deleteFilesOfUnusedSources(id);
+            }
             const downloadedAreas = await this.updateDownloadedAreasFromDevice();
-            const fileNames = await this.getFilesToDownload(area, downloadedAreas[id]?.files);
-            if (fileNames.length === 0) {
+            const files = await this.getFilesOfAreas(areas, downloadedAreas);
+            if (files.length === 0) {
                 this.loggingService.info("[Offline Download] No files to download, all files are up to date");
                 return "up-to-date";
             }
-            await this.downloadOfflineFilesProgressAction(currentDownload, fileNames);
+            await this.downloadOfflineFilesProgressAction(currentDownload, files);
 
             if (currentDownload.abortController.signal.aborted) {
                 return "aborted";
             }
 
-            await this.moveDownloadedFilesToDataDirectory(currentDownload, fileNames);
-            await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(id, fileNames));
+            await this.moveDownloadedFilesToDataDirectory(files);
+            const fileNames = files.map(file => file.fileName);
+            for (const area of areas) {
+                await this.offlineAreasService.saveAreaMetadata(area, await this.getZooms(area.properties.id, fileNames));
+            }
             await this.saveRootAreaMetadataIfDownloaded(fileNames);
             for (const replacedAreaId of replacedAreaIds) {
                 await this.deleteArea(replacedAreaId);
@@ -315,7 +324,7 @@ export class OfflineFilesDownloadService {
                 : typeAndMessage.statusCode != null
                     ? `the server answering with ${typeAndMessage.statusCode}`
                     : "a request that got no answer, i.e. the connection and not the server";
-            this.loggingService.error(`[Offline Download] The download of ${id} failed due to ${reason}: ${typeAndMessage.message}`);
+            this.loggingService.error(`[Offline Download] The download of ${ids.join(", ")} failed due to ${reason}: ${typeAndMessage.message}`);
             return "error";
         } finally {
             // A download that was aborted might only get here after the next one started, and it is not its to clear
@@ -325,35 +334,51 @@ export class OfflineFilesDownloadService {
         }
     }
 
+    /** The files the server lists for the areas, area after area, where a file listed by more than one area is taken once */
+    private async getFilesOfAreas(areas: Immutable<OfflineArea>[], downloadedAreas: Immutable<Record<string, DownloadedArea>>): Promise<AreaFile[]> {
+        const files: AreaFile[] = [];
+        for (const area of areas) {
+            const areaId = area.properties.id;
+            for (const fileName of await this.getFilesToDownload(area, downloadedAreas[areaId]?.files)) {
+                if (!files.some(file => file.fileName === fileName)) {
+                    files.push({ fileName, areaId });
+                }
+            }
+        }
+        return files;
+    }
+
     /**
      * Downloads the files into the cache, where a download that was aborted or failed leaves the files it finished, so
-     * that downloading the area again continues from there instead of starting over. A file that is already whole in
+     * that downloading the areas again continues from there instead of starting over. A file that is already whole in
      * the cache is not downloaded again and counts as downloaded in the progress.
      */
-    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
-        const { area, abortController } = currentDownload;
-        const id = area.properties.id;
-        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${id}`);
+    private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, files: AreaFile[]): Promise<void> {
+        this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${files.length}`);
         const alreadyDownloaded = await this.fileService.listFilesInOfflineCache();
-        const filesToDownload = fileNames.filter(fileName => !alreadyDownloaded.includes(fileName));
-        const skippedCount = fileNames.length - filesToDownload.length;
+        const filesToDownload = files.filter(file => !alreadyDownloaded.includes(file.fileName));
+        const skippedCount = files.length - filesToDownload.length;
         if (skippedCount > 0) {
             this.loggingService.info(`[Offline Download] Skipping ${skippedCount} files that were already downloaded recently`);
         }
         if (filesToDownload.length > 0) {
             const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+            const fileProgress: number[] = files.map(file => filesToDownload.includes(file) ? 0 : 1);
             await this.fileService.downloadFilesToCacheAuthenticated(
-                filesToDownload.map(fileName => ({ url: `${Urls.offlineArea}/${id}/${fileName}`, fileName })),
+                filesToDownload.map(({ fileName, areaId }) => ({ url: `${Urls.offlineArea}/${areaId}/${fileName}`, fileName })),
                 token,
                 {
                     title: this.resources.downloadMapForOfflineViewing,
                     description: this.resources.mapeakPro,
                     completed: this.resources.downloadFinishedSuccessfully
                 },
-                progress => this.updateProgress(currentDownload, (skippedCount + progress * filesToDownload.length) / fileNames.length),
-                abortController);
+                (fileIndex, progress) => {
+                    fileProgress[files.indexOf(filesToDownload[fileIndex])] = progress;
+                    this.updateProgress(currentDownload, files, fileProgress);
+                },
+                currentDownload.abortController);
         }
-        this.loggingService.info(`[Offline Download] Finished downloading offline files of ${id}`);
+        this.loggingService.info("[Offline Download] Finished downloading offline files");
     }
 
     /** Saves the root area with the zooms its files hold, when the root files were downloaded and may hold other zooms than before */
@@ -381,8 +406,8 @@ export class OfflineFilesDownloadService {
 
     /**
      * Moves the files that were downloaded to where the app reads them from, and extracts the routing
-     * tiles among them. This only happens once every file of the area was downloaded, so that a download
-     * that was aborted or failed leaves the files of the area as they were rather than half updated.
+     * tiles among them. This only happens once every file of the areas was downloaded, so that a download
+     * that was aborted or failed leaves the files of the areas as they were rather than half updated.
      * Every file is moved before any of them is handed to the routing engine, so that an engine that
      * fails can not leave the files of the area half moved, and failing to hand a file over is logged
      * and otherwise ignored: the map files of the area are whole and are drawn from as they are, and an
@@ -390,19 +415,18 @@ export class OfflineFilesDownloadService {
      * A file the routing engine did not take is deleted, since it is of no use to the app and nothing else
      * would ever clean it up - it is not one of the files the device is read for.
      */
-    private async moveDownloadedFilesToDataDirectory(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
-        const id = currentDownload.area.properties.id;
-        for (const fileName of fileNames) {
+    private async moveDownloadedFilesToDataDirectory(files: AreaFile[]): Promise<void> {
+        for (const { fileName } of files) {
             await this.fileService.moveFileFromCacheToDataDirectory(fileName);
         }
-        for (const fileName of fileNames) {
+        for (const { fileName, areaId } of files) {
             const isRoutingTilesFile = RoutingProvider.isRoutingTilesFile(fileName);
             if (!isRoutingTilesFile && !RoutingProvider.isRoutingProfilesFile(fileName)) {
                 continue;
             }
             try {
                 if (isRoutingTilesFile) {
-                    await this.routingProvider.extractOfflineRoutingTiles(fileName, id);
+                    await this.routingProvider.extractOfflineRoutingTiles(fileName, areaId);
                 } else {
                     await this.routingProvider.storeRoutingProfiles(await this.fileService.readFileInDataDirectory(fileName));
                     await this.fileService.deleteFileInDataDirectory(fileName);
@@ -412,19 +436,24 @@ export class OfflineFilesDownloadService {
                 await this.fileService.deleteFileInDataDirectory(fileName);
             }
         }
-        this.loggingService.info(`[Offline Download] Moved ${fileNames.length} files of ${id} to the data directory`);
+        this.loggingService.info(`[Offline Download] Moved ${files.length} files to the data directory`);
     }
 
     /**
-     * Reports how far the download of an area got, from 0 to 1. A download that is no longer the current one has
-     * nothing to report - its files might still be coming in after it was aborted, and that says nothing about the
-     * download that took its place.
+     * Reports how far the download of each area got, the average of the progress of its files, where an area with no
+     * file to download is done. A download that is no longer the current one has nothing to report - its files might
+     * still be coming in after it was aborted, and that says nothing about the download that took its place.
      */
-    private updateProgress(currentDownload: CurrentDownload, progress: number) {
+    private updateProgress(currentDownload: CurrentDownload, files: AreaFile[], fileProgress: number[]) {
         if (!this.isCurrent(currentDownload)) {
             return;
         }
-        this.currentDownload.set({ ...currentDownload, progress: progress * 100.0 });
+        const areas = currentDownload.areas.map(({ area }) => {
+            const progressOfArea = fileProgress.filter((_, index) => files[index].areaId === area.properties.id);
+            const progress = progressOfArea.length === 0 ? 1 : progressOfArea.reduce((sum, value) => sum + value, 0) / progressOfArea.length;
+            return { area, progress: progress * 100.0 };
+        });
+        this.currentDownload.set({ ...currentDownload, areas });
     }
 
     /** Whether the given download is the one that is going on, they are told apart by their controller */
@@ -458,7 +487,7 @@ export class OfflineFilesDownloadService {
             return;
         }
         // Every download has an abort controller of its own, so aborting one never touches the next
-        this.loggingService.info("[Offline Download] Aborting the download of " + currentDownload.area.properties.id);
+        this.loggingService.info("[Offline Download] Aborting the download of " + currentDownload.areas.map(({ area }) => area.properties.id).join(", "));
         currentDownload.abortController.abort();
         this.currentDownload.set(null);
     }

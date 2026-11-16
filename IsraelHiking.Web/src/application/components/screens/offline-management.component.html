@@ -36,7 +36,7 @@
                         <i class="fa icon-pencil"></i>
                         {{resources.edit}}
                     </button>
-                    @if (isDownloading(row)) {
+                    @if (getDownloadInProgress(row)) {
                     <button mat-menu-item (click)="cancelDownload()" analyticsOn="click"
                         analyticsCategory="Offline Management" analyticsLabel="Cancel from list">
                         <i class="fa icon-close"></i>
@@ -44,15 +44,15 @@
                     </button>
                     } @else {
                     @if (row.canBeUpdated) {
-                    <button mat-menu-item [disabled]="downloadInProgress() !== null || row.area === null"
-                        (click)="downloadArea(row.area)" analyticsOn="click"
+                    <button mat-menu-item [disabled]="isDownloadInProgress() || row.area === null"
+                        (click)="downloadAreas([row.area])" analyticsOn="click"
                         analyticsCategory="Offline Management"
                         [analyticsLabel]="row.compatibility === 'unusable' ? 'Download Again from list' : 'Update from list'">
                         <i class="fa icon-download"></i>
                         {{row.compatibility === 'unusable' ? resources.download : resources.update}}
                     </button>
                     }
-                    <button mat-menu-item [disabled]="downloadInProgress() !== null" (click)="deleteArea(row.id)"
+                    <button mat-menu-item [disabled]="isDownloadInProgress()" (click)="deleteAreas([row.id])"
                         analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Delete from list">
                         <i class="fa icon-trash"></i>
                         {{resources.delete}}
@@ -81,11 +81,11 @@
                     } @else {
                     <div class="font-bold">{{row.name}}</div>
                     }
-                    @if (isDownloading(row)) {
+                    @if (getDownloadInProgress(row); as download) {
                     <div class="my-2 flex flex-row items-center gap-2">
-                        <mat-progress-bar class="flex-1" mode="determinate" [value]="downloadInProgress().progress">
+                        <mat-progress-bar class="flex-1" mode="determinate" [value]="download.progress">
                         </mat-progress-bar>
-                        <span class="tabular-nums">{{downloadInProgress().progress.toFixed(2)}}%</span>
+                        <span class="tabular-nums">{{download.progress.toFixed(2)}}%</span>
                     </div>
                     } @else {
                     <div>{{row.downloadedDate | date:resources.getDateFormat()}}</div>
@@ -222,26 +222,17 @@
         </mgl-map>
         <div class="absolute bottom-safe w-full text-lg text-center max-md:mb-12">
             <div class="flex flex-row">
-                @if (selectedArea() && !isSelectedDownloaded() && !downloadInProgress()) {
-                <div class="flex-1 m-1">
-                    <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Download">
-                        <i class="fa fa-lg icon-download"></i>
-                        {{resources.startDownload}}
-                    </button>
-                </div>
-                }
-                @if (selectedArea() && isSelectedDownloaded() && isSelectedUpdatable() && !downloadInProgress()) {
+                @if (downloadableSelectedAreas().length > 0 && !isDownloadInProgress()) {
                 <div class="flex-1 m-1">
                     <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
                         analyticsCategory="Offline Management"
-                        [analyticsLabel]="isSelectedIncompatible() ? 'Download Again' : 'Update'">
+                        [analyticsLabel]="downloadSelectedKind() === 'new' ? 'Download' : downloadSelectedKind() === 'again' ? 'Download Again' : 'Update'">
                         <i class="fa fa-lg icon-download"></i>
-                        {{isSelectedIncompatible() ? resources.download : resources.update}}
+                        {{downloadSelectedKind() === 'new' ? resources.startDownload : downloadSelectedKind() === 'again' ? resources.download : resources.update}}
                     </button>
                 </div>
                 }
-                @if (selectedArea() && isSelectedDownloaded() && !downloadInProgress()) {
+                @if (areAllSelectedDownloaded() && !isDownloadInProgress()) {
                 <div class="flex-1 m-1">
                     <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
                         analyticsCategory="Offline Management" analyticsLabel="Delete">
@@ -250,7 +241,7 @@
                     </button>
                 </div>
                 }
-                @if (downloadInProgress()) {
+                @if (isDownloadInProgress()) {
                 <div class="flex-1 m-1">
                     <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
                         analyticsCategory="Offline Management" analyticsLabel="Cancel">
