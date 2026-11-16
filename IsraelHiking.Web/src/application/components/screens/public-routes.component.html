@@ -234,11 +234,11 @@
         <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
             <div class="flex flex-row mx-10 max-md:mx-2">
                 @if (route.properties.website) {
-                <h3>
+                <h3 class="font-normal">
                     <a class="w-full" [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
                 </h3>
                 } @else {
-                <h3 class="w-full">{{getTitle(route)}}</h3>
+                <h3 class="w-full font-normal">{{getTitle(route)}}</h3>
                 }
             </div>
             <div class="flex flex-row mx-10 max-md:mx-2 items-center">

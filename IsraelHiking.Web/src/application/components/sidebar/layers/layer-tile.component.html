@@ -8,7 +8,7 @@
         <img [src]="thumbnail()" alt="" loading="lazy" class="block size-full object-cover" [class.grayscale]="locked()"
             [class.opacity-60]="locked()" (error)="isBroken.set(true)" />
         } @else {
-        <span class="flex size-full items-center justify-center font-medium" [class]="isRow() ? 'text-sm' : 'text-2xl'"
+        <span class="flex size-full items-center justify-center" [class]="isRow() ? 'text-sm' : 'text-2xl'"
             [style.background-color]="placeholderColor()">{{initials()}}</span>
         }
         @if (locked()) {
@@ -25,7 +25,7 @@
         }
     </span>
     <span class="min-w-0 leading-tight hyphens-auto wrap-break-word"
-        [class]="isRow() ? 'flex-1 text-sm' : 'mt-1 block text-center text-xs'" [class.font-medium]="selected()">
+        [class]="isRow() ? 'flex-1 text-sm' : 'mt-1 block text-center text-xs'">
         {{label()}}
     </span>
 </button>

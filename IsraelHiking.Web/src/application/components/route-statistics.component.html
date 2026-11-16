@@ -9,48 +9,48 @@
       @if (!isFollowing()) {
       <div matTooltip="{{resources.gain}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-arrow-up"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{gain() | distance:'elevation':'value'}} <span class="text-xs font-normal opacity-70">{{gain() | distance:'elevation':'unit'}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{gain() | distance:'elevation':'value'}} <span class="text-xs opacity-70">{{gain() | distance:'elevation':'unit'}}</span></span>
       </div>
       <div matTooltip="{{resources.loss}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-arrow-down"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{loss() | distance:'elevation':'value'}} <span class="text-xs font-normal opacity-70">{{loss() | distance:'elevation':'unit'}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{loss() | distance:'elevation':'value'}} <span class="text-xs opacity-70">{{loss() | distance:'elevation':'unit'}}</span></span>
       </div>
       <div matTooltip="{{resources.length}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{length() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{length() | distance:'distance':'unit'}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{length() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{length() | distance:'distance':'unit'}}</span></span>
       </div>
       } @else {
       <div class="flex min-w-0 flex-col items-center gap-1">
           <span class="text-sm opacity-70">ETA</span>
-          <span class="whitespace-nowrap text-xl font-medium"><span dir="ltr">{{ETA()}}</span></span>
+          <span class="whitespace-nowrap text-xl"><span dir="ltr">{{ETA()}}</span></span>
       </div>
       <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-arrow-circle-right"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{remainingDistance() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{remainingDistance() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
       </div>
       <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{traveledDistance() | distance:'distance':'value'}} <span class="text-xs font-normal opacity-70">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{traveledDistance() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
       </div>
       }
       <div matTooltip="{{resources.duration}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-clock-o"></i>
-          <span class="whitespace-nowrap text-xl font-medium">{{duration()}} <span class="text-xs font-normal opacity-70">{{durationUnits()}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{duration()}} <span class="text-xs opacity-70">{{durationUnits()}}</span></span>
       </div>
       <div matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-avg-speed"></i>
           @if (averageSpeed()) {
-          <span class="whitespace-nowrap text-xl font-medium">{{getSpeedString(averageSpeed())}} <span class="text-xs font-normal opacity-70">{{speedUnitString()}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{getSpeedString(averageSpeed())}} <span class="text-xs opacity-70">{{speedUnitString()}}</span></span>
           } @else {
-          <span class="whitespace-nowrap text-xl font-medium">--</span>
+          <span class="whitespace-nowrap text-xl">--</span>
           }
       </div>
       <div matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
           <i class="fa text-2xl! opacity-70 icon-speed"></i>
           @if (currentSpeed()) {
-          <span class="whitespace-nowrap text-xl font-medium">{{getSpeedString(currentSpeed())}} <span class="text-xs font-normal opacity-70">{{speedUnitString()}}</span></span>
+          <span class="whitespace-nowrap text-xl">{{getSpeedString(currentSpeed())}} <span class="text-xs opacity-70">{{speedUnitString()}}</span></span>
           } @else {
-          <span class="whitespace-nowrap text-xl font-medium">--</span>
+          <span class="whitespace-nowrap text-xl">--</span>
           }
       </div>
     </div>

@@ -125,7 +125,7 @@
                 <img #shareImage [src]="getImageUrl(shareUrl)" loading="lazy" alt=""
                     (error)="shareImage.src='content/logo.png'" class="block shrink-0 size-20 rounded-xl object-cover">
                 <div class="flex flex-col flex-1 min-w-0 gap-1">
-                    <div class="font-medium break-words">
+                    <div class="break-words">
                         <highlighted-text [text]="shareUrl.title" [searchTerm]="searchTerm()"></highlighted-text>
                     </div>
                     @if (shareUrl.description) {

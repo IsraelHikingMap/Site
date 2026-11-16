@@ -1,6 +1,6 @@
 <div class="sticky top-0 z-10 bg-surface px-3 pt-2 pb-3" [dir]="resources.direction">
     <div class="flex flex-row items-center gap-2">
-        <h2 class="m-0 flex-1 ps-1 text-xl font-medium">{{resources.privateRoutes}}</h2>
+        <h2 class="m-0 flex-1 ps-1 text-xl font-normal">{{resources.privateRoutes}}</h2>
         <button mat-icon-button type="button" (click)="close()" [attr.aria-label]="resources.close" tabindex="-1">
             <i class="fa icon-close"></i>
         </button>
@@ -49,7 +49,7 @@
                     <div cdkDragHandle class="cursor-move px-2 opacity-40"><i class="fa icon-th"></i></div>
                     <mat-radio-button [value]="route.id" (click)="selectRoute($event, route)"
                         [attr.aria-label]="route.name"></mat-radio-button>
-                    <div class="min-w-0 flex-1 cursor-pointer font-medium wrap-anywhere" [style.color]="route.color"
+                    <div class="min-w-0 flex-1 cursor-pointer wrap-anywhere" [style.color]="route.color"
                         [dir]="resources.getDirection(route.name)" (click)="selectRoute($event, route)">{{route.name}}</div>
                     <button mat-icon-button class="shrink-0" (click)="toggleRouteVisibility($event, route)" analyticsOn="click"
                         analyticsCategory="Private Routes" analyticsLabel="Toggle route visibility">

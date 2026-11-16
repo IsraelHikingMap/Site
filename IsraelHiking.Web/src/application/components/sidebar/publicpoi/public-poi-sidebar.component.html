@@ -6,7 +6,7 @@
 <div [dir]="resources.direction">
   <div class="sticky top-0 z-10 bg-surface px-4 pt-2 pb-2">
     <div class="flex flex-row items-start gap-2">
-      <h2 class="m-0 min-w-0 flex-1 pt-2 text-xl font-medium break-words" [ngClass]="resources.getTextAlignment(title())"
+      <h2 class="m-0 min-w-0 flex-1 pt-2 text-xl font-normal break-words" [ngClass]="resources.getTextAlignment(title())"
         [dir]="resources.getDirection(title())">
         @if (hasUrl()) {
         <a [href]="getUrl()" [target]="'_blank'" class="text-inherit" analyticsOn="click" analyticsCategory="POI"
