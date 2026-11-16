@@ -130,7 +130,7 @@ describe("OfflineFilesDownloadService", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([OfflineReducer, InMemoryReducer]),
-                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download", downloadMapForOfflineViewing: "title", mapeakPro: "description" } },
+                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download", downloadMapForOfflineViewing: "title", mapeakPro: "description", downloadFinishedSuccessfully: "completed" } },
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
@@ -637,7 +637,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, fileName: areaFile },
                     { url: `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
-                ], "token", { title: "title", description: "description" }, expect.any(Function), expect.any(AbortController));
+                ], "token", { title: "title", description: "description", completed: "completed" }, expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(area, { minZoom: 5, maxZoom: 14 });

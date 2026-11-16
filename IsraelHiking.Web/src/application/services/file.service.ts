@@ -5,7 +5,7 @@ import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
-import { CapacitorDownloader, DOWNLOAD_BATCH_MAX_FILES } from "@capgo/capacitor-downloader";
+import { CapacitorDownloader } from "@capgo/capacitor-downloader";
 
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
@@ -65,10 +65,14 @@ export type OfflineFileToDownload = {
     fileName: string;
 };
 
-/** The text the notification of a download shows while it goes on in the background */
+/**
+ * The text the notification of a download shows while it goes on in the background, and the text of the notification
+ * left behind once all of it is done, so that a download finished in the background is not missed.
+ */
 export type DownloadNotificationText = {
     title: string;
     description: string;
+    completed: string;
 };
 
 /** A file in the app's data directory, the time it was last written to and its size in bytes */
@@ -425,27 +429,14 @@ export class FileService {
     }
 
     /**
-     * Downloads the offline files into the offline files cache with the downloader plugin, which keeps going while the
-     * app is in the background - from a foreground service that shows the notification on android, and from a continued
+     * Downloads the offline files into the offline files cache as one batch of the downloader plugin, which keeps going while
+     * the app is in the background - from a foreground service that shows the notification on android, and from a continued
      * processing task on iOS 26. A file only takes its name once it is whole, so the cache never holds a part of a file.
-     * The plugin takes a limited number of files at a time, so they are handed over in batches of that size.
+     * Resolves once all of them are whole, rejects once one of them failed, and resolves straight away on an abort.
      */
     public async downloadFilesToCacheAuthenticated(files: OfflineFileToDownload[], token: string, notificationText: DownloadNotificationText,
         progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         await this.ensureOfflineCacheDirectory();
-        for (let index = 0; index < files.length && !abortController.signal.aborted; index += DOWNLOAD_BATCH_MAX_FILES) {
-            const batch = files.slice(index, index + DOWNLOAD_BATCH_MAX_FILES);
-            await this.downloadBatchToCache(batch, token, notificationText,
-                progress => progressCallback((index + progress * batch.length) / files.length), abortController);
-        }
-    }
-
-    /**
-     * Downloads one batch of files, resolving once all of them are whole and rejecting once one of them failed. An abort
-     * stops the batch and resolves straight away, without waiting for the plugin to say anything more about it.
-     */
-    private async downloadBatchToCache(files: OfflineFileToDownload[], token: string, notificationText: DownloadNotificationText,
-        progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         const id = `offline-files-${FileService.batchCounter++}`;
         this.loggingService.info(`[Files] Starting downloading ${files.length} files to cache, ${id}: ${files.map(f => f.fileName).join(", ")}`);
         const destinations = await Promise.all(files.map(f => Filesystem.getUri({ path: FileService.offlineCachePath(f.fileName), directory: Directory.Cache })));
@@ -484,6 +475,7 @@ export class FileService {
                 notification: "progress",
                 title: notificationText.title,
                 description: notificationText.description,
+                downloadCompletedNotificationText: notificationText.completed,
                 iosContinuedProcessing: true
             });
             await finished;

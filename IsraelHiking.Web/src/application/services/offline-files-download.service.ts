@@ -345,7 +345,11 @@ export class OfflineFilesDownloadService {
             await this.fileService.downloadFilesToCacheAuthenticated(
                 filesToDownload.map(fileName => ({ url: `${Urls.offlineArea}/${id}/${fileName}`, fileName })),
                 token,
-                { title: this.resources.downloadMapForOfflineViewing, description: this.resources.mapeakPro },
+                {
+                    title: this.resources.downloadMapForOfflineViewing,
+                    description: this.resources.mapeakPro,
+                    completed: this.resources.downloadFinishedSuccessfully
+                },
                 progress => this.updateProgress(currentDownload, (skippedCount + progress * filesToDownload.length) / fileNames.length),
                 abortController);
         }
