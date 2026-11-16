@@ -1,3 +1,20 @@
+diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/AndroidManifest.xml b/node_modules/@capgo/capacitor-downloader/android/src/main/AndroidManifest.xml
+index 107ee99..4aaebb3 100644
+--- a/node_modules/@capgo/capacitor-downloader/android/src/main/AndroidManifest.xml
++++ b/node_modules/@capgo/capacitor-downloader/android/src/main/AndroidManifest.xml
+@@ -1,12 +1,4 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+-    <application>
+-        <service
+-            android:name="ee.forgr.capacitor.plugin.downloader.OkHttpDownloadForegroundService"
+-            android:exported="false"
+-            android:foregroundServiceType="dataSync" />
+-    </application>
+ </manifest>
 diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
 index 294aba3..e2fba34 100644
 --- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
