@@ -300,15 +300,15 @@ export class OfflineFilesDownloadService {
                 return areas.map(() => status);
             }
             let installs = Promise.resolve();
-            return await Promise.all(areasToDownload.map(async (areaToDownload, index) => {
+            return await Promise.all(areasToDownload.map(async areaToDownload => {
                 const id = areaToDownload.area.properties.id;
                 const areaFiles = files.filter(file => file.areaId === id);
-                if (areaFiles.length === 0) {
-                    this.loggingService.info(`[Offline Download] No files to download for ${id}, all files are up to date`);
-                    return "up-to-date";
-                }
                 try {
-                    await this.downloadAreaFiles(currentDownload, index, areaFiles, alreadyDownloaded);
+                    if (areaFiles.length === 0) {
+                        this.loggingService.info(`[Offline Download] No files to download for ${id}, all files are up to date`);
+                        return "up-to-date";
+                    }
+                    await this.downloadAreaFiles(currentDownload, areaToDownload.area, areaFiles, alreadyDownloaded);
                     if (currentDownload.abortController.signal.aborted) {
                         return "aborted";
                     }
@@ -318,6 +318,8 @@ export class OfflineFilesDownloadService {
                     return "downloaded";
                 } catch (ex) {
                     return this.getFailureStatus(currentDownload, id, ex);
+                } finally {
+                    this.removeFromProgress(currentDownload, id);
                 }
             }));
         } finally {
@@ -386,10 +388,9 @@ export class OfflineFilesDownloadService {
     /**
      * Downloads the files of one area into the cache, where a download that was aborted or failed leaves the files it
      * finished, so that downloading the area again continues from there instead of starting over. A file that is already
-     * whole in the cache is not downloaded again and counts as downloaded in the progress. The notification names the area.
+     * whole in the cache is not downloaded again and counts as downloaded in the progress. The notification is titled with the name of the area.
      */
-    private async downloadAreaFiles(currentDownload: CurrentDownload, index: number, files: AreaFile[], alreadyDownloaded: string[]): Promise<void> {
-        const area = currentDownload.areas[index].area;
+    private async downloadAreaFiles(currentDownload: CurrentDownload, area: Immutable<OfflineArea>, files: AreaFile[], alreadyDownloaded: string[]): Promise<void> {
         const filesToDownload = files.filter(file => !alreadyDownloaded.includes(file.fileName));
         const skippedCount = files.length - filesToDownload.length;
         this.loggingService.info(`[Offline Download] Downloading ${filesToDownload.length} files of ${area.properties.id}` +
@@ -404,14 +405,14 @@ export class OfflineFilesDownloadService {
             filesToDownload.map(({ fileName, areaId }) => ({ url: `${Urls.offlineArea}/${areaId}/${fileName}`, fileName })),
             token,
             {
-                title: this.resources.downloadMapForOfflineViewing,
-                description: name,
+                title: name,
+                description: this.resources.downloadMapForOfflineViewing,
                 completed: `${name}: ${this.resources.downloadFinishedSuccessfully}`
             },
             (fileIndex, progress) => {
                 fileProgress[fileIndex] = progress;
                 const sum = fileProgress.reduce((total, value) => total + value, skippedCount);
-                this.updateProgress(currentDownload, index, sum / files.length);
+                this.updateProgress(currentDownload, area.properties.id, sum / files.length);
             },
             currentDownload.abortController);
     }
@@ -479,12 +480,27 @@ export class OfflineFilesDownloadService {
      * nothing to report - its files might still be coming in after it was aborted, and that says nothing about the
      * download that took its place.
      */
-    private updateProgress(currentDownload: CurrentDownload, index: number, progress: number) {
+    private updateProgress(currentDownload: CurrentDownload, id: string, progress: number) {
         if (!this.isCurrent(currentDownload)) {
             return;
         }
         const latest = this.currentDownload();
-        this.currentDownload.set({ ...latest, areas: latest.areas.map((area, i) => i === index ? { ...area, progress: progress * 100.0 } : area) });
+        this.currentDownload.set({
+            ...latest,
+            areas: latest.areas.map(area => area.area.properties.id === id ? { ...area, progress: progress * 100.0 } : area)
+        });
+    }
+
+    /**
+     * Takes an area whose download ended out of the areas in progress, so that it is shown as what it ended as - downloaded,
+     * or as it was before - while the other areas are still downloading.
+     */
+    private removeFromProgress(currentDownload: CurrentDownload, id: string) {
+        if (!this.isCurrent(currentDownload)) {
+            return;
+        }
+        const latest = this.currentDownload();
+        this.currentDownload.set({ ...latest, areas: latest.areas.filter(({ area }) => area.properties.id !== id) });
     }
 
     /** Whether the given download is the one that is going on, they are told apart by their controller */

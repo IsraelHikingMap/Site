@@ -335,6 +335,26 @@ index 2223a86..8f83eab 100644
                              }
                              int percent = (int) (active.progress * 100f);
                              if (percent != lastReportedPercent) {
+diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
+index c5eeb48..d5c2a91 100644
+--- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
++++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
+@@ -155,6 +155,7 @@ final class OkHttpDownloadProgressNotifier {
+             .setContentTitle(contentTitle)
+             .setContentText(contentText)
+             .setProgress(100, percentage, false)
++            .setWhen(entry.startedAt)
+             .setOngoing(true)
+             .setOnlyAlertOnce(true)
+             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+@@ -258,6 +259,7 @@ final class OkHttpDownloadProgressNotifier {
+         final String title;
+         final String description;
+         final String notificationMode;
++        final long startedAt = System.currentTimeMillis();
+         long lastPostedAt;
+ 
+         ProgressEntry(String title, String description, String notificationMode, long lastPostedAt) {
 diff --git a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
 index d453822..aeff223 100644
 --- a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts

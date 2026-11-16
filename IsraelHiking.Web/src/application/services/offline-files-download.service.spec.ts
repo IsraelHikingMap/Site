@@ -638,10 +638,10 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/${AREA_ID}/${AREA_MAP_FILE}`, fileName: AREA_MAP_FILE },
                     { url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
-                ], "token", expect.objectContaining({ description: AREA.properties.name }), expect.any(Function), expect.any(AbortController));
+                ], "token", expect.objectContaining({ title: AREA.properties.name }), expect.any(Function), expect.any(AbortController));
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/${otherAreaId}/${otherAreaFile}`, fileName: otherAreaFile }
-                ], "token", expect.objectContaining({ description: "Other area" }), expect.any(Function), expect.any(AbortController));
+                ], "token", expect.objectContaining({ title: "Other area" }), expect.any(Function), expect.any(AbortController));
 
                 progressCallbacks[0](0, 1);
                 progressCallbacks[1](0, 0.5);
@@ -651,6 +651,7 @@ describe("OfflineFilesDownloadService", () => {
                 await vi.waitFor(() => expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OTHER_AREA, expect.any(Object)));
                 // The other area is written to the device as soon as its own files are whole
                 expect(offlineAreasService.saveAreaMetadata).not.toHaveBeenCalledWith(AREA, expect.any(Object));
+                await vi.waitFor(() => expect(service.downloadsInProgress()).toEqual([{ area: AREA, progress: 50 }]));
 
                 finishDownloads[0]();
                 expect(await promise).toEqual(["downloaded", "downloaded"]);
@@ -715,8 +716,8 @@ describe("OfflineFilesDownloadService", () => {
                     { url: `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, fileName: areaFile },
                     { url: `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
                 ], "token", {
-                    title: "title",
-                    description: "Israel – Palestinian Territories",
+                    title: "Israel – Palestinian Territories",
+                    description: "title",
                     completed: "Israel – Palestinian Territories: completed"
                 }, expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
