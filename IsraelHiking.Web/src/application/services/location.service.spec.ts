@@ -172,7 +172,8 @@ describe("LocationService", () => {
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            deviceOrientationService.orientationChanged.emit(1);
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(eventSpy).not.toHaveBeenCalled();
         }
@@ -192,7 +193,8 @@ describe("LocationService", () => {
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as unknown as GeolocationPosition));
-            deviceOrientationService.orientationChanged.emit(1);
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(eventSpy).not.toHaveBeenCalledTimes(2);
         }
@@ -253,6 +255,49 @@ describe("LocationService", () => {
             deviceOrientationService.orientationChanged.emit(5);
 
             expect(mapService.moveToWithCurrentZoom).toHaveBeenLastCalledWith({ lat: 2, lng: 3, alt: undefined }, 5, 150);
+        }
+    ));
+
+    it("Should not move the map on a small orientation change", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(10);
+            vi.mocked(mapService.moveToWithCurrentZoom).mockClear();
+            deviceOrientationService.orientationChanged.emit(12);
+            deviceOrientationService.orientationChanged.emit(8);
+
+            expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should measure the orientation change across north", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(355);
+            vi.mocked(mapService.moveToWithCurrentZoom).mockClear();
+            deviceOrientationService.orientationChanged.emit(357);
+            deviceOrientationService.orientationChanged.emit(1);
+
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledTimes(1);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenLastCalledWith({ lat: 2, lng: 3, alt: undefined }, 1, 150);
         }
     ));
 
@@ -324,7 +369,8 @@ describe("LocationService", () => {
             mapService.moveToWithCurrentZoom = vi.fn();
 
             store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as unknown as GeolocationPosition));
-            deviceOrientationService.orientationChanged.emit(1);
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
         }
