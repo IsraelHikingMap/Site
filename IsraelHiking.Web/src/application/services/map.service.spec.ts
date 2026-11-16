@@ -423,40 +423,6 @@ describe("MapService", () => {
         }
     ));
 
-    it("Should not wait for a move end when the map is not moving", inject([MapService],
-        async (service: MapService) => {
-            const once = vi.fn();
-            service.setMap({
-                isMoving: () => false,
-                once,
-                setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
-                on: () => { }
-            } as unknown as Map);
-
-            await service.waitForMoveEnd();
-
-            expect(once).not.toHaveBeenCalled();
-        }
-    ));
-
-    it("Should wait for the move end when the map is moving", inject([MapService],
-        async (service: MapService) => {
-            const once = vi.fn().mockResolvedValue(undefined);
-            service.setMap({
-                isMoving: () => true,
-                once,
-                setTransformRequest: () => { },
-                setMissingStyleImageResolver: () => { },
-                on: () => { }
-            } as unknown as Map);
-
-            await service.waitForMoveEnd();
-
-            expect(once).toHaveBeenCalledWith("moveend");
-        }
-    ));
-
     it("Should not move to with current zoom after map was removed", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();

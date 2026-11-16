@@ -145,8 +145,7 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    /** Resolves once the movement to the GPS position has started, so that the `moveend` that follows is its own. */
-    public async moveMapToGpsPosition(duration: number) {
+    public moveMapToGpsPosition(duration: number) {
         if (this.locationWithBearing == null) {
             return;
         }
@@ -154,7 +153,7 @@ export class LocationService {
         const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        await this.mapService.moveToWithCurrentZoom(center, bearing, duration);
+        this.mapService.moveToWithCurrentZoom(center, bearing, duration);
     }
 
     private isSmallBearingChange(bearing: number): boolean {
