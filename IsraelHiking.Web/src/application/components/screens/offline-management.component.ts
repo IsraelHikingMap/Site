@@ -19,7 +19,7 @@ import type { Immutable } from "immer";
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { OfflineFilesDownloadService, type DownloadInProgress, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
+import { OfflineFilesDownloadService, type AreaToDownload, type DownloadInProgress, type DownloadStatus, type AreaCompatibility } from "../../services/offline-files-download.service";
 import { OfflineAreasService } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
@@ -282,34 +282,40 @@ export class OfflineManagementComponent {
      */
     public downloadAreas(areas: Immutable<OfflineArea>[]) {
         const areasToDownload = areas.map(area => this.toAreaToDownload(area));
-        const replacedAreaIds = [...new Set(areasToDownload.flatMap(area =>
-            this.offlineFilesDownloadService.getReplacedAreaIds(area, this.offeredAreaIds())))];
+        const replacedAreaIds = [...new Set(areasToDownload.flatMap(({ replacedAreaIds }) => replacedAreaIds))];
         if (replacedAreaIds.length === 0) {
-            this.startDownload(areasToDownload, replacedAreaIds);
+            this.startDownload(areasToDownload);
             return;
         }
         const names = this.downloadedAreaRows().filter(row => replacedAreaIds.includes(row.id)).map(row => row.name);
         this.toastService.confirm({
             message: this.resources.downloadingThisAreaDeletesOldAreas.replace("{{names}}", names.join(", ")),
             type: "OkCancel",
-            confirmAction: () => this.startDownload(areasToDownload, replacedAreaIds)
+            confirmAction: () => this.startDownload(areasToDownload)
         });
     }
 
-    /** An area in the shape the server offers it now, where an area that was downloaded before keeps the name the user gave it */
-    private toAreaToDownload(area: Immutable<OfflineArea>): Immutable<OfflineArea> {
+    /**
+     * An area in the shape the server offers it now, where an area that was downloaded before keeps the name the user
+     * gave it, along with the areas it replaces.
+     */
+    private toAreaToDownload(area: Immutable<OfflineArea>): AreaToDownload {
         const id = area.properties.id;
         const offeredArea = this.areas().find(offered => offered.properties.id === id) ?? area;
         const downloadedArea = this.downloadedAreas()[id]?.area;
-        return downloadedArea == null ? offeredArea : { ...offeredArea, properties: downloadedArea.properties };
+        const areaToDownload = downloadedArea == null ? offeredArea : { ...offeredArea, properties: downloadedArea.properties };
+        return { area: areaToDownload, replacedAreaIds: this.offlineFilesDownloadService.getReplacedAreaIds(areaToDownload, this.offeredAreaIds()) };
     }
 
-    private async startDownload(areasToDownload: Immutable<OfflineArea>[], replacedAreaIds: string[]) {
+    /** The areas whose download did not finish are selected again, so that they can be downloaded again */
+    private async startDownload(areasToDownload: AreaToDownload[]) {
+        const areas = areasToDownload.map(({ area }) => area);
         this.askToTurnOffBatteryOptimization();
-        this.fitBounds({ type: "FeatureCollection", features: areasToDownload });
+        this.fitBounds({ type: "FeatureCollection", features: areas });
         this.selectedAreas.set([]);
-        const status = await this.offlineFilesDownloadService.downloadAreas(areasToDownload, replacedAreaIds);
-        this.reportDownloadEnd(status, () => this.selectedAreas.set(areasToDownload));
+        const statuses = await this.offlineFilesDownloadService.downloadAreas(areasToDownload);
+        this.selectedAreas.set(areas.filter((_, index) => statuses[index] === "error" || statuses[index] === "aborted"));
+        this.reportDownloadEnd(statuses);
     }
 
     /**
@@ -331,22 +337,16 @@ export class OfflineManagementComponent {
         });
     }
 
-    /** What was downloaded is selected again when its download did not finish, so that it can be downloaded again */
-    private reportDownloadEnd(status: DownloadStatus, selectAgain: () => void) {
-        switch (status) {
-            case "up-to-date":
-                this.toastService.success(this.resources.allFilesAreUpToDate);
-                break;
-            case "downloaded":
-                this.toastService.success(this.resources.downloadFinishedSuccessfully);
-                break;
-            case "error":
-                selectAgain();
-                this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
-                break;
-            case "aborted":
-                selectAgain();
-                break;
+    /** Tells how the download of the areas ended, where an area that failed outweighs the ones that did not */
+    private reportDownloadEnd(statuses: DownloadStatus[]) {
+        if (statuses.includes("error")) {
+            this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
+        } else if (statuses.includes("aborted")) {
+            return;
+        } else if (statuses.every(status => status === "up-to-date")) {
+            this.toastService.success(this.resources.allFilesAreUpToDate);
+        } else {
+            this.toastService.success(this.resources.downloadFinishedSuccessfully);
         }
     }
 

@@ -16,15 +16,13 @@ index 107ee99..4aaebb3 100644
 -    </application>
  </manifest>
 diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
-index 294aba3..b2e628d 100644
+index 294aba3..e2fba34 100644
 --- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
 +++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
-@@ -32,15 +32,14 @@ import org.json.JSONObject;
- @CapacitorPlugin(name = "CapacitorDownloader")
- public class CapacitorDownloaderPlugin extends Plugin {
+@@ -34,13 +34,14 @@ public class CapacitorDownloaderPlugin extends Plugin {
  
--    static final int BATCH_MAX_FILES = 32;
--
+     static final int BATCH_MAX_FILES = 32;
+ 
 -    private final String pluginVersion = "8.8.1";
 +    private final String pluginVersion = "8.8.0";
  
@@ -37,19 +35,7 @@ index 294aba3..b2e628d 100644
      private final Map<String, Long> downloadGenerations = new ConcurrentHashMap<>();
      private final AtomicLong pendingDownloadSequence = new AtomicLong(0);
      private ExecutorService downloadManagerExecutor;
-@@ -366,11 +365,6 @@ public class CapacitorDownloaderPlugin extends Plugin {
-             return;
-         }
- 
--        if (files.length() > BATCH_MAX_FILES) {
--            call.reject("Batch exceeds maximum of " + BATCH_MAX_FILES + " files");
--            return;
--        }
--
-         final String notification = call.getString("notification");
-         final long batchGeneration = nextGeneration(batchId);
-         final String completionNotificationText = call.getString("downloadCompletedNotificationText");
-@@ -405,14 +399,18 @@ public class CapacitorDownloaderPlugin extends Plugin {
+@@ -405,14 +406,18 @@ public class CapacitorDownloaderPlugin extends Plugin {
                      androidHttpEngine,
                      resolvedDestination.preferOkHttpInAutoMode
                  );
@@ -73,7 +59,7 @@ index 294aba3..b2e628d 100644
              }
          } catch (JSONException e) {
              rollbackBatch(batchState);
-@@ -427,6 +425,11 @@ public class CapacitorDownloaderPlugin extends Plugin {
+@@ -427,6 +432,11 @@ public class CapacitorDownloaderPlugin extends Plugin {
          final JSObject headers = call.getObject("headers");
          final String network = call.getString("network");
  
@@ -85,7 +71,7 @@ index 294aba3..b2e628d 100644
          runDownloadManagerWork(
              call,
              () -> {
-@@ -539,14 +542,177 @@ public class CapacitorDownloaderPlugin extends Plugin {
+@@ -539,14 +549,177 @@ public class CapacitorDownloaderPlugin extends Plugin {
          final int index;
          final String url;
          final File destinationFile;
@@ -264,7 +250,7 @@ index 294aba3..b2e628d 100644
      private DownloadManager.Request buildDownloadRequest(
          String url,
          File destinationFile,
-@@ -833,6 +999,7 @@ public class CapacitorDownloaderPlugin extends Plugin {
+@@ -833,6 +1006,7 @@ public class CapacitorDownloaderPlugin extends Plugin {
                          destinationFile,
                          headers,
                          network,
@@ -272,7 +258,7 @@ index 294aba3..b2e628d 100644
                          (downloadId, progress) ->
                              handler.post(() -> {
                                  if (!isCurrentOkHttpDownload(downloadId) || !isCurrentOkHttpGeneration(downloadId, storedGeneration)) {
-@@ -1067,6 +1234,12 @@ public class CapacitorDownloaderPlugin extends Plugin {
+@@ -1067,6 +1241,12 @@ public class CapacitorDownloaderPlugin extends Plugin {
              return;
          }
  
@@ -350,22 +336,10 @@ index 2223a86..8f83eab 100644
                              int percent = (int) (active.progress * 100f);
                              if (percent != lastReportedPercent) {
 diff --git a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
-index d453822..5de63a7 100644
+index d453822..aeff223 100644
 --- a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
 +++ b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
-@@ -1,5 +1,10 @@
- import type { PluginListenerHandle } from '@capacitor/core';
--/** Maximum number of files allowed in one batch `download()` call. */
-+/**
-+ * Maximum number of files that was allowed in one batch `download()` call.
-+ *
-+ * @deprecated A batch takes any number of files: iOS queues them in its URL session and Android runs at most four at
-+ * a time, starting them in the order they are given.
-+ */
- export declare const DOWNLOAD_BATCH_MAX_FILES = 32;
- /**
-  * Represents the current state and progress of a download task.
-@@ -30,7 +35,7 @@ export interface DownloadFileSpec {
+@@ -30,7 +30,7 @@ export interface DownloadFileSpec {
       * - `public-downloads/...` saves to the public Downloads folder (DownloadManager).
       * - Any other relative path saves under app external files (DownloadManager with `'auto'`).
       *
@@ -374,7 +348,7 @@ index d453822..5de63a7 100644
       *
       * Absolute paths and `file://` URIs are supported on iOS and on Android single downloads.
       *
-@@ -72,6 +77,14 @@ export interface DownloadOptions {
+@@ -72,6 +72,14 @@ export interface DownloadOptions {
      };
      /** Network type requirement for download */
      network?: 'cellular' | 'wifi-only';
@@ -389,7 +363,7 @@ index d453822..5de63a7 100644
      /** Download priority level */
      priority?: 'high' | 'normal' | 'low';
      /**
-@@ -91,18 +104,20 @@ export interface DownloadOptions {
+@@ -91,18 +99,20 @@ export interface DownloadOptions {
       */
      notification?: 'completed' | 'progress' | 'hidden';
      /**
@@ -414,7 +388,7 @@ index d453822..5de63a7 100644
       *
       * @since 8.6.0
       */
-@@ -137,19 +152,26 @@ export interface DownloadOptions {
+@@ -137,19 +147,26 @@ export interface DownloadOptions {
       */
      downloadCompletedNotificationText?: string;
      /**
@@ -429,13 +403,13 @@ index d453822..5de63a7 100644
 +     * task does not launch in time. If the task expires, the download fails with `downloadFailed` and is not resumed
 +     * automatically. The host app must allow `$(PRODUCT_BUNDLE_IDENTIFIER).CapacitorDownloader.continuedProcessing.*` in
 +     * `BGTaskSchedulerPermittedIdentifiers` (see plugin README). Ignored on Android and Web.
-      *
++     *
 +     * @since 8.9.0
 +     */
 +    iosContinuedProcessing?: boolean;
 +    /**
 +     * Title of the iOS continued processing task.
-+     *
+      *
 +     * @deprecated Use `title` with `iosContinuedProcessing: true`.
       * @since 8.8.0
       */
@@ -448,7 +422,7 @@ index d453822..5de63a7 100644
       * @since 8.8.0
       */
      iosContinuedProcessingSubtitle?: string;
-@@ -163,7 +185,7 @@ export interface DownloadOptions {
+@@ -163,7 +180,7 @@ export interface DownloadOptions {
  /**
   * Configuration options for a multi-file batch download.
   *
@@ -457,16 +431,7 @@ index d453822..5de63a7 100644
   *
   * **Process death:** On Android, batch state lives in memory only and is lost when the host process is killed (DownloadManager work may still finish, but the plugin does not rebuild batch progress). On iOS, batch metadata is persisted in `DownloadBatchStore` (UserDefaults) and restored when the plugin initializes.
   *
-@@ -179,7 +201,7 @@ export interface DownloadBatchOptions {
-      *
-      * The batch shares the top-level `id`. Progress events use `progress` and `fileProgress` from 0 to 1 (same scale as DownloadTask).
-      * `downloadCompleted` fires once when every file succeeds. Any failure cancels the batch.
--     * At most 32 entries are allowed.
-+     * Any number of entries is allowed, they are downloaded a few at a time, started in the order given.
-      *
-      * @since 8.7.0
-      */
-@@ -192,34 +214,50 @@ export interface DownloadBatchOptions {
+@@ -192,34 +209,50 @@ export interface DownloadBatchOptions {
      };
      /** Network type requirement for download */
      network?: 'cellular' | 'wifi-only';
@@ -524,7 +489,7 @@ index d453822..5de63a7 100644
       *
       * @since 8.6.0
       */
-@@ -235,7 +273,7 @@ export interface DownloadBatchOptions {
+@@ -235,7 +268,7 @@ export interface DownloadBatchOptions {
       *   in the app process and do not continue after the process is killed (unlike DownloadManager on those paths).
       * - `'downloadManager'`: always use the system DownloadManager with legacy destination resolution.
       *
@@ -533,7 +498,7 @@ index d453822..5de63a7 100644
       *
       * @since 8.5.0
       */
-@@ -253,6 +291,13 @@ export interface DownloadBatchOptions {
+@@ -253,6 +286,13 @@ export interface DownloadBatchOptions {
       * @since 8.5.0
       */
      downloadCompletedNotificationText?: string;
@@ -548,7 +513,7 @@ index d453822..5de63a7 100644
  /**
   * Capacitor plugin for downloading files with background support.
 diff --git a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
-index 80204f5..702c628 100644
+index 80204f5..461cbe8 100644
 --- a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
 +++ b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
 @@ -8,7 +8,7 @@ import Capacitor
@@ -569,15 +534,7 @@ index 80204f5..702c628 100644
      private let tasksLock = NSLock()
      private let batchCoordinator = DownloadBatchCoordinator()
      private let continuedProcessing = DownloadContinuedProcessingCoordinator()
-@@ -32,7 +34,6 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
-     private let foregroundSessionLock = NSLock()
-     internal private(set) var restoredBackgroundSessionIdentifiers: [String] = []
-     internal private(set) var didRestoreGenerationsBeforeDelegateRegistration = false
--    static let batchMaxFiles = 32
- 
-     private func registerDownloadDelegateIfGenerationsRestored() {
-         tasksLock.lock()
-@@ -89,6 +90,10 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -89,6 +91,10 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
      }
  
      private func cancelDownloadFromContinuedProcessingExpiry(_ downloadId: String) {
@@ -588,7 +545,7 @@ index 80204f5..702c628 100644
          guard let task = getTask(for: downloadId) else {
              return
          }
-@@ -119,6 +124,27 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -119,6 +125,27 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
          getTask(for: id) != nil
      }
  
@@ -616,7 +573,7 @@ index 80204f5..702c628 100644
      private func setTask(_ task: URLSessionDownloadTask, for id: String) {
          tasksLock.lock()
          defer { tasksLock.unlock() }
-@@ -298,6 +324,7 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -298,6 +325,7 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
              generation: generation
          )
  
@@ -624,7 +581,7 @@ index 80204f5..702c628 100644
          var request = URLRequest(url: url)
          if let headers = call.getObject("headers") as? [String: String] {
              for (key, value) in headers {
-@@ -336,15 +363,21 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -336,15 +364,21 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
          }
      }
  
@@ -652,15 +609,7 @@ index 80204f5..702c628 100644
      }
  
      private func markContinuedProcessingFinished(downloadId: String, success: Bool) {
-@@ -355,15 +388,10 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
-     }
- 
-     private func downloadBatch(_ call: CAPPluginCall, batchId: String, files: [[String: Any]]) {
--        if files.count > Self.batchMaxFiles {
--            call.reject("Batch exceeds maximum of \(Self.batchMaxFiles) files")
--            return
--        }
--
+@@ -363,7 +397,7 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
          var parsed: [(url: URL, destination: String)] = []
          let headers = call.getObject("headers") as? [String: String] ?? [:]
          let wifiOnly = call.getString("network") == "wifi-only"
@@ -669,7 +618,7 @@ index 80204f5..702c628 100644
  
          for fileObject in files {
              guard let urlString = fileObject["url"] as? String,
-@@ -396,33 +424,78 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -396,33 +430,78 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
              generation: generation
          )
  
@@ -713,8 +662,11 @@ index 80204f5..702c628 100644
 +                self.foregroundSessionLock.lock()
 +                stagedTasks.forEach { self.foregroundSessionDownloadIds.insert($0.taskId) }
 +                self.foregroundSessionLock.unlock()
-+            }
-+
+             }
+ 
+-            let task = batchSession.downloadTask(with: request)
+-            task.taskDescription = taskId
+-            stagedTasks.append((taskId, task))
 +            stagedTasks.forEach { self.setTask($0.task, for: $0.taskId) }
 +            guard self.batchCoordinator.generation(for: batchId) == generation else {
 +                self.discardStagedBatchTasks(stagedTasks, session: batchSession)
@@ -724,11 +676,8 @@ index 80204f5..702c628 100644
 +            }
 +            if !self.batchCoordinator.isPaused(batchId: batchId) {
 +                stagedTasks.forEach { $0.task.resume() }
-             }
- 
--            let task = batchSession.downloadTask(with: request)
--            task.taskDescription = taskId
--            stagedTasks.append((taskId, task))
++            }
++
 +            call.resolve([
 +                "id": batchId,
 +                "state": "RUNNING",
@@ -766,7 +715,7 @@ index 80204f5..702c628 100644
      }
  
      private func cancelBatchTasks(batchId: String) {
-@@ -496,16 +569,18 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -496,16 +575,18 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
          DownloadBackgroundSessionManager.shared.mainSession
      }
  
@@ -790,7 +739,7 @@ index 80204f5..702c628 100644
      }
  
      @objc func stop(_ call: CAPPluginCall) {
-@@ -517,7 +592,11 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+@@ -517,7 +598,11 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
          if batchCoordinator.isBatch(batchId: id) {
              let destinations = batchCoordinator.destinationsForCancellation(batchId: id)
              batchCoordinator.markCancelled(batchId: id)
@@ -802,7 +751,7 @@ index 80204f5..702c628 100644
              deleteDownloadedFiles(destinations: destinations)
              batchCoordinator.removeBatch(batchId: id, unregisterChildren: false)
              call.resolve()
-@@ -706,7 +785,9 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+@@ -706,7 +791,9 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
                      if let completionText = DownloadCompletedNotificationStore.shared.takeText(for: batchId, generation: generation) {
                          DownloadCompletedNotificationPresenter.presentIfAllowed(downloadId: batchId, body: completionText)
                      }
@@ -812,7 +761,7 @@ index 80204f5..702c628 100644
                      notifyListeners(
                          "downloadProgress",
                          data: [
-@@ -804,10 +885,11 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+@@ -804,10 +891,11 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
              return
          }
  
@@ -827,7 +776,7 @@ index 80204f5..702c628 100644
              guard let batchProgress = batchCoordinator.updateFileProgress(
                  batchId: batchParts.batchId,
                  generation: batchParts.generation,
-@@ -816,6 +898,7 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+@@ -816,6 +904,7 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
              ) else {
                  return
              }
