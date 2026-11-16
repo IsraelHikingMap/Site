@@ -147,11 +147,8 @@ export class DatabaseService {
         const x = +splitUrl[splitUrl.length - 2];
         const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
         const offlineAvailable = await this.pmTilesService.isOfflineFileAvailable(z, x, y, type);
-        const sinceServerFailureMs = Date.now() - this.lastServerFailureTime;
-        if (offlineAvailable && sinceServerFailureMs < DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS) {
-            this.loggingService.info(`[Slice] Reading ${z}/${x}/${y} of ${type} from the offline file without asking the server, ` +
-                `which could not be reached ${Math.round(sinceServerFailureMs / 1000)}s ago`);
-            return await this.getOfflineTile(z, x, y, type);
+        if (offlineAvailable && this.isSkippingServer()) {
+            return { data: await this.pmTilesService.getTileByType(z, x, y, type) };
         }
         try {
             const response = await firstValueFrom(this.httpClient.get(url.replace("slice://", "https://"), { observe: "response", responseType: "arraybuffer" })
@@ -166,7 +163,7 @@ export class DatabaseService {
                 throw createNotFoundError(`Tile ${z}/${x}/${y} of ${type} is not on the server`);
             }
             // Timeout or other error
-            this.lastServerFailureTime = Date.now();
+            this.skipServerForAWhile(`${z}/${x}/${y} of ${type}`, ex as Error);
             if (offlineAvailable === false) {
                 if (!this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)) {
                     this.store.dispatch(new SetLastOfflineDetectedDate(new Date()));
@@ -174,20 +171,25 @@ export class DatabaseService {
                 throw new Error(`${NO_OFFLINE_FILE_MESSAGE} for tile ${z}/${x}/${y} of ${type}, ` +
                     `and the server could not be reached: ${(ex as Error).message}`, { cause: ex });
             }
-            this.loggingService.info(`[Slice] The server could not be reached for ${z}/${x}/${y} of ${type}, reading the offline files ` +
-                `without asking it for the next ${DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS / 1000}s: ${(ex as Error).message}`);
-            return await this.getOfflineTile(z, x, y, type);
+            return { data: await this.pmTilesService.getTileByType(z, x, y, type) };
         }
     }
 
-    /** Reads a tile from the offline file, logging a tile it does not have, which the map replaces with the zoom below */
-    private async getOfflineTile(z: number, x: number, y: number, type: string): Promise<GetResourceResponse<ArrayBuffer>> {
-        try {
-            return { data: await this.pmTilesService.getTileByType(z, x, y, type) };
-        } catch (ex) {
-            this.loggingService.info(`[Slice] ${z}/${x}/${y} of ${type} is not in the offline file: ${(ex as Error).message}`);
-            throw ex;
+    private isSkippingServer(): boolean {
+        return Date.now() - this.lastServerFailureTime < DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS;
+    }
+
+    /**
+     * Reads the tiles that have an offline file from it without asking the server, starting now, after a request to
+     * the server failed. Only the request that starts skipping the server is logged, since the requests already
+     * waiting on it fail along with it.
+     */
+    private skipServerForAWhile(tile: string, error: Error) {
+        if (!this.isSkippingServer()) {
+            this.loggingService.info(`[Slice] The server could not be reached for ${tile}, reading the offline files ` +
+                `without asking it for the next ${DatabaseService.SKIP_SERVER_AFTER_FAILURE_MS / 1000}s: ${error.message}`);
         }
+        this.lastServerFailureTime = Date.now();
     }
 
     public async uninitialize() {
