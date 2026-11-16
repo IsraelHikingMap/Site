@@ -365,7 +365,7 @@
     "This name is already in use": "This name is already in use",
     "This will delete all current routes. Are you sure?": "This will delete all current routes. Are you sure?",
     "Title": "Title",
-    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "To prevent download errors, please don't switch apps or lock your screen until the download is finished",
+    "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.": "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.",
     "Toilets": "Toilets",
     "Too many routes found, zoom in the map or change the filters...": "Too many routes found, zoom in the map or change the filters...",
     "Traces are only saved locally. You can change that in the settings screen.": "Traces are only saved locally. You can change that in the settings screen.",

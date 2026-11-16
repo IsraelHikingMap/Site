@@ -13,6 +13,7 @@ import { DatePipe, NgClass } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { form, FormField, validate } from "@angular/forms/signals";
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from "@angular/material/core";
+import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 import type { Immutable } from "immer";
 
 import { AutomaticLayerPresentationComponent } from "../map/automatic-layer-presentation.component";
@@ -23,6 +24,7 @@ import { OfflineAreasService } from "../../services/offline-areas.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersService } from "../../services/layers.service";
 import { ToastService } from "../../services/toast.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { SpatialHelper } from "../../services/spatial.helper";
 import { DEFAULT_BASE_LAYERS, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, EditableLayer, OfflineArea } from "../../models";
@@ -97,6 +99,7 @@ export class OfflineManagementComponent {
     private readonly defaultStyleService = inject(DefaultStyleService);
     private readonly layersService = inject(LayersService);
     private readonly toastService = inject(ToastService);
+    private readonly runningContextService = inject(RunningContextService);
     private readonly offlineAreasService = inject(OfflineAreasService);
     private readonly store = inject(Store);
     private readonly changeDetectorRef = inject(ChangeDetectorRef);
@@ -286,11 +289,30 @@ export class OfflineManagementComponent {
     }
 
     private async startDownload(areaToDownload: Immutable<OfflineArea>, replacedAreaIds: string[]) {
-        this.toastService.info(this.resources.dontSwitchApps);
+        this.askToTurnOffBatteryOptimization();
         this.fitBounds(areaToDownload);
         this.selectedArea.set(null);
         const status = await this.offlineFilesDownloadService.downloadArea(areaToDownload, replacedAreaIds);
         this.reportDownloadEnd(status, () => this.selectedArea.set(areaToDownload));
+    }
+
+    /**
+     * Asks to turn off the battery optimization of the app on android, which can stop the download once the app is in the
+     * background. The download does not wait for the answer, it starts either way.
+     */
+    private async askToTurnOffBatteryOptimization() {
+        if (!this.runningContextService.isCapacitor || this.runningContextService.isIos) {
+            return;
+        }
+        const { enabled } = await BatteryOptimization.isBatteryOptimizationEnabled();
+        if (!enabled) {
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.turnOffBatteryOptimizationForDownload,
+            type: "OkCancel",
+            confirmAction: () => BatteryOptimization.openBatteryOptimizationSettings()
+        });
     }
 
     /** What was downloaded is selected again when its download did not finish, so that it can be downloaded again */

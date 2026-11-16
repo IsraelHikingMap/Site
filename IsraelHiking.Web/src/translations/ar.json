@@ -365,7 +365,7 @@
     "This name is already in use": "هذا الاسم قيد الاستخدام بالفعل",
     "This will delete all current routes. Are you sure?": "سيؤدي ذلك إلى حذف جميع المسارات الحالية. هل أنت متأكد؟",
     "Title": "عنوان",
-    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "لمنع أخطاء التحميل، يرجى عدم التبديل بين التطبيقات أو قفل الشاشة حتى يتم الانتهاء من التحميل",
+    "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.": "لمواصلة التنزيل بينما يعمل التطبيق في الخلفية، قم بإيقاف تشغيل تحسين البطارية لهذا التطبيق في إعدادات جهازك.",
     "Toilets": "مرافق صحية",
     "Too many routes found, zoom in the map or change the filters...": "تم العثور على عدد كبير جدًا من المسارات، قم بتكبير الخريطة أو تغيير الفلاتر...",
     "Traces are only saved locally. You can change that in the settings screen.": "تُحفظ المسارات فقط محليًا، يمكنك تغيير ذلك في شاشة الإعدادات.",

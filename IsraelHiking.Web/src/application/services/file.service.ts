@@ -5,7 +5,7 @@ import { Share } from "@capacitor/share";
 import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
-import { encode } from "base64-arraybuffer";
+import { CapacitorDownloader, DOWNLOAD_BATCH_MAX_FILES } from "@capgo/capacitor-downloader";
 
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
@@ -56,21 +56,20 @@ export type HTMLElementInputChangeEvent = {
     stopPropagation(): void;
 };
 
-/**
- * The bytes a download gathered and did not write to its file yet, see DOWNLOAD_WRITE_BUFFER_SIZE.
- * Whether anything was written already tells the write that creates the file from the ones that add to it.
- */
-type PendingChunks = {
-    chunks: Uint8Array[];
-    length: number;
-    wroteAnything: boolean;
+/** Reports how much of the files were downloaded together, from 0 to 1 */
+export type FileDownloadProgressCallback = (progress: number) => void;
+
+/** A file to download into the offline files cache, see downloadFilesToCacheAuthenticated */
+export type OfflineFileToDownload = {
+    url: string;
+    fileName: string;
 };
 
-/**
- * Reports how much of a file was downloaded, from 0 to 1. A file whose length the server did not report
- * has nothing to report until it is whole, since there is nothing to measure what it got against.
- */
-export type FileDownloadProgressCallback = (progress: number) => void;
+/** The text the notification of a download shows while it goes on in the background */
+export type DownloadNotificationText = {
+    title: string;
+    description: string;
+};
 
 /** A file in the app's data directory, the time it was last written to and its size in bytes */
 export type DataDirectoryFile = {
@@ -90,21 +89,8 @@ export class FileService {
     /** The extension of the offline map files an offline download leaves in the data directory. */
     private static readonly OFFLINE_FILE_EXTENSION = ".pmtiles";
 
-    /**
-     * Tells the file a download is writing apart from the one another download of the same file writes,
-     * so that two downloads of the same tile never write over each other, see
-     * downloadFileToCacheAuthenticated.
-     */
-    private static partialFileCounter = 0;
-
-    /**
-     * How many bytes a download gathers before it writes them to the file. Every write crosses the bridge
-     * as base64 text, which costs far more than the write itself, so the chunks the network hands over -
-     * tens of kilobytes each - are gathered into one write instead of being written one by one.
-     * Most of what a larger buffer saves is saved by the first megabyte, while the memory it takes is paid
-     * by every download that is going on at the same time, along with the base64 text of its own buffer.
-     */
-    private static readonly DOWNLOAD_WRITE_BUFFER_SIZE = 2 * 1024 * 1024;
+    /** Tells the batches of the downloader plugin apart, so that the events of an aborted one are not taken for those of the next */
+    private static batchCounter = 0;
 
     /**
      * How long a style is waited for when there is a copy of it on the device to draw instead - a network that
@@ -439,126 +425,78 @@ export class FileService {
     }
 
     /**
-     * Downloads an offline file into the offline files cache. It is written under a name of its own and
-     * only takes the name of the file once it was downloaded to its end, so that only whole files are ever
-     * in the cache, and so that a download that is still unwinding after it was aborted can not write over
-     * the file of the download that took its place - they never share a path.
-     * A file that was not downloaded to its end, because the download was aborted or failed, is deleted.
-     * The bytes are gathered into large writes rather than written as they arrive, see
-     * DOWNLOAD_WRITE_BUFFER_SIZE.
-     * A download that failed is logged with the file it died on and how far it got, neither of which is in
-     * the error itself - without them a log only says that the download of the tile failed, and every file
-     * of it is a suspect.
-     * The expected length is taken from X-Uncompressed-Length when the server sends it, since a response that
-     * was compressed in transit has no Content-Length.
+     * Downloads the offline files into the offline files cache with the downloader plugin, which keeps going while the
+     * app is in the background - from a foreground service that shows the notification on android, and from a continued
+     * processing task on iOS 26. A file only takes its name once it is whole, so the cache never holds a part of a file.
+     * The plugin takes a limited number of files at a time, so they are handed over in batches of that size.
      */
-    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
-        this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
+    public async downloadFilesToCacheAuthenticated(files: OfflineFileToDownload[], token: string, notificationText: DownloadNotificationText,
+        progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         await this.ensureOfflineCacheDirectory();
-        const partialFileName = `${fileName}.${FileService.partialFileCounter++}.part`;
-        const path = FileService.offlineCachePath(partialFileName);
-        let previousPercentage = 0;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            signal: abortController.signal
-        });
-        if (!response.ok) {
-            this.loggingService.error(`[Files] Failed to download file: ${fileName}, status: ${response.statusText}`);
-            throw new Error(`Failed to download file: ${fileName}, status: ${response.statusText}`);
+        for (let index = 0; index < files.length && !abortController.signal.aborted; index += DOWNLOAD_BATCH_MAX_FILES) {
+            const batch = files.slice(index, index + DOWNLOAD_BATCH_MAX_FILES);
+            await this.downloadBatchToCache(batch, token, notificationText,
+                progress => progressCallback((index + progress * batch.length) / files.length), abortController);
         }
-        const reader = response.body.getReader();
-        const contentLength = Number(response.headers.get("X-Uncompressed-Length") || response.headers.get("Content-Length"));
-        let receivedLength = 0;
-        const pending: PendingChunks = { chunks: [], length: 0, wroteAnything: false };
-        let done: boolean;
+    }
+
+    /**
+     * Downloads one batch of files, resolving once all of them are whole and rejecting once one of them failed. An abort
+     * stops the batch and resolves straight away, without waiting for the plugin to say anything more about it.
+     */
+    private async downloadBatchToCache(files: OfflineFileToDownload[], token: string, notificationText: DownloadNotificationText,
+        progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
+        const id = `offline-files-${FileService.batchCounter++}`;
+        this.loggingService.info(`[Files] Starting downloading ${files.length} files to cache, ${id}: ${files.map(f => f.fileName).join(", ")}`);
+        const destinations = await Promise.all(files.map(f => Filesystem.getUri({ path: FileService.offlineCachePath(f.fileName), directory: Directory.Cache })));
+        let settle: { resolve: () => void, reject: (error: Error) => void };
+        const finished = new Promise<void>((resolve, reject) => settle = { resolve, reject });
+        const listeners = await Promise.all([
+            CapacitorDownloader.addListener("downloadProgress", event => {
+                if (event.id === id) {
+                    progressCallback(event.progress);
+                }
+            }),
+            CapacitorDownloader.addListener("downloadCompleted", event => {
+                if (event.id === id) {
+                    settle.resolve();
+                }
+            }),
+            CapacitorDownloader.addListener("downloadFailed", event => {
+                if (event.id === id) {
+                    settle.reject(new Error(`Failed to download ${files[event.fileIndex]?.fileName ?? "a file"} of ${id}: ${event.error}`));
+                }
+            })
+        ]);
+        const abort = () => {
+            this.loggingService.info(`[Files] Aborting the download of ${id}`);
+            CapacitorDownloader.stop({ id }).catch(() => { });
+            settle.resolve();
+        };
+        abortController.signal.addEventListener("abort", abort, { once: true });
         try {
-            do {
-                const readResult = await reader.read();
-                done = readResult.done;
-                if (done) {
-                    break;
-                }
-                const value = readResult.value;
-                if (abortController.signal.aborted) {
-                    this.loggingService.info(`[Files] Aborting download of file ${fileName}`);
-                    await this.deleteFileInOfflineCache(partialFileName);
-                    return;
-                }
-
-                pending.chunks.push(value);
-                pending.length += value.length;
-                receivedLength += value.length;
-                if (pending.length >= FileService.DOWNLOAD_WRITE_BUFFER_SIZE) {
-                    await this.writePendingChunks(path, pending);
-                }
-                if (contentLength > 0) {
-                    const currentPercentage = receivedLength / contentLength;
-                    if (currentPercentage - previousPercentage > 0.001) {
-                        progressCallback(currentPercentage);
-                        previousPercentage = currentPercentage;
-                    }
-                }
-            } while (!done);
-            await this.writePendingChunks(path, pending);
-        } catch (ex) {
-            this.loggingService.error(`[Files] Failed to download ${fileName} after ` +
-                `${(receivedLength / 1024 / 1024).toFixed(1)} of ${(contentLength / 1024 / 1024).toFixed(1)} MB: ` +
-                `${(ex as Error).message}`);
-            await this.deleteFileInOfflineCache(partialFileName);
-            throw ex;
-        }
-        progressCallback(1);
-        await Filesystem.rename({
-            from: path,
-            to: FileService.offlineCachePath(fileName),
-            directory: Directory.Cache
-        });
-        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}, ` +
-            `${(receivedLength / 1024 / 1024).toFixed(1)} MB`);
-    }
-
-    /**
-     * Writes the bytes a download gathered so far into its file and empties them, so that the ones that
-     * come next are gathered on their own. The first write creates the file and the rest add to it, which
-     * also means that a file that holds no bytes at all is still created.
-     */
-    private async writePendingChunks(path: string, pending: PendingChunks): Promise<void> {
-        if (pending.length === 0 && pending.wroteAnything) {
-            return;
-        }
-        const data = encode(FileService.concatenateChunks(pending.chunks, pending.length));
-        pending.chunks = [];
-        pending.length = 0;
-        if (pending.wroteAnything) {
-            await Filesystem.appendFile({
-                path,
-                directory: Directory.Cache,
-                data
+            await CapacitorDownloader.download({
+                id,
+                files: files.map((file, index) => ({ url: file.url, destination: destinations[index].uri })),
+                headers: { Authorization: `Bearer ${token}` },
+                lengthHeader: "X-Uncompressed-Length",
+                androidHttpEngine: "okhttp",
+                notification: "progress",
+                title: notificationText.title,
+                description: notificationText.description,
+                iosContinuedProcessing: true
             });
-            return;
+            await finished;
+            if (!abortController.signal.aborted) {
+                this.loggingService.info(`[Files] Finished downloading ${files.length} files to cache, ${id}`);
+            }
+        } catch (ex) {
+            this.loggingService.error(`[Files] ${(ex as Error).message}`);
+            throw ex;
+        } finally {
+            abortController.signal.removeEventListener("abort", abort);
+            await Promise.all(listeners.map(listener => listener.remove()));
         }
-        await Filesystem.writeFile({
-            path,
-            directory: Directory.Cache,
-            data
-        });
-        pending.wroteAnything = true;
-    }
-
-    /**
-     * Gathers the chunks the network handed over into one buffer of exactly their bytes, since a chunk
-     * might be a view into a larger buffer, which holds bytes that are not a part of it.
-     */
-    private static concatenateChunks(chunks: Uint8Array[], totalLength: number): ArrayBuffer {
-        const buffer = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-            buffer.set(chunk, offset);
-            offset += chunk.length;
-        }
-        return buffer.buffer;
     }
 
     public async readFileInDataDirectory(fileName: string): Promise<string> {
@@ -613,12 +551,9 @@ export class FileService {
     }
 
     /**
-     * Creates the offline files cache directory when it is not there. Neither writing the first chunk of a
-     * file nor appending the rest of them creates it, so it is created before the file is downloaded.
-     * It is only created once it was found to be missing, since creating a directory that is already there
-     * is an error on android while it is not on ios. Creating it can still fail on another download that
-     * is creating it at that same moment, files are downloaded a few at a time, which is not a problem as
-     * long as it ended up there - what the failure was is only worth passing on when it did not.
+     * Creates the offline files cache directory when it is not there, so that the files are downloaded into a directory
+     * that exists. It is only created once it was found to be missing, since creating a directory that is already there
+     * is an error on android while it is not on ios.
      */
     private async ensureOfflineCacheDirectory(): Promise<void> {
         if (await this.offlineCacheDirectoryExists()) {
@@ -650,17 +585,6 @@ export class FileService {
             return result.type === "directory";
         } catch {
             return false;
-        }
-    }
-
-    private async deleteFileInOfflineCache(fileName: string): Promise<void> {
-        try {
-            await Filesystem.deleteFile({
-                path: FileService.offlineCachePath(fileName),
-                directory: Directory.Cache
-            });
-        } catch (ex) {
-            this.loggingService.warning(`[Files] Did not delete the partial file: ${fileName}, ${(ex as Error).message}`);
         }
     }
 

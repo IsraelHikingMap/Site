@@ -39,6 +39,8 @@
 		"MailComposerPlugin",
 		"BackgroundGeolocation",
 		"CapgoCompassPlugin",
+		"CapacitorDownloaderLifecycle",
+		"CapacitorDownloaderPlugin",
 		"CapgoInAppBrowserPlugin",
 		"CapacitorShareTargetPlugin",
 		"SpeechSynthesisPlugin",
