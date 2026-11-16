@@ -60,8 +60,7 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         }
 
         val offlineAvailable = pmTilesService.isOfflineFileAvailable(z, x, y, type)
-        val sinceServerFailureMillis = System.currentTimeMillis() - lastServerFailureMillis
-        if (offlineAvailable && sinceServerFailureMillis < SKIP_SERVER_AFTER_FAILURE_MS) {
+        if (offlineAvailable && isSkippingServer()) {
             return offlineResponse(original, z, x, y, type)
         }
         val timeout: Int =
@@ -84,7 +83,7 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
 
         // Close the failed response body to avoid leaks
         response?.close()
-        lastServerFailureMillis = System.currentTimeMillis()
+        skipServerForAWhile()
 
         if (!offlineAvailable) {
             if (networkError != null) {
@@ -98,6 +97,17 @@ class SliceProtocolInterceptor internal constructor(private val pmTilesService: 
         }
 
         return offlineResponse(original, z, x, y, type)
+    }
+
+    private fun isSkippingServer(): Boolean =
+            System.currentTimeMillis() - lastServerFailureMillis < SKIP_SERVER_AFTER_FAILURE_MS
+
+    /**
+     * Reads the tiles that have an offline file from it without asking the server, starting now, after a request to
+     * the server failed.
+     */
+    private fun skipServerForAWhile() {
+        lastServerFailureMillis = System.currentTimeMillis()
     }
 
     /** Reads a tile from the offline file, a tile it does not have is a 404 the map replaces with the zoom below */
