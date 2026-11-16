@@ -77,4 +77,50 @@ describe("DatabaseService", () => {
             }
         )
     );
+
+    it("Should read a slice tile from the offline file without asking the server shortly after the server could not be reached",
+        inject([DatabaseService, PmTilesService, HttpTestingController],
+            async (service: DatabaseService, pmTilesService: PmTilesService, mockBackend: HttpTestingController) => {
+                await service.initialize();
+                const offlineTile = new ArrayBuffer(1);
+                pmTilesService.isOfflineFileAvailable = vi.fn().mockResolvedValue(true);
+                pmTilesService.getTileByType = vi.fn().mockResolvedValue(offlineTile);
+
+                const first = service.getSliceTile("slice://mapeak.com/vector/data/raster-dem/14/9783/6797.webp");
+                await vi.waitFor(() => mockBackend.expectOne("https://mapeak.com/vector/data/raster-dem/14/9783/6797.webp")
+                    .error(new ProgressEvent("error")));
+                expect((await first).data).toBe(offlineTile);
+
+                const second = await service.getSliceTile("slice://mapeak.com/vector/data/raster-dem/13/4891/3398.webp");
+
+                mockBackend.expectNone("https://mapeak.com/vector/data/raster-dem/13/4891/3398.webp");
+                expect(second.data).toBe(offlineTile);
+            }
+        )
+    );
+
+    it("Should ask the server again once a while passed since it could not be reached",
+        inject([DatabaseService, PmTilesService, HttpTestingController],
+            async (service: DatabaseService, pmTilesService: PmTilesService, mockBackend: HttpTestingController) => {
+                await service.initialize();
+                pmTilesService.isOfflineFileAvailable = vi.fn().mockResolvedValue(true);
+                pmTilesService.getTileByType = vi.fn().mockResolvedValue(new ArrayBuffer(1));
+                const now = Date.now();
+                const dateNow = vi.spyOn(Date, "now").mockReturnValue(now);
+
+                const first = service.getSliceTile("slice://mapeak.com/vector/data/raster-dem/14/9783/6797.webp");
+                await vi.waitFor(() => mockBackend.expectOne("https://mapeak.com/vector/data/raster-dem/14/9783/6797.webp")
+                    .error(new ProgressEvent("error")));
+                await first;
+                dateNow.mockReturnValue(now + 30000);
+
+                const second = service.getSliceTile("slice://mapeak.com/vector/data/raster-dem/13/4891/3398.webp");
+                await vi.waitFor(() => mockBackend.expectOne("https://mapeak.com/vector/data/raster-dem/13/4891/3398.webp")
+                    .flush(new ArrayBuffer(2)));
+
+                expect((await second).data.byteLength).toBe(2);
+                dateNow.mockRestore();
+            }
+        )
+    );
 });
