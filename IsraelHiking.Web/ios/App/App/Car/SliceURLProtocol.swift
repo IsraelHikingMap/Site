@@ -24,12 +24,14 @@ final class SliceURLProtocol: URLProtocol {
     private static let serverFailureLock = NSLock()
     private static var lastServerFailure = Date.distantPast
 
-    private static func secondsSinceServerFailure() -> TimeInterval {
+    private static func isSkippingServer() -> Bool {
         serverFailureLock.lock(); defer { serverFailureLock.unlock() }
-        return Date().timeIntervalSince(lastServerFailure)
+        return Date().timeIntervalSince(lastServerFailure) < skipServerAfterFailure
     }
 
-    private static func recordServerFailure() {
+    /// Reads the tiles that have an offline file from it without asking the server, starting now, after a request
+    /// to the server failed.
+    private static func skipServerForAWhile() {
         serverFailureLock.lock(); defer { serverFailureLock.unlock() }
         lastServerFailure = Date()
     }
@@ -68,7 +70,7 @@ final class SliceURLProtocol: URLProtocol {
             ? SliceURLProtocol.onlineTimeoutOfflineAvailableMs
             : SliceURLProtocol.onlineTimeoutMs
 
-        if offlineAvailable && SliceURLProtocol.secondsSinceServerFailure() < SliceURLProtocol.skipServerAfterFailure {
+        if offlineAvailable && SliceURLProtocol.isSkippingServer() {
             serveOffline(parsed: parsed, offlineAvailable: true, networkError: nil, response: nil)
             return
         }
@@ -89,7 +91,7 @@ final class SliceURLProtocol: URLProtocol {
                 self.client?.urlProtocolDidFinishLoading(self)
                 return
             }
-            SliceURLProtocol.recordServerFailure()
+            SliceURLProtocol.skipServerForAWhile()
             self.serveOffline(parsed: parsed, offlineAvailable: offlineAvailable,
                               networkError: error, response: response)
         }
