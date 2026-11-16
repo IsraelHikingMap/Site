@@ -1,4 +1,5 @@
 import { inject, Service } from "@angular/core";
+import { Location } from "@angular/common";
 import { NavigationEnd, Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 import { filter, skip } from "rxjs";
@@ -61,6 +62,7 @@ export class HashService {
     private static readonly ZOOM_PERSICION = 2;
 
     private readonly router = inject(Router);
+    private readonly location = inject(Location);
     private readonly mapService = inject(MapService);
     private readonly sidebarService = inject(SidebarService);
     private readonly dataContainerService = inject(DataContainerService);
@@ -119,6 +121,12 @@ export class HashService {
         });
     }
 
+    /**
+     * Writes the map position into the address bar without navigating while already on the map, as a navigation to
+     * it would fly the map back to where it was when the address was written - midway, when that was the `moveend` of
+     * an animation another one cut off. Arriving at the map from another address is still a navigation, so the router
+     * knows it left that address and does not ignore going back to it.
+     */
     private resetAddressbar(): void {
         if (this.sidebarService.viewName === "public-poi") {
             return;
@@ -154,12 +162,17 @@ export class HashService {
             return;
         }
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        this.router.navigate([
+        const mapUrlSegments = [
             RouteStrings.ROUTE_MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.PERSICION),
             location.longitude.toFixed(HashService.PERSICION)
-        ], { replaceUrl: true });
+        ];
+        if (this.router.url.startsWith(RouteStrings.ROUTE_MAP + "/")) {
+            this.location.replaceState(mapUrlSegments.join("/"));
+            return;
+        }
+        this.router.navigate(mapUrlSegments, { replaceUrl: true });
     }
 
     public getHref(): string {
