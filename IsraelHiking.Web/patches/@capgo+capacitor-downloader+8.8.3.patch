@@ -16,18 +16,10 @@ index 107ee99..4aaebb3 100644
 -    </application>
  </manifest>
 diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
-index 294aba3..e2fba34 100644
+index e12d3ee..bc93d6d 100644
 --- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
 +++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
-@@ -34,13 +34,14 @@ public class CapacitorDownloaderPlugin extends Plugin {
- 
-     static final int BATCH_MAX_FILES = 32;
- 
--    private final String pluginVersion = "8.8.1";
-+    private final String pluginVersion = "8.8.0";
- 
-     private DownloadManager downloadManager;
-     private final Map<String, Long> downloads = new ConcurrentHashMap<>();
+@@ -41,6 +41,7 @@ public class CapacitorDownloaderPlugin extends Plugin {
      private final Map<String, DownloadBatchState> batches = new ConcurrentHashMap<>();
      private final Map<String, String> batchChildOwners = new ConcurrentHashMap<>();
      private final Map<String, File> okHttpDestinationFiles = new ConcurrentHashMap<>();
@@ -533,18 +525,9 @@ index d453822..aeff223 100644
  /**
   * Capacitor plugin for downloading files with background support.
 diff --git a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
-index 80204f5..461cbe8 100644
+index f6375f0..9d3ef5b 100644
 --- a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
 +++ b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
-@@ -8,7 +8,7 @@ import Capacitor
- 
- @objc(CapacitorDownloaderPlugin)
- public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
--    private let pluginVersion: String = "8.8.1"
-+    private let pluginVersion: String = "8.8.0"
-     public let identifier = "CapacitorDownloaderPlugin"
-     public let jsName = "CapacitorDownloader"
-     public let pluginMethods: [CAPPluginMethod] = [
 @@ -24,6 +24,8 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
      private var tasks: [String: URLSessionDownloadTask] = [:]
      private var downloadGenerations: [String: UInt64] = [:]
