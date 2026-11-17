@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "יש להוריד מחדש {{count}} אזורים",
+    "{{count}} selected": "{{count}} נבחרו",
     "4WD Track": "דרך לג'יפים",
     "4x4 Routing": "ניווט 4×4",
     "A few words about the route you are saving.": "כמה מילים על המסלול שאתם שומרים.",
@@ -231,6 +232,7 @@
     "Next": "הבא",
     "No": "לא",
     "No description available in your language": "אין תיאור מתאים בשפה שלכם.",
+    "No downloaded areas yet": "עדיין אין אזורים שהורדו",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "לא נמצאה אפליקציית דוא\"ל במכשיר. יש להתקין או להגדיר אפליקציית דוא\"ל ולנסות שוב, או לשלוח לנו דוא\"ל לכתובת support@mapeak.com עם תיאור התקלה",
     "No Entry": "אין מעבר",
     "No routes found in this area...": "לא נמצאו מסלולים באיזור זה...",
@@ -326,6 +328,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "אגם ומאגר עונתיים, אפיק נחל אכזב, ביצה",
     "Secondary": "כביש משני",
     "See Also": "ראו גם",
+    "Select all": "בחר הכל",
     "Select Icon": "בחרו סמליל",
     "Settings": "הגדרות",
     "Share": "שיתוף",

@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "يجب تنزيل {{count}} مناطق مرة أخرى",
+    "{{count}} selected": "تم تحديد {{count}}",
     "4WD Track": "مسار للمركبات رباعية الدفع",
     "4x4 Routing": "توجيه 4x4",
     "A few words about the route you are saving.": "بضع كلمات عن المسار الذي تحفظه.",
@@ -231,6 +232,7 @@
     "Next": "التالي",
     "No": "لا",
     "No description available in your language": "لا يوجد وصف متوفر بلغتك.",
+    "No downloaded areas yet": "لا توجد مناطق محملة بعد",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "لم يتم العثور على تطبيق بريد إلكتروني على هذا الجهاز. يرجى تثبيت تطبيق بريد إلكتروني أو إعداده والمحاولة مرة أخرى، أو إرسال بريد إلكتروني إلينا على support@mapeak.com مع وصف المشكلة",
     "No Entry": "ممنوع المرور",
     "No routes found in this area...": "لم يتم العثور على مسارات في هذه المنطقة...",
@@ -326,6 +328,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "بحيرة موسمية أو خزان، مجرى نهر جاف، أرض رطبة",
     "Secondary": "ثانوي",
     "See Also": "انظر أيضًا",
+    "Select all": "تحديد الكل",
     "Select Icon": "اختر رمزًا",
     "Settings": "الإعدادات",
     "Share": "مشاركة",

@@ -56,8 +56,8 @@ export type HTMLElementInputChangeEvent = {
     stopPropagation(): void;
 };
 
-/** Reports how much of the files were downloaded together, from 0 to 1 */
-export type FileDownloadProgressCallback = (progress: number) => void;
+/** Reports how much of one of the files was downloaded, from 0 to 1, by the index of that file in the files that are downloaded */
+export type FileDownloadProgressCallback = (fileIndex: number, progress: number) => void;
 
 /** A file to download into the offline files cache, see downloadFilesToCacheAuthenticated */
 export type OfflineFileToDownload = {
@@ -444,8 +444,8 @@ export class FileService {
         const finished = new Promise<void>((resolve, reject) => settle = { resolve, reject });
         const listeners = await Promise.all([
             CapacitorDownloader.addListener("downloadProgress", event => {
-                if (event.id === id) {
-                    progressCallback(event.progress);
+                if (event.id === id && event.fileIndex != null) {
+                    progressCallback(event.fileIndex, event.fileProgress ?? 0);
                 }
             }),
             CapacitorDownloader.addListener("downloadCompleted", event => {

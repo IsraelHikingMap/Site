@@ -130,7 +130,7 @@ export class OfflineAreasService {
     /** Names a downloaded area the way the user typed it, in every language, since that is the name they will look for */
     public renameDownloadedArea(area: Immutable<OfflineArea>, name: string): Promise<void> {
         const { id, minZoom, maxZoom } = area.properties;
-        return this.saveAreaMetadata({ ...area, properties: { id, name } }, { minZoom, maxZoom });
+        return this.saveAreaMetadata({ ...area, properties: { id, name, renamed: true } }, { minZoom, maxZoom });
     }
 
     /** The root files as an area, the whole world */

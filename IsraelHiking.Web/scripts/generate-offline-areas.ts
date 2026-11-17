@@ -44,6 +44,10 @@ const BUFFER_DISTANCE = 1.1 * SIMPLIFY_TOLERANCE;
 const COORDINATE_DECIMALS = 3;
 /** How many statements an Overpass query is sent with, the whole list at once takes it longer than its timeout */
 const OVERPASS_BATCH_SIZE = 100;
+/** Names that replace the ones taken from OSM, by area id and language */
+const NAME_OVERRIDES: Record<string, Record<string, string>> = {
+    "israel-and-palestine": { "name:he": "ישראל והשטחים" }
+};
 
 const index = await (await fetch(GEOFABRIK_INDEX_ADDRESS)).json() as GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>;
 const regions = index.features as GeofabrikRegion[];
@@ -255,6 +259,7 @@ function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feat
             properties[`name:${language}`] = ordered.map(relation => relation.tags[`name:${language}`] ?? relation.tags["name:en"] ?? relation.tags.name).join(" – ");
         }
     }
+    Object.assign(properties, NAME_OVERRIDES[properties.id]);
     return { type: "Feature", properties, geometry: roundedGeometry };
 }
 

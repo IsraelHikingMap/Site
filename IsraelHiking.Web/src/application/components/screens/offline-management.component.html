@@ -1,64 +1,37 @@
-<div class="flex flex-row relative h-dvh" [dir]="resources.direction">
-    <div class="hidden max-md:block absolute bottom-safe left-1/2 -translate-x-1/2 z-10">
-        <mat-button-toggle-group [(ngModel)]="showMap">
-            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Offline Management"
-                analyticsLabel="Open list view">
-                <i class="fa icon-list"></i>
-                {{resources.list}}
-            </mat-button-toggle>
-            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Offline Management"
-                analyticsLabel="Open map view">
-                <i class="fa icon-map-o"></i>
-                {{resources.map}}
-            </mat-button-toggle>
-        </mat-button-toggle-group>
-    </div>
-    <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
-        class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
-        @if (isStatusWarning()) {
-        <div class="sticky top-0 z-10 bg-surface p-2 flex flex-row items-center gap-2 text-warning">
-            <i class="fa fa-lg icon-exclamation-triangle"></i>
-            <span>{{statusMessage()}}</span>
-        </div>
-        }
-        @for (row of downloadedAreaRows(); track row.id) {
-        <div class="cursor-pointer border-b pb-2" (click)="showOnMap(row)" analyticsOn="click"
-            analyticsCategory="Offline Management" analyticsLabel="Show area on map">
-            <div class="m-2 flex flex-row items-center">
-                <button mat-button [matMenuTriggerFor]="areaMenu" [matMenuTriggerRestoreFocus]="false"
-                    (click)="$event.stopPropagation()"
-                    analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Open area menu">
-                    <i class="fa fa-action icon-ellipsis-v"></i>
+<div class="relative h-dvh" [dir]="resources.direction">
+    <div class="flex flex-row h-full">
+        <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
+            class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
+            @if (incompatibleMessage()) {
+            <div class="ps-2 flex flex-row items-center gap-2 text-warning">
+                <i class="fa fa-lg icon-exclamation-triangle"></i>
+                <span class="flex-1">{{incompatibleMessage()}}</span>
+                <button mat-button [disabled]="isDownloadInProgress()" (click)="selectIncompatible()" analyticsOn="click"
+                    analyticsCategory="Offline Management" analyticsLabel="Select incompatible">
+                    {{resources.selectAll}}
                 </button>
-                <mat-menu #areaMenu="matMenu" overlapTrigger="false">
-                    <button mat-menu-item [disabled]="row.area === null" (click)="editAreaName(row.id)" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Edit area name">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.edit}}
-                    </button>
-                    @if (isDownloading(row)) {
-                    <button mat-menu-item (click)="cancelDownload()" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Cancel from list">
-                        <i class="fa icon-close"></i>
-                        {{resources.cancel}}
-                    </button>
-                    } @else {
-                    @if (row.canBeUpdated) {
-                    <button mat-menu-item [disabled]="downloadInProgress() !== null || row.area === null"
-                        (click)="downloadArea(row.area)" analyticsOn="click"
-                        analyticsCategory="Offline Management"
-                        [analyticsLabel]="row.compatibility === 'unusable' ? 'Download Again from list' : 'Update from list'">
-                        <i class="fa icon-download"></i>
-                        {{row.compatibility === 'unusable' ? resources.download : resources.update}}
-                    </button>
-                    }
-                    <button mat-menu-item [disabled]="downloadInProgress() !== null" (click)="deleteArea(row.id)"
-                        analyticsOn="click" analyticsCategory="Offline Management" analyticsLabel="Delete from list">
-                        <i class="fa icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                    }
-                </mat-menu>
+            </div>
+            }
+            @if (downloadedAreaDetails().length > 0) {
+            <div class="sticky top-0 z-10 bg-surface border-b border-outline-variant">
+                <div class="ps-1 pe-2 flex flex-row items-center gap-2">
+                    <mat-checkbox [checked]="areAllDownloadedSelected()"
+                        [indeterminate]="selectedIds().length > 0 && !areAllDownloadedSelected()"
+                        [disabled]="isDownloadInProgress()" (change)="toggleSelectAll()" analyticsOn="click"
+                        analyticsCategory="Offline Management" analyticsLabel="Select all">
+                        {{selectedIds().length > 0 ? resources.countSelected.replace('{{count}}', selectedIds().length.toString()) : resources.selectAll}}
+                    </mat-checkbox>
+                </div>
+            </div>
+            }
+            @for (row of downloadedAreaDetails(); track row.id) {
+            <div class="flex flex-row items-center gap-1 ps-1 pe-2 py-2 border-b border-outline-variant border-s-4 cursor-pointer hover:bg-on-surface/5"
+                [style.border-inline-start-color]="getAreaColor(row)" [ngClass]="{'bg-brand-tonal': isSelected(row.id)}"
+                (click)="toggleDownloadedArea(row)" analyticsOn="click" analyticsCategory="Offline Management"
+                analyticsLabel="Toggle area from list">
+                <mat-checkbox [checked]="isSelected(row.id)" [disabled]="!!getDownloadInProgress(row.id)"
+                    (click)="$event.stopPropagation()" (change)="toggleDownloadedArea(row)">
+                </mat-checkbox>
                 <div class="flex-1 min-w-0">
                     @if (editedAreaId() === row.id) {
                     <div class="flex flex-row items-center" (click)="$event.stopPropagation()">
@@ -72,211 +45,217 @@
                             <mat-error>{{resources.nameIsAlreadyInUse}}</mat-error>
                             }
                         </mat-form-field>
-                        <button mat-button [disabled]="nameForm().invalid()" (mousedown)="$event.preventDefault()"
+                        <button mat-icon-button [disabled]="nameForm().invalid()" (mousedown)="$event.preventDefault()"
                             (click)="saveAreaName(row)" analyticsOn="click"
                             analyticsCategory="Offline Management" analyticsLabel="Save area name">
-                            <i class="fa fa-action icon-check"></i>
+                            <i class="fa icon-check"></i>
                         </button>
                     </div>
                     } @else {
-                    <div class="font-bold">{{row.name}}</div>
+                    <div class="font-bold truncate">{{row.name}}</div>
                     }
-                    @if (isDownloading(row)) {
-                    <div class="my-2 flex flex-row items-center gap-2">
-                        <mat-progress-bar class="flex-1" mode="determinate" [value]="downloadInProgress().progress">
+                    @if (getDownloadInProgress(row.id); as download) {
+                    <div class="mt-1 flex flex-row items-center gap-2 text-sm">
+                        <mat-progress-bar class="flex-1" mode="determinate" [value]="download.progress">
                         </mat-progress-bar>
-                        <span class="tabular-nums">{{downloadInProgress().progress.toFixed(2)}}%</span>
+                        <span class="tabular-nums">{{download.progress.toFixed(2)}}%</span>
                     </div>
                     } @else {
-                    <div>{{row.downloadedDate | date:resources.getDateFormat()}}</div>
+                    <div class="text-sm opacity-70">{{row.downloadedDate | date:resources.getDateFormat()}}</div>
                     }
                     @if (row.compatibility !== 'compatible') {
-                    <div [style.color]="getAreaColor(row)">
+                    <div class="text-sm" [style.color]="getAreaColor(row)">
                         {{!row.canBeUpdated ? resources.cantBeUpdatedDownloadAnotherArea : row.compatibility === 'unusable' ? resources.needsToBeDownloadedAgain : resources.updateNeededForNewFeatures}}
                     </div>
                     }
                 </div>
-            </div>
-        </div>
-        } @empty {
-        <p class="p-2">{{resources.clickTheMapToSelectAnArea}}</p>
-        }
-    </div>
-    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="w-2/3 relative">
-        <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
-            [attributionControl]="false">
-            <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [allowOffline]="false"
-                [before]="resources.endOfBaseLayer">
-            </auto-layer>
-            <mgl-geojson-source id="offline-areas" [data]="areasCollection()">
-            </mgl-geojson-source>
-            <mgl-layer id="offline-areas-border" type="line" source="offline-areas" [paint]="{
-                  'line-color': '#757575',
-                  'line-width': 1
-              }">
-            </mgl-layer>
-            <mgl-geojson-source id="downloaded-areas" [data]="downloadedAreasFeatures()">
-            </mgl-geojson-source>
-            <mgl-geojson-source id="currnet-location" [data]="currentLocation">
-            </mgl-geojson-source>
-            <mgl-layer id="downloaded-areas-fill" type="fill" source="downloaded-areas" [paint]="{
-                  'fill-color': ['get', 'color'],
-                  'fill-opacity': 0.2
-              }">
-            </mgl-layer>
-            <mgl-layer id="downloaded-areas-casing" type="line" source="downloaded-areas" [layout]="{
-                  'line-join': 'round'
-              }" [paint]="{
-                  'line-color': 'white',
-                  'line-width': 7
-              }">
-            </mgl-layer>
-            <mgl-layer id="downloaded-areas-border" type="line" source="downloaded-areas"
-                [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
-                  'line-cap': 'round',
-                  'line-join': 'round'
-              }" [paint]="{
-                  'line-color': ['get', 'color'],
-                  'line-width': 3
-              }">
-            </mgl-layer>
-            <mgl-layer id="downloaded-areas-border-incompatible" type="line" source="downloaded-areas"
-                [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
-                  'line-cap': 'butt',
-                  'line-join': 'round'
-              }" [paint]="{
-                  'line-color': ['get', 'color'],
-                  'line-width': 3,
-                  'line-dasharray': [2, 1]
-              }">
-            </mgl-layer>
-            <mgl-layer id="downloaded-areas-text" type="symbol" source="downloaded-areas" [layout]="{
-                  'text-field': ['get', 'label'],
-                  'text-font': ['Noto Sans Regular'],
-                  'text-size': ['get', 'textSize'],
-              }" [paint]="{
-                  'text-color': ['get', 'color'],
-                  'text-halo-color' : 'white',
-                  'text-halo-width': 2
-              }">
-            </mgl-layer>
-            <mgl-layer id="currnet-location-circle" type="circle" source="currnet-location" [paint]="{
-                  'circle-radius': 7,
-                  'circle-color': 'magenta'
-
-              }">
-            </mgl-layer>
-            <mgl-geojson-source id="selected-area" [data]="selectedAreaFeatures()">
-            </mgl-geojson-source>
-            <mgl-layer id="selected-area-fill" type="fill" source="selected-area" [paint]="{
-                  'fill-color': 'rgba(0, 128, 0, 0.15)'
-              }">
-            </mgl-layer>
-            <mgl-layer id="selected-area-border" type="line" source="selected-area" [layout]="{
-                  'line-cap': 'round',
-                  'line-join': 'round'
-              }" [paint]="{
-                  'line-color': 'green',
-                  'line-width': 3
-              }">
-            </mgl-layer>
-            <mgl-layer id="selected-area-text" type="symbol" source="selected-area" [filter]="['has', 'label']" [layout]="{
-                  'text-field': ['get', 'label'],
-                  'text-font': ['Noto Sans Regular'],
-                  'text-size': 24,
-                  'text-allow-overlap': true
-              }" [paint]="{
-                  'text-color': 'green',
-                  'text-halo-color' : 'white',
-                  'text-halo-width': 3,
-                  'text-halo-blur': 1
-              }">
-            </mgl-layer>
-            <mgl-geojson-source id="in-progress-area" [data]="inProgress()">
-            </mgl-geojson-source>
-            <mgl-layer id="in-progress-area-border" type="line" source="in-progress-area" [layout]="{
-                  'line-cap': 'round', 
-                  'line-join': 'round'
-              }" [paint]="{
-                  'line-color': 'blue',
-                  'line-width': 3
-              }">
-            </mgl-layer>
-            <mgl-layer id="in-progress-area-text" type="symbol" source="in-progress-area"
-                [filter]="['has', 'label']" [layout]="{
-                  'text-field': ['get', 'label'],
-                  'text-font': ['Noto Sans Regular'],
-                  'text-size': 30,
-                  'text-allow-overlap': true
-              }" [paint]="{
-                  'text-color': 'blue',
-                  'text-halo-color' : 'white',
-                  'text-halo-width': 2
-              }">
-            </mgl-layer>
-            <mgl-layer id="in-progress-area-fill" type="fill" source="in-progress-area"
-                [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
-                  'fill-color': 'rgba(0, 128, 128, 0.5)'
-              }">
-            </mgl-layer>
-        </mgl-map>
-        <div class="absolute bottom-safe w-full text-lg text-center max-md:mb-12">
-            <div class="flex flex-row">
-                @if (selectedArea() && !isSelectedDownloaded() && !downloadInProgress()) {
-                <div class="flex-1 m-1">
-                    <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Download">
-                        <i class="fa fa-lg icon-download"></i>
-                        {{resources.startDownload}}
-                    </button>
-                </div>
-                }
-                @if (selectedArea() && isSelectedDownloaded() && isSelectedUpdatable() && !downloadInProgress()) {
-                <div class="flex-1 m-1">
-                    <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
-                        analyticsCategory="Offline Management"
-                        [analyticsLabel]="isSelectedIncompatible() ? 'Download Again' : 'Update'">
-                        <i class="fa fa-lg icon-download"></i>
-                        {{isSelectedIncompatible() ? resources.download : resources.update}}
-                    </button>
-                </div>
-                }
-                @if (selectedArea() && isSelectedDownloaded() && !downloadInProgress()) {
-                <div class="flex-1 m-1">
-                    <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Delete">
-                        <i class="fa fa-lg icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                </div>
-                }
-                @if (downloadInProgress()) {
-                <div class="flex-1 m-1">
-                    <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
-                        analyticsCategory="Offline Management" analyticsLabel="Cancel">
-                        <i class="fa fa-lg icon-close"></i>
-                        {{resources.cancel}}
-                    </button>
-                </div>
-                }
-            </div>
-            @if (statusMessage()) {
-            <div class="bg-surface p-2 flex flex-row items-center justify-center gap-2"
-                [class.text-warning]="isStatusWarning()">
-                @if (isStatusWarning()) {
-                <i class="fa fa-lg icon-exclamation-triangle"></i>
-                }
-                <span>{{statusMessage()}}</span>
-                @if (isStatusWarning()) {
-                <button mat-button (click)="selectNextIncompatible()" analyticsOn="click"
-                    analyticsCategory="Offline Management" analyticsLabel="Next Incompatible">
-                    <i class="fa fa-lg" [class.icon-chevron-left]="resources.direction === 'rtl'"
-                        [class.icon-chevron-right]="resources.direction !== 'rtl'"></i>
-                    {{resources.next}}
+                @if (editedAreaId() !== row.id) {
+                <button mat-icon-button class="shrink-0" [disabled]="row.area === null"
+                    (click)="$event.stopPropagation(); editAreaName(row.id)" [title]="resources.edit" analyticsOn="click"
+                    analyticsCategory="Offline Management" analyticsLabel="Edit area name">
+                    <i class="fa icon-pencil"></i>
                 </button>
                 }
             </div>
+            } @empty {
+            <div class="flex flex-col items-center gap-2 p-8 text-center opacity-70">
+                <i class="fa icon-map-o text-5xl"></i>
+                <div class="font-bold">{{resources.noDownloadedAreasYet}}</div>
+                <div class="text-sm">{{resources.clickTheMapToSelectAnArea}}</div>
+            </div>
+            }
+            <div class="h-24"></div>
+        </div>
+        <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="w-2/3 relative">
+            <mgl-map [mapStyle]="offlineMapStyle" (mapClick)="onMapClick($event)" (mapLoad)="onMapLoad($event)"
+                [attributionControl]="false">
+                <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [allowOffline]="false"
+                    [before]="resources.endOfBaseLayer">
+                </auto-layer>
+                <mgl-geojson-source id="offline-areas" [data]="areasCollection()">
+                </mgl-geojson-source>
+                <mgl-layer id="offline-areas-border" type="line" source="offline-areas" [paint]="{
+                      'line-color': '#757575',
+                      'line-width': 1
+                  }">
+                </mgl-layer>
+                <mgl-geojson-source id="downloaded-areas" [data]="downloadedAreasFeatures()">
+                </mgl-geojson-source>
+                <mgl-geojson-source id="currnet-location" [data]="currentLocation">
+                </mgl-geojson-source>
+                <mgl-layer id="downloaded-areas-fill" type="fill" source="downloaded-areas" [paint]="{
+                      'fill-color': ['get', 'color'],
+                      'fill-opacity': 0.2
+                  }">
+                </mgl-layer>
+                <mgl-layer id="downloaded-areas-casing" type="line" source="downloaded-areas" [layout]="{
+                      'line-join': 'round'
+                  }" [paint]="{
+                      'line-color': 'white',
+                      'line-width': 7
+                  }">
+                </mgl-layer>
+                <mgl-layer id="downloaded-areas-border" type="line" source="downloaded-areas"
+                    [filter]="['!=', ['get', 'incompatible'], 'true']" [layout]="{
+                      'line-cap': 'round',
+                      'line-join': 'round'
+                  }" [paint]="{
+                      'line-color': ['get', 'color'],
+                      'line-width': 3
+                  }">
+                </mgl-layer>
+                <mgl-layer id="downloaded-areas-border-incompatible" type="line" source="downloaded-areas"
+                    [filter]="['==', ['get', 'incompatible'], 'true']" [layout]="{
+                      'line-cap': 'butt',
+                      'line-join': 'round'
+                  }" [paint]="{
+                      'line-color': ['get', 'color'],
+                      'line-width': 3,
+                      'line-dasharray': [2, 1]
+                  }">
+                </mgl-layer>
+                <mgl-layer id="downloaded-areas-text" type="symbol" source="downloaded-areas" [layout]="{
+                      'text-field': ['get', 'label'],
+                      'text-font': ['Noto Sans Regular'],
+                      'text-size': ['get', 'textSize'],
+                  }" [paint]="{
+                      'text-color': ['get', 'color'],
+                      'text-halo-color' : 'white',
+                      'text-halo-width': 2
+                  }">
+                </mgl-layer>
+                <mgl-layer id="currnet-location-circle" type="circle" source="currnet-location" [paint]="{
+                      'circle-radius': 7,
+                      'circle-color': 'magenta'
+
+                  }">
+                </mgl-layer>
+                <mgl-geojson-source id="selected-area" [data]="selectedAreaFeatures()">
+                </mgl-geojson-source>
+                <mgl-layer id="selected-area-fill" type="fill" source="selected-area" [paint]="{
+                      'fill-color': 'rgba(0, 128, 0, 0.15)'
+                  }">
+                </mgl-layer>
+                <mgl-layer id="selected-area-border" type="line" source="selected-area" [layout]="{
+                      'line-cap': 'round',
+                      'line-join': 'round'
+                  }" [paint]="{
+                      'line-color': 'green',
+                      'line-width': 3
+                  }">
+                </mgl-layer>
+                <mgl-layer id="selected-area-text" type="symbol" source="selected-area" [filter]="['has', 'label']" [layout]="{
+                      'text-field': ['get', 'label'],
+                      'text-font': ['Noto Sans Regular'],
+                      'text-size': 24,
+                      'text-allow-overlap': true
+                  }" [paint]="{
+                      'text-color': 'green',
+                      'text-halo-color' : 'white',
+                      'text-halo-width': 3,
+                      'text-halo-blur': 1
+                  }">
+                </mgl-layer>
+                <mgl-geojson-source id="in-progress-area" [data]="inProgress()">
+                </mgl-geojson-source>
+                <mgl-layer id="in-progress-area-border" type="line" source="in-progress-area" [layout]="{
+                      'line-cap': 'round', 
+                      'line-join': 'round'
+                  }" [paint]="{
+                      'line-color': 'blue',
+                      'line-width': 3
+                  }">
+                </mgl-layer>
+                <mgl-layer id="in-progress-area-text" type="symbol" source="in-progress-area"
+                    [filter]="['has', 'label']" [layout]="{
+                      'text-field': ['get', 'label'],
+                      'text-font': ['Noto Sans Regular'],
+                      'text-size': 30,
+                      'text-allow-overlap': true
+                  }" [paint]="{
+                      'text-color': 'blue',
+                      'text-halo-color' : 'white',
+                      'text-halo-width': 2
+                  }">
+                </mgl-layer>
+                <mgl-layer id="in-progress-area-fill" type="fill" source="in-progress-area"
+                    [filter]="['==', ['get', 'fill'], 'true']" [paint]="{
+                      'fill-color': 'rgba(0, 128, 128, 0.5)'
+                  }">
+                </mgl-layer>
+            </mgl-map>
+            @if (isMapHintShown()) {
+            <div class="absolute inset-x-0 top-0 z-10 magrin-top-with-toolbar flex justify-center pointer-events-none">
+                <div class="mt-3 px-4 py-2 flex flex-row items-center gap-2 rounded-full bg-surface text-on-surface text-base shadow-lg">
+                    <i class="fa fa-lg icon-info-circle text-brand"></i>
+                    {{resources.clickTheMapToSelectAnArea}}
+                </div>
+            </div>
             }
         </div>
+    </div>
+    <div class="absolute inset-x-0 bottom-safe z-10 flex flex-col items-center gap-1 p-1 text-lg text-center">
+        <div class="flex flex-row w-full max-w-md">
+            @if (downloadableSelectedAreas().length > 0 && !isDownloadInProgress()) {
+            <div class="flex-1 m-1">
+                <button mat-flat-button class="w-full" (click)="downloadSelected()" analyticsOn="click"
+                    analyticsCategory="Offline Management"
+                    [analyticsLabel]="downloadSelectedKind() === 'new' ? 'Download' : downloadSelectedKind() === 'again' ? 'Download Again' : 'Update'">
+                    <i class="fa fa-lg icon-download"></i>
+                    {{downloadSelectedKind() === 'new' ? resources.startDownload : downloadSelectedKind() === 'again' ? resources.download : resources.update}}
+                </button>
+            </div>
+            }
+            @if (areAllSelectedDownloaded() && !isDownloadInProgress()) {
+            <div class="flex-1 m-1">
+                <button mat-raised-button class="w-full error-button" (click)="deleteSelected()" analyticsOn="click"
+                    analyticsCategory="Offline Management" analyticsLabel="Delete">
+                    <i class="fa fa-lg icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+            </div>
+            }
+            @if (isDownloadInProgress()) {
+            <div class="flex-1 m-1">
+                <button mat-flat-button class="w-full" (click)="cancelDownload()" analyticsOn="click"
+                    analyticsCategory="Offline Management" analyticsLabel="Cancel">
+                    <i class="fa fa-lg icon-close"></i>
+                    {{resources.cancel}}
+                </button>
+            </div>
+            }
+        </div>
+        <mat-button-toggle-group class="hidden max-md:flex" [ngModel]="showMap()" (ngModelChange)="setShowMap($event)">
+            <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Offline Management"
+                analyticsLabel="Open list view">
+                <i class="fa icon-list"></i>
+                {{resources.list}}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="true" analyticsOn="click" analyticsCategory="Offline Management"
+                analyticsLabel="Open map view">
+                <i class="fa icon-map-o"></i>
+                {{resources.map}}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
     </div>
 </div>

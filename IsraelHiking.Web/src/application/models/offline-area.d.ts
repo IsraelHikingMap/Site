@@ -10,6 +10,8 @@ type OfflineAreaProperties = {
     id: string;
     minZoom?: number;
     maxZoom?: number;
+    /** Whether the user named the area, whose name is then kept when it is updated instead of the server's names */
+    renamed?: boolean;
 } & Partial<Record<`name${string}`, string>>;
 
 /** A map file of a downloaded area, with the date it was downloaded at and the version of the data it holds, when it has one */

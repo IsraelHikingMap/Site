@@ -1,5 +1,6 @@
 {
     "{{count}} areas need to be downloaded again": "{{count}} areas need to be downloaded again",
+    "{{count}} selected": "{{count}} selected",
     "4WD Track": "4WD Track",
     "4x4 Routing": "4x4 Routing",
     "A few words about the route you are saving.": "A few words about the route you are saving.",
@@ -231,6 +232,7 @@
     "Next": "Next",
     "No": "No",
     "No description available in your language": "No description available in your language",
+    "No downloaded areas yet": "No downloaded areas yet",
     "No e-mail app was found on this device. Please install or set up an e-mail app and try again": "No e-mail app was found on this device. Please install or set up an e-mail app and try again, or send us an e-mail to support@mapeak.com describing the issue",
     "No Entry": "No Entry",
     "No routes found in this area...": "No routes found in this area...",
@@ -326,6 +328,7 @@
     "Seasonal Lake or Reservoir, Dry Riverbed, Wetland": "Seasonal Lake or Reservoir, Dry Riverbed, Wetland",
     "Secondary": "Secondary",
     "See Also": "See Also",
+    "Select all": "Select all",
     "Select Icon": "Select Icon",
     "Settings": "Settings",
     "Share": "Share",

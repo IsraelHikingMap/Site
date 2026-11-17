@@ -105,7 +105,8 @@ function createOfflineAreasService() {
         deleteAreaMetadata: vi.fn((id: string) => {
             delete areas[id];
             return Promise.resolve();
-        })
+        }),
+        getName: vi.fn((area: Immutable<OfflineArea>) => area.properties.name)
     };
 }
 
@@ -476,11 +477,11 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 const request = await flushFilesToDownload(mockBackend, {});
 
-                expect(await promise).toBe("up-to-date");
+                expect(await promise).toEqual(["up-to-date"]);
                 expect(request.request.params.get("lastModified")).toBe(downloadDate.toISOString());
             }
         )
@@ -500,11 +501,11 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
                 expect(downloadedAreas[AREA_ID]?.files.map(f => f.fileName)).toEqual([`raster-dem+${AREA_ID}.pmtiles`, AREA_MAP_FILE]);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
@@ -530,11 +531,11 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 const downloadedAreas = store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
                 expect(downloadedAreas[AREA_ID]?.files.map(f => f.fileName)).toEqual([AREA_MAP_FILE]);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(AREA_ROUTING_TILES_FILE);
@@ -555,11 +556,11 @@ describe("OfflineFilesDownloadService", () => {
                     return Promise.resolve();
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("aborted");
+                expect(await promise).toEqual(["aborted"]);
                 expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalled();
             }
         )
@@ -581,31 +582,108 @@ describe("OfflineFilesDownloadService", () => {
                         return new Promise(resolve => stuckDownloads.push(resolve));
                     });
 
-                const stuckPromise = service.downloadArea(AREA, []);
+                const stuckPromise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(1));
 
                 service.abortCurrentDownload();
-                const secondPromise = service.downloadArea(OTHER_AREA, []);
+                const secondPromise = service.downloadAreas([{ area: OTHER_AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [`IHM-schema+${OTHER_AREA.properties.id}.pmtiles`]: "2026-06-01" }, OTHER_AREA.properties.id);
                 await vi.waitFor(() => expect(stuckDownloads.length).toBe(2));
 
                 // The download that was aborted reports its progress before it returns, which is not the progress of the one going on
-                progressCallbacks[0](0.5);
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 0 });
+                progressCallbacks[0](0, 0.5);
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 0 }]);
 
                 stuckDownloads[0](); // the download that was stuck finally returns
-                expect(await stuckPromise).toBe("aborted");
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 0 });
+                expect(await stuckPromise).toEqual(["aborted"]);
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 0 }]);
 
-                progressCallbacks[1](0.5);
-                expect(service.downloadInProgress()).toEqual({ area: OTHER_AREA, progress: 50 });
+                progressCallbacks[1](0, 0.5);
+                expect(service.downloadsInProgress()).toEqual([{ area: OTHER_AREA, progress: 50 }]);
 
                 stuckDownloads[1]();
-                expect(await secondPromise).toBe("downloaded");
-                expect(service.downloadInProgress()).toBeNull();
+                expect(await secondPromise).toEqual(["downloaded"]);
+                expect(service.downloadsInProgress()).toEqual([]);
+            }
+        )
+    );
+
+    it("Should download each area in a batch of its own, taking a root file both of them list once, as a file of the first area",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
+                offlineAreasService: OfflineAreasService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+                const otherAreaId = OTHER_AREA.properties.id;
+                const otherAreaFile = `IHM-schema+${otherAreaId}.pmtiles`;
+                const progressCallbacks: FileDownloadProgressCallback[] = [];
+                const finishDownloads: (() => void)[] = [];
+                vi.mocked(fileService.downloadFilesToCacheAuthenticated).mockImplementation((_files, _token, _notificationText, callback) => {
+                    progressCallbacks.push(callback);
+                    return new Promise(resolve => finishDownloads.push(resolve));
+                });
+
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }, { area: OTHER_AREA, replacedAreaIds: [] }]);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" });
+                await flushFilesToDownload(mockBackend, { [otherAreaFile]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" }, otherAreaId);
+                await vi.waitFor(() => expect(finishDownloads.length).toBe(2));
+
+                expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
+                    { url: `${Urls.offlineArea}/${AREA_ID}/${AREA_MAP_FILE}`, fileName: AREA_MAP_FILE },
+                    { url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
+                ], "token", expect.objectContaining({ title: AREA.properties.name }), expect.any(Function), expect.any(AbortController));
+                expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
+                    { url: `${Urls.offlineArea}/${otherAreaId}/${otherAreaFile}`, fileName: otherAreaFile }
+                ], "token", expect.objectContaining({ title: "Other area" }), expect.any(Function), expect.any(AbortController));
+
+                progressCallbacks[0](0, 1);
+                progressCallbacks[1](0, 0.5);
+                expect(service.downloadsInProgress()).toEqual([{ area: AREA, progress: 50 }, { area: OTHER_AREA, progress: 50 }]);
+
+                finishDownloads[1]();
+                await vi.waitFor(() => expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(OTHER_AREA, expect.any(Object)));
+                // The other area is written to the device as soon as its own files are whole
+                expect(offlineAreasService.saveAreaMetadata).not.toHaveBeenCalledWith(AREA, expect.any(Object));
+                await vi.waitFor(() => expect(service.downloadsInProgress()).toEqual([{ area: AREA, progress: 50 }]));
+
+                finishDownloads[0]();
+                expect(await promise).toEqual(["downloaded", "downloaded"]);
+                expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledTimes(3);
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(AREA, expect.any(Object));
+            }
+        )
+    );
+
+    it("Should keep an area whose files were downloaded when the download of another area fails",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, OfflineAreasService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
+                offlineAreasService: OfflineAreasService) => {
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+                const otherAreaId = OTHER_AREA.properties.id;
+                const otherAreaFile = `IHM-schema+${otherAreaId}.pmtiles`;
+                vi.mocked(fileService.downloadFilesToCacheAuthenticated).mockImplementation(files =>
+                    files[0].fileName === otherAreaFile ? Promise.reject(new Error("connection lost")) : Promise.resolve());
+
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }, { area: OTHER_AREA, replacedAreaIds: [] }]);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+                await flushFilesToDownload(mockBackend, { [otherAreaFile]: "2026-06-01" }, otherAreaId);
+
+                expect(await promise).toEqual(["downloaded", "error"]);
+                expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(AREA, expect.any(Object));
+                expect(offlineAreasService.saveAreaMetadata).not.toHaveBeenCalledWith(OTHER_AREA, expect.any(Object));
+                expect(fileService.moveFileFromCacheToDataDirectory).not.toHaveBeenCalledWith(otherAreaFile);
             }
         )
     );
@@ -626,18 +704,22 @@ describe("OfflineFilesDownloadService", () => {
                 };
                 const areaFile = "IHM-schema+israel-and-palestine.pmtiles";
 
-                const promise = service.downloadArea(area, []);
+                const promise = service.downloadAreas([{ area: area, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 const areaRequest = await vi.waitFor(() => mockBackend.expectOne(r => r.url === `${Urls.offlineArea}/israel-and-palestine`));
-                expect(service.downloadInProgress()).toEqual({ area, progress: 0 });
+                expect(service.downloadsInProgress()).toEqual([{ area, progress: 0 }]);
                 areaRequest.flush({ [areaFile]: "2026-06-01", [ROOT_MAP_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 expect(areaRequest.request.method).toBe("GET");
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, fileName: areaFile },
                     { url: `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
-                ], "token", { title: "title", description: "description", completed: "completed" }, expect.any(Function), expect.any(AbortController));
+                ], "token", {
+                    title: "Israel – Palestinian Territories",
+                    description: "title",
+                    completed: "Israel – Palestinian Territories: completed"
+                }, expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(area, { minZoom: 5, maxZoom: 14 });
@@ -665,12 +747,12 @@ describe("OfflineFilesDownloadService", () => {
                 const area = createSquareArea("israel-and-palestine", [34, 29, 36, 34]);
 
                 const replacedAreaIds = service.getReplacedAreaIds(area, new Set(["israel-and-palestine", "jerusalem"]));
-                const promise = service.downloadArea(area, replacedAreaIds);
+                const promise = service.downloadAreas([{ area: area, replacedAreaIds: replacedAreaIds }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { "IHM-schema+israel-and-palestine.pmtiles": "2026-06-01" }, "israel-and-palestine");
 
                 expect(replacedAreaIds.sort()).toEqual([TILE_ID, "old-israel"].sort());
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(MAP_FILE);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(oldAreaFile);
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(farTileFile);
@@ -708,11 +790,11 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(offlineAreasService.loadAreasMetadata).mockResolvedValue({ [AREA_ID]: namedArea, [ROOT_ID]: OfflineAreasService.createRootArea(ROOT_ZOOMS) });
 
-                const promise = service.downloadArea(namedArea, []);
+                const promise = service.downloadAreas([{ area: namedArea, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(namedArea, { minZoom: 5, maxZoom: 14 });
             }
         )
@@ -767,11 +849,11 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 vi.mocked(fileService.listFilesInOfflineCache).mockResolvedValue([AREA_MAP_FILE]);
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
-                expect(await promise).toBe("downloaded");
+                expect(await promise).toEqual(["downloaded"]);
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith(
                     [{ url: expect.stringContaining(AREA_ROUTING_TILES_FILE), fileName: AREA_ROUTING_TILES_FILE }],
                     "token", expect.any(Object), expect.any(Function), expect.any(AbortController));
@@ -793,7 +875,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 const tileRequest = await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -819,7 +901,7 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
                 await promise;
@@ -849,11 +931,11 @@ describe("OfflineFilesDownloadService", () => {
                     inMemoryState: { downloadedAreas: {} }
                 });
 
-                const promise = service.downloadArea(AREA, []);
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
                 await flushStyles(mockBackend, {});
                 await flushFilesToDownload(mockBackend, {});
 
-                expect(await promise).toBe("up-to-date");
+                expect(await promise).toEqual(["up-to-date"]);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith(`a-removed-source+${AREA_ID}.pmtiles`);
                 expect(fileService.deleteFileInDataDirectory).toHaveBeenCalledWith("a-removed-source+root.pmtiles");
                 expect(fileService.deleteFileInDataDirectory).not.toHaveBeenCalledWith(AREA_MAP_FILE);
