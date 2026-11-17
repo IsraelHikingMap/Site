@@ -23,6 +23,7 @@ dependencies {
     implementation project(':capawesome-capacitor-mail-composer')
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')
+    implementation project(':capgo-capacitor-downloader')
     implementation project(':capgo-capacitor-inappbrowser')
     implementation project(':capgo-capacitor-share-target')
     implementation project(':capgo-capacitor-speech-synthesis')

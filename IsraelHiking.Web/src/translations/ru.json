@@ -365,7 +365,7 @@
     "This name is already in use": "Это имя уже используется",
     "This will delete all current routes. Are you sure?": "Это удалит все текущие маршруты. Вы уверены?",
     "Title": "Заголовок",
-    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "Чтобы предотвратить ошибки загрузки, пожалуйста, не переключайте приложения и не блокируйте экран до завершения загрузки",
+    "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.": "Чтобы загрузка продолжалась, пока приложение работает в фоновом режиме, отключите оптимизацию расхода заряда аккумулятора для этого приложения в настройках вашего устройства.",
     "Toilets": "Туалеты",
     "Too many routes found, zoom in the map or change the filters...": "Найдено слишком много маршрутов, увеличьте масштаб карты или измените фильтры...",
     "Traces are only saved locally. You can change that in the settings screen.": "Следы сохраняются только локально. Вы можете изменить это на экране настроек.",

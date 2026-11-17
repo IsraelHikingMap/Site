@@ -366,7 +366,7 @@ export class ResourcesService {
     public routesDeleted: string;
     public uploadingDataFromExternalSourceIsNotAllowed: string;
     public pleaseAllowLocationTracking: string;
-    public dontSwitchApps: string;
+    public turnOffBatteryOptimizationForDownload: string;
     public tooManyRoutes: string;
     public openRoutesPanel: string;
     public thisMightTakeAWhile: string;
@@ -508,7 +508,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794775048900");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794819027155");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -843,7 +843,8 @@ export class ResourcesService {
         this.routesDeleted = this.gettextCatalog.getString("Routes deleted");
         this.uploadingDataFromExternalSourceIsNotAllowed = this.gettextCatalog.getString("Uploading data from external source is not allowed...");
         this.pleaseAllowLocationTracking = this.gettextCatalog.getString("Please allow location tracking");
-        this.dontSwitchApps = this.gettextCatalog.getString("To prevent download errors, please don't switch apps or lock your screen until the download is finished");
+        this.turnOffBatteryOptimizationForDownload = this.gettextCatalog
+            .getString("To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.");
         this.tooManyRoutes = this.gettextCatalog.getString("You have more than 10 routes which can cause performance issues.");
         this.openRoutesPanel = this.gettextCatalog.getString("Open routes panel");
         this.thisMightTakeAWhile = this.gettextCatalog.getString("This might take a while");

@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import CapacitorDownloaderPlugin
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -9,7 +10,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         UIApplication.shared.applicationSupportsShakeToEdit = false;
+        CapacitorDownloaderLifecycle.warmUpBackgroundSessions()
         return true
+    }
+    /// Hands the downloader plugin the events of its background session when iOS relaunched the app for them, so that
+    /// the offline files that finished downloading while the app was not running are moved into place.
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String,
+                     completionHandler: @escaping () -> Void) {
+        CapacitorDownloaderLifecycle.handleEventsForBackgroundURLSession(identifier: identifier, completionHandler: completionHandler)
     }
     /// Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     /// Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

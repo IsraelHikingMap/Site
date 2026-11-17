@@ -6,7 +6,6 @@ import { firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 import { last } from "lodash-es";
 import { Immutable } from "immer";
-import pLimit from "p-limit";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { Urls } from "../urls";
@@ -327,39 +326,33 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Downloads the files into the cache, where a download that was aborted or failed leaves whatever it
-     * did get, so that downloading the area again continues from there instead of starting over.
-     * A few files are downloaded at a time, in the order they were listed in, which is why the server
-     * lists the files that take it longest first - a file that is started last is the one left downloading
-     * on its own once every other file is done.
-     * A file that is already whole in the cache is not downloaded again.
+     * Downloads the files into the cache, where a download that was aborted or failed leaves the files it finished, so
+     * that downloading the area again continues from there instead of starting over. A file that is already whole in
+     * the cache is not downloaded again and counts as downloaded in the progress.
      */
     private async downloadOfflineFilesProgressAction(currentDownload: CurrentDownload, fileNames: string[]): Promise<void> {
         const { area, abortController } = currentDownload;
         const id = area.properties.id;
         this.loggingService.info(`[Offline Download] Starting downloading offline files, total files: ${fileNames.length}, of: ${id}`);
-        const length = fileNames.length;
-        const progressPerFile: Record<number, number> = {};
         const alreadyDownloaded = await this.fileService.listFilesInOfflineCache();
-        const fileDownloadPromises: Promise<void>[] = [];
-        const limit = pLimit(3);
-        for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-            const fileName = fileNames[fileNameIndex];
-            if (abortController.signal.aborted) {
-                this.loggingService.info("[Offline Download] Aborted downloading offline files, current file: " + fileName);
-                return;
-            }
-            if (alreadyDownloaded.includes(fileName)) {
-                this.loggingService.info("[Offline Download] File already downloaded recently, skipping: " + fileName);
-                this.updateProgress(currentDownload, progressPerFile, fileNameIndex, 1, length);
-                continue;
-            }
-            const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-            const fileDownloadUrl = `${Urls.offlineArea}/${id}/${fileName}`;
-            fileDownloadPromises.push(limit(() => this.fileService.downloadFileToCacheAuthenticated(fileDownloadUrl, fileName, token,
-                value => this.updateProgress(currentDownload, progressPerFile, fileNameIndex, value, length), abortController)));
+        const filesToDownload = fileNames.filter(fileName => !alreadyDownloaded.includes(fileName));
+        const skippedCount = fileNames.length - filesToDownload.length;
+        if (skippedCount > 0) {
+            this.loggingService.info(`[Offline Download] Skipping ${skippedCount} files that were already downloaded recently`);
         }
-        await Promise.all(fileDownloadPromises);
+        if (filesToDownload.length > 0) {
+            const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+            await this.fileService.downloadFilesToCacheAuthenticated(
+                filesToDownload.map(fileName => ({ url: `${Urls.offlineArea}/${id}/${fileName}`, fileName })),
+                token,
+                {
+                    title: this.resources.downloadMapForOfflineViewing,
+                    description: this.resources.mapeakPro,
+                    completed: this.resources.downloadFinishedSuccessfully
+                },
+                progress => this.updateProgress(currentDownload, (skippedCount + progress * filesToDownload.length) / fileNames.length),
+                abortController);
+        }
         this.loggingService.info(`[Offline Download] Finished downloading offline files of ${id}`);
     }
 
@@ -423,20 +416,16 @@ export class OfflineFilesDownloadService {
     }
 
     /**
-     * Reports how far the download of an area got, where every one of its files weighs the same.
-     * A download that is no longer the current one has nothing to report - its files might still be
-     * coming in after it was aborted, and that says nothing about the download that took its place.
+     * Reports how far the download of an area got, from 0 to 1. A download that is no longer the current one has
+     * nothing to report - its files might still be coming in after it was aborted, and that says nothing about the
+     * download that took its place.
      */
-    private updateProgress(currentDownload: CurrentDownload, progressPerFile: Record<number, number>,
-        fileNameIndex: number, progressValue: number, length: number) {
-        progressPerFile[fileNameIndex] = progressValue;
+    private updateProgress(currentDownload: CurrentDownload, progress: number) {
         if (!this.isCurrent(currentDownload)) {
             return;
         }
-        const totalProgress = Object.values(progressPerFile).reduce((a, b) => a + b, 0) / length;
-        this.currentDownload.set({ ...currentDownload, progress: totalProgress * 100.0 });
+        this.currentDownload.set({ ...currentDownload, progress: progress * 100.0 });
     }
-
 
     /** Whether the given download is the one that is going on, they are told apart by their controller */
     private isCurrent(currentDownload: CurrentDownload): boolean {
@@ -447,8 +436,6 @@ export class OfflineFilesDownloadService {
      * Asks the server which of the files of an area need downloading, along with the root files, named the way they
      * are kept on the device. The root files are asked for by the date of the area, which lists them with almost
      * every download, since they are small and that is simpler than asking for them on their own.
-     * The order the server lists them in is kept as it is: it lists the files that take it longest first,
-     * and they are downloaded in the order they are listed in, see downloadOfflineFilesProgressAction.
      */
     private async getFilesToDownload(area: Immutable<OfflineArea>, downloadedFiles: Immutable<FileNameDateVersion[]> | undefined): Promise<string[]> {
         const id = area.properties.id;

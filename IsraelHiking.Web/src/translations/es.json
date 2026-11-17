@@ -365,7 +365,7 @@
     "This name is already in use": "Este nombre ya está en uso",
     "This will delete all current routes. Are you sure?": "Esto eliminará todas las rutas actuales. ¿Estás seguro?",
     "Title": "Título",
-    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "Para evitar errores de descarga, por favor no cambies de aplicación ni bloquees la pantalla hasta que la descarga haya terminado",
+    "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.": "Para que la descarga continúe mientras la aplicación está en segundo plano, desactiva la optimización de batería para esta aplicación en la configuración de tu dispositivo.",
     "Toilets": "Aseos",
     "Too many routes found, zoom in the map or change the filters...": "Se encontraron demasiadas rutas, acerca el mapa o cambia los filtros...",
     "Traces are only saved locally. You can change that in the settings screen.": "Las trazas solo se guardan localmente. Puedes cambiarlo en la pantalla de configuración.",

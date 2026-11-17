@@ -130,13 +130,13 @@ describe("OfflineFilesDownloadService", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([OfflineReducer, InMemoryReducer]),
-                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download" } },
+                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download", downloadMapForOfflineViewing: "title", mapeakPro: "description", downloadFinishedSuccessfully: "completed" } },
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
                         getStyleJsonContent: vi.fn(() => Promise.resolve(JSON.stringify(createStyle({})))),
                         getStyleJsonContentFromDevice: vi.fn(() => Promise.resolve(JSON.stringify(createStyle({})))),
-                        downloadFileToCacheAuthenticated: vi.fn(() => Promise.resolve()),
+                        downloadFilesToCacheAuthenticated: vi.fn(() => Promise.resolve()),
                         moveFileFromCacheToDataDirectory: vi.fn(() => Promise.resolve()),
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
                         renameFileInDataDirectory: vi.fn(() => Promise.resolve()),
@@ -550,10 +550,9 @@ describe("OfflineFilesDownloadService", () => {
                     offlineState: { isSubscribed: true },
                     inMemoryState: { downloadedAreas: {} }
                 });
-                // Aborting a download makes the request of every file that is being downloaded fail
-                vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(() => {
+                vi.mocked(fileService.downloadFilesToCacheAuthenticated).mockImplementation(() => {
                     service.abortCurrentDownload();
-                    return Promise.reject(new DOMException("The user aborted a request.", "AbortError"));
+                    return Promise.resolve();
                 });
 
                 const promise = service.downloadArea(AREA, []);
@@ -576,8 +575,8 @@ describe("OfflineFilesDownloadService", () => {
                 });
                 const stuckDownloads: (() => void)[] = [];
                 const progressCallbacks: FileDownloadProgressCallback[] = [];
-                vi.mocked(fileService.downloadFileToCacheAuthenticated).mockImplementation(
-                    (_url, _fileName, _token, progressCallback) => {
+                vi.mocked(fileService.downloadFilesToCacheAuthenticated).mockImplementation(
+                    (_files, _token, _notificationText, progressCallback) => {
                         progressCallbacks.push(progressCallback);
                         return new Promise(resolve => stuckDownloads.push(resolve));
                     });
@@ -635,10 +634,10 @@ describe("OfflineFilesDownloadService", () => {
 
                 expect(await promise).toBe("downloaded");
                 expect(areaRequest.request.method).toBe("GET");
-                expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, areaFile, "token", expect.any(Function), expect.any(AbortController));
-                expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, ROOT_MAP_FILE, "token", expect.any(Function), expect.any(AbortController));
+                expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
+                    { url: `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, fileName: areaFile },
+                    { url: `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
+                ], "token", { title: "title", description: "description", completed: "completed" }, expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(area, { minZoom: 5, maxZoom: 14 });
@@ -773,9 +772,9 @@ describe("OfflineFilesDownloadService", () => {
                 await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01", [AREA_ROUTING_TILES_FILE]: "2026-06-01" });
 
                 expect(await promise).toBe("downloaded");
-                expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledTimes(1);
-                expect(fileService.downloadFileToCacheAuthenticated).toHaveBeenCalledWith(
-                    expect.stringContaining(AREA_ROUTING_TILES_FILE), AREA_ROUTING_TILES_FILE, "token", expect.any(Function), expect.any(AbortController));
+                expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith(
+                    [{ url: expect.stringContaining(AREA_ROUTING_TILES_FILE), fileName: AREA_ROUTING_TILES_FILE }],
+                    "token", expect.any(Object), expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
             }
         )

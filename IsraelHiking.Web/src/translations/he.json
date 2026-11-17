@@ -365,7 +365,7 @@
     "This name is already in use": "השם כבר בשימוש",
     "This will delete all current routes. Are you sure?": "פעולה זו תמחק את כל המסלולים שפתוחים. האם אתם בטוחים?",
     "Title": "כותרת",
-    "To prevent download errors, please don't switch apps or lock your screen until the download is finished": "על מנת למנוע בעיות בהורדה, אנא הישארו באפליקציה הזו מבלי לנעול את המסך",
+    "To keep downloading while the app is in the background, turn off battery optimization for this app in your device settings.": "כדי שההורדה תמשיך גם כשהאפליקציה ברקע, כבו את שיפור ביצועי הסוללה עבור האפליקציה בהגדרות המכשיר.",
     "Toilets": "שירותים",
     "Too many routes found, zoom in the map or change the filters...": "נמצאו יותר מדי מסלולים, הגדילו את המפה או שנו את הסינונים...",
     "Traces are only saved locally. You can change that in the settings screen.": "ההקלטות נשמרות רק מקומית. תוכלו לשנות זאת במסך ההגדרות.",
