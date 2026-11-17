@@ -21,10 +21,14 @@
             }
             @for (layer of layers(); track layer.key) {
             <div class="overflow-hidden rounded-2xl border border-solid border-outline-variant" [id]="getCardId(layer.key)">
-                <div class="flex flex-row items-center gap-1 ps-1 pe-1">
+                <div class="flex flex-row items-center gap-1 py-1 ps-1 pe-1">
                     <mat-checkbox class="min-w-0 flex-1 wrap-anywhere" [checked]="isShownInPanel(layer)"
                         [disabled]="isLocked(layer)" (change)="setShownInPanel(layer, $event.checked)">
-                        {{resources.translate(layer.key)}}
+                        <span class="flex flex-row items-center gap-3">
+                            <layer-thumbnail class="size-10" [small]="true" [label]="resources.translate(layer.key)"
+                                [thumbnail]="getThumbnail(layer)"></layer-thumbnail>
+                            {{resources.translate(layer.key)}}
+                        </span>
                     </mat-checkbox>
                     @if (isApp) {
                     <button mat-icon-button type="button" class="shrink-0" (click)="share(layer)"
