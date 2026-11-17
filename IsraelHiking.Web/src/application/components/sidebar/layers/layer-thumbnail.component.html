@@ -1,0 +1,19 @@
+@if (thumbnail() && !isBroken()) {
+<img [src]="thumbnail()" alt="" loading="lazy" class="block size-full object-cover" [class.grayscale]="locked()"
+    [class.opacity-60]="locked()" (error)="isBroken.set(true)" />
+} @else {
+<span class="flex size-full items-center justify-center" [class]="small() ? 'text-sm' : 'text-2xl'"
+    [style.background-color]="placeholderColor()">{{initials()}}</span>
+}
+@if (locked()) {
+<span class="absolute bottom-0.5 start-0.5 flex items-center justify-center rounded-full bg-green-600 text-white"
+    [class]="small() ? 'size-4' : 'size-5'">
+    <i class="fa icon-dollar" [class]="small() ? 'text-[8px]!' : 'text-[10px]!'"></i>
+</span>
+}
+@if (selected()) {
+<span class="absolute bottom-0.5 start-0.5 flex items-center justify-center rounded-full bg-brand"
+    [class]="small() ? 'size-4' : 'size-5'">
+    <i class="fa icon-check" [class]="small() ? 'text-[8px]!' : 'text-[10px]!'"></i>
+</span>
+}

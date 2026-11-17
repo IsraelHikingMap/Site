@@ -28,6 +28,7 @@ import { OfflineReducer } from "./reducers/offline.reducer";
 import { PaywallReducer } from "./reducers/paywall.reducer";
 import { cloneActionPlugin } from "./reducers/clone-action.plugin";
 import { routes } from "./app.routes";
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from "@angular/material/form-field";
 
 /**
  * The map keeps its position in the url, so moving it navigates without changing screens. Only a navigation
@@ -49,6 +50,7 @@ function getScreen(snapshot: ActivatedRouteSnapshot) {
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: "outline" } as MatFormFieldDefaultOptions },
         provideAppInitializer(async () => {
             await inject(ApplicationInitializeService).initialize();
         }),

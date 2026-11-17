@@ -1,4 +1,4 @@
-<div matAutocompleteOrigin #searchOrigin="matAutocompleteOrigin" class="box-border flex h-12 w-full items-center rounded-full bg-surface pe-4 text-on-surface shadow-md">
+<div matAutocompleteOrigin #searchOrigin="matAutocompleteOrigin" class="box-border flex h-12 w-full items-center rounded-full bg-surface text-on-surface shadow-md">
 <mat-form-field class="search-input-container w-full" subscriptSizing="dynamic">
   <i matPrefix class="fa icon-search ms-3 me-3 opacity-60"></i>
   @if (!isPoisSearch()) {
@@ -9,7 +9,7 @@
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
     [matAutocomplete]="autoFrom" [matAutocompleteConnectedTo]="searchOrigin" [placeholder]="placeholder()" [dir]="resources.getDirection(searchTerm())"
     (focus)="selectSearchTermOnFocus()">
-  <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" class="mt-2 rounded-3xl!"
+  <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" class="mt-2"
     [displayWith]="displayResults">
     @for (result of searchResults(); track result.id) {
     <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']"

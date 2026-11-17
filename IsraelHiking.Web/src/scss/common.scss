@@ -30,6 +30,8 @@ html {
     color-scheme: light;
     @include mat.button-overrides($low-emphasis-button-labels);
     @include mat.button-toggle-overrides($opaque-button-toggle);
+    /* Text fields are outlined across the app, rounded like the cards and buttons around them. */
+    @include mat.form-field-overrides((outlined-container-shape: 12px));
 
     --brand-color: #32cd6d;
     --warning-color: #8a5a00;
@@ -158,6 +160,13 @@ body {
             small-container-color: var(--mat-sys-surface),
             small-foreground-color: var(--mat-sys-on-surface),
         ));
+}
+
+/* An outlined field's label floats on its top border, sticking out above the field, so a field at the top of a
+   dialog, card or other clipping container would have its label cut off. Fields without a label, like the search
+   and the pill dropdowns, have nothing sticking out and keep their size. */
+mat-form-field:has(mat-label) {
+    padding-top: 8px;
 }
 
 /* Material's own dropdown in the outlined style, at the height and with the shape of the pill buttons it

@@ -10,6 +10,7 @@ import { Share } from "@capacitor/share";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
+import { LayerThumbnailComponent } from "./layer-thumbnail.component";
 import { LayerPropertiesComponent } from "./layer-properties.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { ScrollToDirective } from "../../../directives/scroll-to.directive";
@@ -34,7 +35,7 @@ export type ManageLayersDialogData = {
 @Component({
     selector: "manage-layers-dialog",
     templateUrl: "./manage-layers-dialog.component.html",
-    imports: [Dir, MatButton, MatIconButton, MatCheckbox, MatTooltip, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent]
+    imports: [Dir, MatButton, MatIconButton, MatCheckbox, MatTooltip, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent, LayerThumbnailComponent]
 })
 export class ManageLayersDialogComponent {
     public readonly resources = inject(ResourcesService);
@@ -66,6 +67,10 @@ export class ManageLayersDialogComponent {
         if (this.editing() != null) {
             this.scrollToOpenCardAfterRender();
         }
+    }
+
+    public getThumbnail(layer: Immutable<EditableLayer>): string {
+        return this.layersService.getThumbnail(layer);
     }
 
     public isShownInPanel(layer: Immutable<EditableLayer>): boolean {
