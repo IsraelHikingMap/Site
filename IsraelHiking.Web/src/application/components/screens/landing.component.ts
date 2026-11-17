@@ -31,10 +31,6 @@ export class LandingComponent {
         return this.runningContextService.isCapacitor;
     }
 
-    public isIos(): boolean {
-        return this.runningContextService.isIos;
-    }
-
     public isShowPurchaseButton(): boolean {
         return this.purchaseService.isPurchaseAvailable() || this.purchaseService.isRenewAvailable();
     }

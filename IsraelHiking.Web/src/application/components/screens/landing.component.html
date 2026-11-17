@@ -25,21 +25,16 @@
         <div id="download" class="mb-8 flex flex-col items-center gap-3 md:order-last md:mb-0">
             <span class="text-sm font-medium text-gray-200">Take the map offline &mdash; get the app</span>
             <div class="flex flex-row gap-4">
-                @if (!isMobile() || !isIos()) {
                 <a [href]="androidAppUrl" analyticsOn="click" analyticsCategory="Landing"
                     analyticsLabel="Download from google play store"
                     class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                     <img src="content/google-play-badge.png" alt="Google Play" width="200" height="59">
                 </a>
-                }
-
-                @if (!isMobile() || isIos()) {
                 <a [href]="iosAppUrl" analyticsOn="click" analyticsCategory="Landing"
                     analyticsLabel="Download from app store"
                     class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
                     <img src="content/app-store-badge.png" alt="App Store" width="200" height="59">
                 </a>
-                }
             </div>
         </div>
         }
@@ -321,7 +316,8 @@
             <a href="https://www.youtube.com/shorts/pseuA9EUXzA" target="_blank" rel="noopener" analyticsOn="click"
                 analyticsCategory="Landing" analyticsLabel="Tutorial - setup and offline map download"
                 class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
-                <img src="content/videos/pseuA9EUXzA.webp" alt="Setup and Offline Map Download" loading="lazy" class="mx-auto mt-6 block w-64 rounded-lg" />
+                <img src="content/videos/pseuA9EUXzA.webp" alt="Setup and Offline Map Download" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
                 <div class="p-6">
                     <h3 class="mb-2 text-lg font-bold">Setup and Offline Map Download</h3>
                     <p class="text-sm text-gray-600">Get the app ready and take your first region offline.</p>
@@ -331,7 +327,8 @@
             <a href="https://www.youtube.com/watch?v=3ZeIEwj96tE" target="_blank" rel="noopener" analyticsOn="click"
                 analyticsCategory="Landing" analyticsLabel="Tutorial - app tour"
                 class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
-                <img src="content/videos/3ZeIEwj96tE.webp" alt="App Tour" loading="lazy" class="mx-auto mt-6 block w-64 rounded-lg" />
+                <img src="content/videos/3ZeIEwj96tE.webp" alt="App Tour" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
                 <div class="p-6">
                     <h3 class="mb-2 text-lg font-bold">App Tour</h3>
                     <p class="text-sm text-gray-600">A walk through the map, search, and the main tools.</p>
@@ -341,7 +338,8 @@
             <a href="https://www.youtube.com/watch?v=I9j86k7go70" target="_blank" rel="noopener" analyticsOn="click"
                 analyticsCategory="Landing" analyticsLabel="Tutorial - planning and editing a route"
                 class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
-                <img src="content/videos/I9j86k7go70.webp" alt="Planning and Editing a Route" loading="lazy" class="mx-auto mt-6 block w-64 rounded-lg" />
+                <img src="content/videos/I9j86k7go70.webp" alt="Planning and Editing a Route" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
                 <div class="p-6">
                     <h3 class="mb-2 text-lg font-bold">Planning and Editing a Route</h3>
                     <p class="text-sm text-gray-600">Draw a hiking route, refine it, and save it for the trail.</p>
