@@ -147,8 +147,8 @@ export class OfflineManagementComponent {
         .map(details => details.id));
 
     /**
-     * The selected areas a download brings something to, which are the ones the server offers. One that was downloaded
-     * keeps the shape and the name it has on the device.
+     * The selected areas a download brings something to, which are the ones the server offers, see toAreaToDownload for
+     * what is downloaded of each.
      */
     public readonly downloadableSelectedAreas = computed(() => this.selectedIds()
         .filter(id => this.offeredAreaIds().has(id))
@@ -297,14 +297,14 @@ export class OfflineManagementComponent {
     }
 
     /**
-     * An area in the shape the server offers it now, where an area that was downloaded before keeps the name the user
-     * gave it, along with the areas it replaces.
+     * An area as the server offers it now, with the names it has there, unless the user named it, along with the
+     * areas it replaces.
      */
     private toAreaToDownload(area: Immutable<OfflineArea>): AreaToDownload {
         const id = area.properties.id;
         const offeredArea = this.getOfferedArea(id) ?? area;
-        const downloadedArea = this.downloadedAreas()[id]?.area;
-        const areaToDownload = downloadedArea == null ? offeredArea : { ...offeredArea, properties: downloadedArea.properties };
+        const downloadedArea = this.getDownloadedArea(id);
+        const areaToDownload = downloadedArea?.properties.renamed ? { ...offeredArea, properties: downloadedArea.properties } : offeredArea;
         return { area: areaToDownload, replacedAreaIds: this.offlineFilesDownloadService.getReplacedAreaIds(areaToDownload, this.offeredAreaIds()) };
     }
 

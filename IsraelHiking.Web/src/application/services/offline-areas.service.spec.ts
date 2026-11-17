@@ -119,7 +119,7 @@ describe("OfflineAreasService", () => {
 
         await service.renameDownloadedArea(createArea("israel-and-palestine", [34, 29, 36, 34], { "name:he": "ישראל" }), "Home");
 
-        expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)["israel-and-palestine"].area.properties).toEqual({ id: "israel-and-palestine", name: "Home" });
+        expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas)["israel-and-palestine"].area.properties).toEqual({ id: "israel-and-palestine", name: "Home", renamed: true });
     }));
 
     it("should read the root files up to their zoom and the area a tile overlaps above it, even when its middle is outside", () => {
