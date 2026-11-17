@@ -363,11 +363,10 @@ export class OfflineManagementComponent {
     /** Adds the clicked area to the selection, or takes it out when it is already selected. Clicking outside of every area clears it. */
     public onMapClick(event: MapMouseEvent) {
         const area = this.offlineAreasService.findArea(this.areas(), event.lngLat);
-        if (area == null) {
-            this.selectedIds.set([]);
-            return;
+        if (area !== null) {
+            this.toggleSelection(area.properties.id);
         }
-        this.toggleSelection(area.properties.id);
+
     }
 
     /** Selects a downloaded area or takes it out of the selection, the same as clicking it on the map */
@@ -497,6 +496,7 @@ export class OfflineManagementComponent {
     public onMapLoad(map: Map) {
         this.map = map;
         this.map.dragRotate.disable();
+        this.map.doubleClickZoom.disable();
         this.map.touchZoomRotate.disableRotation();
         this.initializeCenterAndZoom();
     }
