@@ -4,12 +4,13 @@ import { firstValueFrom } from "rxjs";
 import { Encoder, Profile } from "@garmin/fitsdk";
 import { encode } from "base64-arraybuffer";
 
-import { DeviceOAuthService } from "./device-oauth.service";
-import { getCumulativeDistances, getRoutePoints } from "./device-provider";
+import { DeviceProviderOAuthService } from "./device-provider-oauth.service";
 import { RouteStatisticsService } from "../route-statistics.service";
+import { SelectedRouteService } from "../selected-route.service";
+import { SpatialHelper } from "../spatial.helper";
 import { Urls } from "../../urls";
-import type { DeviceConnectionInfo, DeviceProvider, DeviceTokenResponse } from "./device-provider";
-import type { DeviceServiceId, RouteDataWithoutState } from "../../models";
+import type { DeviceProvider, DeviceProviderTokenResponse } from "./device-provider";
+import type { DeviceProviderConnection, DeviceProviderId, LatLngAltTime, RouteDataWithoutState } from "../../models";
 
 /** A route encoded as a FIT course plus the metadata the Wahoo routes API requires. */
 type FitCoursePayload = {
@@ -36,35 +37,35 @@ const SEMICIRCLES_PER_DEGREE = 2 ** 31 / 180;
 @Service()
 export class WahooDeviceProvider implements DeviceProvider {
 
-    public readonly id: DeviceServiceId = "wahoo";
+    public readonly id: DeviceProviderId = "wahoo";
     public readonly displayName = "Wahoo";
-    public readonly icon = "content/device-logos/wahoo.png";
-    public readonly isAvailable = true;
+    public readonly icon = "content/device-providers/wahoo.png";
 
     private static readonly CLIENT_ID = "amZH1PBW99VdHFWN6zgzo5953jXPo3Hv8DCTJBnv0CQ";
     private static readonly CYCLING_WORKOUT_TYPE_FAMILY_ID = 0;
     private static readonly SCOPE = "user_read routes_write";
 
-    private readonly deviceOAuthService = inject(DeviceOAuthService);
+    private readonly deviceProviderOAuthService = inject(DeviceProviderOAuthService);
     private readonly httpClient = inject(HttpClient);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
 
-    public async login(): Promise<DeviceConnectionInfo> {
-        const { verifier, challenge } = await this.deviceOAuthService.generatePkcePair();
-        const code = await this.deviceOAuthService.authorize(
+    public async login(): Promise<DeviceProviderConnection> {
+        const { verifier, challenge } = await this.deviceProviderOAuthService.generatePkcePair();
+        const code = await this.deviceProviderOAuthService.authorize(
             Urls.wahooAuthorize, WahooDeviceProvider.CLIENT_ID, WahooDeviceProvider.SCOPE, challenge);
-        const token = await this.deviceOAuthService.exchangeToken(Urls.wahooToken, {
+        const token = await this.deviceProviderOAuthService.exchangeToken(Urls.wahooToken, {
             client_id: WahooDeviceProvider.CLIENT_ID,
             grant_type: "authorization_code",
             code,
-            redirect_uri: this.deviceOAuthService.getRedirectUri(),
+            redirect_uri: this.deviceProviderOAuthService.getRedirectUri(),
             code_verifier: verifier
         });
         return this.toConnectionInfo(token, verifier);
     }
 
-    public async refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo> {
-        const token = await this.deviceOAuthService.exchangeToken(Urls.wahooToken, {
+    public async refresh(connection: DeviceProviderConnection): Promise<DeviceProviderConnection> {
+        const token = await this.deviceProviderOAuthService.exchangeToken(Urls.wahooToken, {
             client_id: WahooDeviceProvider.CLIENT_ID,
             grant_type: "refresh_token",
             refresh_token: connection.refreshToken,
@@ -96,7 +97,7 @@ export class WahooDeviceProvider implements DeviceProvider {
         }));
     }
 
-    private toConnectionInfo(token: DeviceTokenResponse, codeVerifier: string): DeviceConnectionInfo {
+    private toConnectionInfo(token: DeviceProviderTokenResponse, codeVerifier: string): DeviceProviderConnection {
         return {
             accessToken: token.access_token,
             refreshToken: token.refresh_token,
@@ -112,14 +113,14 @@ export class WahooDeviceProvider implements DeviceProvider {
      * messages are plain objects cast to its message type.
      */
     private toFitCourse(route: RouteDataWithoutState): FitCoursePayload {
-        const points = getRoutePoints(route);
+        const points = this.selectedRouteService.getLatlngs(route);
         if (points.length < 2) {
             throw new Error("The route has no path to send to the device");
         }
         const name = route.name || "Mapeak";
         const first = points[0];
         const lastPoint = points[points.length - 1];
-        const cumulativeDistance = getCumulativeDistances(points);
+        const cumulativeDistance = this.getCumulativeDistances(points);
         const totalDistance = cumulativeDistance[cumulativeDistance.length - 1];
         const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(points);
         const ascent = statistics.gain;
@@ -192,6 +193,18 @@ export class WahooDeviceProvider implements DeviceProvider {
         };
     }
 
+
+    /**
+     * The distance in meters from the first point to each of the points, which a FIT course has on every record.
+     * The route statistics can not be used for it, since they leave out points that have no elevation.
+     */
+    private getCumulativeDistances(points: LatLngAltTime[]): number[] {
+        const cumulativeDistance = [0];
+        for (let i = 1; i < points.length; i++) {
+            cumulativeDistance.push(cumulativeDistance[i - 1] + SpatialHelper.getDistanceInMeters(points[i - 1], points[i]));
+        }
+        return cumulativeDistance;
+    }
 
     private toSemicircles(degrees: number): number {
         return Math.round(degrees * SEMICIRCLES_PER_DEGREE);

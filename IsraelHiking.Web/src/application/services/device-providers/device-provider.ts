@@ -1,58 +1,32 @@
-import type { DeviceServiceId, LatLngAltTime, RouteDataWithoutState } from "../../models";
-import { SpatialHelper } from "../spatial.helper";
+import type { DeviceProviderConnection, DeviceProviderId, RouteDataWithoutState } from "../../models";
 
 /** OAuth token-response shape shared by the device providers. */
-export type DeviceTokenResponse = {
+export type DeviceProviderTokenResponse = {
     access_token: string;
     refresh_token: string;
     expires_in?: number;
 };
 
-/** Everything needed to keep a device service connected and to refresh it. */
-export type DeviceConnectionInfo = {
-    accessToken: string;
-    refreshToken: string;
-    codeVerifier: string;
-    expiresAt: number;
-};
-
 /**
- * A connectable external device service (Wahoo, Garmin, ...) that a planned
- * route can be pushed to. Implementations mirror each other so the settings UI
+ * A device provider (Wahoo, Garmin, ...) whose cloud a planned route can be pushed to,
+ * to sync from there to the user's device. Implementations mirror each other so the settings UI
  * and the send-to-device flow stay provider-agnostic.
  */
 export interface DeviceProvider {
-    /** Stable id, also the key under userState.connectedDeviceServices. */
-    readonly id: DeviceServiceId;
+    /** Stable id, also the key under userState.connectedDeviceProviders. */
+    readonly id: DeviceProviderId;
     /** Brand name shown in the UI (not translated). */
     readonly displayName: string;
-    /** The service's app icon, shown next to its name. */
+    /** The provider's app icon, shown next to its name. */
     readonly icon: string;
-    /** False until the provider's developer program issued a client id, which keeps it out of the UI. */
-    readonly isAvailable: boolean;
 
     /** Runs the OAuth PKCE flow and returns the connection info to persist. */
-    login(): Promise<DeviceConnectionInfo>;
+    login(): Promise<DeviceProviderConnection>;
     /** Exchanges the stored refresh token for a fresh access token. */
-    refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo>;
+    refresh(connection: DeviceProviderConnection): Promise<DeviceProviderConnection>;
     /** Uploads the route to the user's account so it syncs to their device. */
     sendRoute(accessToken: string, route: RouteDataWithoutState): Promise<void>;
     /** Tells the provider the user disconnected, for a provider that requires it. */
     disconnect?(accessToken: string): Promise<void>;
 }
 
-/** The route's points across all its segments, in order. */
-export function getRoutePoints(route: RouteDataWithoutState): LatLngAltTime[] {
-    return (route.segments || [])
-        .flatMap(segment => segment.latlngs || [])
-        .filter(latlng => latlng != null);
-}
-
-/** The distance in meters from the first point to each of the points. */
-export function getCumulativeDistances(points: LatLngAltTime[]): number[] {
-    const cumulativeDistance = [0];
-    for (let i = 1; i < points.length; i++) {
-        cumulativeDistance.push(cumulativeDistance[i - 1] + SpatialHelper.getDistanceInMeters(points[i - 1], points[i]));
-    }
-    return cumulativeDistance;
-}

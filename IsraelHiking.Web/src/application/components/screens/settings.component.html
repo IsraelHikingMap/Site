@@ -111,18 +111,18 @@
     <div class="flex flex-col mt-2 rounded-xl border border-outline-variant divide-y divide-outline-variant">
       @for (provider of deviceProviders(); track provider.id) {
       <div class="flex flex-row items-center gap-3 px-4 py-3">
-        <device-logo [provider]="provider" class="h-8"></device-logo>
+        <device-provider-logo [provider]="provider" class="h-8"></device-provider-logo>
         <span class="flex-1 text-sm">
-          @if (connectedDeviceServices()?.[provider.id]) {
+          @if (connectedDeviceProviders()?.[provider.id]) {
           <i class="fa icon-check text-brand"></i> {{resources.connected}}
           }
         </span>
-        @if (connectedDeviceServices()?.[provider.id]) {
-        <button mat-stroked-button (click)="disconnectDevice(provider.id)" analyticsOn="click"
-          analyticsCategory="Configuration" analyticsLabel="Disconnect device {{provider.id}}">{{resources.disconnect}}</button>
+        @if (connectedDeviceProviders()?.[provider.id]) {
+        <button mat-stroked-button (click)="disconnectDeviceProvider(provider.id)" analyticsOn="click"
+          analyticsCategory="Configuration" analyticsLabel="Disconnect device provider {{provider.id}}">{{resources.disconnect}}</button>
         } @else {
-        <button mat-flat-button (click)="connectDevice(provider.id)" analyticsOn="click"
-          analyticsCategory="Configuration" analyticsLabel="Connect device {{provider.id}}">{{resources.connect}}</button>
+        <button mat-flat-button (click)="connectDeviceProvider(provider.id)" analyticsOn="click"
+          analyticsCategory="Configuration" analyticsLabel="Connect device provider {{provider.id}}">{{resources.connect}}</button>
         }
       </div>
       }

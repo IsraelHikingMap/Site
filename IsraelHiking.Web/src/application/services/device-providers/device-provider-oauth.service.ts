@@ -6,17 +6,17 @@ import { encode } from "base64-arraybuffer";
 
 import { RunningContextService } from "../running-context.service";
 import { Urls } from "../../urls";
-import type { DeviceTokenResponse } from "./device-provider";
+import type { DeviceProviderTokenResponse } from "./device-provider";
 
 /**
- * Shared OAuth 2.0 PKCE helper for the external device services. Mirrors the OSM
+ * Shared OAuth 2.0 PKCE helper for the device providers. Mirrors the OSM
  * login in authorization.service.ts (InAppBrowser secure window + broadcast
  * channel) but adds PKCE so no client secret is needed and the whole flow can
  * run client-side. The token exchange is POSTed through the nginx proxy (the
  * caller passes a proxied token URL) to avoid CORS on the web.
  */
 @Service()
-export class DeviceOAuthService {
+export class DeviceProviderOAuthService {
 
     /**
      * Its own channel and redirect page, so a device login never clashes with the OSM login, which uses
@@ -63,7 +63,7 @@ export class DeviceOAuthService {
         const result = await InAppBrowser.openSecureWindow({
             authEndpoint: authorizeUrl + "?" + params.toString(),
             redirectUri: this.redirectUrl,
-            broadcastChannelName: DeviceOAuthService.AUTH_CHANNEL
+            broadcastChannelName: DeviceProviderOAuthService.AUTH_CHANNEL
         });
         const searchParams = new URL(result.redirectedUri).searchParams;
         if (searchParams.has("error")) {
@@ -79,8 +79,8 @@ export class DeviceOAuthService {
         return code;
     }
 
-    public async exchangeToken(tokenUrl: string, body: Record<string, string>): Promise<DeviceTokenResponse> {
-        return firstValueFrom(this.httpClient.post<DeviceTokenResponse>(tokenUrl, new URLSearchParams(body).toString(), {
+    public async exchangeToken(tokenUrl: string, body: Record<string, string>): Promise<DeviceProviderTokenResponse> {
+        return firstValueFrom(this.httpClient.post<DeviceProviderTokenResponse>(tokenUrl, new URLSearchParams(body).toString(), {
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         }));
     }

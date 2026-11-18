@@ -1,8 +1,9 @@
 import type { ActivityType, UserInfo } from "..";
 
-export type DeviceServiceId = "wahoo" | "garmin";
+export type DeviceProviderId = "wahoo" | "garmin";
 
-export type DeviceServiceToken = {
+/** Everything needed to keep a device provider connected and to refresh its token. */
+export type DeviceProviderConnection = {
     accessToken: string;
     refreshToken: string;
     /** Kept for PKCE refreshes, which require the original code verifier */
@@ -16,5 +17,5 @@ export type UserState = {
     token: string;
     agreedToTheTermsOfService: boolean;
     prefferedActivityType: ActivityType;
-    connectedDeviceServices: Partial<Record<DeviceServiceId, DeviceServiceToken>>;
+    connectedDeviceProviders: Partial<Record<DeviceProviderId, DeviceProviderConnection>>;
 };

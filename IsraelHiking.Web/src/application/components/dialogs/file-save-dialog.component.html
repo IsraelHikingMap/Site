@@ -11,7 +11,7 @@
                 @for (provider of deviceProviders(); track provider.id) {
                 <button mat-stroked-button (click)="sendToDevice(provider.id)" mat-dialog-close analyticsOn="click"
                     analyticsCategory="Files" analyticsLabel="Send to device {{provider.id}}">
-                    <device-logo [provider]="provider" class="h-5"></device-logo>
+                    <device-provider-logo [provider]="provider" class="h-5"></device-provider-logo>
                 </button>
                 }
             </div>

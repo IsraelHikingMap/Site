@@ -2,12 +2,12 @@ import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
-import { DeviceOAuthService } from "./device-oauth.service";
-import { getCumulativeDistances, getRoutePoints } from "./device-provider";
+import { DeviceProviderOAuthService } from "./device-provider-oauth.service";
 import { RouteStatisticsService } from "../route-statistics.service";
+import { SelectedRouteService } from "../selected-route.service";
 import { Urls } from "../../urls";
-import type { DeviceConnectionInfo, DeviceProvider, DeviceTokenResponse } from "./device-provider";
-import type { DeviceServiceId, RouteDataWithoutState, RoutingType } from "../../models";
+import type { DeviceProvider, DeviceProviderTokenResponse } from "./device-provider";
+import type { DeviceProviderConnection, DeviceProviderId, RouteDataWithoutState, RoutingType } from "../../models";
 
 type GarminActivityType = "HIKING" | "MOUNTAIN_BIKING" | "OTHER";
 
@@ -32,23 +32,22 @@ type GarminCourse = {
 @Service()
 export class GarminDeviceProvider implements DeviceProvider {
 
-    public readonly id: DeviceServiceId = "garmin";
+    public readonly id: DeviceProviderId = "garmin";
     public readonly displayName = "Garmin";
-    public readonly icon = "content/device-logos/garmin.png";
+    public readonly icon = "content/device-providers/garmin.png";
 
     private static readonly CLIENT_ID = "717bf25f-aafa-4a33-a4ae-b26ac14446f2";
 
-    public readonly isAvailable = true;
-
-    private readonly deviceOAuthService = inject(DeviceOAuthService);
+    private readonly deviceProviderOAuthService = inject(DeviceProviderOAuthService);
     private readonly httpClient = inject(HttpClient);
     private readonly routeStatisticsService = inject(RouteStatisticsService);
+    private readonly selectedRouteService = inject(SelectedRouteService);
 
-    public async login(): Promise<DeviceConnectionInfo> {
-        const { verifier, challenge } = await this.deviceOAuthService.generatePkcePair();
-        const code = await this.deviceOAuthService.authorize(
+    public async login(): Promise<DeviceProviderConnection> {
+        const { verifier, challenge } = await this.deviceProviderOAuthService.generatePkcePair();
+        const code = await this.deviceProviderOAuthService.authorize(
             Urls.garminAuthorize, GarminDeviceProvider.CLIENT_ID, null, challenge, Urls.garminCallback);
-        const token = await this.deviceOAuthService.exchangeToken(Urls.garminToken, {
+        const token = await this.deviceProviderOAuthService.exchangeToken(Urls.garminToken, {
             grant_type: "authorization_code",
             code,
             redirect_uri: Urls.garminCallback,
@@ -57,8 +56,8 @@ export class GarminDeviceProvider implements DeviceProvider {
         return this.toConnectionInfo(token, verifier);
     }
 
-    public async refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo> {
-        const token = await this.deviceOAuthService.exchangeToken(Urls.garminToken, {
+    public async refresh(connection: DeviceProviderConnection): Promise<DeviceProviderConnection> {
+        const token = await this.deviceProviderOAuthService.exchangeToken(Urls.garminToken, {
             grant_type: "refresh_token",
             refresh_token: connection.refreshToken
         });
@@ -77,7 +76,7 @@ export class GarminDeviceProvider implements DeviceProvider {
         }));
     }
 
-    private toConnectionInfo(token: DeviceTokenResponse, codeVerifier: string): DeviceConnectionInfo {
+    private toConnectionInfo(token: DeviceProviderTokenResponse, codeVerifier: string): DeviceProviderConnection {
         return {
             accessToken: token.access_token,
             refreshToken: token.refresh_token,
@@ -87,16 +86,15 @@ export class GarminDeviceProvider implements DeviceProvider {
     }
 
     private toCourse(route: RouteDataWithoutState): GarminCourse {
-        const points = getRoutePoints(route);
+        const points = this.selectedRouteService.getLatlngs(route);
         if (points.length < 2) {
             throw new Error("The route has no path to send to the device");
         }
-        const cumulativeDistance = getCumulativeDistances(points);
         const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(points);
         return {
             courseName: route.name || "Mapeak",
             description: route.description || "",
-            distance: cumulativeDistance[cumulativeDistance.length - 1],
+            distance: statistics.length,
             elevationGain: statistics.gain,
             elevationLoss: Math.abs(statistics.loss),
             activityType: this.toActivityType(route.segments[route.segments.length - 1]?.routingType),

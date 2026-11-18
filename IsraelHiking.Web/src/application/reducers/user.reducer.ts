@@ -3,21 +3,21 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ActivityType, DeviceServiceId, DeviceServiceToken, UserInfo, UserState } from "../models";
+import type { ActivityType, DeviceProviderId, DeviceProviderConnection, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
     public static readonly type = "[User] SetUserInfoAction";
     constructor(public readonly userInfo: UserInfo) { }
 }
 
-export class SetDeviceServiceTokenAction {
+export class SetDeviceProviderConnectionAction {
     public static type = this.prototype.constructor.name;
-    constructor(public serviceId: DeviceServiceId, public token: DeviceServiceToken) { }
+    constructor(public serviceId: DeviceProviderId, public token: DeviceProviderConnection) { }
 }
 
-export class RemoveDeviceServiceAction {
+export class RemoveDeviceProviderConnectionAction {
     public static type = this.prototype.constructor.name;
-    constructor(public serviceId: DeviceServiceId) { }
+    constructor(public serviceId: DeviceProviderId) { }
 }
 
 export class SetTokenAction {
@@ -74,20 +74,20 @@ export class UserInfoReducer {
         }));
     }
 
-    @Action(SetDeviceServiceTokenAction)
-    public setDeviceServiceToken(ctx: StateContext<UserState>, action: SetDeviceServiceTokenAction) {
+    @Action(SetDeviceProviderConnectionAction)
+    public setDeviceProviderConnection(ctx: StateContext<UserState>, action: SetDeviceProviderConnectionAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.connectedDeviceServices ??= {};
-            lastState.connectedDeviceServices[action.serviceId] = action.token;
+            lastState.connectedDeviceProviders ??= {};
+            lastState.connectedDeviceProviders[action.serviceId] = action.token;
             return lastState;
         }));
     }
 
-    @Action(RemoveDeviceServiceAction)
-    public removeDeviceService(ctx: StateContext<UserState>, action: RemoveDeviceServiceAction) {
+    @Action(RemoveDeviceProviderConnectionAction)
+    public removeDeviceProviderConnection(ctx: StateContext<UserState>, action: RemoveDeviceProviderConnectionAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.connectedDeviceServices ??= {};
-            delete lastState.connectedDeviceServices[action.serviceId];
+            lastState.connectedDeviceProviders ??= {};
+            delete lastState.connectedDeviceProviders[action.serviceId];
             return lastState;
         }));
     }
