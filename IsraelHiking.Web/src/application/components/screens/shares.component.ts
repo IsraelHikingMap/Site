@@ -236,8 +236,18 @@ export class SharesComponent implements OnInit {
     }
 
     public async sendShareUrlToDevice(shareUrl: Immutable<ShareUrl>, id: DeviceProviderId) {
+        if (!this.deviceProvidersService.isConnected(id)) {
+            this.toastService.confirm({
+                type: "Custom",
+                message: this.resources.connectServiceFirst,
+                confirmAction: () => this.router.navigate([RouteStrings.ROUTE_SETTINGS]),
+                customConfirmText: this.resources.settings,
+                customDeclineText: this.resources.cancel
+            });
+            return;
+        }
         const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
-        await this.deviceProvidersService.sendRouteGated(id, share.dataContainer.routes);
+        await this.deviceProvidersService.sendRoutes(id, share.dataContainer.routes);
     }
 
     public async addShareUrlToRoutes(shareUrl: Immutable<ShareUrl>) {

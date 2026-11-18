@@ -1,5 +1,4 @@
 import { computed, inject, Service } from "@angular/core";
-import { Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 
 import { WahooDeviceProvider } from "./wahoo.device-provider";
@@ -7,7 +6,6 @@ import { GarminDeviceProvider } from "./garmin.device-provider";
 import { LoggingService } from "../logging.service";
 import { ToastService } from "../toast.service";
 import { ResourcesService } from "../resources.service";
-import { RouteStrings } from "../hash.service";
 import { RemoveDeviceProviderConnectionAction, SetDeviceProviderConnectionAction } from "../../reducers/user.reducer";
 import type { DeviceProvider } from "./device-provider";
 import type { ApplicationState, DeviceProviderId, RouteDataWithoutState } from "../../models";
@@ -29,7 +27,6 @@ export class DeviceProvidersService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly resources = inject(ResourcesService);
-    private readonly router = inject(Router);
     private readonly providers: DeviceProvider[] = [
         inject(WahooDeviceProvider),
         inject(GarminDeviceProvider)
@@ -72,35 +69,20 @@ export class DeviceProvidersService {
     }
 
     /**
-     * Sends one or more routes to a device and surfaces the outcome via toasts. This is the single entry
-     * point used by the export dialog and the saved routes menu so both stay in sync.
+     * Sends one or more routes to a connected provider and surfaces the outcome via toasts.
      */
-    public async sendRouteGated(id: DeviceProviderId, routes: RouteDataWithoutState[]): Promise<void> {
-        if (!this.isConnected(id)) {
-            this.toastService.confirm({
-                type: "Custom",
-                message: this.resources.connectServiceFirst,
-                confirmAction: () => this.router.navigate([RouteStrings.ROUTE_SETTINGS]),
-                customConfirmText: this.resources.settings,
-                customDeclineText: this.resources.cancel
-            });
-            return;
-        }
+    public async sendRoutes(id: DeviceProviderId, routes: RouteDataWithoutState[]): Promise<void> {
         try {
+            const provider = this.getProvider(id);
+            const accessToken = await this.getValidAccessToken(id, provider);
             for (const route of routes) {
-                await this.sendRouteToDevice(id, route);
+                await provider.sendRoute(accessToken, route);
+                this.loggingService.info(`[DeviceProviders] Sent route to ${id}`);
             }
             this.toastService.success(this.resources.routeSentToDevice);
         } catch (ex) {
             this.toastService.error(ex as Error, this.resources.unableToSendToDevice);
         }
-    }
-
-    private async sendRouteToDevice(id: DeviceProviderId, route: RouteDataWithoutState): Promise<void> {
-        const provider = this.getProvider(id);
-        const accessToken = await this.getValidAccessToken(id, provider);
-        await provider.sendRoute(accessToken, route);
-        this.loggingService.info(`[DeviceProviders] Sent route to ${id}`);
     }
 
     private async getValidAccessToken(id: DeviceProviderId, provider: DeviceProvider): Promise<string> {

@@ -3,6 +3,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor , MatIconButton } from "@angular/material/button";
 import { MatDivider } from "@angular/material/divider";
 import { CdkScrollable } from "@angular/cdk/scrolling";
+import { Router } from "@angular/router";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -10,6 +11,7 @@ import { DeviceProviderLogoComponent } from "../device-provider-logo.component";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
+import { RouteStrings } from "../../services/hash.service";
 import { DeviceProvidersService } from "../../services/device-providers/device-providers.service";
 import type { DataContainer, DeviceProviderId, RouteData } from "../../models";
 
@@ -23,6 +25,7 @@ export class FileSaveDialogComponent {
 
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
+    private readonly router = inject(Router);
     private readonly deviceProvidersService = inject(DeviceProvidersService);
     private readonly data = inject<RouteData>(MAT_DIALOG_DATA)
 
@@ -42,7 +45,17 @@ export class FileSaveDialogComponent {
     }
 
     public async sendToDevice(id: DeviceProviderId) {
-        await this.deviceProvidersService.sendRouteGated(id, [this.data]);
+        if (!this.deviceProvidersService.isConnected(id)) {
+            this.toastService.confirm({
+                type: "Custom",
+                message: this.resources.connectServiceFirst,
+                confirmAction: () => this.router.navigate([RouteStrings.ROUTE_SETTINGS]),
+                customConfirmText: this.resources.settings,
+                customDeclineText: this.resources.cancel
+            });
+            return;
+        }
+        await this.deviceProvidersService.sendRoutes(id, [this.data]);
     }
 
     private getName(data: DataContainer): string {
