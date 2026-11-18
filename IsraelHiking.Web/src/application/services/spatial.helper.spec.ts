@@ -415,6 +415,34 @@ describe("Spatial service", () => {
         expect(Math.max(...(clipped.geometry as GeoJSON.Polygon).coordinates[0].map(([lng]) => lng))).toBeCloseTo(3);
     });
 
+    it("Should get the bounds of an area on both sides of the antimeridian across it and not around the world", () => {
+        const fiji = createAcrossAntimeridian();
+
+        const bounds = SpatialHelper.getBoundsForFeature(fiji);
+
+        expect(bounds.southWest.lng).toBe(177);
+        expect(bounds.northEast.lng).toBe(182);
+        expect(SpatialHelper.getBoundsArea(fiji)).toBe(10);
+    });
+
+    it("Should keep the bounds of an area that goes all the way around the world", () => {
+        const world: GeoJSON.Feature<GeoJSON.Polygon> = { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [[[-180, -90], [180, -90], [180, -60], [-180, -60], [-180, -90]]] } };
+
+        const bounds = SpatialHelper.getBoundsForFeature(world);
+
+        expect(bounds.southWest.lng).toBe(-180);
+        expect(bounds.northEast.lng).toBe(180);
+    });
+
+    it("Should clip an area on both sides of the antimeridian from its west across it", () => {
+        const clipped = SpatialHelper.clipFromWest(createAcrossAntimeridian(), 0.6);
+
+        const longitudes = (clipped.geometry as GeoJSON.MultiPolygon).coordinates.flat(2).map(([lng]) => lng);
+        // 60% of the way from 177 to 182 is 180, so only the eastern part of it, west of the antimeridian, is filled
+        expect(Math.min(...longitudes)).toBeCloseTo(177);
+        expect(Math.max(...longitudes)).toBeCloseTo(180);
+    });
+
     it("Should label a crescent inside itself and not in the middle of its bounds, which is outside it", () => {
         // A "C" shape, open to the east, whose bounds' middle (5, 5) is in the opening
         const crescent: GeoJSON.Polygon = { type: "Polygon", coordinates: [[[0, 0], [10, 0], [10, 2], [2, 2], [2, 8], [10, 8], [10, 10], [0, 10], [0, 0]]] };
@@ -430,3 +458,18 @@ describe("Spatial service", () => {
         expect(SpatialHelper.intersects(SpatialHelper.getTilePolygon({ x: 0, y: 0 }, 1, 0.1), SpatialHelper.getTilePolygon({ x: 1, y: 1 }, 1, 0.1))).toBe(false);
     });
 });
+
+/** An area like Fiji, with a part west of the antimeridian from 177 to 180 and a part east of it from -180 to -178 */
+function createAcrossAntimeridian(): GeoJSON.Feature<GeoJSON.MultiPolygon> {
+    return {
+        type: "Feature",
+        properties: {},
+        geometry: {
+            type: "MultiPolygon",
+            coordinates: [
+                [[[177, -20], [180, -20], [180, -18], [177, -18], [177, -20]]],
+                [[[-180, -20], [-178, -20], [-178, -18], [-180, -18], [-180, -20]]]
+            ]
+        }
+    };
+}

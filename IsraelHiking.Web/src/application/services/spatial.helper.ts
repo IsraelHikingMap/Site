@@ -345,7 +345,58 @@ export class SpatialHelper {
     }
 
     public static getBoundsForFeatureCollection(featureCollection: Immutable<GeoJSON.FeatureCollection>): Bounds {
-        return SpatialHelper.bboxToBounds(bbox(featureCollection as GeoJSON.FeatureCollection));
+        return SpatialHelper.bboxToBounds(SpatialHelper.getBbox(featureCollection as GeoJSON.FeatureCollection));
+    }
+
+    /**
+     * The bounds of a feature, which for one that is on both sides of the antimeridian, like Fiji, are the ones across it,
+     * with longitudes past 180, rather than ones as wide as the world. Maplibre takes such longitudes as they are.
+     */
+    private static getBbox(geoJson: GeoJSON.GeoJSON): GeoJSON.BBox {
+        const boundingBox = bbox(geoJson);
+        if (boundingBox[2] - boundingBox[0] <= 180) {
+            return boundingBox;
+        }
+        const acrossAntimeridian = bbox(featureCollection(SpatialHelper.getParts(geoJson)
+            .map(part => SpatialHelper.shiftWestToEast(part))
+            .map(part => ({ type: "Feature", properties: {}, geometry: part }) as GeoJSON.Feature)));
+        return acrossAntimeridian[2] - acrossAntimeridian[0] < boundingBox[2] - boundingBox[0] ? acrossAntimeridian : boundingBox;
+    }
+
+    /** The geometries a feature is made of, where every polygon of a multi polygon is one, since each is on one side of the antimeridian */
+    private static getParts(geoJson: GeoJSON.GeoJSON): GeoJSON.Geometry[] {
+        switch (geoJson.type) {
+            case "FeatureCollection":
+                return geoJson.features.flatMap(feature => SpatialHelper.getParts(feature));
+            case "Feature":
+                return geoJson.geometry == null ? [] : SpatialHelper.getParts(geoJson.geometry);
+            case "GeometryCollection":
+                return geoJson.geometries.flatMap(geometry => SpatialHelper.getParts(geometry));
+            case "MultiPolygon":
+                return geoJson.coordinates.map(coordinates => ({ type: "Polygon", coordinates }));
+            default:
+                return [geoJson];
+        }
+    }
+
+    /**
+     * Moves a geometry that is all west of the prime meridian 360 degrees east, past the antimeridian, so that it is next to
+     * the parts of its area that are just west of it. One that is on both sides of the prime meridian, like Togo, is kept.
+     */
+    private static shiftWestToEast(geometry: GeoJSON.Geometry): GeoJSON.Geometry {
+        if (bbox(geometry)[2] >= 0) {
+            return geometry;
+        }
+        return JSON.parse(JSON.stringify(geometry), (key, value) =>
+            key === "coordinates" ? SpatialHelper.shiftPositions(value) : value);
+    }
+
+    private static shiftPositions(coordinates: unknown[]): unknown[] {
+        if (typeof coordinates[0] === "number") {
+            const [lng, ...rest] = coordinates as number[];
+            return [lng + 360, ...rest];
+        }
+        return coordinates.map(child => SpatialHelper.shiftPositions(child as unknown[]));
     }
 
     public static getBoundsForFeature(feature: Immutable<GeoJSON.Feature<GeoJSON.Geometry>>): Bounds {
@@ -422,10 +473,21 @@ export class SpatialHelper {
         return booleanIntersects(geometry as GeoJSON.Feature | GeoJSON.Geometry, otherGeometry as GeoJSON.Feature | GeoJSON.Geometry);
     }
 
-    /** The part of a polygon west of a line that is the given part of the way across its bounds */
+    /**
+     * The part of a polygon west of a line that is the given part of the way across its bounds. One that is on both sides
+     * of the antimeridian is clipped across it, with longitudes past 180, see getBbox.
+     */
     public static clipFromWest(polygon: Immutable<GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>>, part: number): GeoJSON.Feature {
-        const [minLng, minLat, maxLng, maxLat] = bbox(polygon as GeoJSON.Feature);
-        return bboxClip(polygon as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>, [minLng, minLat, minLng + (maxLng - minLng) * part, maxLat]);
+        const feature = polygon as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>;
+        const [minLng, minLat, maxLng, maxLat] = SpatialHelper.getBbox(feature);
+        const continuous: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> = maxLng <= 180 ? feature : {
+            ...feature,
+            geometry: {
+                type: "MultiPolygon",
+                coordinates: SpatialHelper.getParts(feature).map(polygon => (SpatialHelper.shiftWestToEast(polygon) as GeoJSON.Polygon).coordinates)
+            }
+        };
+        return bboxClip(continuous, [minLng, minLat, minLng + (maxLng - minLng) * part, maxLat]);
     }
 
     /**
@@ -442,7 +504,7 @@ export class SpatialHelper {
 
     /** How large a feature is by its bounds, in square degrees, which is enough to tell a smaller one from a larger one */
     public static getBoundsArea(feature: Immutable<GeoJSON.Feature>): number {
-        const [minLng, minLat, maxLng, maxLat] = bbox(feature as GeoJSON.Feature);
+        const [minLng, minLat, maxLng, maxLat] = SpatialHelper.getBbox(feature as GeoJSON.Feature);
         return (maxLng - minLng) * (maxLat - minLat);
     }
 
