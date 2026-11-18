@@ -223,7 +223,6 @@ export class ResourcesService {
     public gotLostWarningsHint: string;
     public navigateWithWaze: string;
     public navigateWithGoogleMaps: string;
-    public offlinePurchaseGratitude: string;
     public mapeakPro: string;
     public availableWithMapeakPro: string;
     public mapeakProIsPurchasedInTheApp: string;
@@ -521,7 +520,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795034307282");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795034623422");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -696,7 +695,6 @@ export class ResourcesService {
             "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.navigateWithGoogleMaps = this.gettextCatalog.getString("Navigate with Google Maps");
-        this.offlinePurchaseGratitude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.mapeakPro = this.gettextCatalog.getString("Mapeak Pro");
         this.availableWithMapeakPro = this.gettextCatalog.getString("Available with Mapeak Pro");
         this.mapeakProIsPurchasedInTheApp = this.gettextCatalog.getString("Mapeak Pro can be purchased in the Mapeak app for Android and iOS");

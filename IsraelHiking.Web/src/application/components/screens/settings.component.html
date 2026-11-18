@@ -107,7 +107,7 @@
   @if (deviceProviders().length > 0) {
   <div class="flex flex-col mb-4">
     <label>{{resources.connectedServices}}</label>
-    <span class="text-sm">{{resources.connectedServicesHint}}</span>
+    <span class="text-sm opacity-70">{{resources.connectedServicesHint}}</span>
     <div class="flex flex-col mt-2 rounded-xl border border-outline-variant divide-y divide-outline-variant">
       @for (provider of deviceProviders(); track provider.id) {
       <div class="flex flex-row items-center gap-3 px-4 py-3">
@@ -131,7 +131,6 @@
   }
   @if (isSubscribed()) {
   <p class="ms-2">
-    {{resources.offlinePurchaseGratitude}}<br />
     <a [href]="manageSubscriptions" target="_blank" analyticsOn="click" analyticsCategory="Configuration"
       analyticsLabel="Manage subscriptions">{{resources.manageSubscriptions}}</a>
   </p>
