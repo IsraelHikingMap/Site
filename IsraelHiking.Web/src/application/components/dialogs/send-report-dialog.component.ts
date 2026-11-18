@@ -17,7 +17,7 @@ export type SendReportDialogData = {
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, MatDialogActions, MatAnchor, AnalyticsDirective]
 })
 export class SendReportDialogComponent {
-    public mailToLink: string;
+    public readonly mailToLink: string;
 
     public readonly resources = inject(ResourcesService);
     private readonly data = inject<SendReportDialogData>(MAT_DIALOG_DATA);

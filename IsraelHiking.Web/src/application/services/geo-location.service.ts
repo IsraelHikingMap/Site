@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
+import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { BackgroundGeolocation, Location, CallbackError } from "@capgo/background-geolocation";
 import { App } from "@capacitor/app";
 import { Store } from "@ngxs/store";
@@ -8,18 +8,26 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SelectedRouteService } from "./selected-route.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class GeoLocationService {
+    private static readonly LOCATION_LOG_READ_LIMIT = 10000;
+
     private isBackground = false;
     private wasInitialized = false;
-    private lastReceivedPosition: GeolocationPosition | null = null;
+    private lastLocationLogId: number | undefined;
+    private locationLogReads: Promise<GeolocationPosition[]> = Promise.resolve([]);
+    private isLocationLogReadWaiting = false;
 
-    public positionWhileInBackground = new EventEmitter<GeolocationPosition>();
-    public backToForeground = new EventEmitter<void>();
+    /**
+     * Emits every position the plugin logged, in the order it received them, including the ones that came while
+     * the app was in the background or killed. Nothing is logged in the browser, so it never emits there.
+     */
+    public readonly positionsReceived = new EventEmitter<GeolocationPosition[]>();
+    public readonly backToForeground = new EventEmitter<void>();
 
     private readonly resources = inject(ResourcesService);
     private readonly selectedRouteService = inject(SelectedRouteService);
@@ -41,12 +49,19 @@ export class GeoLocationService {
         };
     }
 
-    public initialize() {
+    /**
+     * Picks tracking back up where the last session left it. Deliberately not part of initialize:
+     * it asks for the location permission, which should only happen once there is a map to show the
+     * position on, never to someone who just opened a content page.
+     */
+    public restoreTracking() {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.store.dispatch(new SetTrackingStateAction("disabled"));
             this.enable();
         }
+    }
 
+    public initialize() {
         this.store.select((s: ApplicationState) => s.routes.present).subscribe(() => {
             this.sendPlannedRouteToPluginIfNeeded();
         });
@@ -57,7 +72,9 @@ export class GeoLocationService {
 
         App.addListener("appStateChange", (state) => {
             this.isBackground = !state.isActive;
-            this.loggingService.info(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
+            const appStateMessage = `[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`;
+            this.loggingService.info(appStateMessage);
+            this.loggingService.info(appStateMessage, "gps");
             if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
                 return;
             }
@@ -77,7 +94,10 @@ export class GeoLocationService {
             }
             if (!this.isBackground) {
                 this.ngZone.run(async () => {
-                    this.handlePositionChange(this.lastReceivedPosition);
+                    const positions = await this.readLocationLog();
+                    if (positions.length > 0) {
+                        this.handlePositionChange(positions.at(-1));
+                    }
                     this.backToForeground.next();
                 });
             }
@@ -116,7 +136,7 @@ export class GeoLocationService {
     private async startWatching() {
         this.store.dispatch(new SetTrackingStateAction("searching"));
         if (this.wasInitialized) {
-            this.loggingService.debug("[GeoLocation] Background tracking already started, skipping...");
+            this.loggingService.warning("[GeoLocation] Background tracking already started, skipping...");
             return;
         }
         this.loggingService.info("[GeoLocation] Starting background tracking");
@@ -126,22 +146,24 @@ export class GeoLocationService {
                 backgroundTitle: "Mapeak",
                 requestPermissions: true,
                 stale: true,
-                distanceFilter: 2
-            }, (location?: Location, error?: CallbackError) => {
+                distanceFilter: 2,
+                locationLog: true
+            }, async (location?: Location, error?: CallbackError) => {
                 if (location) {
-                    this.loggingService.debug(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`);
+                    this.loggingService.info(`[GeoLocation] Received position: lat: ${location.latitude}, lng: ${location.longitude}, time: ${new Date(location.time).toISOString()}, accuracy: ${location.accuracy}, background: ${this.isBackground}`, "gps");
                     const position = this.locationToPosition(location);
                     const latLng = GeoLocationService.positionToLatLngTime(position);
-                    if (SpatialService.isJammingTarget(latLng)) {
+                    if (SpatialHelper.isJammingTarget(latLng)) {
                         this.toastService.info(this.resources.jammedPositionReceived);
                         return;
                     }
-                    this.lastReceivedPosition = position;
                     if (this.isBackground) {
-                        this.positionWhileInBackground.next(this.lastReceivedPosition);
                         return;
                     }
-                    this.handlePositionChange(this.lastReceivedPosition);
+                    if (this.runningContextService.isCapacitor) {
+                        await this.readLocationLog();
+                    }
+                    this.handlePositionChange(position);
                     return;
                 } else if (error) {
                     this.loggingService.error(`[GeoLocation] Failed to start background tracking: ${error.message} code: ${error.code}`);
@@ -176,11 +198,61 @@ export class GeoLocationService {
         }
     }
 
+    /**
+     * Reads the positions the plugin logged since the previous read, hands them to the listeners and clears them
+     * from the log, so the log only holds what the app has not seen yet. Reads run one after the other, as each
+     * one carries on from where the previous one left off, and a call made while a read is already waiting gets that
+     * read, so the burst of callbacks that arrives when the app returns from the background does not queue a read each.
+     */
+    public readLocationLog(): Promise<GeolocationPosition[]> {
+        if (this.isLocationLogReadWaiting) {
+            return this.locationLogReads;
+        }
+        this.isLocationLogReadWaiting = true;
+        this.locationLogReads = this.locationLogReads.then(async () => {
+            this.isLocationLogReadWaiting = false;
+            const positions = await this.readAllLocationsFromLog();
+            if (positions.length > 0) {
+                this.positionsReceived.next(positions);
+            }
+            return positions;
+        });
+        return this.locationLogReads;
+    }
+
+    /**
+     * A page is only returned once it was cleared from the log, so a page that fails is read again by the next read
+     * instead of being handed out while it is still in the log, where it would be handed out again after a restart.
+     */
+    private async readAllLocationsFromLog(): Promise<GeolocationPosition[]> {
+        try {
+            const { entries } = await BackgroundGeolocation.getLocationLog({
+                afterId: this.lastLocationLogId,
+                limit: GeoLocationService.LOCATION_LOG_READ_LIMIT
+            });
+            if (entries.length === 0) {
+                return [];
+            }
+            const lastId = entries.at(-1).id;
+            await BackgroundGeolocation.clearLocationLog({ upToId: lastId });
+            this.lastLocationLogId = lastId;
+            const positions = entries.map(e => this.locationToPosition(e))
+                .filter(p => !SpatialHelper.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
+            if (entries.length < GeoLocationService.LOCATION_LOG_READ_LIMIT) {
+                return positions;
+            }
+            return [...positions, ...await this.readAllLocationsFromLog()];
+        } catch (ex) {
+            this.loggingService.error(`[GeoLocation] Failed to read the location log: ${(ex as Error).message}`);
+            return [];
+        }
+    }
+
     private async stopWatching() {
         this.store.dispatch(new SetTrackingStateAction("disabled"));
         this.store.dispatch(new SetCurrentPositionAction(null));
         if (this.wasInitialized) {
-            this.loggingService.debug("[GeoLocation] Stopping background tracking");
+            this.loggingService.info("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.stop();
             this.wasInitialized = false;
         }

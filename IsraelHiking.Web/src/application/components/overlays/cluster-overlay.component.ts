@@ -8,6 +8,7 @@ import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
+import { PoiService } from "../../services/poi.service";
 
 @Component({
     selector: "cluster-overlay",
@@ -17,19 +18,20 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 })
 export class ClusterOverlayComponent {
 
-    public features = input<GeoJSON.Feature[]>();
+    public readonly features = input<GeoJSON.Feature[]>();
 
     public closed = output();
     public readonly resources = inject(ResourcesService);
 
     private readonly router = inject(Router);
+    private readonly poiService = inject(PoiService);
 
     public getTitle(feature: GeoJSON.Feature) {
         return GeoJSONUtils.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public hasExtraData(feature: GeoJSON.Feature): boolean {
-        return GeoJSONUtils.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public clickOnItem(feature: GeoJSON.Feature) {

@@ -19,8 +19,20 @@ platform :ios do
   desc "Build the iOS app only"
   lane :build_ios do
     setup_ci
-    sync_code_signing(type: "appstore")
-    build_app(workspace: "App.xcworkspace", scheme: "App")
+    sync_code_signing(type: "appstore", app_identifier: ["com.mapeak", "com.mapeak.ShareExtension"])
+    build_app(
+      project: "App.xcodeproj",
+      scheme: "App",
+      cloned_source_packages_path: File.expand_path("../../.spm-cache", __dir__),
+      skip_package_dependencies_resolution: true,
+      disable_package_automatic_updates: true,
+      export_options: {
+        provisioningProfiles: {
+          "com.mapeak" => "match AppStore com.mapeak",
+          "com.mapeak.ShareExtension" => "match AppStore com.mapeak.ShareExtension"
+        }
+      }
+    )
   end
   desc "Upload the previously built IPA to TestFlight"
   lane :upload_to_testers do

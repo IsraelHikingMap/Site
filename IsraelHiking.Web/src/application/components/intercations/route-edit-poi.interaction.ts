@@ -1,8 +1,8 @@
-import { inject, Injectable, NgZone } from "@angular/core";
-import { MapMouseEvent, Map } from "maplibre-gl";
+import { inject, NgZone, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import type { MapMouseEvent, Map } from "maplibre-gl";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -11,9 +11,10 @@ import { SnappingService, SnappingPointResponse } from "../../services/snapping.
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import type { ApplicationState, MarkerData, LatLngAltTime } from "../../models";
 
-@Injectable()
+@Service()
 export class RouteEditPoiInteraction {
 
     private readonly matDialog = inject(MatDialog);
@@ -31,7 +32,7 @@ export class RouteEditPoiInteraction {
         }
     }
 
-    private handleClick = (event: MapMouseEvent) => {
+    private readonly handleClick = (event: MapMouseEvent) => {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking") {
             const latLng = event.lngLat;
             const point = event.target.project(latLng);
@@ -53,13 +54,13 @@ export class RouteEditPoiInteraction {
     public handleDragEnd(latlng: LatLngAltTime, index: number) {
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
-            const markerData = structuredClone(recordedRouteState.route.markers[index]) as MarkerData;
+            const markerData = editableCopy(recordedRouteState.route.markers[index]);
             markerData.id = uuidv4();
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
             const routeData = this.selectedRouteService.getSelectedRoute();
-            const markerData = structuredClone(routeData.markers[index]) as MarkerData;
+            const markerData = editableCopy(routeData.markers[index]);
             markerData.latlng = latlng;
             this.store.dispatch(new UpdatePrivatePoiAction(routeData.id, index, markerData));
         }
@@ -81,7 +82,7 @@ export class RouteEditPoiInteraction {
 
         const snapping = this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
-            markerData = structuredClone(snapping.markerData) as MarkerData;
+            markerData = editableCopy(snapping.markerData);
         }
         this.addToSelectedRoute(markerData);
     }

@@ -1,5 +1,5 @@
-import { Component, inject, signal } from "@angular/core";
-import { MarkdownComponent } from "ngx-markdown";
+import { Component, ViewEncapsulation, inject, signal } from "@angular/core";
+import { MarkdownComponent, provideMarkdown } from "ngx-markdown";
 import { skip } from "rxjs";
 
 import { Router } from "@angular/router";
@@ -10,11 +10,14 @@ import { ApplicationState } from "../../models";
 @Component({
     selector: "faq",
     templateUrl: "./faq.component.html",
-    imports: [MarkdownComponent]
+    styleUrls: ["./faq.component.scss"],
+    encapsulation: ViewEncapsulation.None,
+    imports: [MarkdownComponent],
+    providers: [provideMarkdown()]
 })
 export class FaqComponent {
-    public direction = signal<string>("ltr");
-    public markdownFilePath = signal<string>("content/faq/en-US.md");
+    public readonly direction = signal<string>("ltr");
+    public readonly markdownFilePath = signal<string>("content/faq/en-US.md");
 
     private readonly router = inject(Router);
     private readonly store = inject(Store);

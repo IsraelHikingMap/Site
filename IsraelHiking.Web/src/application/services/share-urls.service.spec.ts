@@ -2,7 +2,7 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -31,8 +31,8 @@ describe("Share Urls Service", () => {
             warning: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([ShareUrlsReducer])],
             providers: [
+                provideStore([ShareUrlsReducer]),
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
@@ -95,15 +95,11 @@ describe("Share Urls Service", () => {
                     start: { lat: 1, lng: 1 }
                 }
             ]);
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
@@ -150,9 +146,7 @@ describe("Share Urls Service", () => {
                     id: "3"
                 }
             ]);
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 dataContainer: {
                     routes: [],
                     northEast: { lat: 1, lng: 1 },
@@ -160,17 +154,13 @@ describe("Share Urls Service", () => {
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "2").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "2"))).flush({
                 dataContainer: {
                     routes: [],
                     northEast: { lat: 1, lng: 1 },
@@ -178,18 +168,14 @@ describe("Share Urls Service", () => {
                 }
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "3").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "3"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
             });
 
             await promise;
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(vi.mocked(spy).mock.calls.length).toBe(8);
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls.length).toBe(8));
             expect(vi.mocked(spy).mock.calls[5][0]).toBeInstanceOf(UpdateShareUrlAction);
             expect(vi.mocked(spy).mock.calls[5][0].shareUrl.start).toBeDefined();
             expect(vi.mocked(spy).mock.calls[6][0]).toBeInstanceOf(UpdateShareUrlAction);
@@ -223,9 +209,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("5");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date(0).toISOString());
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "5/timestamp"))).flush(new Date(0).toISOString());
 
             expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
             await promise;
@@ -238,9 +222,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 start: { lat: 1, lng: 1 }
             });
 
@@ -257,9 +239,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 dataContainer: {
                     routes: [{ segments: [{ latlngs: [{ lat: 1, lng: 1 }] }] }]
                 }
@@ -278,9 +258,7 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("6");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.urls + "6").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "6"))).flush({
                 dataContainer: {
                     northEast: { lat: 0, lng: 0 },
                     southWest: { lat: 2, lng: 2 }
@@ -300,15 +278,11 @@ describe("Share Urls Service", () => {
 
             const promise = shareUrlsService.getShareUrl("7");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7/timestamp"))).flush(new Date(200).toISOString());
 
-            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
-
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush({
                 start: { lat: 1, lng: 1 }
-            })).not.toThrow();
+            });
             await promise;
         }
     ));
@@ -318,15 +292,11 @@ describe("Share Urls Service", () => {
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100).toISOString() } as ShareUrl);
 
             const promise = shareUrlsService.getShareUrl("7");
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.expectOne(Urls.urls + "7").flush(null, { status: 500, statusText: "Internal Server Error" });
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7/timestamp"))).flush(new Date(200).toISOString());
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush(null, { status: 500, statusText: "Internal Server Error" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.urls + "7"))).flush({
                 start: { lat: 1, lng: 1 }
-            })).not.toThrow();
+            });
             await promise;
         }
     ));
@@ -376,7 +346,7 @@ describe("Share Urls Service", () => {
 
     it("Should set share Url to store", inject([ShareUrlsService, Store], (shareUrlsService: ShareUrlsService, store: Store) => {
         store.dispatch = vi.fn();
-        shareUrlsService.setShareUrl({} as any);
+        shareUrlsService.setShareUrl({} as unknown as ShareUrl);
         expect(store.dispatch).toHaveBeenCalled();
     }));
 
@@ -415,4 +385,33 @@ describe("Share Urls Service", () => {
     it("Should get unknown icon from unknown type", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
         expect(shareUrlsService.getIconFromType("Unknown")).toBe("icon-question");
     }));
+
+    it("should return a OSM user display name when getting a share url", inject([ShareUrlsService, HttpTestingController], async (service: ShareUrlsService, mockBackend: HttpTestingController) => {
+        const promise = service.getAttributionForImage("https://www.mapeak.com/api/urls/12345/thumbnail");
+        mockBackend.match(r => r.url.startsWith("https://www.mapeak.com/api/urls/"))[0].flush({
+            osmUserId: 12,
+            website: "https://website.com/"
+        });
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url.startsWith(`${Urls.osmApi}user/12`)))).flush({
+            user: {
+                display_name: "Osm User Name"
+            }
+        });
+
+        const response = await promise;
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("Osm User Name");
+        expect(response.url).toBe("https://website.com/");
+    }));
+
+    it("should only claim share url thumbnails", inject([ShareUrlsService], (service: ShareUrlsService) => {
+        expect(service.isImageUrl("https://www.mapeak.com/api/urls/12345/thumbnail")).toBeTruthy();
+        expect(service.isImageUrl("https://upload.wikimedia.org/image.jpeg")).toBeFalsy();
+    }));
+
+    it("should return null attribution for an image that is not a share url thumbnail", inject([ShareUrlsService],
+        async (service: ShareUrlsService) => {
+            expect(await service.getAttributionForImage("https://upload.wikimedia.org/image.jpeg")).toBeNull();
+        }
+    ));
 });

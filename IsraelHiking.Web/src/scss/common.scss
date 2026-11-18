@@ -3,7 +3,6 @@
 @use "theme-colors";
 @use "dialogs";
 @use "../fonts/icons.css";
-@use "font-awesome/css/font-awesome.css";
 @use "maplibre-gl/dist/maplibre-gl.css";
 @use "import-tailwind";
 
@@ -13,6 +12,10 @@ $low-emphasis-button-labels: (
     protected-label-text-color: var(--mat-sys-on-surface)
 );
 
+$opaque-button-toggle: (
+    background-color: var(--mat-sys-surface)
+);
+
 html {
     @include mat.theme((color: (primary: theme-colors.$primary-palette,
                 tertiary: theme-colors.$tertiary-palette,
@@ -20,14 +23,19 @@ html {
             ),
             typography: (plain-family: ("Noto Sans Regular", sans-serif),
                 brand-family: ("Noto Sans Regular", sans-serif),
+                medium-weight: 400,
             ),
             density: 0,
         ));
     color-scheme: light;
     @include mat.button-overrides($low-emphasis-button-labels);
+    @include mat.button-toggle-overrides($opaque-button-toggle);
+    /* Text fields are outlined across the app, rounded like the cards and buttons around them. */
+    @include mat.form-field-overrides((outlined-container-shape: 12px));
 
     --brand-color: #32cd6d;
-    @include mat.theme-overrides((primary: var(--brand-color)));
+    --warning-color: #8a5a00;
+    @include mat.theme-overrides((primary: var(--brand-color), on-primary: #003018));
 }
 
 .dark-theme {
@@ -38,6 +46,9 @@ html {
         ));
     color-scheme: dark;
     @include mat.button-overrides($low-emphasis-button-labels);
+    @include mat.button-toggle-overrides($opaque-button-toggle);
+
+    --warning-color: #ffc107;
 }
 
 .error-button {
@@ -54,28 +65,50 @@ html {
     margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
 
     &.success-snackbar {
-        --mat-snack-bar-container-color: var(--brand-color);
+        @include mat.snack-bar-overrides((container-color: var(--brand-color)));
     }
 
     &.warn-snackbar {
-        --mat-snack-bar-container-color: #ffeb3b;
-        --mat-snack-bar-supporting-text-color: #000;
+        @include mat.snack-bar-overrides((container-color: #ffeb3b, supporting-text-color: #000));
     }
 
     &.error-snackbar {
-        --mat-snack-bar-container-color: #f44336;
+        @include mat.snack-bar-overrides((container-color: #f44336));
     }
 
     &.confirm-snackbar {
-        --mat-snack-bar-button-color: var(--mat-snack-bar-supporting-text-color);
+        @include mat.snack-bar-overrides((button-color: var(--mat-sys-inverse-on-surface)));
     }
 }
 
+/* A count on a badge in the brand color, used where the badge marks something to look at rather than an error. */
+.brand-badge {
+    @include mat.badge-overrides((background-color: var(--brand-color), text-color: #003018));
+}
+
+/* Latin slice first: browsers only fetch a face whose unicode-range matches text they
+   actually render, so latin readers never download the full multi-script file. No coverage
+   is lost - the full font still backs every other script. */
+@font-face {
+    font-family: 'Noto Sans Regular';
+    font-style: normal;
+    font-display: swap;
+    src: url('../fonts/noto-sans-latin.woff2') format('woff2');
+    unicode-range: U+0000-024F, U+2000-206F;
+}
+
+/* Scoped to the scripts this file actually contains. Without it the browser downloads all
+   177kb to look for characters that are not in there - the emoji on the landing page alone
+   were enough to pull it in, only to fall back to a system font anyway. */
 @font-face {
     font-family: 'Noto Sans Regular';
     font-style: normal;
     font-display: swap;
     src: url('../fonts/noto-sans-regular.woff2') format('woff2');
+    unicode-range: U+250-52F, U+900-97F, U+10FB, U+1AB0-1ACE, U+1C80-1C88, U+1D00-1FFF,
+        U+2070-2189, U+2212, U+25CC, U+2C60-2C7F, U+2DE0-2E5D, U+A640-A69F, U+A700-A7FF,
+        U+A8FF-A92E, U+AB30-AB6B, U+FB00-FB06, U+FE00-FE2F, U+FEFF, U+FFFC-FFFD,
+        U+10780-107BA, U+1DF00-1DF1E;
 }
 
 @font-face {
@@ -91,7 +124,7 @@ html {
     font-family: 'Noto Sans Cond Bold';
     font-style: normal;
     font-display: swap;
-    src: url('../fonts/noto-sans-condensed-bold.ttf') format('truetype');
+    src: url('../fonts/noto-sans-condensed-bold.woff2') format('woff2');
 }
 
 html {
@@ -116,37 +149,41 @@ body {
     color: rgba(0, 0, 0, 0.87);
 }
 
-.side-control {
-    position: relative;
-    padding: 2px;
-    clear: both;
-    background-color: var(--mat-sys-surface);
-    margin: 0 !important;
-    border: 2px solid var(--mat-sys-outline-variant);
-
-    & button,
-    a {
-        min-width: unset !important;
-        padding: 0 !important;
-        display: block;
-        width: v.$app-button-size;
-        height: v.$app-button-size;
-        border-radius: 0;
-
-        & i {
-            vertical-align: middle !important;
-        }
-    }
-
-    .mat-mdc-button-persistent-ripple,
-    .mat-mdc-button-persistent-ripple::before,
-    .mat-mdc-button-ripple {
-        border-radius: 0; // avoid pill-shaped hover state for side buttons
-    }
+/* Round fab buttons on the surface colour, like the ones floating over the map, which read as part of the
+   map and not as a block of brand chrome stacked on top of it. A background set on the button still wins. */
+.round-fab {
+    @include mat.fab-overrides((container-shape: 9999px,
+            extended-container-shape: 9999px,
+            small-container-shape: 9999px,
+            container-color: var(--mat-sys-surface),
+            foreground-color: var(--mat-sys-on-surface),
+            small-container-color: var(--mat-sys-surface),
+            small-foreground-color: var(--mat-sys-on-surface),
+        ));
 }
 
-.side-control.maplibregl-ctrl button:last-of-type {
-    overflow: hidden;
+/* An outlined field's label floats on its top border, sticking out above the field, so a field at the top of a
+   dialog, card or other clipping container would have its label cut off. Fields without a label, like the search
+   and the pill dropdowns, have nothing sticking out and keep their size. */
+mat-form-field:has(mat-label) {
+    padding-top: 8px;
+}
+
+/* Material's own dropdown in the outlined style, at the height and with the shape of the pill buttons it
+   sits next to in the list headers. The corner is half the 40px height rather than a "full" radius, since
+   the outlined field also sizes its side padding from this value. */
+.pill-select {
+    @include mat.form-field-density(-4);
+    @include mat.form-field-overrides((outlined-container-shape: 20px));
+}
+
+/* A toggled round button is filled with the brand tone, the way Material marks a selected icon button -
+   an outline drawn around a circle reads as a focus ring. The surface is mixed in so a button floating
+   over the map stays opaque. */
+.mat-mdc-icon-button.active,
+.mat-mdc-mini-fab.active {
+    outline: none !important;
+    background-color: color-mix(in srgb, var(--brand-color) 35%, var(--mat-sys-surface)) !important;
 }
 
 .active {
@@ -163,6 +200,79 @@ body {
 
 .stack-icon-large {
     font-size: 1.25em !important;
+}
+
+/* Icon helpers, ported from font-awesome 4.7 when that dependency was dropped.
+   Every icon in the app comes from the generated mapeak font, so only the sizing and
+   stacking helpers were kept.
+   The family is repeated here on purpose: icons.css assigns it through an attribute selector, which
+   the critical css extractor does not carry into the inlined styles, and without it the icons fall
+   back to whatever the surrounding text uses until the full stylesheet arrives. */
+.fa {
+    display: inline-block;
+    font-family: "mapeak";
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    font-size: inherit;
+    line-height: 1;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-lg {
+    font-size: 1.33333333em;
+    line-height: 0.75em;
+    vertical-align: -15%;
+}
+
+/* The icon of a fab or of a button that shows nothing but the icon. These draw a font icon at the size of their
+   label, far smaller than the same icon in an icon button, so they are given the icon button's size. An icon beside
+   a label stays at fa-lg. */
+.fa-action {
+    font-size: 24px;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.fa-4x {
+    font-size: 4em;
+}
+
+.fa-5x {
+    font-size: 5em;
+}
+
+.fa-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.fa-stack-1x,
+.fa-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.fa-stack-1x {
+    line-height: inherit;
+}
+
+.fa-stack-2x {
+    font-size: 2em;
 }
 
 .fa.mat-icon {
@@ -241,22 +351,10 @@ body {
     padding-bottom: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 48px);
 }
 
-.maplibregl-ctrl-top-left {
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-top-right {
-    margin-top: calc(var(--app-toolbar-height, 56px) + var(--safe-area-inset-top, env(safe-area-inset-top, 0))) !important;
-}
-
-.maplibregl-ctrl-bottom-right {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-}
-
-.maplibregl-ctrl-bottom-left {
-    margin-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
-    margin-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0)) !important;
+/* For chrome that spans the full width: in landscape the navigation bar sits on one of the sides. */
+.px-safe {
+    padding-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+    padding-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
 }
 
 .magrin-top-with-toolbar {
@@ -267,10 +365,6 @@ mgl-map {
     height: 100% !important;
     width: 100% !important;
     object-fit: cover;
-}
-
-.maplibregl-ctrl {
-    margin: 0 !important;
 }
 
 .maplibregl-popup-content {
@@ -299,8 +393,7 @@ mgl-map {
 
 @media print {
 
-    .mat-mdc-tooltip,
-    .side-control {
+    .mat-mdc-tooltip {
         display: none !important;
     }
 }

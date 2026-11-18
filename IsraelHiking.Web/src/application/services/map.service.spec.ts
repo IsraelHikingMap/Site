@@ -1,23 +1,29 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
-import type { Map, ErrorEvent } from "maplibre-gl";
+import { provideStore, Store } from "@ngxs/store";
+import type { ErrorEvent, LayerSpecification, Map, SourceSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { SetLocationAction } from "../reducers/location.reducer";
+import { UserInfoReducer } from "../reducers/user.reducer";
+import { Urls } from "../urls";
 
 describe("MapService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer])],
             providers: [
+                provideStore([InMemoryReducer, UserInfoReducer]),
                 MapService,
                 CancelableTimeoutService,
                 { provide: ResourcesService, useValue: {} },
+                { provide: DatabaseService, useValue: {} },
+                { provide: OverpassTurboService, useValue: {} },
                 {
                     provide: LoggingService,
                     useValue: {
@@ -30,14 +36,45 @@ describe("MapService", () => {
     });
 
     it("Should resolve promise when setting the map", inject([MapService], async (service: MapService) => {
-        service.setMap({ on: () => { } } as any as Map);
+        service.setMap({ on: () => { }, setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         expect(true).toBeTruthy();
     }));
 
+    describe("transform request", () => {
+        it("Should add the user's token to a request to our own api", inject([MapService, Store], (service: MapService, store: Store) => {
+            store.reset({ userState: { token: "some-token" } });
+            const transform = captureTransformRequest(service);
+
+            const result = transform(Urls.satelliteTiles + "10/20/30");
+
+            expect(result.headers.Authorization).toBe("Bearer some-token");
+        }));
+
+        it("Should not add the user's token to a request to a third party", inject([MapService, Store], (service: MapService, store: Store) => {
+            store.reset({ userState: { token: "some-token" } });
+            const transform = captureTransformRequest(service);
+
+            const result = transform(Urls.HIKING_STYLE_ADDRESS);
+
+            expect(result.headers).toBeUndefined();
+        }));
+
+        it("Should not add an authorization header when the user is not logged in", inject([MapService, Store], (service: MapService, store: Store) => {
+            store.reset({ userState: { token: null } });
+            const transform = captureTransformRequest(service);
+
+            const result = transform(Urls.satelliteTiles + "10/20/30");
+
+            expect(result.headers).toBeUndefined();
+        }));
+    });
+
     it("Should unset the map and remove listeners", inject([MapService], async (service: MapService) => {
         const spy = vi.fn();
-        service.setMap({ on: () => { }, off: spy } as any as Map);
+        service.setMap({ on: () => { }, off: spy, setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { } } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(spy).toHaveBeenCalled();
@@ -49,15 +86,15 @@ describe("MapService", () => {
         expect(url).toContain("/123");
     }));
 
-    it("Should should not do anything when missing image addres does not start with http", inject([MapService],
+    it("Should not do anything when missing image address does not start with http", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();
             const mapMock = {
                 loadImage: spy,
-                on: (event: string, callback: (e: any) => void) => {
-                    if (event == "styleimagemissing") callback({ id: "123" });
-                }
-            } as any as Map;
+                on: () => { },
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => void) => resolver("123")
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
             expect(spy).not.toHaveBeenCalled();
@@ -71,12 +108,10 @@ describe("MapService", () => {
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: any) => void) => {
-                    if (event == "styleimagemissing") {
-                        callback({ id: "http://123.png" });
-                    }
-                }
-            } as any as Map;
+                on: () => { },
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => Promise<void>) => resolver("http://123.png")
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
             expect(spy).toHaveBeenCalledTimes(1);
@@ -88,20 +123,20 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn().mockReturnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = vi.fn();
-            let storedCallback = (_e: any) => { };
+            let storedResolver = (_id: string): void | Promise<void> => { };
             const mapMock = {
                 loadImage: spy,
                 addImage: addImageSpy,
-                on: (event: string, callback: (e: any) => void) => {
-                    if (event == "styleimagemissing") {
-                        storedCallback = callback;
-                        callback({ id: "http://123.png" });
-                    }
+                on: () => { },
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: (resolver: (id: string) => Promise<void>) => {
+                    storedResolver = resolver;
+                    return resolver("http://123.png");
                 }
-            } as any as Map;
+            } as unknown as Map;
             service.setMap(mapMock);
             await service.initializationPromise;
-            storedCallback({ id: "http://123.png" });
+            await storedResolver("http://123.png");
             expect(spy).toHaveBeenCalledTimes(1);
             expect(addImageSpy).toHaveBeenCalledTimes(1);
         }
@@ -110,11 +145,13 @@ describe("MapService", () => {
     it("should not log 418 error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
         loggingService.error = vi.fn();
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
-                    callback({ error: new Error("418") } as any as ErrorEvent);
+                    callback({ error: new Error("418") } as unknown as ErrorEvent);
             }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(loggingService.error).not.toHaveBeenCalled();
     }));
@@ -122,11 +159,13 @@ describe("MapService", () => {
     it("should log error message", inject([MapService, LoggingService], async (service: MapService, loggingService: LoggingService) => {
         loggingService.error = vi.fn();
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: (event: string, callback: (error: ErrorEvent) => void) => {
                 if (event == "error")
-                    callback({ error: new Error("other") } as any as ErrorEvent);
+                    callback({ error: new Error("other") } as unknown as ErrorEvent);
             }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(loggingService.error).toHaveBeenCalled();
     }));
@@ -142,12 +181,14 @@ describe("MapService", () => {
             }
         });
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
-                if (event == "moveend") callback({} as any);
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: (event: string, callback: (e: unknown) => void) => {
+                if (event == "moveend") callback({});
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
             getZoom: () => 1
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(spy).toHaveBeenCalled();
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetLocationAction);
@@ -164,24 +205,28 @@ describe("MapService", () => {
             }
         });
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
-                if (event == "moveend") callback({} as any);
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: (event: string, callback: (e: unknown) => void) => {
+                if (event == "moveend") callback({});
             },
             getCenter: () => ({ lng: 1, lat: 2 }),
             getZoom: () => 1
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         expect(spy).not.toHaveBeenCalled();
     }));
 
     it("should not throw if moveend is called after map removal", inject([MapService], async (service: MapService) => {
-        let moveendCallback: (e: any) => void;
+        let moveendCallback: (e: unknown) => void;
         service.setMap({
-            on: (event: string, callback: (error: ErrorEvent) => void) => {
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: (event: string, callback: (e: unknown) => void) => {
                 if (event == "moveend") moveendCallback = callback;
             },
             off: () => { }
-        } as any as Map);
+        } as unknown as Map);
         await service.initializationPromise;
         service.unsetMap();
         expect(() => moveendCallback(null)).not.toThrow();
@@ -189,21 +234,25 @@ describe("MapService", () => {
 
     it("should get bounds from map", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             getBounds: () => ({
                 getNorthEast: () => ({ lat: 1, lng: 1 }),
                 getSouthWest: () => ({ lat: 2, lng: 2 })
             })
-        } as any as Map);
+        } as unknown as Map);
         const bounds = service.getMapBounds();
         expect(bounds).toEqual({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
     }));
 
     it("should project point", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             project: () => ({ x: 1, y: 2 })
-        } as any as Map);
+        } as unknown as Map);
         const point = service.project({ lng: 1, lat: 2 });
         expect(point.x).toEqual(1);
         expect(point.y).toEqual(2);
@@ -216,19 +265,23 @@ describe("MapService", () => {
 
     it("should get a list of features when the map was initialized", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             queryRenderedFeatures: () => [{ id: "42" }, { id: "43" }],
             getLayer: () => true
-        } as any as Map);
+        } as unknown as Map);
         const features = service.getFeaturesFromTiles();
         expect(features.length).toEqual(2);
     }));
 
     it("should return is moving when the map is moving", inject([MapService], async (service: MapService) => {
         service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
             on: () => { },
             isMoving: () => true
-        } as any as Map);
+        } as unknown as Map);
         expect(service.isMoving()).toEqual(true);
     }));
 
@@ -237,9 +290,11 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } });
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(50);
         }
@@ -250,13 +305,15 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
-            const originalInnerWidth = (window as any).innerWidth;
-            (window as any).innerWidth = 500;
+            } as unknown as Map);
+            const originalInnerWidth = (window as { innerWidth: number }).innerWidth;
+            (window as { innerWidth: number }).innerWidth = 500;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: window.innerHeight / 2 });
-            (window as any).innerWidth = originalInnerWidth;
+            (window as { innerWidth: number }).innerWidth = originalInnerWidth;
             expect(vi.mocked(spy).mock.calls[0][1].padding.bottom).toBe(window.innerHeight / 2);
         }
     ));
@@ -266,13 +323,15 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 fitBounds: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
-            const originalInnerWidth = (window as any).innerWidth;
-            (window as any).innerWidth = 1000;
+            } as unknown as Map);
+            const originalInnerWidth = (window as { innerWidth: number }).innerWidth;
+            (window as { innerWidth: number }).innerWidth = 1000;
             await service.fitBounds({ northEast: { lat: 1, lng: 1 }, southWest: { lat: 2, lng: 2 } }, 0, { bottom: 100 });
-            (window as any).innerWidth = originalInnerWidth;
+            (window as { innerWidth: number }).innerWidth = originalInnerWidth;
             expect(vi.mocked(spy).mock.calls[0][1].padding).toBe(0);
         }
     ));
@@ -285,9 +344,11 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 1, lat: 1 }, 1);
             expect(spy).not.toHaveBeenCalled();
         }
@@ -301,8 +362,10 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { }
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 2, lat: 2 }, 1);
             expect(spy).toHaveBeenCalled();
         }
@@ -316,9 +379,11 @@ describe("MapService", () => {
                     return { lat: 1, lng: 1 };
                 },
                 flyTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
+            } as unknown as Map);
             await service.flyTo({ lng: 2, lat: 2 });
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0].zoom).toBe(1);
@@ -330,12 +395,31 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 easeTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1
-            } as any as Map);
-            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
+            } as unknown as Map);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 500);
             expect(spy).toHaveBeenCalled();
             expect(vi.mocked(spy).mock.calls[0][0].zoom).toBe(1);
+        }
+    ));
+
+    it("Should move to with the given duration", inject([MapService],
+        async (service: MapService) => {
+            const spy = vi.fn();
+            service.setMap({
+                easeTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
+                on: () => { },
+                getZoom: () => 1
+            } as unknown as Map);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 150);
+            await new Promise(resolve => setTimeout(resolve));
+
+            expect(vi.mocked(spy).mock.calls[0][0].duration).toBe(150);
         }
     ));
 
@@ -344,12 +428,14 @@ describe("MapService", () => {
             const spy = vi.fn();
             service.setMap({
                 easeTo: spy,
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 getZoom: () => 1,
                 off: () => { }
-            } as any as Map);
+            } as unknown as Map);
             service.unsetMap();
-            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1);
+            await service.moveToWithCurrentZoom({ lng: 2, lat: 2 }, 1, 500);
             expect(spy).not.toHaveBeenCalled();
         }
     ));
@@ -358,10 +444,12 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 addLayer: spy
-            } as any as Map);
-            service.addLayer({ id: "layer1" } as any);
+            } as unknown as Map);
+            service.addLayer({ id: "layer1" } as unknown as LayerSpecification);
             expect(spy).toHaveBeenCalled();
         }
     ));
@@ -370,11 +458,21 @@ describe("MapService", () => {
         async (service: MapService) => {
             const spy = vi.fn();
             service.setMap({
+                setTransformRequest: () => { },
+                setMissingStyleImageResolver: () => { },
                 on: () => { },
                 addSource: spy
-            } as any as Map);
-            service.addSource("source1", {} as any);
+            } as unknown as Map);
+            service.addSource("source1", {} as unknown as SourceSpecification);
             expect(spy).toHaveBeenCalled();
         }
     ));
+
+    function captureTransformRequest(service: MapService): (url: string) => { url: string; headers?: Record<string, string> } {
+        let transform: (url: string) => { url: string; headers?: Record<string, string> };
+        service.setTransformRequest({
+            setTransformRequest: (fn: (url: string) => { url: string; headers?: Record<string, string> }) => transform = fn
+        } as unknown as Map);
+        return transform;
+    }
 });

@@ -1,31 +1,61 @@
-<header class="relative h-screen min-h-screen w-full bg-cover bg-center bg-no-repeat"
-    style="background-image: url('content/hero-mountain.jpg');">
+<header class="relative min-h-dvh w-full overflow-hidden">
+    <picture>
+        <source type="image/avif" sizes="100vw"
+            srcset="content/hero-mountain-640.avif 640w, content/hero-mountain-960.avif 960w, content/hero-mountain-1280.avif 1280w, content/hero-mountain-1920.avif 1920w">
+        <source type="image/webp" sizes="100vw"
+            srcset="content/hero-mountain-640.webp 640w, content/hero-mountain-960.webp 960w, content/hero-mountain-1280.webp 1280w, content/hero-mountain-1920.webp 1920w">
+        <!-- An img rather than a css background so the preload scanner finds it while parsing the
+             html, and can pick a size that fits the screen instead of always sending the full one. -->
+        <img src="content/hero-mountain-1280.jpg" alt="" width="1920" height="1080" fetchpriority="high"
+            class="absolute inset-0 h-full w-full object-cover object-center">
+    </picture>
     <div class="absolute inset-0 bg-black/10"></div>
-    <div class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center text-white">
-        <h1 class="mb-6 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl">
+    <div
+        class="relative z-10 box-border flex min-h-dvh flex-col items-center justify-start px-4 pt-[10dvh] pb-16 text-center text-white">
+        <h1 class="mb-3 text-5xl font-extrabold leading-tight tracking-tight md:text-7xl">
             Built for <br />
             <span class="text-brand">Real Adventures</span>
         </h1>
-        <p class="mb-10 max-w-3xl text-lg font-light md:text-2xl text-gray-100">
-            Whether you're summiting peaks or exploring backroads, <br />
-            <span class="text-2xl">navigate confidently anywhere.</span>
+        <p class="mb-6 max-w-3xl text-lg font-light text-gray-100 md:text-xl">
+            Whether you're summiting peaks or exploring backroads,
+            <span class="block text-xl font-semibold text-white md:text-3xl">navigate confidently anywhere.</span>
         </p>
-        @if (!isApp()) {
-        <div class="flex flex-col gap-4 sm:flex-row">
-            <a [href]="androidAppUrl" analyticsLabel="Download from google play store"
-                class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
-                <img src="content/google-play-badge.png" alt="Google Play" width="200">
-            </a>
 
-            <a [href]="iosAppUrl" analyticsLabel="Download from app store"
-                class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
-                <img src="content/app-store-badge.png" alt="App Store" width="200">
-            </a>
+        @if (!isApp()) {
+        <div id="download" class="mb-8 flex flex-col items-center gap-3 md:order-last md:mb-0">
+            <span class="text-sm font-medium text-gray-200">Take the map offline &mdash; get the app</span>
+            <div class="flex flex-row gap-4">
+                <a [href]="androidAppUrl" analyticsOn="click" analyticsCategory="Landing"
+                    analyticsLabel="Download from google play store"
+                    class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
+                    <img src="content/google-play-badge.png" alt="Google Play" width="200" height="59">
+                </a>
+                <a [href]="iosAppUrl" analyticsOn="click" analyticsCategory="Landing"
+                    analyticsLabel="Download from app store"
+                    class="group flex items-center gap-3 rounded-lg transition-all hover:scale-105">
+                    <img src="content/app-store-badge.png" alt="App Store" width="200" height="59">
+                </a>
+            </div>
         </div>
         }
+
+        <div class="mb-4 box-border w-full max-w-xl rounded-full text-start shadow-2xl" [dir]="resources.direction">
+            <search class="block"></search>
+        </div>
+
+        <div class="flex w-full max-w-xl flex-col justify-center gap-3 sm:flex-row md:mb-10">
+            <a routerLink="/map" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Plan & Explore"
+                class="rounded-full bg-brand px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
+                {{resources.planAndExplore}}
+            </a>
+            <a routerLink="/public-routes" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Find Routes"
+                class="rounded-full bg-white px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
+                {{resources.findRoutes}}
+            </a>
+        </div>
     </div>
-    <div class="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce text-gray-100">
-        <i class="fa fa-chevron-down fa-lg"></i>
+    <div class="absolute bottom-16 left-1/2 -translate-x-1/2 animate-bounce text-gray-100 max-md:hidden">
+        <i class="fa icon-chevron-down fa-lg"></i>
     </div>
 </header>
 
@@ -101,14 +131,20 @@
 </section>
 
 <section class="bg-white py-20">
-    <div class="mx-auto max-w-5xl px-4 text-center">
+    <div class="mx-auto max-w-6xl px-4 text-center">
         <h2 class="mb-4 text-3xl font-bold text-gray-900">Choose Your Adventure</h2>
         <p class="mb-12 text-lg text-gray-600">Plan for free. Upgrade to Pro for total independence.</p>
 
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-            <div class="rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
+        <div class="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
+            <div
+                class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
                 <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Mapeak Free</h3>
                 <p class="mt-2 text-sm text-gray-500">For home planning and online use.</p>
+                <div class="mt-6 flex items-baseline gap-1">
+                    <span class="text-4xl font-extrabold text-gray-900">$0</span>
+                    <span class="font-medium text-gray-500">/ forever</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">No account required to start.</p>
                 <ul class="mt-8 space-y-4">
                     <li class="flex items-start gap-3"><span class="text-brand">✓</span> <span>Unlimited Route
                             Planning</span></li>
@@ -121,17 +157,16 @@
                 </ul>
             </div>
 
-            <div class="relative rounded-2xl border-2 border-brand bg-white p-8 text-left shadow-2xl">
-                <div
-                    class="absolute -top-4 right-6 bg-brand text-white text-xs font-black px-3 py-1 rounded-full uppercase">
-                    Most Popular</div>
-                <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Mapeak Pro</h3>
-                <p class="mt-2 text-sm text-gray-500">For when the signal disappears.</p>
-                <div class="mt-4 flex items-baseline gap-1">
-                    <span class="text-4xl font-extrabold text-gray-900">$29.99</span>
-                    <span class="text-gray-500 font-medium">/ year</span>
+            <div
+                class="flex flex-col rounded-2xl border border-gray-200 p-8 text-left transition-all hover:border-gray-300">
+                <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Pro Monthly</h3>
+                <p class="mt-2 text-sm text-gray-500">Full offline power, month to month.</p>
+                <div class="mt-6 flex items-baseline gap-1">
+                    <span class="text-4xl font-extrabold text-gray-900">$3.99</span>
+                    <span class="font-medium text-gray-500">/ month</span>
                 </div>
-                <ul class="mt-6 space-y-4">
+                <p class="mt-1 text-xs text-gray-500">Billed monthly. Cancel anytime.</p>
+                <ul class="mt-8 space-y-4">
                     <li class="flex items-center gap-3 font-semibold text-gray-900">
                         <span
                             class="fa icon-download border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
@@ -149,32 +184,96 @@
                     </li>
                     <li class="flex items-center gap-3 font-semibold text-gray-900">
                         <span
-                            class="fa fa-battery-full border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                            class="fa icon-battery border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
                         <span>Save Battery on Long Trails</span>
                     </li>
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-globe border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>High Resolution Satellite Imagery</span>
+                    </li>
                 </ul>
-                <div class="mt-8 border-t border-green pt-6 text-center">
+                <div class="mt-8 border-t border-gray-200 pt-6 text-center">
                     @if (!isApp()) {
-                    <span
-                        class="inline-block rounded-full bg-gray-100 px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600">
-                        Upgrade inside the app
-                    </span>
+                    <a href="#download" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Get the App"
+                        class="inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 no-underline shadow-md transition-transform hover:scale-105">
+                        Get the App
+                    </a>
 
                     <p class="mt-3 text-xs text-gray-400">
-                        Install Mapeak on iOS or Android to subscribe.
+                        Subscriptions are purchased in the iOS or Android app.
                     </p>
                     } @else {
-                    <span
-                        class="inline-block rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600"
-                        (click)="order()">
-                        Subscribe now!
-                    </span>
+                    <button type="button" (click)="order()" analyticsOn="click" analyticsCategory="Landing"
+                        analyticsLabel="Start subscription"
+                        class="w-full rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 shadow-md transition-transform hover:scale-105">
+                        Start Your Subscription
+                    </button>
+                    }
+                </div>
+            </div>
+
+            <div class="relative flex flex-col rounded-2xl border-2 border-brand bg-white p-8 text-left shadow-2xl">
+                <div
+                    class="absolute -top-4 right-6 bg-brand text-white text-xs font-black px-3 py-1 rounded-full uppercase">
+                    Most Popular</div>
+                <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide">Pro Yearly</h3>
+                <p class="mt-2 text-sm text-gray-500">For when the signal disappears.</p>
+                <div class="mt-6 flex items-baseline gap-1">
+                    <span class="text-4xl font-extrabold text-gray-900">$29.99</span>
+                    <span class="font-medium text-gray-500">/ year</span>
+                </div>
+                <p class="mt-1 text-xs font-semibold text-brand">Just $2.50 a month — save 37%</p>
+                <ul class="mt-8 space-y-4">
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-download border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>Unlimited Offline Map Downloads</span>
+                    </li>
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-map border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>Offline Vector Maps Anywhere You Go</span>
+                    </li>
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-recordings border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>Full Offline Navigation and Route planning</span>
+                    </li>
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-battery border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>Save Battery on Long Trails</span>
+                    </li>
+                    <li class="flex items-center gap-3 font-semibold text-gray-900">
+                        <span
+                            class="fa icon-globe border-2 border-solid border-gray-200 p-1 rounded-full aspect-square flex! items-center"></span>
+                        <span>High Resolution Satellite Imagery</span>
+                    </li>
+                </ul>
+                <div class="mt-8 border-t border-gray-200 pt-6 text-center">
+                    @if (!isApp()) {
+                    <a href="#download" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Get the App"
+                        class="inline-block rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 no-underline shadow-md transition-transform hover:scale-105">
+                        Get the App
+                    </a>
+
+                    <p class="mt-3 text-xs text-gray-400">
+                        Subscriptions are purchased in the iOS or Android app.
+                    </p>
+                    } @else {
+                    <button type="button" (click)="order()" analyticsOn="click" analyticsCategory="Landing"
+                        analyticsLabel="Start subscription"
+                        class="w-full rounded-full bg-brand px-6 py-3 text-sm font-bold uppercase tracking-widest text-gray-900 shadow-md transition-transform hover:scale-105">
+                        Start Your Subscription
+                    </button>
                     }
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 
 <section class="bg-gray-900 py-20 text-white">
     <div class="mx-auto max-w-4xl px-4 text-center">
@@ -206,6 +305,58 @@
     </div>
 </section>
 
+<section class="bg-white py-20">
+    <div class="mx-auto max-w-5xl px-4">
+        <div class="mb-12 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 md:text-4xl">Getting Started</h2>
+            <p class="mt-4 text-gray-600">Short video tutorials to get you up and running.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <a href="https://www.youtube.com/shorts/pseuA9EUXzA" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - setup and offline map download"
+                class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <img src="content/videos/pseuA9EUXzA.webp" alt="Setup and Offline Map Download" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
+                <div class="p-6">
+                    <h3 class="mb-2 text-lg font-bold">Setup and Offline Map Download</h3>
+                    <p class="text-sm text-gray-600">Get the app ready and take your first region offline.</p>
+                </div>
+            </a>
+
+            <a href="https://www.youtube.com/watch?v=3ZeIEwj96tE" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - app tour"
+                class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <img src="content/videos/3ZeIEwj96tE.webp" alt="App Tour" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
+                <div class="p-6">
+                    <h3 class="mb-2 text-lg font-bold">App Tour</h3>
+                    <p class="text-sm text-gray-600">A walk through the map, search, and the main tools.</p>
+                </div>
+            </a>
+
+            <a href="https://www.youtube.com/watch?v=I9j86k7go70" target="_blank" rel="noopener" analyticsOn="click"
+                analyticsCategory="Landing" analyticsLabel="Tutorial - planning and editing a route"
+                class="overflow-hidden rounded-xl border border-gray-200 text-gray-900 no-underline shadow-lg transition-shadow hover:shadow-xl">
+                <img src="content/videos/I9j86k7go70.webp" alt="Planning and Editing a Route" loading="lazy"
+                    class="mx-auto mt-6 block w-64 rounded-lg" />
+                <div class="p-6">
+                    <h3 class="mb-2 text-lg font-bold">Planning and Editing a Route</h3>
+                    <p class="text-sm text-gray-600">Draw a hiking route, refine it, and save it for the trail.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="mt-12 text-center">
+            <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsOn="click" analyticsCategory="Landing"
+                analyticsLabel="FAQ"
+                class="inline-block rounded-full bg-brand px-8 py-3.5 font-bold text-gray-900 no-underline shadow-lg transition-transform hover:scale-105">
+                See our F.A.Q and videos page
+            </a>
+        </div>
+    </div>
+</section>
+
 <footer class="bg-black py-8 text-center text-sm text-gray-500">
 
     @if (isMobile()) {
@@ -215,17 +366,14 @@
     }
 
     <div class="mb-4">
-        <a routerLink="/privacy-policy" analyticsLabel="Privacy policy" class="hover:text-white transition-colors">
+        <a routerLink="/privacy-policy" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Privacy policy"
+            class="hover:text-white transition-colors">
             {{resources.privacyPolicyTermsOfService}}
         </a>
         <span>|</span>
-        <a routerLink="/attribution" analyticsLabel="Attribution" class="hover:text-white transition-colors">
-            {{resources.attribution}}
-        </a>
-        <span>|</span>
-        <a routerLink="/{{resources.getCurrentLanguageCode()}}/faq" analyticsLabel="FAQ"
+        <a routerLink="/attribution" analyticsOn="click" analyticsCategory="Landing" analyticsLabel="Attribution"
             class="hover:text-white transition-colors">
-            {{resources.FAQ}}
+            {{resources.attribution}}
         </a>
     </div>
 </footer>

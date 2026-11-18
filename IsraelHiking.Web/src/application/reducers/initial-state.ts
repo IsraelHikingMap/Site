@@ -3,6 +3,7 @@ import type { Category, EditableLayer, Language, MutableApplicationState, RouteD
 
 export const HIKING_MAP = "Hiking Map";
 export const MTB_MAP = "MTB Map";
+export const SATELLITE_MAP = "Satellite Map";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 export const OPEN_HEATMAP = "Open Heatmap";
@@ -22,6 +23,11 @@ export const AVAILABLE_LANGUAGES: Language[] = [{
     code: "es",
     rtl: false,
     label: "Español"
+},
+{
+    code: "de",
+    rtl: false,
+    label: "Deutsch"
 },
 {
     code: "he",
@@ -148,6 +154,20 @@ export const DEFAULT_BASE_LAYERS: EditableLayer[] = [{
     id: null
 }];
 
+/**
+ * The base layers that are only available to a subscribed user - the imagery they show comes from a
+ * commercial provider and is proxied by our server, which only serves it to a subscribed user.
+ */
+export const SUBSCRIBED_BASE_LAYERS: EditableLayer[] = [{
+    key: SATELLITE_MAP,
+    address: Urls.SATELLITE_STYLE_ADDRESS,
+    isEditable: false,
+    minZoom: 1,
+    maxZoom: 19,
+    opacity: 1,
+    id: null
+}];
+
 export const DEFAULT_OVERLAYS: EditableLayer[] = [{
     key: OPEN_HEATMAP,
     address: Urls.HEATMAP_STYLE_ADDRESS,
@@ -166,8 +186,10 @@ export const initialState =
             isAutomaticRecordingUpload: true,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
-            isShowIntro: true,
+            isShowOnboarding: true,
+            isFirstActionReported: false,
             isShowKmMarker: false,
+            isKeepNorthUp: false,
             isShowSlope: false,
             version: 10,
             language: AVAILABLE_LANGUAGES.find(l => l.code === navigator.language) ?? AVAILABLE_LANGUAGES[0],
@@ -193,8 +215,7 @@ export const initialState =
         recordedRouteState: {
             isAddingPoi: false,
             isRecording: false,
-            route: null,
-            pendingProcessing: []
+            route: null
         },
         tracesState: {
             traces: []
@@ -205,7 +226,9 @@ export const initialState =
             selectedBaseLayerKey: HIKING_MAP,
             expanded: ["Base Layers", "Overlays", POINTS_OF_INTEREST],
             visiblePoisCategories: POINTS_OF_INTEREST_CATEGORIES.map(c => c.name),
-            visibleOverlays: []
+            visibleOverlays: [],
+            hiddenBaseLayers: [],
+            hiddenOverlays: []
         },
         shareUrlsState: {
             shareUrls: [],
@@ -223,10 +246,11 @@ export const initialState =
             uploadMarkerData: null
         },
         inMemoryState: {
+            effectiveTheme: "light",
+            downloadedAreas: {},
             distance: false,
             following: true,
             pannedTimestamp: null,
-            keepNorthUp: false,
             shareUrl: null,
             fileUrl: null,
             baseLayer: null,
@@ -243,7 +267,6 @@ export const initialState =
         },
         offlineState: {
             isSubscribed: false,
-            downloadedTiles: null,
             uploadPoiQueue: [],
             lastOfflineDetectedDate: null
         },

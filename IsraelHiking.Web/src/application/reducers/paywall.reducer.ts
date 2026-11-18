@@ -6,12 +6,12 @@ import { initialState } from "./initial-state";
 import { produce } from "immer";
 
 export class SetLastPaywallShownDate {
-    public static type = this.prototype.constructor.name;
-    constructor(public lastPaywallShownDate: Date | null) { }
+    public static readonly type = "[Paywall] SetLastPaywallShownDate";
+    constructor(public readonly lastPaywallShownDate: Date | null) { }
 }
 
 export class IncrementAppLaunchesSinceLastPaywallShown {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Paywall] IncrementAppLaunchesSinceLastPaywallShown";
     constructor() { }
 }
 

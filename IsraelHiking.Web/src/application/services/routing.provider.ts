@@ -1,35 +1,47 @@
-import { inject, Injectable } from "@angular/core";
+﻿import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
-import { VectorTile } from "@mapbox/vector-tile";
 import { Store } from "@ngxs/store";
-import PathFinder from "geojson-path-finder";
-import Protobuf from "pbf";
-import QuickLRU from "quick-lru";
+import polyline from "@mapbox/polyline";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { SpatialService } from "./spatial.service";
-import { PmTilesService } from "./pmtiles.service";
+import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ElevationProvider } from "./elevation.provider";
+import { Valhalla } from "./valhalla.plugin";
 import { Urls } from "../urls";
+import type { ValhallaRouteLeg, ValhallaRouteResponse } from "./valhalla.plugin";
 import type { ApplicationState, LatLngAltTime, RoutingType } from "../models";
 
-@Injectable()
+@Service()
 export class RoutingProvider {
-    private static readonly MAX_ROUTING_ZOOM = 14;
-    private static readonly ROUTING_SCHEMA = "IHM-schema";
-    private static readonly ROUTING_CLASS_PROPERTY_NAME = "ihm_class";
+    /** The name of the routing profile of every routing type, as they are named in the profiles file */
+    private static readonly VALHALLA_PROFILE: Record<RoutingType, string> = {
+        Hike: "foot",
+        Bike: "bike",
+        "4WD": "car4WheelDrive",
+        None: "default"
+    };
 
-    private featuresCache = new QuickLRU<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>({ maxSize: 100 });
+    /** Matches the resolution of valhalla's elevation data */
+    private static readonly ELEVATION_INTERVAL_METERS = 30;
+
+    /** How long to wait for the server, shorter when the route can be calculated on the device */
+    private static readonly ONLINE_TIMEOUT_MS = 4500;
+    private static readonly ONLINE_TIMEOUT_WITH_TILES_MS = 1500;
+
+    private static readonly ROUTING_TILES_PREFIX = "valhalla";
+    private static readonly ROUTING_TILES_EXTENSION = ".tar";
+
+    /** The file the offline routing engine is set up with, as the server names it */
+    private static readonly PROFILES_FILE_NAME = "valhalla-profiles.json";
 
     private readonly httpClient = inject(HttpClient);
     private readonly resources = inject(ResourcesService);
     private readonly toastService = inject(ToastService);
-    private readonly pmTilesService = inject(PmTilesService);
     private readonly loggingService = inject(LoggingService);
     private readonly runningContextService = inject(RunningContextService);
     private readonly elevationProvider = inject(ElevationProvider);
@@ -37,7 +49,7 @@ export class RoutingProvider {
 
     public async getRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
         if (routinType === "None") {
-            const distance = SpatialService.getDistanceInMeters(latlngStart, latlngEnd);
+            const distance = SpatialHelper.getDistanceInMeters(latlngStart, latlngEnd);
             const pointsCount = Math.min(100, Math.ceil(distance / 100));
             const latlngs = [];
             for (let i = 0; i <= pointsCount; i++) {
@@ -50,131 +62,158 @@ export class RoutingProvider {
         }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
+        const hasTiles = this.areRoutingTilesDownloaded(latlngStart, latlngEnd);
         try {
-            const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address).pipe(timeout(4500)));
-            return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
+            const data = await firstValueFrom(this.httpClient.get<GeoJSON.FeatureCollection<GeoJSON.LineString>>(address)
+                .pipe(timeout(hasTiles ? RoutingProvider.ONLINE_TIMEOUT_WITH_TILES_MS : RoutingProvider.ONLINE_TIMEOUT_MS)));
+            return data.features[0].geometry.coordinates.map(c => SpatialHelper.toLatLng(c));
         } catch (ex) {
             try {
-                return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
+                return await this.getOffineRoute(latlngStart, latlngEnd, routinType, hasTiles);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
-                const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.toastService.warning(offlineState.isSubscribed || !this.runningContextService.isCapacitor
-                    ? this.resources.routingFailedTryShorterRoute
-                    : this.resources.routingFailedBuySubscription
-                );
-                const lngLat = [latlngStart, latlngEnd];
+                this.toastService.warning(this.getRoutingFailedMessage(hasTiles));
+                const lngLat = [{ ...latlngStart }, { ...latlngEnd }];
                 this.elevationProvider.updateHeights(lngLat);
                 return lngLat;
             }
         }
     }
 
-    private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routinType: RoutingType): Promise<LatLngAltTime[]> {
-        const zoom = RoutingProvider.MAX_ROUTING_ZOOM; // this is the max zoom for these tiles
-        const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
-        let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
-        const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
-        let tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
-        const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
-        if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
-            throw new Error("Offline routing is only supported for adjecent tiles maximum...");
+    /**
+     * Explains why the route could not be calculated: a user without a subscription cannot route
+     * offline at all, a subscribed user who did not download the area this route is in should
+     * download it, and when the tiles are there no route could be found between the points.
+     */
+    private getRoutingFailedMessage(hasTiles: boolean): string {
+        if (!this.runningContextService.isCapacitor) {
+            return this.resources.routingFailed;
         }
-        for (const tile of tiles) {
-            if (!await this.pmTilesService.isOfflineFileAvailable(zoom, tile.x, tile.y, RoutingProvider.ROUTING_SCHEMA)) {
-                throw new Error("Unable to find offline route, some tiles are missing");
-            }
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        if (!offlineState.isSubscribed) {
+            return this.resources.routingFailedBuySubscription;
         }
-        // increase the chance of getting a route by adding more tiles
-        if (tileXmax === tileXmin) {
-            tileXmax += 1;
-        }
-        if (tileYmax === tileYmin) {
-            tileYmax += 1;
-        }
-        let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom);
-        if (routinType === "4WD") {
-            features = features.filter(f =>
-                f.properties.ihm_class !== "footway" &&
-                f.properties.ihm_class !== "pedestrian" &&
-                f.properties.ihm_class !== "path" &&
-                f.properties.ihm_class !== "cycleway" &&
-                f.properties.ihm_class !== "steps");
-        } else if (routinType === "Bike") {
-            features = features.filter(
-                f => f.properties.ihm_class !== "footway" &&
-                    f.properties.ihm_class !== "pedestrian" &&
-                    f.properties.ihm_class !== "steps");
-        }
-        const startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
-        const endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
-
-        const collection = {
-            type: "FeatureCollection",
-            features
-        } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-        const pathFinder = new PathFinder(collection, { tolerance: 2e-5 });
-        const route = pathFinder.findPath(startFeature, endFeature);
-        if (!route) {
-            throw new Error("[Routing] No route found... :-(");
-        }
-
-        const lnglats = route.path.map(c => SpatialService.toLatLng(c));
-        await this.elevationProvider.updateHeights(lnglats);
-        return lnglats;
+        return hasTiles ? this.resources.routingFailed : this.resources.routingFailedDownloadTheArea;
     }
 
-    private async updateCacheAndGetFeatures(
-        tileXmin: number,
-        tileXmax: number,
-        tileYmin: number,
-        tileYmax: number,
-        zoom: number): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
-        const allCollection = [];
-        for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
-            for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
-                const key = `${tileX}/${tileY}`;
-                if (this.featuresCache.has(key)) {
-                    allCollection.push(this.featuresCache.get(key));
-                    continue;
-                }
-                const collection = {
-                    type: "FeatureCollection",
-                    features: []
-                } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                const arrayBuffer = await this.pmTilesService.getTileByType(zoom, tileX, tileY, RoutingProvider.ROUTING_SCHEMA);
-                const tile = new VectorTile(new Protobuf(arrayBuffer));
-                for (const layerKey of Object.keys(tile.layers)) {
-                    const layer = tile.layers[layerKey];
-                    for (let featureIndex = 0; featureIndex < layer.length; featureIndex++) {
-                        const feature = layer.feature(featureIndex);
-                        const isHighway = Object.keys(feature.properties).find(k => k === RoutingProvider.ROUTING_CLASS_PROPERTY_NAME) != null;
-                        if (!isHighway) {
-                            continue;
-                        }
-                        const geojsonFeature = feature.toGeoJSON(tileX, tileY, zoom);
-                        if (geojsonFeature.geometry.type === "LineString") {
-                            collection.features.push(geojsonFeature as GeoJSON.Feature<GeoJSON.LineString>);
-                        } else if (geojsonFeature.geometry.type === "MultiLineString") {
-                            const multiLines = geojsonFeature.geometry.coordinates.map(coordinates => ({
-                                type: "Feature",
-                                geometry: {
-                                    type: "LineString",
-                                    coordinates
-                                },
-                                properties: { ...geojsonFeature.properties }
-                            } as GeoJSON.Feature<GeoJSON.LineString>));
-                            collection.features.push(...multiLines);
-                        }
-                    }
-                }
-                collection.features = SpatialService.clipLinesToTileBoundary(collection.features, { x: tileX, y: tileY }, zoom);
-                SpatialService.addMissinIntersectionPoints(collection.features);
-                this.featuresCache.set(key, collection);
-                allCollection.push(collection);
-            }
-        }
+    /** Whether both points are in downloaded areas that have their routing tiles */
+    private areRoutingTilesDownloaded(start: LatLngAltTime, end: LatLngAltTime): boolean {
+        const areasWithRoutingTiles = Object.values(this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas))
+            .filter(({ area, hasRoutingTiles }) => area != null && hasRoutingTiles)
+            .map(({ area }) => area);
+        return [start, end].every(point =>
+            areasWithRoutingTiles.some(area => SpatialHelper.isPointInPolygon(SpatialHelper.toCoordinate(point), area)));
+    }
 
-        return allCollection.map(c => c.features).flat();
+    /**
+     * Whether the given offline file is a slice of routing tiles, as the server names them.
+     */
+    public static isRoutingTilesFile(fileName: string): boolean {
+        return fileName.startsWith(RoutingProvider.ROUTING_TILES_PREFIX) &&
+            fileName.endsWith(RoutingProvider.ROUTING_TILES_EXTENSION);
+    }
+
+    /**
+     * Whether the given offline file is the one the offline routing engine is set up with, rather
+     * than one the app itself reads.
+     */
+    public static isRoutingProfilesFile(fileName: string): boolean {
+        return fileName === RoutingProvider.PROFILES_FILE_NAME;
+    }
+
+    /**
+     * Hands the downloaded profiles to the routing plugin, which keeps them from now on - where they
+     * are kept is the plugin's to decide, the app only knows which file it is.
+     */
+    public async storeRoutingProfiles(content: string): Promise<void> {
+        await Valhalla.storeProfiles({ profiles: content });
+        this.loggingService.info(`[Routing] Handed ${RoutingProvider.PROFILES_FILE_NAME} to the offline routing engine`);
+    }
+
+    /**
+     * Extracts a downloaded offline routing tiles file, the file itself is removed once extracted.
+     * The area it belongs to is identified so that it can later be removed without affecting its neighbours.
+     */
+    public async extractOfflineRoutingTiles(fileName: string, areaId: string): Promise<void> {
+        const results = await Valhalla.extractFile({ tarFileName: fileName, id: areaId });
+        this.loggingService.info(`[Routing] Extracted ${results.extractedFiles} offline routing tiles from ${fileName} for area: ${areaId}`);
+    }
+
+    /**
+     * The areas whose routing tiles are on the device. They are stored by the plugin and not as files,
+     * so it is the one that knows about them, and failing to ask it means there are none to route with.
+     */
+    public async getAreasWithRoutingTiles(): Promise<string[]> {
+        try {
+            return (await Valhalla.listIds()).ids;
+        } catch (ex) {
+            this.loggingService.warning(`[Routing] Failed to get the offline routing tiles: ${(ex as Error).message}`);
+            return [];
+        }
+    }
+
+    /**
+     * Removes the offline routing tiles of a single area, the tiles it shares with its neighbours are kept.
+     */
+    public async deleteOfflineRoutingTiles(areaId: string): Promise<void> {
+        await Valhalla.deleteById({ id: areaId });
+        this.loggingService.info(`[Routing] Removed the offline routing tiles of ${areaId}`);
+    }
+
+    /**
+     * Calculates a route between the two given points using the tiles on the device.
+     * The returned points have their elevation set from valhalla's elevation samples.
+     */
+    private async getOffineRoute(latlngStart: LatLngAltTime, latlngEnd: LatLngAltTime, routingType: RoutingType,
+        hasTiles: boolean): Promise<LatLngAltTime[]> {
+        if (!hasTiles) {
+            throw new Error("[Routing] There are no offline routing tiles for the area of this route");
+        }
+        const results = await Valhalla.route({
+            fromLat: latlngStart.lat,
+            fromLng: latlngStart.lng,
+            toLat: latlngEnd.lat,
+            toLng: latlngEnd.lng,
+            profile: RoutingProvider.VALHALLA_PROFILE[routingType],
+            elevationInterval: RoutingProvider.ELEVATION_INTERVAL_METERS
+        });
+        const latlngs = RoutingProvider.parseValhallaResponse(results.raw);
+        this.loggingService.info(`[Routing] Got an offline route with ${latlngs.length} points`);
+        return latlngs;
+    }
+
+    /**
+     * Turns a raw valhalla response into the route's points. Static and public so it can be tested
+     * without the native plugin, which has no web implementation to stand in for it.
+     */
+    public static parseValhallaResponse(raw: string): LatLngAltTime[] {
+        const response = JSON.parse(raw) as ValhallaRouteResponse;
+        if (response.trip == null) {
+            throw new Error(`[Routing] Offline routing failed with code ${response.code}: ${response.message}`);
+        }
+        return (response.trip.legs ?? []).flatMap(leg => RoutingProvider.valhallaLegToLatLngs(leg));
+    }
+
+    /**
+     * Decodes a leg's shape and sets the elevation of every point by interpolating between the
+     * elevation samples, which are evenly spaced along the leg.
+     */
+    private static valhallaLegToLatLngs(leg: ValhallaRouteLeg): LatLngAltTime[] {
+        const points: LatLngAltTime[] = polyline.decode(leg.shape ?? "", 6).map(([lat, lng]) => ({ lat, lng }));
+        const elevations = leg.elevation ?? [];
+        if (elevations.length === 0) {
+            return points;
+        }
+        let cumulativeDistance = 0;
+        for (let index = 0; index < points.length; index++) {
+            if (index > 0) {
+                cumulativeDistance += SpatialHelper.getDistanceInMeters(points[index - 1], points[index]);
+            }
+            const sample = cumulativeDistance / RoutingProvider.ELEVATION_INTERVAL_METERS;
+            const low = Math.min(Math.floor(sample), elevations.length - 1);
+            const high = Math.min(low + 1, elevations.length - 1);
+            points[index].alt = elevations[low] + (elevations[high] - elevations[low]) * (sample - low);
+        }
+        return points;
     }
 }

@@ -23,7 +23,7 @@
         class="whitespace-pre-line {{resources.getTextAlignment(description)}}">
         {{description}}</p>
     </div>
-    @if (showCoordinates) {
+    @if (showCoordinates()) {
     <div class="flex flex-row">
       <coordinates [latlng]="marker.latlng"></coordinates>
     </div>
@@ -34,23 +34,23 @@
       <button mat-button type="button" class="w-full" mat-dialog-close (click)="uploadPoint()"
         matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" analyticsOn="click"
         analyticsCategory="Private POI" analyticsLabel="Open upload point dialog"><i
-          class="fa icon-cloud-upload"></i></button>
+          class="fa fa-action icon-cloud-upload"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button type="button" class="w-full" (click)="toggleCoordinates()"
         matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" analyticsOn="click"
-        analyticsCategory="Private POI" analyticsLabel="Toggle coordinates"><i class="fa icon-globe"></i></button>
+        analyticsCategory="Private POI" analyticsLabel="Toggle coordinates"><i class="fa fa-action icon-globe"></i></button>
     </div>
     <div class="flex-1">
       <button mat-button type="button" class="w-full" mat-dialog-close (click)="edit()" matTooltip="{{resources.edit}}"
         matTooltipPosition="above" analyticsOn="click" analyticsCategory="Private POI" analyticsLabel="Edit"><i
-          class="fa icon-pencil"></i></button>
+          class="fa fa-action icon-pencil"></i></button>
     </div>
     @if (isShowAddToActiveRoute()) {
     <div class="flex-1">
       <button mat-button type="button" class="w-full" mat-dialog-close (click)="addToActiveRoute()"
         matTooltip="{{resources.addPointToActiveRoute}}" matTooltipPosition="above" analyticsOn="click"
-        analyticsCategory="Private POI" analyticsLabel="Add to active route"><i class="fa icon-plus"></i></button>
+        analyticsCategory="Private POI" analyticsLabel="Add to active route"><i class="fa fa-action icon-plus"></i></button>
     </div>
     }
   </div>

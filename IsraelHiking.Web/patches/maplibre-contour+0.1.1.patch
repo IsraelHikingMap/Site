@@ -1,0 +1,105 @@
+diff --git a/node_modules/maplibre-contour/dist/add-protocol-worker.js b/node_modules/maplibre-contour/dist/add-protocol-worker.js
+index 047356b..8888f1d 100644
+--- a/node_modules/maplibre-contour/dist/add-protocol-worker.js
++++ b/node_modules/maplibre-contour/dist/add-protocol-worker.js
+@@ -1800,7 +1800,7 @@ const defaultGetTile = (url, abortController) => __awaiter(void 0, void 0, void
+     };
+     const response = yield fetch(url, options);
+     if (!response.ok) {
+-        throw new Error(`Bad response: ${response.status} for ${url}`);
++        throw Object.assign(new Error(`Bad response: ${response.status} for ${url}`), { status: response.status });
+     }
+     return {
+         data: yield response.blob(),
+@@ -1808,6 +1808,13 @@ const defaultGetTile = (url, abortController) => __awaiter(void 0, void 0, void
+         cacheControl: response.headers.get("cache-control") || undefined,
+     };
+ });
++/**
++ * Whether a DEM tile request failed because the tileset does not have that tile, as a sparse tileset that only
++ * holds its higher zooms where there is data answers, and not because it could not be fetched.
++ */
++function isNotFound(error) {
++    return (error === null || error === void 0 ? void 0 : error.status) === 404;
++}
+ /**
+  * Caches, decodes, and processes raster tiles in the current thread.
+  */
+@@ -1840,6 +1847,7 @@ class LocalDemManager {
+         this.demUrlPattern = options.demUrlPattern;
+         this.encoding = options.encoding;
+         this.maxzoom = options.maxzoom;
++        this.minzoom = options.minzoom || 0;
+         this.decodeImage = options.decodeImage || defaultDecoder;
+         this.getTile = options.getTile || defaultGetTile;
+     }
+@@ -1856,8 +1864,42 @@ class LocalDemManager {
+         }, parentAbortController);
+     }
+     fetchDem(z, x, y, options, abortController, timer) {
++        return this.fetchDemAtZoom(this.demZoom(z, options), z, x, y, abortController, timer);
++    }
++    demZoom(z, options) {
++        return Math.max(0, Math.min(z - (options.overzoom || 0), this.maxzoom));
++    }
++    /**
++     * The DEM under the contour tile and its 8 neighbors, at the zoom `fetchDem` uses or, when the tileset answers
++     * that the tile under the contour tile does not exist, at the closest lower zoom down to `minzoom` that has it -
++     * a sparse tileset leaves out its higher zooms where it has no data for them. A neighbor the tileset does not
++     * have is left out.
++     */
++    fetchNeighbors(zoom, z, x, y, abortController, timer) {
++        return __awaiter(this, void 0, void 0, function* () {
++            const max = 1 << z;
++            const neighborPromises = [];
++            for (let iy = y - 1; iy <= y + 1; iy++) {
++                for (let ix = x - 1; ix <= x + 1; ix++) {
++                    neighborPromises.push(iy < 0 || iy >= max
++                        ? undefined
++                        : this.fetchDemAtZoom(zoom, z, (ix + max) % max, iy, abortController, timer).catch((error) => {
++                            if (isNotFound(error)) {
++                                return undefined;
++                            }
++                            throw error;
++                        }));
++                }
++            }
++            const neighbors = yield Promise.all(neighborPromises);
++            if (neighbors[4] || zoom <= this.minzoom || isAborted(abortController)) {
++                return neighbors;
++            }
++            return this.fetchNeighbors(zoom - 1, z, x, y, abortController, timer);
++        });
++    }
++    fetchDemAtZoom(zoom, z, x, y, abortController, timer) {
+         return __awaiter(this, void 0, void 0, function* () {
+-            const zoom = Math.max(0, Math.min(z - (options.overzoom || 0), this.maxzoom));
+             const subZ = z - zoom;
+             const div = 1 << subZ;
+             const newX = Math.floor(x / div);
+@@ -1874,16 +1916,7 @@ class LocalDemManager {
+         }
+         const key = [z, x, y, encodeIndividualOptions(options)].join("/");
+         const cached = this.contourCache.get(key, (_, childAbortController) => __awaiter(this, void 0, void 0, function* () {
+-            const max = 1 << z;
+-            const neighborPromises = [];
+-            for (let iy = y - 1; iy <= y + 1; iy++) {
+-                for (let ix = x - 1; ix <= x + 1; ix++) {
+-                    neighborPromises.push(iy < 0 || iy >= max
+-                        ? undefined
+-                        : this.fetchDem(z, (ix + max) % max, iy, options, childAbortController, timer));
+-                }
+-            }
+-            const neighbors = yield Promise.all(neighborPromises);
++            const neighbors = yield this.fetchNeighbors(this.demZoom(z, options), z, x, y, childAbortController, timer);
+             let virtualTile = HeightTile.combineNeighbors(neighbors);
+             if (!virtualTile || isAborted(childAbortController)) {
+                 return { arrayBuffer: new Uint8Array().buffer };
+@@ -1940,6 +1973,7 @@ self.worker.actor.registerMessageHandler("contour-worker", (mapId, params) => __
+         timeoutMs: (_b = params.timeoutMs) !== null && _b !== void 0 ? _b : 10000,
+         encoding: params.encoding,
+         maxzoom: params.maxzoom,
++        minzoom: params.minzoom,
+         getTile: (url, abortController) => __awaiter(void 0, void 0, void 0, function* () {
+             const request = {
+                 url,

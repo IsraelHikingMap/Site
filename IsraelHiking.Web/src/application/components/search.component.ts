@@ -1,19 +1,11 @@
-import {
-    Component,
-    HostListener,
-    ViewEncapsulation,
-    ElementRef,
-    inject,
-    viewChild,
-    viewChildren
-} from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, ElementRef, inject, viewChild, viewChildren, signal, computed, DOCUMENT } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { MatFormField } from "@angular/material/form-field";
+import { MatFormField, MatPrefix } from "@angular/material/form-field";
 import { MatInput } from "@angular/material/input";
 import { MatOption } from "@angular/material/core";
-import { MatAutocompleteTrigger, MatAutocomplete } from "@angular/material/autocomplete";
+import { MatAutocompleteTrigger, MatAutocomplete, MatAutocompleteOrigin } from "@angular/material/autocomplete";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { debounceTime, filter, tap, distinctUntilChanged, share } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -23,35 +15,29 @@ import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
 import { MapService } from "../services/map.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
+import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../services/keyboard-shortcuts";
+import { AnalyticsService } from "../services/analytics.service";
 import { SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
-
-export type SearchContext = {
-    searchTerm: string;
-    searchResults: SearchResultsPointOfInterest[];
-    selectedSearchResults: SearchResultsPointOfInterest;
-};
 
 @Component({
     selector: "search",
     templateUrl: "./search.component.html",
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgClass, Dir, MatFormField, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, ReactiveFormsModule, MatOption]
+    imports: [NgClass, Dir, MatFormField, MatPrefix, MatInput, FormsModule, MatAutocompleteTrigger, MatAutocomplete, MatAutocompleteOrigin, ReactiveFormsModule, MatOption]
 })
 export class SearchComponent {
 
-    public fromContext: SearchContext = {
-        searchTerm: "",
-        searchResults: [],
-        selectedSearchResults: null
-    };
-    public searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+    public readonly searchResults = signal<SearchResultsPointOfInterest[]>([]);
+    public readonly searchTerm = signal("");
+    private selectedSearchResults: SearchResultsPointOfInterest = null;
+    public readonly searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
 
     private selectFirstSearchResults = false;
 
-    public searchFromInput = viewChild<ElementRef>("searchFromInput");
-    public matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
+    public readonly searchFromInput = viewChild<ElementRef>("searchFromInput");
+    public readonly matAutocompleteTriggers = viewChildren(MatAutocompleteTrigger);
 
     public readonly resources = inject(ResourcesService);
     private readonly searchResultsProvider = inject(SearchResultsProvider);
@@ -59,20 +45,25 @@ export class SearchComponent {
     private readonly router = inject(Router);
     private readonly store = inject(Store);
     private readonly mapService = inject(MapService);
+    private readonly document = inject(DOCUMENT);
+    private readonly analyticsService = inject(AnalyticsService);
+
+    private readonly currentUrl = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.currentUrl);
+
+    public readonly isPoisSearch = computed(() => {
+        const currentUrl = this.currentUrl();
+        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+    });
 
     constructor() {
-        this.configureInputFormControl(this.searchFrom, this.fromContext);
+        this.configureInputFormControl(this.searchFrom);
     }
 
-    public isLoggedIn(): boolean {
-        return this.store.selectSnapshot((state: ApplicationState) => state.userState.userInfo) != null;
-    }
-
-    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
+    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>) {
         const stringValues$ = input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
-                    this.selectResults(context, x);
+                    this.selectResults(x);
                 } else {
                     this.selectFirstSearchResults = false;
                 }
@@ -81,45 +72,69 @@ export class SearchComponent {
             share()
         );
 
-        // Prefix: fires on each keystroke (no debounce)
-        stringValues$.pipe(
+        // Prefix: fires shortly after each keystroke for fast results
+        const terms$ = stringValues$.pipe(
             debounceTime(200),
-            distinctUntilChanged()
-        ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, true);
+            distinctUntilChanged(),
+            share()
+        );
+
+        terms$.subscribe(x => {
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(true);
         });
 
-        // Full term: only fires after typing genuinely stops
-        stringValues$.pipe(
-            debounceTime(1000),
-            distinctUntilChanged()
+        /*
+         * Full term: only fires after typing genuinely stops.
+         * It is chained after the prefix stream on purpose - debouncing the raw input again would
+         * hide intermediate terms from this stream, so a term that is deleted and retyped quickly
+         * (i.e. "abcd" -> "abc" -> "abcd") would look unchanged here and never be searched in full,
+         * even though the prefix stream already replaced the results with prefix ones.
+         */
+        terms$.pipe(
+            debounceTime(800)
         ).subscribe(x => {
-            context.searchTerm = x;
-            context.selectedSearchResults = null;
-            this.search(context, false);
+            this.searchTerm.set(x);
+            this.selectedSearchResults = null;
+            this.search(false);
         });
     }
 
+    /**
+     * Focuses the search input, selecting its text is left to the focus event handler
+     */
     public focusOnSearchInput() {
-        // ChangeDetectionRef doesn't work well for some reason...
-        setTimeout(() => {
-            this.searchFromInput().nativeElement.focus();
-            this.searchFromInput().nativeElement.select();
-        }, 100);
-
+        setTimeout(() => this.searchFromInput()?.nativeElement.focus(), 100);
     }
 
-    public async search(searchContext: SearchContext, isPrefix: boolean) {
-        try {
-            const results = await this.searchResultsProvider.getResults(searchContext.searchTerm, isPrefix);
-            if (results == null) {
+    public selectSearchTermOnFocus() {
+        const valueOnFocus = this.searchFromInput()?.nativeElement.value;
+        setTimeout(() => {
+            const input = this.searchFromInput()?.nativeElement;
+            // Selecting focuses the input back, and a focused input reopens the results panel -
+            // after picking a result the input is blurred on purpose, so leave it alone
+            if (input !== this.document.activeElement) {
                 return;
             }
-            searchContext.searchResults = results;
-            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
-                this.selectResults(searchContext, searchContext.searchResults[0]);
+            // Selecting lets a new search replace the old term, but only when nothing was typed
+            // while waiting - otherwise the next keystroke would replace the character just typed
+            if (input.value === valueOnFocus) {
+                input.select();
+            }
+        }, 100);
+    }
+
+    public async search(isPrefix: boolean) {
+        try {
+            const results = await this.searchResultsProvider.getResults(this.searchTerm(), isPrefix, this.shouldUseMapCenter());
+            if (results == null) {
+                // A stale response, a newer search superseded it - keep the currently displayed results
+                return;
+            }
+            this.searchResults.set(results);
+            if (this.selectFirstSearchResults && this.searchResults().length > 0) {
+                this.selectResults(this.searchResults()[0]);
             }
             this.selectFirstSearchResults = false;
         } catch {
@@ -153,56 +168,76 @@ export class SearchComponent {
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id]);
     }
 
-    private selectResults(searchContext: SearchContext, searchResult: SearchResultsPointOfInterest) {
-        searchContext.selectedSearchResults = searchResult;
+    /**
+     * Picking a place out of the search results is the earliest deliberate thing most users do with the
+     * app, which is why the first action is reported from here, see AnalyticsService.reportFirstAction.
+     */
+    private selectResults(searchResult: SearchResultsPointOfInterest) {
+        this.analyticsService.reportFirstAction();
+        this.selectedSearchResults = searchResult;
+        // Material focuses the input back right after a result is picked, blurring it once that is
+        // done hides the mobile keyboard
+        setTimeout(() => this.searchFromInput()?.nativeElement.blur());
         this.moveToResults(searchResult);
     }
 
     @HostListener("window:keydown", ["$event"])
-    public onSearchShortcutKeys($event: KeyboardEvent) {
-        if ($event.key === "Enter") {
+    public onSearchShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleSearchShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private handleSearchShortcut(event: KeyboardEvent): string | null {
+        if (event.key === "Enter") {
             return this.handleEnterKeydown();
         }
-        if ($event.ctrlKey === false && $event.metaKey === false) {
-            return true;
+        if (isCtrlOrMeta(event) && event.code === "KeyF") {
+            this.focusOnSearchInput();
+            return "Focus search";
         }
-        if ($event.key == null) {
-            return true;
-        }
-        switch ($event.key.toLowerCase()) {
-            case "f":
-                this.focusOnSearchInput();
-                break;
-            default:
-                return true;
-        }
-        return false;
+        return null;
     }
+
     /**
      * This function should make sure the ENTER key is behaving as it should:
      * In case there are search results open and non is selected - select the first result.
      * In case a search is being made - when the search is finshed select the first result.
      *
-     * @returns true - if no operations was made, false otherwise
+     * @returns the shortcut's name if the key press was handled, null otherwise
      */
-    private handleEnterKeydown(): boolean {
+    private handleEnterKeydown(): string | null {
+        if (this.searchFromInput()?.nativeElement !== this.document.activeElement) {
+            return null;
+        }
         if (this.matAutocompleteTriggers()[0] == null) {
-            return true;
+            return null;
         }
         if (this.matAutocompleteTriggers()[0].activeOption != null) {
-            return true;
+            return null;
         }
-        if (this.fromContext.selectedSearchResults == null && this.fromContext.searchResults.length > 0) {
-            this.selectResults(this.fromContext, this.fromContext.searchResults[0]);
-            return false;
+        if (this.selectedSearchResults == null && this.searchResults().length > 0) {
+            this.selectResults(this.searchResults()[0]);
+            return "Search enter";
         }
         this.selectFirstSearchResults = true;
-        return false;
+        return "Search enter";
     }
 
-    public isPoisSearch() {
+    /** 
+     * Use map center only when the map is visible
+     */
+    private shouldUseMapCenter(): boolean {
         const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return currentUrl !== RouteStrings.ROUTE_SHARES && currentUrl !== RouteStrings.ROUTE_TRACES;
+        return currentUrl !== RouteStrings.ROUTE_ROOT &&
+            currentUrl !== RouteStrings.ROUTE_LANDING &&
+            currentUrl !== RouteStrings.ROUTE_ABOUT;
     }
 
     public updateSearchTerm(searchTerm: string) {
@@ -210,9 +245,14 @@ export class SearchComponent {
     }
 
     public placeholder() {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
+        const currentUrl = this.currentUrl();
+        if (currentUrl === RouteStrings.ROUTE_ROOT ||
+            currentUrl === RouteStrings.ROUTE_LANDING ||
+            currentUrl === RouteStrings.ROUTE_ABOUT) {
+            return this.resources.searchLandingPlaceHolder;
+        }
         if (currentUrl === RouteStrings.ROUTE_SHARES) {
-            return this.resources.searchSharesPlaceHolder;
+            return this.resources.searchSavedRoutesPlaceHolder;
         }
         if (currentUrl === RouteStrings.ROUTE_TRACES) {
             return this.resources.searchTracesPlaceHolder;

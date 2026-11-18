@@ -16,7 +16,6 @@ using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 
 namespace IsraelHiking.API.Tests.Services;
 
@@ -26,8 +25,7 @@ public class PointsOfInterestProviderTests
     private PointsOfInterestProvider _adapter;
     private IClientsFactory _clientsFactory;
     private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-    private IWikimediaCommonGateway _wikimediaCommonGateway;
-    private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
+    private IImageUploadGateway _imageUploadGateway;
     private ITagsHelper _tagsHelper;
     private IWikidataGateway _wikidataGateway;
     private IShareUrlGateway _shareUrlGateway;
@@ -39,15 +37,15 @@ public class PointsOfInterestProviderTests
         _tagsHelper = new TagsHelper();
         _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
             new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
-        _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
-        _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
+        _imageUploadGateway = Substitute.For<IImageUploadGateway>();
+        _imageUploadGateway.UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>())
+            .Returns("https://images.mapeak.com/image.jpg");
         _wikidataGateway = Substitute.For<IWikidataGateway>();
         _wikidataGateway.GetContent(Arg.Any<string>()).Returns(new WikidataContent());
         _shareUrlGateway = Substitute.For<IShareUrlGateway>();
         _adapter = new PointsOfInterestProvider(_osmGeoJsonPreprocessorExecutor,
-            _wikimediaCommonGateway,
+            _imageUploadGateway,
             new Base64ImageStringToFileConverter(),
-            _imagesUrlsStorageExecutor,
             _tagsHelper, _clientsFactory,
             _wikidataGateway, _shareUrlGateway,
             Substitute.For<ILogger>());
@@ -214,7 +212,6 @@ public class PointsOfInterestProviderTests
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
         feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "www.wikidata.org/wiki/Q19401334");
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
         var results = _adapter.AddFeature(feature, gateway, language).Result;
 
@@ -223,6 +220,46 @@ public class PointsOfInterestProviderTests
         gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIDATA].Equals("Q19401334")));
         gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
         gateway.Received().CloseChangeset(Arg.Any<long>());
+    }
+
+    [TestMethod]
+    public void AddFeature_MultipleWebsites_ShouldStoreThemInASingleSemicolonSeparatedTag()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://first.com;https://second.com");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "https://third.com");
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x =>
+            x.Tags[FeatureAttributes.WEBSITE].Equals("https://first.com;https://second.com;https://third.com") &&
+            x.Tags.All(t => t.Key != FeatureAttributes.WEBSITE + "1")
+        ));
+    }
+
+    [TestMethod]
+    public void AddFeature_WebsitesTooLongForASingleTag_ShouldStoreThemInNumberedWebsiteTags()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var longUrl = "https://" + string.Join("", Enumerable.Repeat("i", 200)) + ".com";
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
+        feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, longUrl + ";" + longUrl + "1");
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x =>
+            x.Tags[FeatureAttributes.WEBSITE].Equals(longUrl) &&
+            x.Tags[FeatureAttributes.WEBSITE + ":1"].Equals(longUrl + "1")
+        ));
     }
 
     [TestMethod]
@@ -237,7 +274,6 @@ public class PointsOfInterestProviderTests
         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon");
         feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
         feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
         var results = _adapter.AddFeature(feature, gateway, language).Result;
 
@@ -263,6 +299,21 @@ public class PointsOfInterestProviderTests
 
         Assert.IsNotNull(results);
         gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("זוהר")));
+    }
+
+    [TestMethod]
+    public void AddFeature_TouristAttraction_ShouldAddFixMeTag()
+    {
+        var gateway = SetupOsmAuthClient();
+        var language = Languages.HEBREW;
+        gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+        var feature = GetValidFeature("42", Sources.OSM);
+        feature.Attributes[FeatureAttributes.POI_ICON] = "icon-star";
+
+        var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+        Assert.IsNotNull(results);
+        gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags["fixme"] != null));
     }
 
     [TestMethod]
@@ -430,6 +481,50 @@ public class PointsOfInterestProviderTests
 
 
     [TestMethod]
+    public void UpdateFeature_AddImageToSuperRelation_ShouldFetchTheChildRelationsForItsGeometryAndUpdate()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, "Relation_1" },
+            { FeatureAttributes.POI_ICON, "icon" },
+            { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                                          "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+        });
+        // The "full" response of a super relation does not contain the ways of its child relations
+        gateway.GetCompleteRelation(1).Returns(new CompleteRelation
+        {
+            Id = 1,
+            Tags = new TagsCollection { { "name:he", "name" }, { "route", "bicycle" } },
+            Members = [new CompleteRelationMember { Member = new CompleteRelation { Id = 2, Members = [] } }]
+        });
+        gateway.GetCompleteRelation(2).Returns(new CompleteRelation
+        {
+            Id = 2,
+            Tags = new TagsCollection { { "route", "bicycle" } },
+            Members =
+            [
+                new CompleteRelationMember
+                {
+                    Member = new CompleteWay
+                    {
+                        Id = 3,
+                        Nodes = [new Node { Id = 4, Latitude = 1, Longitude = 2 }, new Node { Id = 5, Latitude = 3, Longitude = 4 }]
+                    }
+                }
+            ]
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received(1).GetCompleteRelation(2);
+        _imageUploadGateway.Received(1).UploadImage("name.png", Arg.Any<string>(), user.DisplayName, Arg.Any<Stream>(), Arg.Is<Coordinate>(c => c.X == 2 && c.Y == 1));
+        gateway.Received(1).UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Id == 1));
+    }
+
+    [TestMethod]
     public void UpdateFeature_WithImageIdExists_ShouldUpdate()
     {
         var user = new User { DisplayName = "DisplayName" };
@@ -443,7 +538,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection {
@@ -457,8 +551,7 @@ public class PointsOfInterestProviderTests
 
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-        _wikimediaCommonGateway.Received(1).UploadImage("name.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        _imageUploadGateway.Received(1).UploadImage("name.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
     }
 
     [TestMethod]
@@ -475,7 +568,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection {
@@ -489,8 +581,7 @@ public class PointsOfInterestProviderTests
 
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-        _wikimediaCommonGateway.Received(1).UploadImage("name.1.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        _imageUploadGateway.Received(1).UploadImage("name.1.png", "description", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
     }
 
     [TestMethod]
@@ -507,7 +598,6 @@ public class PointsOfInterestProviderTests
             { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                                           "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
         });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
         gateway.GetNode(42).Returns(new Node
         {
             Tags = new TagsCollection()
@@ -521,31 +611,7 @@ public class PointsOfInterestProviderTests
 
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-        _wikimediaCommonGateway.Received(1).UploadImage("tint.png", "tint", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
-    }
-
-    [TestMethod]
-    public void UpdateFeature_WithImageInRepository_ShouldNotUploadImage()
-    {
-        var user = new User { DisplayName = "DisplayName" };
-        var gateway = SetupOsmAuthClient();
-        gateway.GetUserDetails().Returns(user);
-        var id = "Node_42";
-        var poi = new Feature(new Point(0, 0), new AttributesTable {
-            { FeatureAttributes.POI_SOURCE, Sources.OSM },
-            { FeatureAttributes.ID, id },
-            { FeatureAttributes.POI_ICON, "icon" },
-            { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                                          "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
-        });
-        _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
-        gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
-
-        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
-
-        _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t => t.Key == "image")));
+        _imageUploadGateway.Received(1).UploadImage("tint.png", "tint", user.DisplayName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
     }
 
     [TestMethod]
@@ -568,7 +634,7 @@ public class PointsOfInterestProviderTests
 
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-        _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+        _imageUploadGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t =>
                 t.Key == "description:he" && t.Value == "new description") &&
             o.Tags.Any(t => t.Key == "name:he" && t.Value == "new name") &&
@@ -594,7 +660,7 @@ public class PointsOfInterestProviderTests
 
         _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
 
-        _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+        _imageUploadGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
         gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
     }
 
@@ -618,6 +684,62 @@ public class PointsOfInterestProviderTests
             o.Tags.Any(t => t.Key == "historic" && t.Value == "ruins") &&
             o.Tags.All(t => t.Key != "natural"))
         );
+    }
+
+    [TestMethod]
+    public void UpdateFeature_RemoveTitleWhenOnlyNameTagExists_ShouldRemoveNameTagInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        const string id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+        });
+        poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, string.Empty);
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection { { "historic", "ruins" }, { "name", "some name" } },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags.All(t => t.Key != "name") && o.Tags.All(t => t.Key != "name:he")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_RemoveTitleWhenNameByLanguageExists_ShouldRemoveNameTagsInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        const string id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+        });
+        poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, string.Empty);
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection { { "historic", "ruins" }, { "name", "some name" }, { "name:he", "some name" } },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags.All(t => t.Key != "name") && o.Tags.All(t => t.Key != "name:he")
+        ));
     }
 
     [TestMethod]
@@ -648,6 +770,68 @@ public class PointsOfInterestProviderTests
 
         gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
             o.Tags.All(t => t.Key != "website1") && o.Tags.Any(t => t.Value == "url-to-keep")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_AddUrlToLegacyNumberedWebsites_ShouldMigrateToASingleSemicolonSeparatedTag()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+            { FeatureAttributes.POI_ADDED_URLS, new [] { "https://third.com" } }
+        });
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection {
+                { "website", "https://first.com" },
+                { "website1", "https://second.com" }
+            },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags["website"] == "https://first.com;https://second.com;https://third.com" &&
+            o.Tags.All(t => t.Key != "website1")
+        ));
+    }
+
+    [TestMethod]
+    public void UpdateFeature_RemoveUrlFromSemicolonSeparatedWebsites_ShouldUpdateInOSM()
+    {
+        var user = new User { DisplayName = "DisplayName" };
+        var gateway = SetupOsmAuthClient();
+        gateway.GetUserDetails().Returns(user);
+        var id = "Node_42";
+        var poi = new Feature(new Point(0, 0), new AttributesTable {
+            { FeatureAttributes.POI_SOURCE, Sources.OSM },
+            { FeatureAttributes.ID, id },
+            { FeatureAttributes.POI_ICON, "icon-ruins" },
+            { FeatureAttributes.POI_REMOVED_URLS, new [] { "url-to-remove" } }
+        });
+        gateway.GetNode(42).Returns(new Node
+        {
+            Tags = new TagsCollection {
+                { "website", "url-to-remove;url-to-keep" }
+            },
+            Latitude = 0,
+            Longitude = 0,
+            Id = 42
+        });
+
+        _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+        gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+            o.Tags["website"] == "url-to-keep"
         ));
     }
 

@@ -1,15 +1,19 @@
-import { Component, ViewEncapsulation, ElementRef, inject, viewChildren, DestroyRef, signal } from "@angular/core";
+import { Component, HostListener, ViewEncapsulation, inject, DestroyRef, signal, computed } from "@angular/core";
+import { BreakpointObserver } from "@angular/cdk/layout";
 import { NgStyle } from "@angular/common";
-import { MatSidenavContainer, MatSidenav, MatSidenavContent } from "@angular/material/sidenav";
-import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import { type StyleSpecification, type Map, ScaleControl, IControl, ControlPosition, type RasterDEMSourceSpecification } from "maplibre-gl";
+import { MatSidenavContainer, MatSidenav } from "@angular/material/sidenav";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { NgProgressbar } from "ngx-progressbar";
 import { NgProgressHttp } from "ngx-progressbar/http";
 import { Store } from "@ngxs/store";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
+import type { StyleSpecification, Map, RasterDEMSourceSpecification } from "maplibre-gl";
 
 import { LayersComponent } from "./layers.component";
 import { RoutesComponent } from "./routes.component";
+import { MapOverlayComponent } from "./map-overlay.component";
+import { ScaleBarComponent } from "./scale-bar.component";
 import { RecordedRouteComponent } from "./recorded-route.component";
 import { ZoomComponent } from "../zoom.component";
 import { LocationComponent } from "../location.component";
@@ -23,12 +27,16 @@ import { OsmAttributionComponent } from "../osm-attribution.component";
 import { LayersSidebarComponent } from "../sidebar/layers/layers-sidebar.component";
 import { PublicPoiSidebarComponent } from "../sidebar/publicpoi/public-poi-sidebar.component";
 import { PrivateRoutesSidebarComponent } from "../sidebar/privateroutes/private-routes-sidebar.component";
+import { BottomSheetComponent } from "../bottom-sheet.component";
 import { MapeakTitleService } from "../../services/mapeak-title.service";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SidebarService } from "../../services/sidebar.service";
+import { isTypingInTextField, isMapPopupOpen, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
+import { MatDialog } from "@angular/material/dialog";
 import type { ApplicationState, LocationState } from "../../models";
 
 @Component({
@@ -36,19 +44,21 @@ import type { ApplicationState, LocationState } from "../../models";
     templateUrl: "./main-map.component.html",
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None,
-    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, MatSidenavContent, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent]
+    imports: [NgProgressbar, NgProgressHttp, NgStyle, MapComponent, MapOverlayComponent, ScaleBarComponent, LayersComponent, PublicPoisComponent, RoutesComponent, RecordedRouteComponent, ZoomComponent, LocationComponent, DrawingComponent, RouteStatisticsComponent, CenterMeComponent, MapeakLinkComponent, LayersButtonComponent, OsmAttributionComponent, MatSidenavContainer, MatSidenav, LayersSidebarComponent, PublicPoiSidebarComponent, PrivateRoutesSidebarComponent, BottomSheetComponent]
 })
 export class MainMapComponent {
 
-    public topStartControls = viewChildren("topStartControl", { read: ElementRef });
-    public topEndControls = viewChildren("topEndControl", { read: ElementRef });
-    public bottomEndControls = viewChildren("bottomEndControl", { read: ElementRef });
-    public bottomStartControls = viewChildren("bottomStartControl", { read: ElementRef });
-
-    public sidenavVisible = signal(false);
-    public sidenavViewName = "";
-    public location: LocationState;
-    public initialStyle: StyleSpecification;
+    public readonly sidenavVisible = signal(false);
+    public readonly sidenavViewName = signal("");
+    /** A narrow screen shows a point's details and the layers in a sheet at the bottom instead of the side drawer. */
+    public readonly isNarrowScreen = toSignal(inject(BreakpointObserver).observe("(max-width: 550px)")
+        .pipe(map(state => state.matches)), { initialValue: false });
+    public readonly sheetViewName = computed(() =>
+        this.isNarrowScreen() && this.sidenavVisible() && ["public-poi", "layers"].includes(this.sidenavViewName())
+            ? this.sidenavViewName()
+            : "");
+    public readonly location: LocationState;
+    public readonly initialStyle: StyleSpecification;
 
     public readonly resources = inject(ResourcesService);
 
@@ -59,8 +69,10 @@ export class MainMapComponent {
     private readonly sidebarService = inject(SidebarService);
     private readonly store = inject(Store);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly analyticsService = inject(AnalyticsService);
+    private readonly matDialog = inject(MatDialog);
 
-    private addedControls: IControl[] = [];
+
     private map: Map;
     private isTerrainOn = false;
 
@@ -74,11 +86,39 @@ export class MainMapComponent {
             this.map = null;
         });
         this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.sidenavViewName = this.sidebarService.viewName;
+            this.sidenavViewName.set(this.sidebarService.viewName);
             this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
         });
-        this.sidenavViewName = this.sidebarService.viewName;
+        this.sidenavViewName.set(this.sidebarService.viewName);
         this.sidenavVisible.set(this.sidebarService.isSidebarOpen());
+    }
+
+    public closeSidebar() {
+        this.sidebarService.hide();
+    }
+
+    @HostListener("window:keydown", ["$event"])
+    public onSidebarShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.closeSidebarOnEscape(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private closeSidebarOnEscape(event: KeyboardEvent): string | null {
+        if (event.key !== "Escape" || !this.sidebarService.isSidebarOpen()) {
+            return null;
+        }
+        if (isMapPopupOpen() || this.matDialog.openDialogs.length > 0) {
+            return null;
+        }
+        this.sidebarService.hide();
+        return "Close sidebar";
     }
 
     public mapLoaded(map: Map) {
@@ -86,43 +126,6 @@ export class MainMapComponent {
         this.mapService.setMap(this.map);
         this.mapService.addArrowToMap(this.map);
         this.map.doubleClickZoom.enable();
-        this.store.select((state: ApplicationState) => state.configuration.language.rtl).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.initControls();
-        });
-        this.store.select((state: ApplicationState) => state.configuration.units).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.initControls();
-        });
-    }
-
-    private initControls() {
-        for (const control of this.addedControls) {
-            this.map.removeControl(control);
-        }
-        this.addedControls = [];
-        for (const c of this.topStartControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "top-" + this.resources.start as ControlPosition);
-            this.addedControls.push(control);
-        }
-        for (const c of this.topEndControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(new CustomControl(c.nativeElement), "top-" + this.resources.end as ControlPosition);
-            this.addedControls.push(control);
-        }
-        const control = new ScaleControl({ unit: this.store.selectSnapshot((state: ApplicationState) => state.configuration.units) });
-        this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
-        this.addedControls.push(control);
-
-        for (const c of this.bottomEndControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "bottom-" + this.resources.end as ControlPosition);
-            this.addedControls.push(control);
-        }
-        for (const c of this.bottomStartControls()) {
-            const control = new CustomControl(c.nativeElement);
-            this.map.addControl(control, "bottom-" + this.resources.start as ControlPosition);
-            this.addedControls.push(control);
-        }
     }
 
     public isMobile() {
@@ -138,7 +141,7 @@ export class MainMapComponent {
     }
 
     public pitchChanged() {
-        if (this.runningContextService.isMobile || !this.map) {
+        if (!this.map) {
             return;
         }
         const pitch = this.map.getPitch();
@@ -163,7 +166,7 @@ export class MainMapComponent {
         this.isTerrainOn = true;
         const source: RasterDEMSourceSpecification = {
             type: "raster-dem",
-            tiles: ["https://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp"],
+            tiles: ["https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp"],
             minzoom: 7,
             maxzoom: 11,
             tileSize: 512,

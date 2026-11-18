@@ -1,21 +1,25 @@
-import { Component, AfterViewInit, ViewEncapsulation, inject } from "@angular/core";
+import { Component, HostListener, AfterViewInit, ViewEncapsulation, inject, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { Dir } from "@angular/cdk/bidi";
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
+import { MatDialog } from "@angular/material/dialog";
 import { MapComponent, SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, MarkerComponent } from "@maplibre/ngx-maplibre-gl";
-import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
+import type { MapLayerMouseEvent, Marker } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { RoutePointOverlayComponent } from "../overlays/route-point-overlay.component";
 import { PrivatePoiOverlayComponent } from "../overlays/private-poi-overlay.component";
 import { RoutesPathComponent } from "./routes-path.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
+import { isDeleteKey, isTypingInTextField, SHORTCUT_ANALYTICS_CATEGORY } from "../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../services/analytics.service";
 import { Urls } from "../../urls";
 import type { LatLngAltTime, ApplicationState, RouteData } from "../../models";
 
@@ -28,21 +32,23 @@ interface RoutePointViewData {
     selector: "routes",
     templateUrl: "./routes.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
+    imports: [SourceDirective, GeoJSONSourceComponent, LayerComponent, PopupComponent, RoutePointOverlayComponent, Dir, MatAnchor, MatTooltip, MatButton, AnalyticsDirective, MarkerComponent, PrivatePoiOverlayComponent, RoutesPathComponent]
 })
 export class RoutesComponent implements AfterViewInit {
 
-    public routePointPopupData: RoutePointViewData;
-    public nonEditRoutePointPopupData: { latlng: LatLngAltTime; wazeAddress: string; googleMapsAddress: string; routeId: string };
-    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+    public readonly routePointPopupData = signal<RoutePointViewData>(null);
+    public readonly nonEditRoutePointPopupData = signal<{ latlng: LatLngAltTime; wazeAddress: string; googleMapsAddress: string; routeId: string }>(null);
+    public readonly editingRouteGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
-    };
-    public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point> = {
+    });
+    public readonly routesGeoJson = signal<GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>>({
         type: "FeatureCollection",
         features: []
-    };
-    public routes: Immutable<RouteData[]> = [];
+    });
+    public readonly routes = signal<Immutable<RouteData[]>>([]);
+
+    private isRemovingRoutePoint = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -51,16 +57,20 @@ export class RoutesComponent implements AfterViewInit {
     private readonly routeEditRouteInteraction = inject(RouteEditRouteInteraction);
     private readonly mapComponent = inject(MapComponent);
     private readonly store = inject(Store);
+    private readonly analyticsService = inject(AnalyticsService);
+    private readonly matDialog = inject(MatDialog);
+
+    private readonly selectedRouteId = this.store.selectSignal((s: ApplicationState) => s.routeEditingState.selectedRouteId);
 
     constructor() {
         this.routeEditRouteInteraction.onRoutePointClick.pipe(takeUntilDestroyed()).subscribe(this.handleRoutePointClick);
         this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed()).subscribe(routes => this.handleRoutesChanges(routes));
-        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => this.handleRoutesChanges(this.routes));
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => this.handleRoutesChanges(this.routes()));
         this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).pipe(takeUntilDestroyed()).subscribe(() => this.setInteractionAccordingToState());
     }
 
     private handleRoutesChanges(routes: Immutable<RouteData[]>) {
-        this.routes = routes;
+        this.routes.set(routes);
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
     }
@@ -68,7 +78,7 @@ export class RoutesComponent implements AfterViewInit {
     private buildFeatureCollections() {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         let editingFeatures = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
-        for (const route of this.routes) {
+        for (const route of this.routes()) {
             if (route.state === "Hidden") {
                 continue;
             }
@@ -78,35 +88,97 @@ export class RoutesComponent implements AfterViewInit {
             }
             features = features.concat(this.selectedRouteService.createFeaturesForRoute(route));
         }
-        this.routesGeoJson = {
+        this.routesGeoJson.set({
             type: "FeatureCollection",
             features
-        };
-        this.editingRouteGeoJson = {
+        });
+        this.editingRouteGeoJson.set({
             type: "FeatureCollection",
             features: editingFeatures
-        };
-        this.routeEditRouteInteraction.setData(this.editingRouteGeoJson);
+        });
+        this.routeEditRouteInteraction.setData(this.editingRouteGeoJson());
     }
 
-    private handleRoutePointClick = (pointIndex: number) => {
-        if (pointIndex == null || (this.routePointPopupData != null && this.routePointPopupData.segmentIndex === pointIndex)) {
-            this.routePointPopupData = null;
+    private readonly handleRoutePointClick = (pointIndex: number) => {
+        if (pointIndex == null || (this.routePointPopupData() != null && this.routePointPopupData().segmentIndex === pointIndex)) {
+            this.routePointPopupData.set(null);
             return;
         }
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         const segment = selectedRoute.segments[pointIndex];
         setTimeout(() => {
             // allow angular to draw this as it seems not to do it without this timeout...
-            this.routePointPopupData = {
+            this.routePointPopupData.set({
                 latlng: segment.routePoint,
                 segmentIndex: pointIndex
-            };
+            });
         }, 0);
     };
 
+    @HostListener("window:keydown", ["$event"])
+    public onPopupShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.handleRoutePointShortcut(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private handleRoutePointShortcut(event: KeyboardEvent): string | null {
+        if (isDeleteKey(event)) {
+            return this.removeRoutePoint();
+        }
+        if (event.key !== "Escape") {
+            return null;
+        }
+        if (this.routePointPopupData() != null) {
+            this.closeRoutePointPopup();
+            return "Close route point popup";
+        }
+        if (this.nonEditRoutePointPopupData() != null) {
+            this.nonEditRoutePointPopupData.set(null);
+            return "Close non edit route point popup";
+        }
+        return null;
+    }
+
+    private removeRoutePoint(): string | null {
+        if (this.routePointPopupData() == null || this.isRemovingRoutePoint || this.matDialog.openDialogs.length > 0) {
+            return null;
+        }
+        this.removeRoutePointAndSelectNeighbour(this.routePointPopupData().segmentIndex);
+        return "Delete route point";
+    }
+
+    /**
+     * Keeps the popup on the point that took the deleted one's place, so that a run of points can
+     * be trimmed with DEL alone. Falls back to the point before it at the end of the route.
+     */
+    private async removeRoutePointAndSelectNeighbour(segmentIndex: number) {
+        this.isRemovingRoutePoint = true;
+        try {
+            await this.selectedRouteService.removeSegment(segmentIndex);
+        } finally {
+            this.isRemovingRoutePoint = false;
+        }
+        const segments = this.selectedRouteService.getSelectedRoute()?.segments ?? [];
+        if (segments.length === 0) {
+            this.routePointPopupData.set(null);
+            return;
+        }
+        const neighbourIndex = Math.min(segmentIndex, segments.length - 1);
+        this.routePointPopupData.set({
+            latlng: segments[neighbourIndex].routePoint,
+            segmentIndex: neighbourIndex
+        });
+    }
+
     public closeRoutePointPopup() {
-        this.routePointPopupData = null;
+        this.routePointPopupData.set(null);
     }
 
 
@@ -128,8 +200,8 @@ export class RoutesComponent implements AfterViewInit {
         }
     }
 
-    public markerDragEnd(index: number, event: any) {
-        this.routeEditPoiInteraction.handleDragEnd(event.getLngLat(), index);
+    public markerDragEnd(index: number, marker: Marker) {
+        this.routeEditPoiInteraction.handleDragEnd(marker.getLngLat(), index);
     }
 
     public ngAfterViewInit(): void {
@@ -144,16 +216,16 @@ export class RoutesComponent implements AfterViewInit {
     }
 
     public isRouteInEditPoiMode(route: Immutable<RouteData>) {
-        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.routes().find(r => r.id === this.selectedRouteId());
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
 
-    public routeLineMouseEnter(event: any) {
+    public routeLineMouseEnter(event: MapLayerMouseEvent) {
         this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         this.routeLineMouseOver(event);
     }
 
-    public routeLineMouseOver(event: any) {
+    public routeLineMouseOver(event: MapLayerMouseEvent) {
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
@@ -192,17 +264,17 @@ export class RoutesComponent implements AfterViewInit {
         }
         const pointId = event.features[0].properties.id as string;
         const routeId = pointId.replace("_start", "").replace("_end", "");
-        this.nonEditRoutePointPopupData = {
+        this.nonEditRoutePointPopupData.set({
             latlng: event.lngLat,
             wazeAddress: `${Urls.waze}${event.lngLat.lat},${event.lngLat.lng}`,
             googleMapsAddress: `${Urls.googleMaps}${event.lngLat.lat},${event.lngLat.lng}`,
             routeId
-        };
+        });
     }
 
     public switchToEditMode(routeId: string) {
         this.selectedRouteService.setSelectedRoute(routeId);
         this.selectedRouteService.changeRouteEditState(routeId, "Route");
-        this.nonEditRoutePointPopupData = null;
+        this.nonEditRoutePointPopupData.set(null);
     }
 }

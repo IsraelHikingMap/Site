@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services;
 
@@ -10,11 +11,13 @@ namespace IsraelHiking.API.Services;
 public interface IOfflineFilesService
 {
     /// <summary>
-    /// Get the file's content 
+    /// Get the file's content
     /// </summary>
-    /// <param name="fileRelativePath">The file to get</param>
-    /// <returns>a read stream of the file</returns>
-    Stream GetFileContent(string fileRelativePath);
+    /// <param name="fileName">The file to get</param>
+    /// <param name="tileX">The tile's X coordinates, null for root</param>
+    /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <returns>a read stream of the file and its length when known</returns>
+    Task<(Stream Content, long? Length)> GetFileContent(string fileName, long? tileX, long? tileY);
 
     /// <summary>
     /// Get a list of files that have been updated since a given date
@@ -22,6 +25,36 @@ public interface IOfflineFilesService
     /// <param name="lastModifiedDate">The date to check against</param>
     /// <param name="tileX">The tile's X coordinates, null for root</param>
     /// <param name="tileY">The tile's Y coordinates, null for root</param>
+    /// <param name="routingTile">Whether the client can handle the offline routing files - the routing tile
+    /// itself and, for the root, the valhalla configuration files</param>
+    /// <remarks>
+    /// The order of the files is meaningful: the client downloads them in the order they are listed in, a
+    /// few at a time, so a file that is listed last is the one left downloading on its own once every other
+    /// file is done. The slowest files are therefore listed first, so that they are downloaded alongside the
+    /// rest instead of after them.
+    /// </remarks>
     /// <returns>A list of file names</returns>
-    Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY);
+    Task<Dictionary<string, DateTime>> GetUpdatedFilesList(DateTime lastModifiedDate, long? tileX, long? tileY, bool routingTile);
+
+    /// <summary>
+    /// Get a list of the files of an area that have been updated since a given date
+    /// </summary>
+    /// <param name="areaId">The id of one of the areas of <see cref="GetAreasContent"/></param>
+    /// <param name="lastModifiedDate">The date to check against</param>
+    /// <returns>The names of the files and when they changed, null when there is no such area</returns>
+    Task<Dictionary<string, DateTime>> GetUpdatedFilesListForArea(string areaId, DateTime lastModifiedDate);
+
+    /// <summary>
+    /// Get the content of a file of an area
+    /// </summary>
+    /// <param name="areaId">The id of one of the areas of <see cref="GetAreasContent"/></param>
+    /// <param name="fileName">One of the files <see cref="GetUpdatedFilesListForArea"/> lists</param>
+    /// <returns>A read stream of the file and its length when known, null when there is no such area or file</returns>
+    Task<(Stream Content, long? Length)?> GetFileContentForArea(string areaId, string fileName);
+
+    /// <summary>
+    /// Opens the file holding the areas that can be downloaded for offline usage
+    /// </summary>
+    /// <returns>The content of the file</returns>
+    Stream GetAreasContent();
 }

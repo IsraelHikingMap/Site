@@ -1,8 +1,8 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
-@Injectable()
+@Service()
 export class GetTextCatalogService {
 
     private strings: Record<string, string> = {};

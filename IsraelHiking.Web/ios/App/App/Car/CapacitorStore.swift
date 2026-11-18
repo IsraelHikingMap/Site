@@ -1,12 +1,10 @@
 import Foundation
 
-/**
- * Generic reactive key-value store. Holds persistent values (in UserDefaults) and transient
- * in-memory values behind one listener API: subscribers receive a key whenever a value changes,
- * then read the current value back from the store. The store knows nothing about what the keys
- * mean. Mirrors `CapacitorStore.kt` on Android (which uses SharedPreferences) and the NGXS-style
- * "state + select" pattern on the JS side.
- */
+/// Generic reactive key-value store. Holds persistent values (in UserDefaults) and transient
+/// in-memory values behind one listener API: subscribers receive a key whenever a value changes,
+/// then read the current value back from the store. The store knows nothing about what the keys
+/// mean. Mirrors `CapacitorStore.kt` on Android (which uses SharedPreferences) and the NGXS-style
+/// "state + select" pattern on the JS side.
 final class CapacitorStore {
 
     protocol Listener: AnyObject {
@@ -29,8 +27,6 @@ final class CapacitorStore {
 
     private init() {}
 
-    // MARK: - Listeners
-
     func addListener(_ listener: Listener) {
         lock.lock(); defer { lock.unlock() }
         listeners.removeAll { $0.value == nil || $0.value === listener }
@@ -52,8 +48,6 @@ final class CapacitorStore {
             }
         }
     }
-
-    // MARK: - Persistent values
 
     /// Persist a JSON string value and notify listeners.
     func save(_ key: String, _ json: String) {
@@ -88,8 +82,6 @@ final class CapacitorStore {
         if defaults.object(forKey: Self.prefsPrefix + key) == nil { return defaultValue }
         return defaults.double(forKey: Self.prefsPrefix + key)
     }
-
-    // MARK: - Transient (in-memory) values
 
     /// Set a transient (in-memory) value and notify listeners. Passing nil clears the value.
     func setTransient(_ key: String, _ value: Any?) {

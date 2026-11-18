@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { MatLabel } from "@angular/material/input";
 import { Dir } from "@angular/cdk/bidi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
@@ -10,7 +10,7 @@ import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
-import { SetDateFormatAction, SetUnitsAction, StopShowingIntroAction } from "../../reducers/configuration.reducer";
+import { SetDateFormatAction, SetUnitsAction, StopShowingOnboardingAction } from "../../reducers/configuration.reducer";
 import { AVAILABLE_LANGUAGES, HIKING_MAP, MTB_MAP } from "../../reducers/initial-state";
 import { RunningContextService } from "../../services/running-context.service";
 import { SetActivityTypeAction } from "../../reducers/user.reducer";
@@ -18,10 +18,6 @@ import { SelectBaseLayerAction } from "../../reducers/layers.reducer";
 import { SetRoutingTypeAction } from "../../reducers/route-editing.reducer";
 import type { ActivityType } from "../../models";
 
-import languageAnimationData from "../../../content/lottie/dialog-language.json";
-import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
-import planAnimationData from "../../../content/lottie/dialog-plan.json";
-import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
 @Component({
     selector: "intro-dialog",
@@ -31,19 +27,21 @@ import moreAnimationData from "../../../content/lottie/dialog-more.json";
 })
 export class IntroDialogComponent {
 
-    public lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
-    public lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
-    public lottiePlan: AnimationOptions = { animationData: planAnimationData };
-    public lottieMore: AnimationOptions = { animationData: moreAnimationData };
+    public readonly lottieLanguage: AnimationOptions = { path: "content/lottie/dialog-language.json" };
+    public readonly lottieMaps: AnimationOptions = { path: "content/lottie/dialog-maps.json" };
+    public readonly lottiePlan: AnimationOptions = { path: "content/lottie/dialog-plan.json" };
+    public readonly lottieMore: AnimationOptions = { path: "content/lottie/dialog-more.json" };
 
-    public activityType: ActivityType = "Hiking";
-    public step = 0;
-    public availableLanguages = AVAILABLE_LANGUAGES;
+    public readonly activityType = signal<ActivityType>("Hiking");
+    public readonly step = signal(0);
+    public readonly availableLanguages = AVAILABLE_LANGUAGES;
 
     public readonly resources = inject(ResourcesService);
 
     private readonly dialogRef = inject(MatDialogRef);
     private readonly store = inject(Store);
+
+    public languageCode = this.store.selectSignal((s) => s.configuration.language.code);
 
     public static openDialog(dialog: MatDialog, runningContextSerivce: RunningContextService) {
         const options: MatDialogConfig = {};
@@ -65,25 +63,21 @@ export class IntroDialogComponent {
     }
 
     public close() {
-        if (this.getLanuguageCode() == "en-US") {
+        if (this.languageCode() == "en-US") {
             this.store.dispatch(new SetDateFormatAction("MM/dd/yyyy"));
             this.store.dispatch(new SetUnitsAction("imperial"));
         } else {
             this.store.dispatch(new SetDateFormatAction("dd/MM/yyyy"));
             this.store.dispatch(new SetUnitsAction("metric"));
         }
-        this.store.dispatch(new StopShowingIntroAction());
+        this.store.dispatch(new StopShowingOnboardingAction());
         this.dialogRef.close();
     }
 
-    public getLanuguageCode(): string {
-        return this.store.selectSnapshot((s) => s.configuration.language.code);
-    }
-
     public setActivityType(activityType: ActivityType) {
-        this.activityType = activityType;
+        this.activityType.set(activityType);
         this.store.dispatch(new SetActivityTypeAction(activityType));
-        switch (this.activityType) {
+        switch (activityType) {
             case "Hiking":
                 this.store.dispatch(new SelectBaseLayerAction(HIKING_MAP));
                 this.store.dispatch(new SetRoutingTypeAction("Hike"));

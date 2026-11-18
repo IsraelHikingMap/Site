@@ -1,15 +1,15 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Encoder, Profile } from "@garmin/fitsdk";
 import { encode } from "base64-arraybuffer";
 
 import { DeviceOAuthService } from "./device-oauth.service";
-import { SpatialService } from "../spatial.service";
+import { getCumulativeDistances, getRoutePoints } from "./device-provider";
 import { RouteStatisticsService } from "../route-statistics.service";
 import { Urls } from "../../urls";
 import type { DeviceConnectionInfo, DeviceProvider, DeviceTokenResponse } from "./device-provider";
-import type { DeviceServiceId, LatLngAltTime, RouteDataWithoutState } from "../../models";
+import type { DeviceServiceId, RouteDataWithoutState } from "../../models";
 
 /** A route encoded as a FIT course plus the metadata the Wahoo routes API requires. */
 type FitCoursePayload = {
@@ -33,11 +33,12 @@ const SEMICIRCLES_PER_DEGREE = 2 ** 31 / 180;
  * (routes_write scope) which then syncs to the user's ELEMNT bike computer.
  * Docs: https://cloud-api.wahooligan.com/
  */
-@Injectable()
+@Service()
 export class WahooDeviceProvider implements DeviceProvider {
 
     public readonly id: DeviceServiceId = "wahoo";
     public readonly displayName = "Wahoo";
+    public readonly isAvailable = true;
 
     private static readonly CLIENT_ID = "amZH1PBW99VdHFWN6zgzo5953jXPo3Hv8DCTJBnv0CQ";
     private static readonly CYCLING_WORKOUT_TYPE_FAMILY_ID = 0;
@@ -103,27 +104,27 @@ export class WahooDeviceProvider implements DeviceProvider {
         };
     }
 
-    /** Builds a FIT "course" file from the route's GPS points, as Wahoo's routes API expects. */
+    /**
+     * Builds a FIT "course" file from the route's GPS points, as Wahoo's routes API expects: file id, course,
+     * lap, a start event, the GPS records and a stop event, in this order. FIT date-times have to be after the
+     * FIT epoch (1989), so the current time is used. The @garmin/fitsdk encoder reads the fields by name, so the
+     * messages are plain objects cast to its message type.
+     */
     private toFitCourse(route: RouteDataWithoutState): FitCoursePayload {
-        const points = this.flattenPoints(route);
+        const points = getRoutePoints(route);
         if (points.length < 2) {
             throw new Error("The route has no path to send to the device");
         }
         const name = route.name || "Mapeak";
         const first = points[0];
         const lastPoint = points[points.length - 1];
-        const cumulativeDistance = this.cumulativeDistances(points);
+        const cumulativeDistance = getCumulativeDistances(points);
         const totalDistance = cumulativeDistance[cumulativeDistance.length - 1];
         const statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(points);
         const ascent = statistics.gain;
         const descent = Math.abs(statistics.loss);
-        // FIT date-times must be after the FIT epoch (1989), so use the current time.
         const created = new Date();
 
-        // A FIT course file: file id, course, lap, then start event, the GPS
-        // records and a stop event - written in this order. The @garmin/fitsdk
-        // Encoder reads named fields dynamically, so the messages are plain
-        // objects cast to the encoder's message type.
         const messages: Record<string, unknown>[] = [
             {
                 mesgNum: Profile.MesgNum.FILE_ID,
@@ -190,19 +191,6 @@ export class WahooDeviceProvider implements DeviceProvider {
         };
     }
 
-    private flattenPoints(route: RouteDataWithoutState): LatLngAltTime[] {
-        return (route.segments || [])
-            .flatMap(segment => segment.latlngs || [])
-            .filter(latlng => latlng != null);
-    }
-
-    private cumulativeDistances(points: LatLngAltTime[]): number[] {
-        const cumulativeDistance = [0];
-        for (let i = 1; i < points.length; i++) {
-            cumulativeDistance.push(cumulativeDistance[i - 1] + SpatialService.getDistanceInMeters(points[i - 1], points[i]));
-        }
-        return cumulativeDistance;
-    }
 
     private toSemicircles(degrees: number): number {
         return Math.round(degrees * SEMICIRCLES_PER_DEGREE);

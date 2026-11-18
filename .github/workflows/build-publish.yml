@@ -5,7 +5,8 @@ name: Build and Publish
 # 2. android - Builds the Android app and uploads it to Google Play (if requested)
 # 3. docker - Builds the Docker image and pushes it to GitHub Container Registry
 # 4. ios - Builds the iOS app and uploads it to App Store (if requested)
-# 5. github-release - Tags the commit and creates a Github release with the apps' binaries (if requested)
+# 5. tag - Tags the built commit with the version string
+# 6. github-release - Creates a Github release with the apps' binaries (if requested)
 
 on:
   workflow_dispatch:
@@ -30,10 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
@@ -52,24 +53,25 @@ jobs:
           PATCH: ${{ github.run_number }}
         run: |
           version_string=$MAJOR.$MINOR.$(($PATCH % 1000))
-          echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
+          version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))
+          echo "version_code=$version_code" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
-          echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
-      - name: Get all milestones
-        id: get_milestones
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: GET /repos/${{ github.repository }}/milestones?state=open
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          commit_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+          {
+            echo "### Build and Publish $version_string"
+            echo ""
+            echo "Version: \`$version_string\`"
+            echo "Branch: \`$GITHUB_REF_NAME\`"
+            echo "Commit: [\`$(git rev-parse --short HEAD)\`]($commit_url) - $(git log -1 --pretty=%s)"
+          } >> $GITHUB_STEP_SUMMARY
       - name: Extract milestone ID
         id: extract
         run: |
-          echo '${{ steps.get_milestones.outputs.data }}' | jq '.[] | select(.title == "Next Release") | .number' > id.txt
-          milestone_id=$(cat id.txt)
+          milestone_id=$(gh api "repos/${{ github.repository }}/milestones?state=open" --jq '.[] | select(.title == "Next Release") | .number')
           echo "milestone_id=$milestone_id" >> $GITHUB_OUTPUT
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     outputs:
       version_code: ${{ steps.version-code.outputs.version_code }}
       version_string: ${{ steps.version-code.outputs.version_string }}
@@ -80,23 +82,27 @@ jobs:
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
-        uses: actions/setup-java@v5.4.0
+        uses: actions/setup-java@v6.3.0
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: 'gradle'
+          cache-dependency-path: |
+            IsraelHiking.Web/android/**/*.gradle*
+            IsraelHiking.Web/android/**/gradle-wrapper.properties
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/android
           bundler-cache: true
 
@@ -119,14 +125,14 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
       - name: Upload apk artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
           path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
@@ -153,7 +159,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Login to GitHub Container Registry
         if: ${{ github.secret_source == 'Actions' }}
@@ -176,21 +182,21 @@ jobs:
           VERSION: ${{ needs.version.outputs.version_string }}
 
   ios:
-    runs-on: macos-26
+    runs-on: xcode-27
     needs: version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/ios/App
           bundler-cache: true
 
@@ -205,16 +211,42 @@ jobs:
           npm run set-version ${{ needs.version.outputs.version_string }} ${{ needs.version.outputs.version_code }}
           npm run build:mobile -- --no-progress
           npx cap sync ios
+
+      - name: Restore Swift package cache
+        id: spm-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Resolve Swift packages
+        run: |
+          cd IsraelHiking.Web/ios/App
+          xcodebuild -resolvePackageDependencies \
+            -project App.xcodeproj \
+            -clonedSourcePackagesDirPath ../.spm-cache
+
+      - name: Save Swift package cache
+        if: steps.spm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
           cd IsraelHiking.Web/ios/App
+          # The lane reuses ios/.spm-cache, populated by the resolve step above.
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 5
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
@@ -233,17 +265,32 @@ jobs:
         env:
           APPSTORE_CONNECT_API_KEY: ${{ secrets.APPSTORE_CONNECT_API_KEY }}
 
-  github-release:
-    if: ${{ github.event.inputs.production == 'true' }}
+  tag:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     needs: [version, ios, android]
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
       - name: Tag commit and push
+        env:
+          VERSION: ${{ needs.version.outputs.version_string }}
         run: |
-          git tag "v${{ needs.version.outputs.version_string }}"
-          git push origin "v${{ needs.version.outputs.version_string }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+          tag_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/v$VERSION"
+          commit_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA"
+          echo "Tagged [\`v$VERSION\`]($tag_url) at [\`$(git rev-parse --short HEAD)\`]($commit_url)" >> $GITHUB_STEP_SUMMARY
+
+  github-release:
+    if: ${{ github.event.inputs.production == 'true' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    needs: [version, ios, android, tag]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
       - name: Download artifacts
         uses: actions/download-artifact@v8
         with:
@@ -255,20 +302,13 @@ jobs:
           mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           mv ${{ github.workspace }}/artifacts/*.apk ${{ github.workspace }}/Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
       - name: Rename and close milestone
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: PATCH /repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }}
-          title: Version ${{ needs.version.outputs.version_string }}
-          state: closed
+        run: gh api -X PATCH repos/${{ github.repository }}/milestones/${{ needs.version.outputs.milestone_id }} -f title="Version ${{ needs.version.outputs.version_string }}" -f state=closed
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create new "Next Release" milestone
-        uses: octokit/request-action@v3.0.0
-        with:
-          route: POST /repos/${{ github.repository }}/milestones
-          title: Next Release
+        run: gh api -X POST repos/${{ github.repository }}/milestones -f title="Next Release"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:

@@ -1,61 +1,43 @@
-import { describe, beforeEach, vi, it, expect } from "vitest";
+﻿import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
-import geojsonVt from "geojson-vt";
-import vtpbf from "vt-pbf";
+import { provideStore, Store } from "@ngxs/store";
+import polyline from "@mapbox/polyline";
 
 import { RoutingProvider } from "./routing.provider";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { SpatialService } from "./spatial.service";
-import { PmTilesService } from "./pmtiles.service";
 import { ElevationProvider } from "./elevation.provider";
+import { OfflineAreasService } from "./offline-areas.service";
+import { SpatialHelper } from "./spatial.helper";
+import type { OfflineArea } from "../models";
 
-const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
-    const tileindex = geojsonVt(featureCollection);
-    const feature = featureCollection.features[0];
-    let coordinate = [0, 0];
-    if (feature.geometry.type === "LineString") {
-        coordinate = feature.geometry.coordinates[0];
-    } else if (feature.geometry.type === "MultiLineString") {
-        coordinate = feature.geometry.coordinates[0][0];
-    }
-    const xy = SpatialService.toTile(SpatialService.toLatLng(coordinate), 14);
-    const tile = tileindex.getTile(14, Math.floor(xy.x), Math.floor(xy.y));
-    return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
-};
+const encodeShape = (latlngs: [number, number][]) => polyline.encode(latlngs, 6);
+const TILE_AREA: OfflineArea = { type: "Feature", properties: { id: "76-51" }, geometry: SpatialHelper.getTilePolygon({ x: 76, y: 51 }, 7) };
 
+/** Areas that were downloaded along with their routing tiles */
 describe("RoutingProvider", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
-                { provide: ResourcesService, useValue: {} },
+                provideStore([InMemoryReducer]),
                 {
-                    provide: ToastService,
+                    provide: ResourcesService,
                     useValue: {
-                        warning: vi.fn()
+                        routingFailed: "routing-failed",
+                        routingFailedBuySubscription: "buy-subscription",
+                        routingFailedDownloadTheArea: "download-the-area"
                     }
                 },
-                { provide: LoggingService, useValue: { error: () => { } } },
-                { provide: RunningContextService, useValue: {} },
-                {
-                    provide: PmTilesService,
-                    useValue: {
-                        isOfflineFileAvailable: () => Promise.resolve(false)
-                    }
-                },
-                {
-                    provide: ElevationProvider,
-                    useValue: {
-                        updateHeights: () => Promise.resolve()
-                    }
-                },
+                { provide: ToastService, useValue: { warning: vi.fn() } },
+                { provide: LoggingService, useValue: { error: () => { }, info: () => { } } },
+                { provide: RunningContextService, useValue: { isCapacitor: false } },
+                { provide: ElevationProvider, useValue: { updateHeights: () => Promise.resolve() } },
                 GeoJsonParser,
                 RoutingProvider,
                 provideHttpClient(withInterceptorsFromDi()),
@@ -120,29 +102,105 @@ describe("RoutingProvider", () => {
         }
     ));
 
-    it("Should return start and end points when reponse is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
+    it("Should return start and end points when response is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
         async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
-                offlineState: {
-                    isOfflineAvailable: false
-                }
+                offlineState: { isSubscribed: false },
+                inMemoryState: { downloadedAreas: {} }
             });
 
             const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
             mockBackend.expectOne(() => true).flush({});
-            await promise;
             const data = await promise;
             expect(data.length).toBe(2);
         }
     ));
 
-    it("Should return straight route from tiles when getting error response from server and no offline subscription",
+    it("Should return start and end points when getting error response from server and there is no offline routing",
         inject([RoutingProvider, HttpTestingController, Store],
             async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
                 store.reset({
-                    offlineState: {
-                        isOfflineAvailable: false
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                const data = await promise;
+                expect(data.length).toBe(2);
+            }
+        )
+    );
+
+    it("Should warn the user when routing fails and there is no offline routing",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService) => {
+                store.reset({
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalled();
+            }
+        )
+    );
+
+    it("Should suggest buying a subscription when the user is not subscribed",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: { isSubscribed: false },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("buy-subscription");
+            }
+        )
+    );
+
+    it("Should suggest downloading the area when it was never downloaded",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+
+                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
+
+                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("download-the-area");
+            }
+        )
+    );
+
+    it("Should suggest downloading the area when it holds no routing tiles, and not take the root files for one",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
+                store.reset({
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: {
+                        downloadedAreas: {
+                            "76-51": { area: TILE_AREA, files: [], hasRoutingTiles: false },
+                            [OfflineAreasService.ROOT_ID]: { area: OfflineAreasService.createRootArea(), files: [], hasRoutingTiles: false }
+                        }
                     }
                 });
 
@@ -150,263 +208,96 @@ describe("RoutingProvider", () => {
 
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
                 await promise;
-                const data = await promise;
-                expect(data.length).toBe(2);
+                expect(toastService.warning).toHaveBeenCalledWith("download-the-area");
             }
         )
     );
 
-    it("Should return start and end points when getting error response from server and offline is missing",
-        inject([RoutingProvider, HttpTestingController, Store],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
+    it("Should only say that routing failed when the points are in a downloaded area with its routing tiles",
+        inject([RoutingProvider, HttpTestingController, Store, ToastService, RunningContextService],
+            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store, toastService: ToastService,
+                runningContextService: RunningContextService) => {
+                (runningContextService as { isCapacitor: boolean }).isCapacitor = true;
                 store.reset({
-                    offlineState: {
-                        isOfflineAvailable: true,
-                        lastModifiedDate: null
-                    }
-                });
-
-                const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike");
-
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(2);
-            }
-        )
-    );
-
-    it("Should return start and end points when getting error response from server and the points are too far part",
-        inject([RoutingProvider, HttpTestingController, Store],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
-                store.reset({
-                    offlineState: {
-                        isOfflineAvailable: true,
-                        lastModifiedDate: new Date()
-                    }
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: { "76-51": { area: TILE_AREA, files: [], hasRoutingTiles: true } } }
                 });
 
                 const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike");
 
                 mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(2);
+                await promise;
+                expect(toastService.warning).toHaveBeenCalledWith("routing-failed");
             }
         )
     );
 
-    it("Should return a route when getting error response from server and offline is available",
-        inject([RoutingProvider, HttpTestingController, PmTilesService],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.0001],
-                                    [35.0001, 32.0002],
-                                    [35.0001, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "track"
-                            }
-                        }
-                    ]
-                } as GeoJSON.FeatureCollection;
+    it("Should decode the shape of an offline route", () => {
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.001, 35.001], [32.002, 35.002]]) }] }
+        });
 
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
-                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike");
+        expect(latlngs.length).toBe(3);
+        expect(latlngs[0].lat).toBeCloseTo(32, 5);
+        expect(latlngs[0].lng).toBeCloseTo(35, 5);
+        expect(latlngs[2].lat).toBeCloseTo(32.002, 5);
+    });
 
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(3);
+    it("Should concatenate the legs of an offline route", () => {
+        const raw = JSON.stringify({
+            trip: {
+                legs: [
+                    { shape: encodeShape([[32, 35], [32.001, 35.001]]) },
+                    { shape: encodeShape([[32.001, 35.001], [32.002, 35.002]]) }
+                ]
             }
-        )
-    );
+        });
 
-    it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RoutingProvider, HttpTestingController, PmTilesService],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "MultiLineString",
-                                coordinates: [
-                                    [
-                                        [35.0001, 32.0001],
-                                        [35.0001, 32.0002],
-                                        [35.0001, 32.0003]
-                                    ],
-                                    [
-                                        [35.0001, 32.0003],
-                                        [35.0002, 32.0003],
-                                        [35.0003, 32.0003]
-                                    ]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "track"
-                            }
-                        }
-                    ]
-                } as GeoJSON.FeatureCollection;
+        expect(RoutingProvider.parseValhallaResponse(raw).length).toBe(4);
+    });
 
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
-                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+    it("Should set the elevation of an offline route from the samples", () => {
+        // Two points 30 meters apart, i.e. exactly one elevation interval
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.00027, 35]]), elevation: [100, 130] }] }
+        });
 
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike");
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(5);
+        expect(latlngs[0].alt).toBe(100);
+        expect(latlngs[1].alt).toBeCloseTo(130, 0);
+    });
+
+    it("Should interpolate the elevation of an offline route between two samples", () => {
+        // The middle point is roughly half an interval in, so its elevation is between the samples
+        const raw = JSON.stringify({
+            trip: {
+                legs: [{
+                    shape: encodeShape([[32, 35], [32.000135, 35], [32.00027, 35]]),
+                    elevation: [100, 200]
+                }]
             }
-        )
-    );
+        });
 
-    it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RoutingProvider, HttpTestingController, PmTilesService],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.0001],
-                                    [35.0001, 32.0002],
-                                    [35.0001, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "track"
-                            }
-                        },
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.0003],
-                                    [35.0002, 32.0003],
-                                    [35.0003, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "steps"
-                            }
-                        }
-                    ]
-                } as GeoJSON.FeatureCollection;
+        const latlngs = RoutingProvider.parseValhallaResponse(raw);
 
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
-                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
+        expect(latlngs[1].alt).toBeGreaterThan(100);
+        expect(latlngs[1].alt).toBeLessThan(200);
+    });
 
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
+    it("Should not set the elevation of an offline route when there are no samples", () => {
+        const raw = JSON.stringify({
+            trip: { legs: [{ shape: encodeShape([[32, 35], [32.002, 35.002]]) }] }
+        });
 
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(3);
-            }
-        )
-    );
+        expect(RoutingProvider.parseValhallaResponse(raw).every(l => l.alt == null)).toBe(true);
+    });
 
-    it("Should return start and end point when all lines are filtered out",
-        inject([RoutingProvider, HttpTestingController, PmTilesService, Store],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.0003],
-                                    [35.0002, 32.0003],
-                                    [35.0003, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "path"
-                            }
-                        }
-                    ]
-                } as GeoJSON.FeatureCollection;
+    it("Should throw when valhalla returns an error", () => {
+        const raw = JSON.stringify({ code: 171, message: "No suitable edges near location" });
 
-                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-                store.reset({
-                    offlineState: {
-                        isOfflineAvailable: true,
-                        lastModifiedDate: new Date()
-                    }
-                });
-
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD");
-
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(2);
-            }
-        )
-    );
-
-    it("Should return a route between two lines when points are not exactly the same",
-        inject([RoutingProvider, HttpTestingController, PmTilesService],
-            async (router: RoutingProvider, mockBackend: HttpTestingController, db: PmTilesService) => {
-                const featureCollection = {
-                    type: "FeatureCollection",
-                    features: [
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.0001],
-                                    [35.0001, 32.0002],
-                                    [35.0001, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "major"
-                            }
-                        },
-                        {
-                            type: "Feature",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: [
-                                    [35.0001, 32.000305],
-                                    [35.0002, 32.0003],
-                                    [35.0003, 32.0003]
-                                ]
-                            },
-                            properties: {
-                                ihm_class: "minor"
-                            }
-                        }
-                    ]
-                } as GeoJSON.FeatureCollection;
-
-                db.isOfflineFileAvailable = () => Promise.resolve(true);
-                db.getTileByType = () => Promise.resolve(createTileFromFeatureCollection(featureCollection));
-
-                const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike");
-
-                mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
-                const data = await promise;
-                expect(data.length).toBe(5);
-            }
-        )
-    );
+        expect(() => RoutingProvider.parseValhallaResponse(raw)).toThrow("No suitable edges near location");
+    });
 });

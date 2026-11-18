@@ -1,12 +1,20 @@
 @use '@angular/material' as mat;
 
+/* The field is the pill itself, at the 48px height of the toolbar. The corner is half that height rather than a
+   "full" radius, since the outlined field also sizes its side padding from this value. The outline only shows
+   on focus, so at rest the pill matches the borderless menu pill next to it. */
 .search-input-container {
-    width: calc(100vw - 196px);
-    @include mat.all-component-densities(-3);
-}
+    @include mat.form-field-density(-2);
+    @include mat.form-field-overrides((
+        outlined-container-shape: 24px,
+        outlined-outline-color: transparent,
+        outlined-hover-outline-color: transparent
+    ));
 
-.search-input-container.logged-in {
-    width: calc(100vw - 146px);
+    .mat-mdc-form-field-infix {
+        width: auto;
+        min-width: 0;
+    }
 }
 
 .search-result-option {
@@ -21,20 +29,15 @@
     padding-bottom: 5px !important;
 }
 
+.search-result-option .mdc-list-item__primary-text {
+    flex: 1 1 auto;
+    margin-right: 0;
+}
+
 .search-result-option i {
     padding: 0 5px 0 0;
 }
 
 .search-result-option[dir=rtl] i {
     padding: 0 0 0 5px;
-}
-
-@media (width > 600px) {
-    .search-input-container {
-        width: 350px;
-    }
-
-    .search-input-container.logged-in {
-        width: 350px;
-    }
 }

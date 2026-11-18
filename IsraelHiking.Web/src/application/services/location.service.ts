@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable } from "@angular/core";
+import { EventEmitter, inject, computed, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 
 import { GeoLocationService } from "./geo-location.service";
@@ -6,6 +6,7 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { PaceCalculatorService } from "./pace-calculator.service";
 import { RouteStrings } from "./hash.service";
 import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models";
@@ -16,47 +17,91 @@ export type LocationWithBearing = {
     accuracy: number;
 };
 
-@Injectable()
+/**
+ * How long the map takes to turn to a new compass heading. Kept close to the compass event interval, as each
+ * heading interrupts the animation of the one before it and a longer animation leaves the map trailing behind.
+ */
+const COMPASS_ANIMATION_DURATION_MILLISECONDS = 150;
+
+/**
+ * The smallest change in compass heading that turns the map. Without it every reading starts a new animation that
+ * cuts off the one before it, and maplibre only lands the map exactly on the GPS position when an animation runs to
+ * its end, so a map that is never left to finish one wobbles and drifts away from the position.
+ */
+const MIN_COMPASS_BEARING_CHANGE_DEGREES = 3;
+
+/**
+ * How long the map takes to move to a new GPS position. About the time between positions when on the move, so the
+ * map glides from one to the next instead of stopping in between.
+ */
+const GPS_ANIMATION_DURATION_MILLISECONDS = 1000;
+
+/** How long the map takes to move back to the GPS position when it is centered on it again. */
+export const CENTER_ANIMATION_DURATION_MILLISECONDS = 500;
+
+/** The last speed the GPS reported together with a heading, and when it arrived. */
+type GpsSpeedState = {
+    speed: number;
+    timestamp: number;
+};
+
+@Service()
 export class LocationService {
+
+    public readonly changed = new EventEmitter<LocationWithBearing | null>();
+    private lastGpsSpeed: GpsSpeedState = null;
+    private locationWithBearing: LocationWithBearing | null = null;
+
     private readonly geoLocationService = inject(GeoLocationService);
     private readonly deviceOrientationService = inject(DeviceOrientationService);
     private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly loggingService = inject(LoggingService);
+    private readonly paceCalculatorService = inject(PaceCalculatorService);
     private readonly store = inject(Store);
+    private readonly inMemoryStateSignal = this.store.selectSignal((state: ApplicationState) => state.inMemoryState);
+    private readonly pannedTimestampSignal = this.store.selectSignal((state: ApplicationState) => state.inMemoryState.pannedTimestamp);
+    private readonly isPanned = computed(() => this.pannedTimestampSignal() != null);
 
-    public changed = new EventEmitter<LocationWithBearing | null>();
-    private lastSpeed: number = null;
-    private lastSpeedTime: number = null;
-    private locationWithBearing: LocationWithBearing | null = null;
-    private isPanned = false;
+    public readonly isFollowing = computed(() => {
+        const inMemoryState = this.inMemoryStateSignal();
+        return inMemoryState.following &&
+            !this.isPanned() &&
+            !this.selectedRouteService.isEditingRoute() &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_SHARES &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_TRACES &&
+            inMemoryState.currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
+    });
 
     public async initialize() {
         await this.mapService.initializationPromise;
+        this.geoLocationService.restoreTracking();
         this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
             if (!this.isActive() || this.locationWithBearing == null) {
                 return;
             }
-            if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
+            if (this.lastGpsSpeed != null && new Date().getTime() - this.lastGpsSpeed.timestamp < 5000) {
                 return;
             }
-            this.lastSpeed = null;
+            this.lastGpsSpeed = null;
+            if (this.isSmallBearingChange(bearing)) {
+                return;
+            }
             this.locationWithBearing.bearing = bearing;
             this.changed.next(this.locationWithBearing);
-            if (!this.mapService.isMoving() && this.isFollowing()) {
-                this.moveMapToGpsPosition();
+            if (this.isFollowing()) {
+                this.moveMapToGpsPosition(COMPASS_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
         this.geoLocationService.backToForeground.subscribe(() => {
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
-            this.isPanned = pannedTimestamp != null;
-            if (this.isPanned) {
+            if (pannedTimestamp != null) {
                 return;
             }
             if (!this.isActive()) {
@@ -66,7 +111,7 @@ export class LocationService {
                 this.store.dispatch(new ToggleDistanceAction());
             }
             if (this.isFollowing()) {
-                this.moveMapToGpsPosition();
+                this.moveMapToGpsPosition(CENTER_ANIMATION_DURATION_MILLISECONDS);
             }
         });
 
@@ -81,6 +126,7 @@ export class LocationService {
         await this.geoLocationService.disable();
         await this.deviceOrientationService.disable();
         this.locationWithBearing = null;
+        this.paceCalculatorService.clear();
         this.changed.next(this.locationWithBearing);
     }
 
@@ -99,25 +145,20 @@ export class LocationService {
         return this.locationWithBearing?.center;
     }
 
-    public isFollowing(): boolean {
-        const currentUrl = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.currentUrl);
-        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following &&
-            !this.isPanned &&
-            !this.selectedRouteService.isEditingRoute() &&
-            currentUrl !== RouteStrings.ROUTE_SHARES &&
-            currentUrl !== RouteStrings.ROUTE_TRACES &&
-            currentUrl !== RouteStrings.ROUTE_PUBLIC_ROUTES;
-    }
-
-    public moveMapToGpsPosition() {
+    public moveMapToGpsPosition(duration: number) {
         if (this.locationWithBearing == null) {
             return;
         }
         const center = this.locationWithBearing.center;
-        const bearing = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).keepNorthUp
+        const bearing = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isKeepNorthUp
             ? 0
             : this.locationWithBearing.bearing;
-        this.mapService.moveToWithCurrentZoom(center, bearing);
+        this.mapService.moveToWithCurrentZoom(center, bearing, duration);
+    }
+
+    private isSmallBearingChange(bearing: number): boolean {
+        const delta = Math.abs(((bearing - this.locationWithBearing.bearing + 540) % 360) - 180);
+        return delta < MIN_COMPASS_BEARING_CHANGE_DEGREES;
     }
 
     private handlePositionChange(position: GeolocationPosition) {
@@ -127,8 +168,7 @@ export class LocationService {
         const validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         let bearing = this.locationWithBearing?.bearing || 0;
         if (validHeading) {
-            this.lastSpeed = position.coords.speed;
-            this.lastSpeedTime = new Date().getTime();
+            this.lastGpsSpeed = { speed: position.coords.speed, timestamp: new Date().getTime() };
             bearing = position.coords.heading;
         }
         if (isNaN(position.coords.latitude) || isNaN(position.coords.longitude)) {
@@ -144,9 +184,10 @@ export class LocationService {
             bearing,
             accuracy: position.coords.accuracy
         };
+        this.paceCalculatorService.updatePace(position.coords.speed);
         this.changed.next(this.locationWithBearing);
-        if (!this.mapService.isMoving() && this.isFollowing()) {
-            this.moveMapToGpsPosition();
+        if (this.isFollowing()) {
+            this.moveMapToGpsPosition(GPS_ANIMATION_DURATION_MILLISECONDS);
         }
     }
 

@@ -1,7 +1,7 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, computed, signal, afterNextRender } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatButton } from "@angular/material/button";
+import { MatDivider } from "@angular/material/divider";
 import { MatMenuTrigger, MatMenu, MatMenuItem } from "@angular/material/menu";
 import { MatDialog } from "@angular/material/dialog";
 import { timer } from "rxjs";
@@ -9,8 +9,8 @@ import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { encode } from "base64-arraybuffer";
 import { Store } from "@ngxs/store";
-import { EmailComposer } from "capacitor-email-composer"
-import platform from "platform";
+import { MailComposer } from "@capawesome/capacitor-mail-composer"
+import { BatteryOptimization } from "@capawesome-team/capacitor-android-battery-optimization";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -22,7 +22,6 @@ import { LayersService } from "../services/layers.service";
 import { HashService } from "../services/hash.service";
 import { PurchaseService } from "../services/purchase.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
-import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { AnalyticsDirective } from "../directives/analytics.directive";
@@ -32,12 +31,9 @@ import type { UserInfo, ApplicationState } from "../models";
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
-    imports: [MatButton, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
+    imports: [MatButton, MatDivider, AnalyticsDirective, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, RouterLinkActive]
 })
 export class MainMenuComponent {
-
-    public userInfo: UserInfo = null;
-    public drawingVisible = false;
 
     public readonly resources = inject(ResourcesService);
 
@@ -52,17 +48,27 @@ export class MainMenuComponent {
     private readonly purchaseService = inject(PurchaseService);
     private readonly store = inject(Store);
 
+    public userInfo = this.store.selectSignal((state: ApplicationState) => state.userState.userInfo);
+    private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+
+    public readonly isLoggedIn = computed(() => this.userInfo() != null);
+
+    /**
+     * Whether the signed in user is known yet. The content routes are prerendered at build time,
+     * where there is never a user, so the prerendered html must not claim the visitor is signed out -
+     * otherwise a signed in visitor stares at a "sign in" button until the persisted state is read
+     * out of indexeddb. This stays false through hydration so the client's first render still matches
+     * the prerendered markup, and flips right after it.
+     */
+    public readonly isUserKnown = signal(false);
+
     constructor() {
-        this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
+        afterNextRender(() => this.isUserKnown.set(true));
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
             });
         }
-    }
-
-    public isLoggedIn() {
-        return this.userInfo != null;
     }
 
     public isApp() {
@@ -95,13 +101,13 @@ export class MainMenuComponent {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        const baseLayer = this.layersService.getSelectedBaseLayer();
+        const baseLayer = this.layersService.selectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
         const subscription = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
-        const logs = await this.loggingService.getLog();
-        const userInfo = this.userInfo || {
+        const generalLogs = await this.loggingService.getLog("general");
+        const userInfo = this.userInfo() || {
             displayName: "non-registered user",
             id: "----"
         } as UserInfo;
@@ -110,24 +116,30 @@ export class MainMenuComponent {
             `Username: ${userInfo.displayName}`,
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-            `Visible overlays: ${JSON.stringify(this.layersService.getAllOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
+            `Visible overlays: ${JSON.stringify(this.layersService.allOverlays().filter(o => this.layersService.isOverlayVisible(o)))}`,
             ""
         ].join("\n");
         const subject = "Issue reported by " + userInfo.displayName;
         try {
             if (!this.runningContextService.isCapacitor) {
 
+                const { default: Bowser } = await import("bowser");
+                const browserInfo = Bowser.parse(navigator.userAgent);
                 infoString += [
-                    `Browser: ${platform.name} ${platform.version}`,
-                    `OS: ${platform.os}`,
+                    `Browser: ${browserInfo.browser.name} ${browserInfo.browser.version}`,
+                    `OS: ${browserInfo.os.name} ${browserInfo.os.version}`,
                     ""
                 ].join("\n");
-                await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
+                await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + generalLogs);
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
+            if (!(await MailComposer.canComposeMail()).canCompose) {
+                this.toastService.warning(this.resources.misconfiguredMailApp);
+                return;
+            }
             const info = await Device.getInfo();
-            const downloadedTiles = this.store.selectSnapshot((s: ApplicationState) => s.offlineState.downloadedTiles);
+            const downloadedAreas = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.downloadedAreas);
             infoString += [
                 `Manufacture: ${info.manufacturer}`,
                 `Model: ${info.model}`,
@@ -135,24 +147,30 @@ export class MainMenuComponent {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`,
                 `Has Subscription: ${this.store.selectSnapshot((s: ApplicationState) => s.offlineState.isSubscribed)}`,
-                downloadedTiles == null ? "" : `Downloaded Tiles: ${Object.keys(downloadedTiles)}`
+                `Downloaded Areas: ${Object.values(downloadedAreas).map(a => a.area.properties.name).join(", ")}`
             ].join("\n");
-            const logFileUri = await this.fileService.storeFileToCache("log.txt", logs, false);
+            if (!this.runningContextService.isIos) {
+                const { enabled } = await BatteryOptimization.isBatteryOptimizationEnabled();
+                infoString += `\nBattery Optimization Enabled: ${enabled}`;
+            }
+            // The log goes over as a file - inline it takes the saved plugin call over android's
+            // binder limit and crashes the app when the mail app opens. The info is small enough.
+            const generalLogFileUri = await this.fileService.storeFileToCache("log.txt", generalLogs, false);
+            const gpsLogFileUri = await this.fileService.storeFileToCache("gps-log.txt", await this.loggingService.getLog("gps"), false);
             const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
 
-            EmailComposer.open({
+            MailComposer.composeMail({
                 to: ["support@mapeak.com"],
                 subject: subject,
                 body: this.resources.reportAnIssueInstructions,
                 attachments: [{
-                    type: "absolute",
-                    name: "log.txt",
-                    path: logFileUri.replace("file://", "")
+                    path: generalLogFileUri
                 }, {
-                    type: "base64",
+                    path: gpsLogFileUri
+                }, {
                     name: `info-${userInfo.id}.txt`,
-                    path: infoBase64
+                    data: infoBase64
                 }]
             });
         } catch (ex) {
@@ -167,13 +185,8 @@ export class MainMenuComponent {
         LanguageDialogComponent.openDialog(this.dialog);
     }
 
-    public openConfigurationDialog() {
-        this.dialog.open(ConfigurationDialogComponent, { width: "480px" });
-    }
-
     public isOfflineDownloadAvailable() {
-        return this.runningContextService.isCapacitor &&
-            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isSubscribed;
+        return this.runningContextService.isCapacitor && this.isSubscribed();
     }
 
     public isPurchaseAvailable() {

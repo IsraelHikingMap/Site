@@ -1,15 +1,17 @@
-﻿<mat-form-field class="search-input-container" [class.logged-in]="isLoggedIn()" subscriptSizing="dynamic">
+<div matAutocompleteOrigin #searchOrigin="matAutocompleteOrigin" class="box-border flex h-12 w-full items-center rounded-full bg-surface text-on-surface shadow-md">
+<mat-form-field class="search-input-container w-full" subscriptSizing="dynamic">
+  <i matPrefix class="fa icon-search ms-3 me-3 opacity-60"></i>
   @if (!isPoisSearch()) {
   <input type="text" matInput #searchInput class="control-container-item" [placeholder]="placeholder()"
     [dir]="resources.getDirection(searchInput.value)" (input)="updateSearchTerm($event.target.value)">
   }
   @else {
   <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom"
-    [matAutocomplete]="autoFrom" [placeholder]="placeholder()" [dir]="resources.getDirection(fromContext.searchTerm)"
-    (focus)="focusOnSearchInput()">
-  <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete"
+    [matAutocomplete]="autoFrom" [matAutocompleteConnectedTo]="searchOrigin" [placeholder]="placeholder()" [dir]="resources.getDirection(searchTerm())"
+    (focus)="selectSearchTermOnFocus()">
+  <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" class="mt-2"
     [displayWith]="displayResults">
-    @for (result of fromContext.searchResults; track result.id) {
+    @for (result of searchResults(); track result.id) {
     <mat-option [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']"
       [dir]="resources.getDirection(result.title)">
       @if (result.hasExtraData) {
@@ -24,3 +26,4 @@
   </mat-autocomplete>
   }
 </mat-form-field>
+</div>

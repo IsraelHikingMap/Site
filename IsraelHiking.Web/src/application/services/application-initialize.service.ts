@@ -1,10 +1,11 @@
-import { Injectable, inject } from "@angular/core";
+import { ErrorHandler, inject, Service } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngxs/store";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
+import { PrivacyDialogComponent } from "../components/dialogs/privacy-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { ThemeService } from "./theme.service";
@@ -22,20 +23,19 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
-import { OverpassTurboService } from "./overpass-turbo.service";
 import { ApplicationUpdateService } from "./application-update.service";
 import { LocationService } from "./location.service";
 import { HashService } from "./hash.service";
 import { AnalyticsService } from "./analytics.service";
-import { MapService } from "./map.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { CarService } from "./car.service";
 import type { ApplicationState } from "../models";
 
-@Injectable()
+@Service()
 export class ApplicationInitializeService {
 
     private readonly dialog = inject(MatDialog);
+    private readonly errorHandler = inject(ErrorHandler);
     private readonly resources = inject(ResourcesService);
     private readonly loggingService = inject(LoggingService);
     private readonly screenService = inject(ScreenService);
@@ -53,24 +53,64 @@ export class ApplicationInitializeService {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly offlineFilesDownloadService = inject(OfflineFilesDownloadService);
     private readonly geoLocationService = inject(GeoLocationService);
-    private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly applicationUpdateService = inject(ApplicationUpdateService);
     private readonly locationService = inject(LocationService);
     private readonly hashService = inject(HashService);
     private readonly analyticsService = inject(AnalyticsService);
-    private readonly mapService = inject(MapService);
     private readonly selectedRouteService = inject(SelectedRouteService);
     private readonly carService = inject(CarService);
     private readonly store = inject(Store);
 
+    /**
+     * Opens whichever dialog the user is due, at most one of them.
+     * The use app and privacy dialogs are both anchored to the bottom of the screen without a
+     * backdrop, so opening two of them would leave one covering the other.
+     */
+    private openStartupDialog() {
+        if (typeof window === "undefined" || this.runningContextService.isIFrame) {
+            return;
+        }
+        const isShowOnboarding = this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowOnboarding;
+        if (this.runningContextService.isCapacitor) {
+            if (isShowOnboarding) {
+                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
+            }
+            return;
+        }
+        if (isShowOnboarding) {
+            PrivacyDialogComponent.openDialog(this.dialog, this.runningContextService, this.resources);
+        } else if (this.runningContextService.isMobile) {
+            if (this.runningContextService.isFacebook) {
+                FacebookWarningDialogComponent.openDialog(this.dialog);
+            } else {
+                UseAppDialogComponent.openDialog(this.dialog);
+            }
+        }
+    }
+
+    /**
+     * Angular's error handler only sees errors it is given, and running zoneless means a rejected
+     * promise - an async event handler that threw, mainly - isn't one of them, so such a failure
+     * would only reach the browser's console and never the log we ask users to send us.
+     */
+    private logUnhandledRejections() {
+        if (typeof window === "undefined") {
+            return;
+        }
+        window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+            this.errorHandler.handleError(event.reason);
+        });
+    }
+
     public async initialize() {
         try {
+            const timeToBootstrap = Math.round(performance.now());
             await this.loggingService.initialize();
+            this.logUnhandledRejections();
             this.loggingService.info("---------------------------------------");
-            this.loggingService.info("Starting Mapeak Application Initialization");
+            this.loggingService.info(`Starting Mapeak Application Initialization, ${timeToBootstrap} ms after the page started loading`);
             await this.databaseService.initialize();
             this.analyticsService.initialize();
-            this.overpassTurboService.initialize();
             this.screenService.initialize();
             this.themeService.initialize();
             await this.resources.initialize();
@@ -81,29 +121,17 @@ export class ApplicationInitializeService {
             this.hashService.initialize();
             this.dragAndDropService.initialize();
             this.carService.initialize();
-            await this.mapService.initialize();
-            if (this.runningContextService.isMobile
-                && !this.runningContextService.isCapacitor
-                && !this.runningContextService.isIFrame) {
-                if (this.runningContextService.isFacebook) {
-                    FacebookWarningDialogComponent.openDialog(this.dialog);
-                } else {
-                    UseAppDialogComponent.openDialog(this.dialog);
-                }
-            } else if (this.runningContextService.isCapacitor
-                && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
-                IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
-            }
+            this.openStartupDialog();
             this.selectedRouteService.initialize();
             this.poiService.initialize(); // do not wait for it to complete
-            this.recordedRouteService.initialize();
+            await this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
-            await this.offlineFilesDownloadService.initialize();
+            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             this.locationService.initialize();
-            await this.applicationUpdateService.initialize(); // Needs to be last to make sure app gets updated
-            this.loggingService.info("Finished Mapeak Application Initialization");
+            this.applicationUpdateService.initialize(); // no need to wait for it to complete
+            this.loggingService.info(`Finished Mapeak Application Initialization, ${Math.round(performance.now())} ms after the page started loading`);
         } catch (ex) {
             if (this.runningContextService.isIFrame) {
                 return;

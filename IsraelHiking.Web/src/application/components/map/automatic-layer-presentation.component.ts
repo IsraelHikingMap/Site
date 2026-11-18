@@ -1,44 +1,48 @@
 import { Component, OnInit, OnChanges, SimpleChanges, OnDestroy, OutputRefSubscription, inject, input } from "@angular/core";
-import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Subject, mergeMap } from "rxjs";
+import { MapComponent, MapService } from "@maplibre/ngx-maplibre-gl";
+import { Subject, firstValueFrom, mergeMap, skip } from "rxjs";
 import { Store } from "@ngxs/store";
-import type { SourceSpecification, LayerSpecification } from "maplibre-gl";
+import type { SourceSpecification, LayerSpecification, StyleSpecification } from "maplibre-gl";
 
-import { ResourcesService } from "../../services/resources.service";
 import { DefaultStyleService } from "../../services/default-style.service";
+import { ResourcesService } from "../../services/resources.service";
 import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models";
+
+/**
+ * The layer types maplibre renders into a terrain tile's drape texture. Any other type ends the run of draped
+ * layers, and the next draped layer after it starts a new one, costing another texture per terrain tile.
+ */
+const DRAPED_LAYER_TYPES = new Set(["background", "fill", "line", "raster", "hillshade", "color-relief"]);
 
 @Component({
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
-    public visible = input<boolean>();
-    public before = input<string>();
-    public isBaselayer = input<boolean>();
-    public layerData = input<EditableLayer>();
-    public allowOffline = input<boolean>();
+    public readonly visible = input<boolean>();
+    public readonly before = input<string>();
+    public readonly isBaselayer = input<boolean>();
+    public readonly layerData = input<EditableLayer>();
+    public readonly allowOffline = input<boolean>();
 
-    private subscriptions: OutputRefSubscription[] = [];
+    private readonly subscriptions: OutputRefSubscription[] = [];
     private jsonSourcesIds: string[] = [];
     private jsonLayersIds: string[] = [];
-    private mapLoadedPromise: Promise<void>;
+    private readonly mapLoadedPromise: Promise<void>;
     private currentLanguageCode: LanguageCode;
-    private recreateQueue = new Subject<() => Promise<void>>();
+    private readonly recreateQueue = new Subject<() => Promise<void>>();
+    private isDestroyed = false;
 
-    public readonly resources = inject(ResourcesService);
 
     private readonly mapComponent = inject(MapComponent);
+    private readonly mapService = inject(MapService);
     private readonly defaultStyleService = inject(DefaultStyleService);
+    private readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
 
     constructor() {
         this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
-        this.mapLoadedPromise = new Promise((resolve, _) => {
-            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
-                resolve();
-            }));
-        });
+        this.mapLoadedPromise = firstValueFrom(this.mapService.mapLoaded$);
     }
 
     public ngOnInit() {
@@ -50,18 +54,19 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             }
             this.currentLanguageCode = language.code;
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.offlineState.downloadedTiles).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.downloadedAreas).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.units).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.theme).subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.effectiveTheme).pipe(skip(1)).subscribe(() => {
             this.addLayerRecreationQuqueItem(this.layerData(), this.layerData());
         }));
     }
 
     public ngOnDestroy() {
+        this.isDestroyed = true;
         this.addLayerRecreationQuqueItem(this.layerData(), null);
         this.recreateQueue.complete();
         for (const subscription of this.subscriptions) {
@@ -78,7 +83,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private updateSourcesAndLayers(layerData: LayerData, sources: Record<string, SourceSpecification>, layers: LayerSpecification[]) {
-        if (!this.visible()) {
+        if (!this.visible() || this.isDestroyed) {
             return;
         }
         for (let sourceKey of Object.keys(sources)) {
@@ -89,8 +94,13 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.mapComponent.mapInstance.addSource(sourceKey, source);
             this.jsonSourcesIds.push(sourceKey);
         }
+        // The style goes in as two chunks that keep its order: everything up to its first non-draped layer joins
+        // the draped region, the rest goes after it. A style that is all lines and fills has no second chunk,
+        // one that starts with a symbol has no first.
+        const beforeDraped = this.isBaselayer() ? this.resources.endOfBaseDrapedLayers : this.resources.endOfOverlaysDrapedLayers;
+        let reachedNonDraped = false;
         for (const layer of layers) {
-            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as any)["IHM:overlay"]) {
+            if (!this.isBaselayer() && layer.metadata && !(layer.metadata as Record<string, unknown>)["IHM:overlay"]) {
                 continue;
             }
             if (!this.isBaselayer() && layer.type === "background") {
@@ -100,13 +110,17 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
                 layer.id = layerData.key + "_" + layer.id;
                 layer.source = layerData.key + "_" + layer.source;
             }
-            this.mapComponent.mapInstance.addLayer(layer, this.before());
+            if (reachedNonDraped || !DRAPED_LAYER_TYPES.has(layer.type)) {
+                reachedNonDraped = true;
+                this.mapComponent.mapInstance.addLayer(layer, this.before());
+            } else {
+                this.mapComponent.mapInstance.addLayer(layer, beforeDraped);
+            }
             this.jsonLayersIds.push(layer.id);
         }
     }
 
-    private async createLayer(layerData: EditableLayer) {
-        const styleLike = await this.defaultStyleService.getSourcesAndLayers(layerData, this.visible(), this.allowOffline() ? "allow-offline" : "online-only");
+    private createLayer(layerData: EditableLayer, styleLike: StyleSpecification) {
         this.updateSourcesAndLayers(layerData, styleLike.sources, styleLike.layers);
 
         if (this.isBaselayer()) {
@@ -128,6 +142,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     /**
      * This adds a recreate method to a queue that will run every time the previous recreate finishes.
      * This allows avoiding a race condition between the init and changes of this component.
+     * The new style is fetched before the old layer is removed, so the map keeps drawing while a slow network is waited on.
      * @param oldLayer - the old layer data to remove
      * @param newLayer - the new layer data to add
      */
@@ -136,11 +151,14 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             if (!this.mapComponent.mapInstance?.loaded()) {
                 await this.mapLoadedPromise;
             }
+            const styleLike = newLayer == null
+                ? null
+                : await this.defaultStyleService.getSourcesAndLayers(newLayer, this.visible(), this.allowOffline() ? "allow-offline" : "online-only");
             if (oldLayer != null) {
                 this.removeLayer();
             }
             if (newLayer != null) {
-                await this.createLayer(newLayer);
+                this.createLayer(newLayer, styleLike);
             }
         });
     }

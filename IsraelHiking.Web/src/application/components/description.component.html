@@ -1,14 +1,26 @@
 <div class="flex flex-row">
-    <p class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(description)"
-        [dir]="resources.getDirection(description)">
-        {{description}}
+    <p class="w-full whitespace-pre-line" [ngClass]="resources.getTextAlignment(description())"
+        [dir]="resources.getDirection(description())">
+        {{description()}}
     </p>
+    @if (canReadOutLoud()) {
+    <button mat-button class="shrink-0 min-w-[unset]! px-2!" (click)="toggleReadOutLoud()"
+        [matTooltip]="isReadingOutLoud() ? resources.stopReadingOutLoud : resources.readOutLoud"
+        matTooltipPosition="below" analyticsOn="click" analyticsCategory="Description" analyticsLabel="Read out loud">
+        <i class="fa fa-action" [ngClass]="isReadingOutLoud() ? 'icon-stop' : 'icon-volume-up'"></i>
+    </button>
+    }
 </div>
-@if (showToggleTranslation) {
+@if (isTranslating()) {
+<div class="flex flex-row items-center justify-center gap-2 opacity-70">
+    <mat-spinner diameter="14"></mat-spinner>
+    <span class="text-sm">{{resources.translating}}</span>
+</div>
+} @else if (showToggleTranslation()) {
 <div class="flex flex-row cursor-pointer" (click)="toggleTranslation()" analyticsOn="click"
     analyticsCategory="Description" analyticsLabel="Toggle translation">
     <span class="w-full text-sm text-center">
-        {{showingTranslated ? resources.translatedBy : resources.clickToTranslate}}
+        {{showingTranslated() ? resources.translated : resources.clickToTranslate}}
     </span>
 </div>
 }

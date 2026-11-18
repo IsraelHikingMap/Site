@@ -40,7 +40,7 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one marker", inject([GpxDataContainerConverterService],
+    it("Should roundtrip DataContainer with one marker", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -83,7 +83,50 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one route", inject([GpxDataContainerConverterService],
+    it("Should roundtrip xml special characters without escaping them twice", inject([GpxDataContainerConverterService],
+        async (service: GpxDataContainerConverterService) => {
+            const gpxBase64String = await service.toGpx({
+                baseLayer: {
+                    address: "address",
+                    key: "key",
+                    maxZoom: 1,
+                    minZoom: 0,
+                    opacity: 1
+                },
+                northEast: { lat: 0, lng: 0 },
+                southWest: { lat: 0, lng: 0 },
+                overlays: [],
+                routes: [
+                    {
+                        id: "id",
+                        description: "quote \" and 'apos'",
+                        name: "R & D <x>",
+                        segments: [],
+                        markers: [
+                            {
+                                description: "d > e",
+                                title: "A & B <c>",
+                                type: "type",
+                                latlng: { lat: 1, lng: 2, alt: 3 },
+                                urls: [{ url: "http://a?b=1&c=2", text: "t & t", mimeType: "image/jpeg" }]
+                            }
+                        ]
+                    }
+                ]
+            });
+            const gpxString = await new Response(decode(gpxBase64String)).text();
+            expect(gpxString).toContain("<name>A &amp; B &lt;c&gt;</name>");
+            expect(gpxString).not.toContain("&amp;amp;");
+            const dataContainer = await service.toDataContainer(gpxString);
+            const marker = dataContainer.routes[0].markers[0];
+            expect(marker.title).toBe("A & B <c>");
+            expect(marker.description).toBe("d > e");
+            expect(marker.urls[0].url).toBe("http://a?b=1&c=2");
+            expect(marker.urls[0].text).toBe("t & t");
+        }
+    ));
+
+    it("Should roundtrip DataContainer with one route", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -143,7 +186,7 @@ describe("GpxDataContainerConverterService", () => {
         }
     ));
 
-    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not created in this site",
+    it("Should roundtrip DataContainer with one route and split it - pretend the GPX was not created in this site",
         inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
             const gpxBase64String = await service.toGpx({
                 baseLayer: {
@@ -200,7 +243,7 @@ describe("GpxDataContainerConverterService", () => {
         })
     );
 
-    it("Should regect invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
+    it("Should reject invalid GPX", inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         const gpxString = `<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx></gpi>`;
         const promise = service.toDataContainer(gpxString);

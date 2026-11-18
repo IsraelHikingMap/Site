@@ -1,96 +1,94 @@
-﻿<div class="sidebar-header flex flex-row justify-center items-center sticky top-0 z-10 bg-surface"
-  [dir]="resources.direction">
-  <div class="flex-1 text-center text-xl">{{resources.layers}}</div>
-  <button mat-button class="w-1/6" type="button" (click)="close()" tabindex="-1"><i
-      class="fa fa-lg icon-close"></i></button>
+<div class="sticky top-0 z-10 bg-surface px-4 pt-2 pb-1" [dir]="resources.direction">
+  <div class="flex flex-row items-center gap-2">
+    <h2 class="m-0 flex-1 text-xl font-normal">{{resources.mapsAndOverlays}}</h2>
+    <button mat-icon-button type="button" (click)="close()" [attr.aria-label]="resources.close" tabindex="-1">
+      <i class="fa icon-close"></i>
+    </button>
+  </div>
 </div>
-<div [dir]="resources.direction">
+<div class="layers-sidebar pb-2" [dir]="resources.direction">
   <mat-accordion multi="true">
-    <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')"
+    <mat-expansion-panel class="overflow-visible!" [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')"
       (closed)="collapse('Base Layers')">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <div class="flex flex-row w-full">
-            <p class="w-full">{{resources.baseLayers}}</p>
-          </div>
-        </mat-panel-title>
+      <mat-expansion-panel-header class="sticky! top-13 z-5 bg-surface">
+        <mat-panel-title>{{resources.baseMaps}}</mat-panel-title>
       </mat-expansion-panel-header>
-      @for (baseLayer of defaultBaseLayers; track baseLayer.key) {
-      <div class="flex flex-row">
-        <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
-          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
-          <span><i class="fa"
-              [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
-          <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
-        </button>
-        <div class="w-1/12">
-          <button mat-button class="w-full short-button" (click)="openLegend(baseLayer)"
-            matTooltip="{{resources.legend}}" matTooltipPosition="before" analyticsOn="click" analyticsCategory="Layers"
-            analyticsLabel="Open legend {{baseLayer.key}}"><i class="fa icon-info"></i></button>
-        </div>
+      <div class="grid grid-cols-3 gap-1">
+        @for (baseLayer of defaultBaseLayers(); track baseLayer.key) {
+        <layer-tile [label]="resources.translate(baseLayer.key)" [thumbnail]="getThumbnail(baseLayer)"
+          [selected]="isBaseLayerSelected(baseLayer)" (pick)="selectBaseLayer(baseLayer)" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
+          @if (hasLegend(baseLayer)) {
+          <button mat-icon-button class="tile-action" (click)="$event.stopPropagation(); openLegend(baseLayer)"
+            matTooltip="{{resources.legend}}" [attr.aria-label]="resources.legend" analyticsOn="click"
+            analyticsCategory="Layers" analyticsLabel="Open legend {{baseLayer.key}}">
+            <i class="fa icon-info-circle"></i>
+          </button>
+          }
+        </layer-tile>
+        }
+        @for (baseLayer of lockedBaseLayers(); track baseLayer.key) {
+        <layer-tile [label]="resources.translate(baseLayer.key)" [thumbnail]="getThumbnail(baseLayer)" [locked]="true"
+          [matTooltip]="resources.availableWithMapeakPro" (pick)="orderSubscription()" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Locked base layer {{baseLayer.key}}"></layer-tile>
+        }
       </div>
-      }
-      @for (baseLayer of (baseLayers$ | async); track baseLayer.key) {
-      <div class="flex flex-row">
-        <button mat-button class="row-button flex-1 justify-start!" (click)="selectBaseLayer(baseLayer)"
-          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
-          <span><i class="fa"
-              [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
-          <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
-        </button>
-        <div class="w-1/12">
-          <button mat-button class="w-full short-button" (click)="editBaseLayer($event, baseLayer)"
-            matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" analyticsOn="click"
-            analyticsCategory="Layers" analyticsLabel="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
-        </div>
+      <div class="mt-1 flex flex-col">
+        @for (baseLayer of baseLayers(); track baseLayer.key) {
+        <layer-tile variant="row" [label]="resources.translate(baseLayer.key)" [thumbnail]="getThumbnail(baseLayer)"
+          [selected]="isBaseLayerSelected(baseLayer)" (pick)="selectBaseLayer(baseLayer)" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Select base layer {{baseLayer.key}}">
+          <button mat-icon-button (click)="editLayer($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}"
+            [attr.aria-label]="resources.baseLayerProperties" analyticsOn="click" analyticsCategory="Layers"
+            analyticsLabel="Edit base layer">
+            <i class="fa icon-ellipsis-v"></i>
+          </button>
+        </layer-tile>
+        }
       </div>
-      }
-      <button mat-button (click)="addBaseLayer($event)" analyticsOn="click" analyticsCategory="Layers"
-        analyticsLabel="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
+      <button mat-stroked-button type="button" (click)="openManage(false)" [matBadge]="hiddenBaseLayersCount()"
+        [matBadgeHidden]="hiddenBaseLayersCount() === 0" class="mt-2 brand-badge"
+        analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Manage maps from base layers">
+        <i class="fa fa-lg icon-sliders"></i> {{resources.manage}}
+      </button>
     </mat-expansion-panel>
-    <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')"
+    <mat-divider></mat-divider>
+    <mat-expansion-panel class="overflow-visible!" [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')"
       (closed)="collapse('Overlays')">
-      <mat-expansion-panel-header>
-        <div class="flex flex-row w-full">
-          <div class="w-4/5">
-            <p class="w-full">{{resources.overlays}}</p>
-          </div>
-          <div class="w-1/5">
-            <button mat-button class="w-full h-full!" (click)="hideAllOverlays($event)" analyticsOn="click"
-              analyticsCategory="Layers" analyticsLabel="Hide all overlays"><i class="fa fa-lg"
-                [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
-          </div>
-        </div>
+      <mat-expansion-panel-header class="sticky! top-13 z-5 bg-surface">
+        <mat-panel-title>{{resources.overlays}}</mat-panel-title>
+        <button mat-icon-button (click)="hideAllOverlays($event)" [attr.aria-label]="resources.overlays"
+          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Hide all overlays">
+          <i class="fa" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i>
+        </button>
       </mat-expansion-panel-header>
-      @for (overlay of defaultOverlays; track overlay.key) {
-      <div class="flex flex-row">
-        <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)"
-          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">
-          <span><i class="fa"
-              [ngClass]="{'icon-eye': isOverlayVisible(overlay), 'icon-eye-slash': !isOverlayVisible(overlay)}"></i></span>
-          <span class="break-all">{{resources.translate(overlay.key)}}</span>
-        </button>
+      <div class="grid grid-cols-3 gap-1">
+        @for (overlay of defaultOverlays; track overlay.key) {
+        <layer-tile [label]="resources.translate(overlay.key)" [thumbnail]="getThumbnail(overlay)"
+          [selected]="isOverlayVisible(overlay)" (pick)="toggleVisibility(overlay)" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}"></layer-tile>
+        }
       </div>
-      }
-      @for (overlay of (overlays$ | async); track overlay.key) {
-      <div class="flex flex-row">
-        <button mat-button class="row-button flex-1 justify-start!" (click)="toggleVisibility(overlay)"
-          analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">
-          <span><i class="fa"
-              [ngClass]="{'icon-eye': isOverlayVisible(overlay), 'icon-eye-slash': !isOverlayVisible(overlay)}"></i></span>
-          <span class="break-all">{{resources.translate(overlay.key)}}</span>
-        </button>
-        <div class="w-1/12">
-          <button mat-button class="w-full short-button" (click)="editOverlay($event, overlay)"
-            matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" analyticsOn="click"
-            analyticsCategory="Layers" analyticsLabel="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
-        </div>
+      <div class="mt-1 flex flex-col">
+        @for (overlay of overlays(); track overlay.key) {
+        <layer-tile variant="row" [label]="resources.translate(overlay.key)" [thumbnail]="getThumbnail(overlay)"
+          [selected]="isOverlayVisible(overlay)" (pick)="toggleVisibility(overlay)" analyticsOn="click"
+          analyticsCategory="Layers" analyticsLabel="Toggle overlay visibility {{overlay.key}}">
+          <button mat-icon-button (click)="editLayer($event, overlay, true)" matTooltip="{{resources.overlayProperties}}"
+            [attr.aria-label]="resources.overlayProperties" analyticsOn="click" analyticsCategory="Layers"
+            analyticsLabel="Edit overlay">
+            <i class="fa icon-ellipsis-v"></i>
+          </button>
+        </layer-tile>
+        }
       </div>
-      }
-      <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" analyticsOn="click"
-        analyticsCategory="Layers" analyticsLabel="Add overlay"><i class="fa fa-lg icon-plus"></i>
-        {{resources.addOverlay}} </button>
+      <button mat-stroked-button type="button" (click)="openManage(true)" [matBadge]="hiddenOverlaysCount()"
+        [matBadgeHidden]="hiddenOverlaysCount() === 0" class="mt-2 brand-badge"
+        analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Manage maps from overlays">
+        <i class="fa fa-lg icon-sliders"></i> {{resources.manage}}
+      </button>
     </mat-expansion-panel>
+    <mat-divider></mat-divider>
     <points-of-interest-categories></points-of-interest-categories>
   </mat-accordion>
 </div>

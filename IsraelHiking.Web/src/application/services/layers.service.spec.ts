@@ -2,22 +2,23 @@ import { describe, beforeEach, vi, it, expect, type Mock } from "vitest";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { inject, TestBed } from "@angular/core/testing";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { Urls } from "../urls";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { LayersService } from "./layers.service";
 import { SetUserInfoAction, UserInfoReducer } from "../reducers/user.reducer";
+import { OfflineReducer } from "../reducers/offline.reducer";
 import { AddBaseLayerAction, AddOverlayAction, LayersReducer, RemoveBaseLayerAction, RemoveOverlayAction, SelectBaseLayerAction, SetOverlaysVisibilityAction, UpdateBaseLayerAction, UpdateOverlayAction } from "../reducers/layers.reducer";
-import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
+import { DEFAULT_BASE_LAYERS, SATELLITE_MAP } from "../reducers/initial-state";
 import type { EditableLayer, LayerData } from "../models";
 
 describe("LayersService", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([LayersReducer, UserInfoReducer])],
             providers: [
+                provideStore([LayersReducer, UserInfoReducer, OfflineReducer]),
                 LayersService,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
@@ -44,6 +45,9 @@ describe("LayersService", () => {
         vi.spyOn(store, "dispatch");
 
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [],
                 baseLayers: []
@@ -60,6 +64,9 @@ describe("LayersService", () => {
         vi.spyOn(store, "dispatch");
 
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [],
                 baseLayers: []
@@ -78,6 +85,9 @@ describe("LayersService", () => {
         const spy = vi.spyOn(store, "dispatch");
 
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             userState: {
                 userInfo: null
             },
@@ -103,8 +113,7 @@ describe("LayersService", () => {
             { key: "overlay3", address: "https://overlay3", isOverlay: true }
         ]);
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetUserInfoAction);
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(SetUserInfoAction));
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(UpdateBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(AddBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateOverlayAction);
@@ -114,9 +123,68 @@ describe("LayersService", () => {
         expect(vi.mocked(spy).mock.calls[7][0]).toBeInstanceOf(RemoveBaseLayerAction);
     }));
 
+    it("should not offer the subscribed base layers to a user that is not subscribed", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
+            layersState: {
+                baseLayers: [],
+                selectedBaseLayerKey: DEFAULT_BASE_LAYERS[0].key,
+                overlays: []
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+
+        expect(service.defaultBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeUndefined();
+        expect(service.lockedBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeDefined();
+    }));
+
+    it("should offer the subscribed base layers to a subscribed user", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        store.reset({
+            offlineState: {
+                isSubscribed: true
+            },
+            layersState: {
+                baseLayers: [],
+                selectedBaseLayerKey: DEFAULT_BASE_LAYERS[0].key,
+                overlays: []
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+
+        expect(service.defaultBaseLayers().find(l => l.key === SATELLITE_MAP)).toBeDefined();
+        expect(service.lockedBaseLayers()).toEqual([]);
+    }));
+
+    it("should fall back to the first base layer when a subscribed base layer is selected without a subscription", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
+            layersState: {
+                baseLayers: [],
+                selectedBaseLayerKey: SATELLITE_MAP,
+                overlays: []
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+
+        expect(service.selectedBaseLayer().key).toBe(DEFAULT_BASE_LAYERS[0].key);
+    }));
+
     it("should check if base layer is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const layer: EditableLayer = { key: "layer1" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 selectedBaseLayerKey: layer.key,
                 overlays: [],
@@ -133,6 +201,9 @@ describe("LayersService", () => {
         const layer1: EditableLayer = { key: "layer1" } as EditableLayer;
         const layer2: EditableLayer = { key: "layer2" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [layer1, layer2],
                 selectedBaseLayerKey: layer2.key,
@@ -143,11 +214,14 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(layer2);
+        expect(service.selectedBaseLayer()).toEqual(layer2);
     }));
 
     it("should return first base layer when selected layer not found", inject([LayersService, Store], (service: LayersService, store: Store) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [],
                 selectedBaseLayerKey: "nonexistent",
@@ -158,7 +232,7 @@ describe("LayersService", () => {
             }
         });
 
-        expect(service.getSelectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
+        expect(service.selectedBaseLayer()).toEqual(DEFAULT_BASE_LAYERS[0]);
     }));
 
     it("should return the base layer address when it contains '{x}'", inject([LayersService, Store], (service: LayersService, store: Store) => {
@@ -168,6 +242,9 @@ describe("LayersService", () => {
         } as EditableLayer;
 
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [baseLayer],
                 selectedBaseLayerKey: baseLayer.key,
@@ -191,6 +268,9 @@ describe("LayersService", () => {
             } as EditableLayer;
 
             store.reset({
+                offlineState: {
+                    isSubscribed: false
+                },
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
@@ -215,6 +295,9 @@ describe("LayersService", () => {
             } as EditableLayer;
 
             store.reset({
+                offlineState: {
+                    isSubscribed: false
+                },
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
@@ -239,6 +322,9 @@ describe("LayersService", () => {
             } as EditableLayer;
 
             store.reset({
+                offlineState: {
+                    isSubscribed: false
+                },
                 layersState: {
                     baseLayers: [baseLayer],
                     selectedBaseLayerKey: baseLayer.key,
@@ -260,6 +346,9 @@ describe("LayersService", () => {
         const layer2: EditableLayer = { key: "layer2" } as EditableLayer;
         const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [layer1, layer2],
                 overlays: [overlay1],
@@ -288,6 +377,9 @@ describe("LayersService", () => {
     it("should toggle overlay", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = vi.spyOn(store, "dispatch");
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 visibleOverlays: [],
                 baseLayers: [],
@@ -308,6 +400,9 @@ describe("LayersService", () => {
         const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [overlay1, overlay2],
                 visibleOverlays: [],
@@ -330,6 +425,9 @@ describe("LayersService", () => {
         const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [overlay1, overlay2],
                 visibleOverlays: [overlay1.key, overlay2.key],
@@ -350,6 +448,9 @@ describe("LayersService", () => {
         const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         const overlay2: EditableLayer = { key: "overlay2" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [baseLayer],
                 overlays: [overlay1, overlay2],
@@ -371,6 +472,9 @@ describe("LayersService", () => {
     it("should get data container without null overlays when a visible overlay key is stale", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const overlay1: EditableLayer = { key: "overlay1" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [],
                 overlays: [overlay1],
@@ -403,6 +507,9 @@ describe("LayersService", () => {
 
     it("should add base layer for logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             userState: {
                 userInfo: {}
             },
@@ -422,17 +529,18 @@ describe("LayersService", () => {
 
         backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateBaseLayerAction));
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddBaseLayerAction);
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
-        expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateBaseLayerAction);
     }));
 
     it("should not add base layer if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
         vi.spyOn(store, "dispatch");
         const existingLayer = { key: "existingLayer" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [existingLayer],
                 overlays: []
@@ -449,6 +557,9 @@ describe("LayersService", () => {
 
     it("should add overlay for non logged-in user", inject([LayersService, Store], (service: LayersService, store: Store) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [],
                 visibleOverlays: [],
@@ -471,6 +582,9 @@ describe("LayersService", () => {
 
     it("should add overlay for non logged-in user", inject([LayersService, Store, HttpTestingController], async (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             userState: {
                 userInfo: {}
             },
@@ -491,17 +605,18 @@ describe("LayersService", () => {
 
         backend.expectOne(u => u.method == "POST" && u.url.startsWith(Urls.userLayers)).flush({ id: "1" });
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateOverlayAction));
         expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(AddOverlayAction);
         expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SetOverlaysVisibilityAction);
-        expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateOverlayAction);
     }));
 
     it("should not add overlay if it already exists", inject([LayersService, Store], (service: LayersService, store: Store) => {
         vi.spyOn(store, "dispatch");
         const existingOverlay = { key: "existingOverlay" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [existingOverlay],
                 visibleOverlays: [],
@@ -520,27 +635,41 @@ describe("LayersService", () => {
         expect(store.dispatch).not.toHaveBeenCalled();
     }));
 
-    it("should update base layer and select it", inject([LayersService, Store], (service: LayersService, store: Store) => {
+    it("should keep the selected base layer selected when it is renamed", inject([LayersService, Store], (service: LayersService, store: Store) => {
         const spy = vi.spyOn(store, "dispatch");
         const layer = { key: "layer1", id: "1" } as EditableLayer;
         store.reset({
-            layersState: {
-                baseLayers: [layer],
-                overlays: []
-            },
-            userState: {
-                userInfo: null
-            }
+            offlineState: { isSubscribed: false },
+            layersState: { baseLayers: [layer], overlays: [], selectedBaseLayerKey: "layer1" },
+            userState: { userInfo: null }
+        });
+
+        service.updateBaseLayer(layer, { ...layer, key: "renamed" });
+
+        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateBaseLayerAction);
+        expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect((vi.mocked(spy).mock.calls[1][0] as SelectBaseLayerAction).key).toBe("renamed");
+    }));
+
+    it("should not select a base layer that is edited while another one is selected", inject([LayersService, Store], (service: LayersService, store: Store) => {
+        const spy = vi.spyOn(store, "dispatch");
+        const layer = { key: "layer1", id: "1" } as EditableLayer;
+        store.reset({
+            offlineState: { isSubscribed: false },
+            layersState: { baseLayers: [layer], overlays: [], selectedBaseLayerKey: "Hiking Map" },
+            userState: { userInfo: null }
         });
 
         service.updateBaseLayer(layer, layer);
 
-        expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(UpdateBaseLayerAction);
-        expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(SelectBaseLayerAction);
+        expect(vi.mocked(spy).mock.calls.some(call => call[0] instanceof SelectBaseLayerAction)).toBe(false);
     }));
 
     it("should update overlay when user is logged in", inject([LayersService, Store, HttpTestingController], (service: LayersService, store: Store, backend: HttpTestingController) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             userState: {
                 userInfo: {}
             },
@@ -564,6 +693,9 @@ describe("LayersService", () => {
         const layer1 = { key: "layer1", id: "1" } as EditableLayer;
         const layer2 = { key: "layer2", id: "2" } as EditableLayer;
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 baseLayers: [layer1, layer2],
                 selectedBaseLayerKey: layer2.key,
@@ -582,6 +714,9 @@ describe("LayersService", () => {
 
     it("should remove overlay for non registered user", inject([LayersService, Store], (service: LayersService, store: Store) => {
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [],
                 visibleOverlays: [],
@@ -602,6 +737,9 @@ describe("LayersService", () => {
     it("should create url from overlay layer data and parse it", inject([LayersService, Store], async (service: LayersService, store: Store) => {
         const spy = vi.spyOn(store, "dispatch");
         store.reset({
+            offlineState: {
+                isSubscribed: false
+            },
             layersState: {
                 overlays: [],
                 visibleOverlays: [],

@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -28,18 +27,16 @@ namespace IsraelHiking.API.Services;
 /// Class constructor
 /// </remarks>
 /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-/// <param name="wikimediaCommonGateway"></param>
+/// <param name="imageUploadGateway"></param>
 /// <param name="base64ImageConverter"></param>
-/// <param name="imageUrlStoreExecutor"></param>
 /// <param name="tagsHelper"></param>
 /// <param name="clientsFactory"></param>
 /// <param name="wikidataGateway"></param>
 /// <param name="shareUrlGateway"></param>
 /// <param name="logger"></param>
 public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-    IWikimediaCommonGateway wikimediaCommonGateway,
+    IImageUploadGateway imageUploadGateway,
     IBase64ImageStringToFileConverter base64ImageConverter,
-    IImagesUrlsStorageExecutor imageUrlStoreExecutor,
     ITagsHelper tagsHelper,
     IClientsFactory clientsFactory,
     IWikidataGateway wikidataGateway,
@@ -47,18 +44,17 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     ILogger logger) : IPointsOfInterestProvider
 {
     /// <summary>
-    /// This icon is the default icon when no icon was used
+    /// The maximal length of an OSM tag's value
     /// </summary>
-    public const string SEARCH_ICON = "icon-search";
+    private const int MAX_TAG_VALUE_LENGTH = 255;
 
     private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
     private readonly ITagsHelper _tagsHelper = tagsHelper;
     private readonly IClientsFactory _clientsFactory = clientsFactory;
     private readonly IWikidataGateway _wikidataGateway = wikidataGateway;
     private readonly IShareUrlGateway _shareUrlGateway = shareUrlGateway;
-    private readonly IWikimediaCommonGateway _wikimediaCommonGateway = wikimediaCommonGateway;
+    private readonly IImageUploadGateway _imageUploadGateway = imageUploadGateway;
     private readonly IBase64ImageStringToFileConverter _base64ImageConverter = base64ImageConverter;
-    private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor = imageUrlStoreExecutor;
     private readonly ILogger _logger = logger;
 
     /// <summary>
@@ -89,26 +85,30 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         return features.Any() ? features.First() : null;
     }
 
+    /// <summary>
+    /// Sets the value of a tag for a specific language.
+    /// The language-less tag is updated too when it holds the value that was presented to the user,
+    /// i.e. when it was used as the fallback for the requested language, otherwise it is left as is.
+    /// </summary>
+    /// <param name="tags">The tags to update</param>
+    /// <param name="key">The tag key, without a language</param>
+    /// <param name="value">The new value, can be empty in order to remove the tag</param>
+    /// <param name="language">The language of the new value</param>
     private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
     {
         var keyWithLanguage = key + ":" + language;
-        var previousValue = string.Empty;
-        if (tags.ContainsKey(keyWithLanguage))
-        {
-            previousValue = tags[keyWithLanguage];
-            tags[keyWithLanguage] = value;
-        }
-        else
-        {
-            tags.Add(new Tag(keyWithLanguage, value));
-        }
-        if (tags.ContainsKey(key) && tags[key] == previousValue)
-        {
-            tags[key] = value;
-        }
-        else if (tags.ContainsKey(key) == false)
+        var previousValue = new[] { keyWithLanguage, key + ":" + Languages.ENGLISH, key }
+            .Where(tags.ContainsKey)
+            .Select(k => tags[k])
+            .FirstOrDefault(string.Empty);
+        tags.AddOrReplace(keyWithLanguage, value);
+        if (tags.ContainsKey(key) == false)
         {
             tags.Add(new Tag(key, value));
+        }
+        else if (tags[key] == previousValue)
+        {
+            tags[key] = value;
         }
     }
 
@@ -191,20 +191,51 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             }
             nonWikipediaUrls.Add(url);
         }
-        SetMultipleValuesForTag(tags, FeatureAttributes.WEBSITE, nonWikipediaUrls.ToArray());
+        SetWebsiteTags(tags, nonWikipediaUrls);
+    }
+
+    /// <summary>
+    /// Sets the websites as a single semicolon separated tag, which is the OSM recommended way, or as
+    /// website, website:1, website:2... when they do not fit in a single tag.
+    /// Both replace the legacy website, website1, website2... tags when they exist.
+    /// </summary>
+    private void SetWebsiteTags(TagsCollectionBase tags, List<string> urls)
+    {
+        RemoveTagsStartingWith(tags, FeatureAttributes.WEBSITE);
+        var nonEmptyUrls = urls.Where(u => !string.IsNullOrWhiteSpace(u)).Select(u => u.Trim()).ToList();
+        if (nonEmptyUrls.Count == 0)
+        {
+            return;
+        }
+        var semicolonSeparatedUrls = string.Join(";", nonEmptyUrls);
+        if (semicolonSeparatedUrls.Length <= MAX_TAG_VALUE_LENGTH)
+        {
+            tags.AddOrReplace(FeatureAttributes.WEBSITE, semicolonSeparatedUrls);
+            return;
+        }
+        for (var index = 0; index < nonEmptyUrls.Count; index++)
+        {
+            var tagName = index == 0 ? FeatureAttributes.WEBSITE : FeatureAttributes.WEBSITE + ":" + index;
+            tags.AddOrReplace(tagName, nonEmptyUrls[index]);
+        }
     }
 
     private void SetMultipleValuesForTag(TagsCollectionBase tags, string tagKey, string[] values)
     {
-        foreach (var tag in tags.Where(t => t.Key.StartsWith(tagKey)))
-        {
-            tags.RemoveKey(tag.Key);
-        }
+        RemoveTagsStartingWith(tags, tagKey);
         for (var index = 0; index < values.Length; index++)
         {
             var value = values[index];
             var tagName = index == 0 ? tagKey : tagKey + index;
             tags.AddOrReplace(tagName, value);
+        }
+    }
+
+    private void RemoveTagsStartingWith(TagsCollectionBase tags, string tagKey)
+    {
+        foreach (var tag in tags.Where(t => t.Key.StartsWith(tagKey)).ToArray())
+        {
+            tags.RemoveKey(tag.Key);
         }
     }
 
@@ -292,12 +323,9 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
 
 
     /// <inheritdoc/>
-    public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language)
+    public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null)
     {
-        var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
         var location = feature.GetLocation();
-        var idString = feature.GetId();
-        _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
         var imagesList = await UploadImages(feature, language, osmGateway);
         var node = new Node
         {
@@ -305,17 +333,16 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
             Longitude = location.X,
             Tags = new TagsCollection()
         };
-        SetWebsiteAndWikiTags(node.Tags, feature.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-            .Select(p => feature.Attributes[p].ToString())
-            .ToList());
+        SetWebsiteAndWikiTags(node.Tags, feature.GetWebsiteUrls());
         SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, imagesList);
         SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
         SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
         AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
         RemoveEmptyTagsAndWhiteSpaces(node.Tags);
+        AddFixMeToTouristAttraction(node.Tags);
         await osmGateway.UploadToOsmWithRetries(
             $"Added {feature.GetTitle(language)} using {Branding.BASE_URL}",
+            clientDetails,
             async changeSetId =>
             {
                 node.Id = await osmGateway.CreateElement(changeSetId, node);
@@ -326,7 +353,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     }
 
     /// <inheritdoc/>
-    public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language)
+    public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language, ClientDetails clientDetails = null)
     {
         ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(partialFeature.GetOsmId(), partialFeature.GetOsmType());
         var oldIcon = _tagsHelper.GetIconColorCategoryForTags(new AttributesTable(completeOsmGeo.Tags.ToDictionary(t => t.Key, t => t.Value as object))).Icon;
@@ -343,7 +370,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ICON))
         {
             var icon = partialFeature.Attributes[FeatureAttributes.POI_ICON].ToString();
-            if (icon != oldIcon && icon != SEARCH_ICON)
+            if (icon != oldIcon && icon != FeatureAttributes.SEARCH_ICON)
             {
                 RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
                 AddTagsByIcon(completeOsmGeo.Tags, icon);
@@ -368,6 +395,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         var feature = ConvertOsmToFeature(completeOsmGeo);
         await osmGateway.UploadToOsmWithRetries(
             $"Updated {feature?.GetTitle(language)} using {Branding.BASE_URL}",
+            clientDetails,
             async changeSetId =>
             {
                 await osmGateway.UpdateElement(changeSetId, completeOsmGeo);
@@ -390,10 +418,7 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
     private async Task UpdateWebsitesAndImages(IFeature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
     {
         var featureAfterTagsUpdates = ConvertOsmToFeature(completeOsmGeo);
-        var existingUrls = featureAfterTagsUpdates.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-            .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
-            .ToList();
+        var existingUrls = featureAfterTagsUpdates.GetWebsiteUrls();
         if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
         {
             foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
@@ -484,17 +509,16 @@ public class PointsOfInterestProvider(IOsmGeoJsonPreprocessorExecutor osmGeoJson
         {
             return imageUrl;
         }
-        using var md5 = MD5.Create();
-        var imageUrlFromDatabase = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
-        if (imageUrlFromDatabase != null)
-        {
-            return imageUrlFromDatabase;
-        }
-
         await using var memoryStream = new MemoryStream(file.Content);
         var nonEmptyDescription = GetNonEmptyDescription(feature.GetDescription(language), nonEmptyTitle);
-        var wikiImageUrl = await _wikimediaCommonGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
-        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, wikiImageUrl);
-        return wikiImageUrl;
+        return await _imageUploadGateway.UploadImage(file.FileName, nonEmptyDescription, userDisplayName, memoryStream, feature.GetLocation());
+    }
+
+    private void AddFixMeToTouristAttraction(TagsCollectionBase tags)
+    {
+        if (tags.Contains(new Tag("tourism", "attraction")) && !tags.ContainsKey("fixme"))
+        {
+            tags.Add("fixme", "Consider adding more specific tags");
+        }
     }
 }

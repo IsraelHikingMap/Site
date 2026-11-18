@@ -9,21 +9,22 @@ public static class RegisterDataAccess
 {
     public static IServiceCollection AddIHMDataAccess(this IServiceCollection services)
     {
-        services.AddTransient<IFileSystemHelper, FileSystemHelper>();
         services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
         services.AddTransient<IGpsBabelGateway, GpsBabelGateway>();
-        services.AddTransient<IRoutingGateway, ValhallaGateway>();
+        services.AddSingleton<ValhallaGateway, ValhallaGateway>();
+        services.AddSingleton<IRoutingGateway>(x => x.GetService<ValhallaGateway>());
         services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
         services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
         services.AddSingleton<ISearchRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IImagesRepository>(x => x.GetService<ElasticSearchGateway>());
-        services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();
+        services.AddTransient<IImageUploadGateway, UserImagesGateway>();
         services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
+        services.AddTransient<ISatelliteImageryGateway, MapboxSatelliteImageryGateway>();
         services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();
         services.AddTransient<IWikidataGateway, WikidataGateway>();
         services.AddTransient<IShareUrlGateway, ShareUrlGateway>();
         // Initializables
         services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
+        services.AddSingleton<IInitializable>(x => x.GetService<ValhallaGateway>());
 
         return services;
     }

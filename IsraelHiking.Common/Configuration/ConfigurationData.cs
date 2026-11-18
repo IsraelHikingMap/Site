@@ -84,7 +84,20 @@ public class ConfigurationData
     /// Valhalla server address
     /// </summary>
     public string ValhallaServerAddress { get; set; }
-
+    /// <summary>
+    /// The path to the file holding the Valhalla routing profiles definitions,
+    /// it can be mounted into the container in order to change the routing behavior
+    /// </summary>
+    public string ValhallaProfilesFilePath { get; set; }
+    /// <summary>
+    /// The path to the file holding the areas that can be downloaded for offline usage,
+    /// it can be mounted into the container in order to change the areas
+    /// </summary>
+    public string OfflineAreasFilePath { get; set; }
+    /// <summary>
+    /// GraphHopper server address
+    /// </summary>
+    public string GraphhopperServerAddress { get; set; }
     /// <summary>
     /// Elasticsearch server address
     /// </summary>
@@ -98,9 +111,17 @@ public class ConfigurationData
     /// </summary>
     public string ImageCreatorServerAddress { get; set; }
     /// <summary>
-    /// A location where offline files are saved in order to allow them to be downloaded
+    /// The base address of the "on-the-fly" service that generates and serves offline files
     /// </summary>
-    public string OfflineFilesFolder { get; set; }
+    public string OnTheFlyFilesAddress { get; set; }
+    /// <summary>
+    /// The base address of the "on-the-fly" service that generates and serves the offline DEM files
+    /// </summary>
+    public string OnTheFlyDemAddress { get; set; }
+    /// <summary>
+    /// The base address of the service that slices and serves the offline routing (valhalla) tiles
+    /// </summary>
+    public string RoutingTilesAddress { get; set; }
     /// <summary>
     /// OSM server base address
     /// </summary>
@@ -117,6 +138,10 @@ public class ConfigurationData
     /// A list of allowed image sites
     /// </summary>
     public List<string> ImageUrlsAllowList { get; set; }
+    /// <summary>
+    /// The base address of the user-images service the site uploads points of interest pictures to
+    /// </summary>
+    public string UserImagesServerAddress { get; set; }
 
     public ConfigurationData()
     {
@@ -139,13 +164,18 @@ public class ConfigurationData
         ClosestHighwayForGates = 0.0003; // around 30m
         ClosestNodeForGates = 0.0001; // around 10m
         ClosestNodeWithGate = 30;
+        GraphhopperServerAddress = "http://localhost:8989/";
         ValhallaServerAddress = "http://localhost:8002/";
+        ValhallaProfilesFilePath = "./valhalla-profiles.json";
+        OfflineAreasFilePath = "./offline-areas.json";
         ElasticsearchServerAddress = "http://localhost:9200/";
         GpsBabelServerAddress = "http://localhost:11987/";
         ImageCreatorServerAddress = "http://localhost:11223/";
-        OfflineFilesFolder = "./";
+        OnTheFlyFilesAddress = "https://mapeak.com/serve-extract/";
+        RoutingTilesAddress = "https://mapeak.com/routing-tiles/";
         OsmBaseAddress = "https://www.openstreetmap.org";
         ShareUrlApiAddress = "https://israelhiking.osm.org.il/api/urls/";
+        UserImagesServerAddress = "http://localhost:3001/";
         ImageUrlsAllowList =
         [
             "wikimedia.org",

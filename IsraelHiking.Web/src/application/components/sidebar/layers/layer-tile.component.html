@@ -1,0 +1,12 @@
+<button type="button" matRipple
+    class="min-w-0 cursor-pointer rounded-xl border-0 bg-transparent p-1 text-inherit"
+    [class]="isRow() ? 'flex flex-1 flex-row items-center gap-3 text-start' : 'block w-full'"
+    [attr.aria-pressed]="selected()" (click)="pick.emit($event)">
+    <layer-thumbnail [label]="label()" [thumbnail]="thumbnail()" [selected]="selected()" [locked]="locked()"
+        [small]="isRow()" [class]="isRow() ? 'size-10' : 'aspect-square'"></layer-thumbnail>
+    <span class="min-w-0 leading-tight hyphens-auto wrap-break-word"
+        [class]="isRow() ? 'flex-1 text-sm' : 'mt-1 block text-center text-xs'">
+        {{label()}}
+    </span>
+</button>
+<span class="empty:hidden" [class]="isRow() ? 'shrink-0' : 'absolute top-2 end-2 rounded-full bg-surface/90 shadow-sm'"><ng-content></ng-content></span>

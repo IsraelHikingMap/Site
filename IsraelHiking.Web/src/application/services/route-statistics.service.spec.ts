@@ -23,7 +23,7 @@ describe("RouteStatisticsService", () => {
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 },
             { lat: 20, lng: 20, alt: 20 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(20);
         expect(statistics.loss).toBeCloseTo(-20);
@@ -36,7 +36,7 @@ describe("RouteStatisticsService", () => {
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 },
             { lat: 30, lng: 30, alt: 30 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(10);
         expect(statistics.loss).toBeCloseTo(-20);
@@ -50,12 +50,48 @@ describe("RouteStatisticsService", () => {
             { lat: 30, lng: 30, alt: null }, { lat: 40, lng: 40, alt: 40 },
             { lat: 40, lng: 40, alt: 40 }, { lat: 10, lng: 10, alt: 10 }];
 
-        const statistics = service.getStatisticsForStandAloneRoute(latlngs as any);
+        const statistics = service.getStatisticsForStandAloneRoute(latlngs);
 
         expect(statistics.gain).toBeCloseTo(30);
         expect(statistics.loss).toBeCloseTo(-30);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(4);
+    });
+
+    it("Should get the same statistics for a route as for its points", () => {
+        const latlngs = [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 },
+            { lat: 30, lng: 30, alt: 30 }, { lat: 10, lng: 10, alt: 10 }];
+        const route = { id: "42", segments: [{ latlngs: latlngs.slice(0, 2) }, { latlngs: latlngs.slice(2) }] };
+
+        const statistics = service.getStatisticsForRoute(route);
+
+        expect(statistics.gain).toBeCloseTo(service.getStatisticsForStandAloneRoute(latlngs).gain);
+        expect(statistics.loss).toBeCloseTo(service.getStatisticsForStandAloneRoute(latlngs).loss);
+        expect(statistics.length).toBeCloseTo(service.getStatisticsForStandAloneRoute(latlngs).length);
+    });
+
+    it("Should reuse a route's statistics when only its properties change", () => {
+        const segments = [{ latlngs: [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 }] }];
+        const route = { id: "42", name: "old name", segments };
+
+        const statistics = service.getStatisticsForRoute(route);
+        // renaming a route creates a new route object but keeps the same segments array
+        const statisticsAfterRename = service.getStatisticsForRoute({ ...route, name: "new name" });
+
+        expect(statisticsAfterRename).toBe(statistics);
+    });
+
+    it("Should recalculate a route's statistics when its points change", () => {
+        const route = { id: "42", segments: [{ latlngs: [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 }] }] };
+
+        const statistics = service.getStatisticsForRoute(route);
+        const statisticsAfterPointsChange = service.getStatisticsForRoute({
+            ...route,
+            segments: [{ latlngs: [{ lat: 10, lng: 10, alt: 10 }, { lat: 30, lng: 30, alt: 40 }] }]
+        });
+
+        expect(statisticsAfterPointsChange).not.toBe(statistics);
+        expect(statisticsAfterPointsChange.length).toBeGreaterThan(statistics.length);
     });
 
     it("Should get statistics on route when recording and there's a route close by", () => {
@@ -71,7 +107,8 @@ describe("RouteStatisticsService", () => {
             { lat: 3, lng: 3, alt: 30 }
         ];
 
-        const statistics = service.getStatisticsForRecordedRouteWithPlannedRoute(recordingRouteData, closestRouteData, lastLatLng, null);
+        const statistics = service.getStatisticsForRecordedRouteWithPlannedRoute(
+            recordingRouteData, { id: "1", segments: [{ latlngs: closestRouteData }] }, lastLatLng, null);
         const statisticsOfCloseRoute = service.getStatisticsForStandAloneRoute(closestRouteData);
         const recodringStatisctics = service.getStatisticsForStandAloneRoute(recordingRouteData);
 
@@ -92,7 +129,7 @@ describe("RouteStatisticsService", () => {
             { lat: 3, lng: 3, alt: 30 }
         ];
 
-        const statistics = service.getStatisticsForRouteWithLocation(routeData, gpsLatLng, null);
+        const statistics = service.getStatisticsForRouteWithLocation({ id: "1", segments: [{ latlngs: routeData }] }, gpsLatLng, null);
         const statisticsOfFullRoute = service.getStatisticsForStandAloneRoute(routeData);
 
         expect(statistics.length).not.toBe(0);
@@ -102,7 +139,7 @@ describe("RouteStatisticsService", () => {
         expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
     });
 
-    it("Should get statistics on route when gps is close by but heading is oposite to route direction", () => {
+    it("Should get statistics on route when gps is close by but heading is opposite to route direction", () => {
         const gpsLatLng: LatLngAltTime = { lat: 1, lng: 0.0001, alt: 20, timestamp: new Date().toISOString() };
         const routeData: LatLngAltTime[] = [
             { lat: 1, lng: 1, alt: 10 },
@@ -110,7 +147,7 @@ describe("RouteStatisticsService", () => {
             { lat: 1, lng: -1, alt: 30 }
         ];
 
-        const statistics = service.getStatisticsForRouteWithLocation(routeData, gpsLatLng, 90);
+        const statistics = service.getStatisticsForRouteWithLocation({ id: "1", segments: [{ latlngs: routeData }] }, gpsLatLng, 90);
         const statisticsOfFullRoute = service.getStatisticsForStandAloneRoute(routeData);
 
         expect(statistics.length).not.toBe(0);

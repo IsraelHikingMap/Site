@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from "@angular/core";
+import { Component, HostListener, inject, model, signal, OnInit, computed } from "@angular/core";
 import { MatSelectChange, MatSelect } from "@angular/material/select";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
@@ -18,6 +18,8 @@ import { PoiService, SelectableCategory } from "../../../services/poi.service";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { ToastService } from "../../../services/toast.service";
+import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../../../services/keyboard-shortcuts";
+import { AnalyticsService } from "../../../services/analytics.service";
 import { ScrollToDirective } from "../../../directives/scroll-to.directive";
 import { POINTS_OF_INTEREST_CATEGORIES } from "../../../reducers/initial-state";
 import type { EditablePublicPointData, IconColorLabel } from "../../../models";
@@ -29,21 +31,70 @@ import type { EditablePublicPointData, IconColorLabel } from "../../../models";
 })
 export class PublicPointOfInterestEditComponent implements OnInit {
 
-    public info = input<EditablePublicPointData>();
+    /**
+     * The icon a new point starts with, see ngOnInit.
+     * The server translates it to tourism=attraction, which says nothing on its own,
+     * so a new point may not be uploaded with this icon and nothing else.
+     */
+    private static readonly GENERIC_ICON = "icon-star";
 
-    public isLoading = false;
-    public categories: SelectableCategory[] = [];
-    public selectedCategory: SelectableCategory = null;
-    public updateLocation = false;
+    public readonly info = model<EditablePublicPointData>();
+
+    public readonly isLoading = signal(false);
+    public readonly categories = signal<SelectableCategory[]>([]);
+    public readonly selectedCategory = signal<SelectableCategory>(null);
+    public readonly updateLocation = signal(false);
 
     public readonly resources = inject(ResourcesService);
 
     private readonly poiService: PoiService = inject(PoiService);
     private readonly sidebarService = inject(SidebarService);
     private readonly toastService = inject(ToastService);
+    private readonly analyticsService = inject(AnalyticsService);
+
+    public readonly isPoint = computed(() => this.info != null && this.info().isPoint);
+
+    private readonly isNew = computed(() => !this.info().id || validateUuid(this.info().id));
+
+    /**
+     * A new point needs to say something beyond the icon it defaults to, otherwise it reaches
+     * OSM as a bare tourism=attraction, which carries no information - see GENERIC_ICON.
+     */
+    public readonly canUpload = computed(() => {
+        if (!this.isNew()) {
+            return true;
+        }
+        const info = this.info();
+        return info.icon !== PublicPointOfInterestEditComponent.GENERIC_ICON ||
+            !!info.title?.trim() ||
+            !!info.description?.trim() ||
+            info.imagesUrls.length > 0 ||
+            info.urls.some(url => url?.trim());
+    });
+
+    @HostListener("window:keydown", ["$event"])
+    public onEditShortcutKeys(event: KeyboardEvent): void {
+        if (isTypingInTextField(event)) {
+            return;
+        }
+        const shortcutName = this.saveOnCtrlEnter(event);
+        if (shortcutName == null) {
+            return;
+        }
+        this.analyticsService.trackEvent(SHORTCUT_ANALYTICS_CATEGORY, shortcutName);
+        event.preventDefault();
+    }
+
+    private saveOnCtrlEnter(event: KeyboardEvent): string | null {
+        if (event.key !== "Enter" || !isCtrlOrMeta(event) || this.isLoading() || !this.canUpload()) {
+            return null;
+        }
+        this.save();
+        return "Save public POI";
+    }
 
     private initializeCategories() {
-        this.categories = structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[];
+        this.categories.set(structuredClone(POINTS_OF_INTEREST_CATEGORIES) as SelectableCategory[]);
     }
 
     public ngOnInit() {
@@ -51,9 +102,9 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         if (this.info().urls.length === 0) {
             this.addEmptyUrl();
         }
-        let selectedIcon = null;
-        let selectedCategory = null;
-        for (const category of this.categories) {
+        let selectedIcon: IconColorLabel = null;
+        let selectedCategory: SelectableCategory = null;
+        for (const category of this.categories()) {
             const icon = category.selectableItems.find(iconToFind => iconToFind.icon === this.info().icon);
             if (icon) {
                 selectedCategory = category;
@@ -63,43 +114,58 @@ export class PublicPointOfInterestEditComponent implements OnInit {
         }
 
         if (selectedCategory == null) {
-            selectedCategory = this.categories.find(categoryToFind => categoryToFind.name === "Other");
+            selectedCategory = this.categories().find(categoryToFind => categoryToFind.name === "Other");
         }
 
-        if (this.info().id && selectedIcon == null) {
-            selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
-            selectedCategory.selectableItems.push(selectedIcon);
-        } else if (!this.info().id && selectedIcon == null) {
+        if (this.isNew() && selectedIcon == null) {
             selectedIcon = selectedCategory.selectableItems[0];
+        } else if (!this.isNew() && selectedIcon == null) {
+            selectedIcon = { icon: this.info().icon, color: "black", label: this.resources.other } as IconColorLabel;
+            const previousCategory = selectedCategory;
+            selectedCategory = { ...previousCategory, selectableItems: [...previousCategory.selectableItems, selectedIcon] };
+            this.categories.update(categories => categories.map(c => c === previousCategory ? selectedCategory : c));
         }
         this.selectCategory({ value: selectedCategory } as MatSelectChange);
         this.selectIcon(selectedIcon);
     }
 
     public selectCategory(e: MatSelectChange) {
-        this.categories.forEach(c => c.isSelected = false);
-        this.selectedCategory = e.value;
-        this.selectedCategory.isSelected = true;
-        if (this.selectedCategory.selectedIcon == null) {
-            this.selectIcon(this.selectedCategory.selectableItems[0]);
+        this.selectedCategory.set(e.value);
+        if (this.selectedCategory().selectedIcon == null) {
+            this.selectIcon(this.selectedCategory().selectableItems[0]);
         }
     }
 
     public selectIcon(icon: IconColorLabel) {
-        this.selectedCategory.selectedIcon = icon;
-        this.info().icon = icon.icon;
+        const previousCategory = this.selectedCategory();
+        const categoryWithIcon = { ...previousCategory, selectedIcon: icon };
+        this.categories.update(categories => categories.map(c => c === previousCategory ? categoryWithIcon : c));
+        this.selectedCategory.set(categoryWithIcon);
+        this.info.update(info => ({ ...info, icon: icon.icon }));
     }
 
     public addEmptyUrl() {
-        this.info().urls.push("");
+        this.info.update(info => ({ ...info, urls: [...info.urls, ""] }));
     }
 
     public removeUrl(i: number) {
-        this.info().urls.splice(i, 1);
+        this.info.update(info => ({ ...info, urls: info.urls.filter((_, index) => index !== i) }));
     }
 
-    public isPoint(): boolean {
-        return this.info != null && this.info().isPoint;
+    public updateTitle(title: string) {
+        this.info.update(info => ({ ...info, title }));
+    }
+
+    public updateDescription(description: string) {
+        this.info.update(info => ({ ...info, description }));
+    }
+
+    public updateImages(imagesUrls: string[]) {
+        this.info.update(info => ({ ...info, imagesUrls }));
+    }
+
+    public updateUrl(i: number, url: string) {
+        this.info.update(info => ({ ...info, urls: info.urls.map((u, index) => index === i ? url : u) }));
     }
 
     public close() {
@@ -107,19 +173,19 @@ export class PublicPointOfInterestEditComponent implements OnInit {
     }
 
     public async save() {
-        this.isLoading = true;
+        this.isLoading.set(true);
         try {
-            if (this.info().id && !validateUuid(this.info().id)) {
-                await this.poiService.updateComplexPoi(this.info(), this.updateLocation);
-            } else {
+            if (this.isNew()) {
                 await this.poiService.addComplexPoi(this.info());
+            } else {
+                await this.poiService.updateComplexPoi(this.info(), this.updateLocation());
             }
             this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
             this.close();
         } catch {
-            this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
+            this.toastService.confirm({ message: this.resources.unableToUploadPoint, type: "Ok" });
         } finally {
-            this.isLoading = false;
+            this.isLoading.set(false);
         }
     }
 }

@@ -8,6 +8,10 @@
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
 	{
+		"pkg": "@capacitor-firebase/analytics",
+		"classpath": "io.capawesome.capacitorjs.plugins.firebase.analytics.FirebaseAnalyticsPlugin"
+	},
+	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
@@ -40,12 +44,20 @@
 		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
 	},
 	{
+		"pkg": "@capawesome/capacitor-mail-composer",
+		"classpath": "io.capawesome.capacitorjs.plugins.mailcomposer.MailComposerPlugin"
+	},
+	{
 		"pkg": "@capgo/background-geolocation",
 		"classpath": "com.capgo.capacitor_background_geolocation.BackgroundGeolocation"
 	},
 	{
 		"pkg": "@capgo/capacitor-compass",
 		"classpath": "app.capgo.capacitor.compass.CapgoCompassPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-downloader",
+		"classpath": "ee.forgr.capacitor.plugin.downloader.CapacitorDownloaderPlugin"
 	},
 	{
 		"pkg": "@capgo/capacitor-inappbrowser",
@@ -56,6 +68,14 @@
 		"classpath": "ee.forgr.capacitor_inappbrowser.InAppBrowserPlugin"
 	},
 	{
+		"pkg": "@capgo/capacitor-share-target",
+		"classpath": "app.capgo.sharetarget.CapacitorShareTargetPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-speech-synthesis",
+		"classpath": "ee.forgr.plugin.speechsynthesis.SpeechSynthesisPlugin"
+	},
+	{
 		"pkg": "@revenuecat/purchases-capacitor",
 		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	},
@@ -64,7 +84,7 @@
 		"classpath": "com.revenuecat.purchases.capacitor.ui.RevenueCatUIPlugin"
 	},
 	{
-		"pkg": "capacitor-email-composer",
-		"classpath": "de.einfachhans.emailcomposer.EmailComposerPlugin"
+		"pkg": "appsflyer-capacitor-plugin",
+		"classpath": "capacitor.plugin.appsflyer.sdk.AppsFlyerPlugin"
 	}
 ]

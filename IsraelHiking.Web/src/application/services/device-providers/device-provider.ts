@@ -1,4 +1,5 @@
-import type { DeviceServiceId, RouteDataWithoutState } from "../../models";
+import type { DeviceServiceId, LatLngAltTime, RouteDataWithoutState } from "../../models";
+import { SpatialHelper } from "../spatial.helper";
 
 /** OAuth token-response shape shared by the device providers. */
 export type DeviceTokenResponse = {
@@ -25,6 +26,8 @@ export interface DeviceProvider {
     readonly id: DeviceServiceId;
     /** Brand name shown in the UI (not translated). */
     readonly displayName: string;
+    /** False until the provider's developer program issued a client id, which keeps it out of the UI. */
+    readonly isAvailable: boolean;
 
     /** Runs the OAuth PKCE flow and returns the connection info to persist. */
     login(): Promise<DeviceConnectionInfo>;
@@ -32,4 +35,20 @@ export interface DeviceProvider {
     refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo>;
     /** Uploads the route to the user's account so it syncs to their device. */
     sendRoute(accessToken: string, route: RouteDataWithoutState): Promise<void>;
+}
+
+/** The route's points across all its segments, in order. */
+export function getRoutePoints(route: RouteDataWithoutState): LatLngAltTime[] {
+    return (route.segments || [])
+        .flatMap(segment => segment.latlngs || [])
+        .filter(latlng => latlng != null);
+}
+
+/** The distance in meters from the first point to each of the points. */
+export function getCumulativeDistances(points: LatLngAltTime[]): number[] {
+    const cumulativeDistance = [0];
+    for (let i = 1; i < points.length; i++) {
+        cumulativeDistance.push(cumulativeDistance[i - 1] + SpatialHelper.getDistanceInMeters(points[i - 1], points[i]));
+    }
+    return cumulativeDistance;
 }

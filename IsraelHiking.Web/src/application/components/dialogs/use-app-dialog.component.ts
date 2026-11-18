@@ -14,7 +14,7 @@ import { RunningContextService } from "../../services/running-context.service";
     imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, MatDialogActions, MatAnchor, AnalyticsDirective]
 })
 export class UseAppDialogComponent {
-    public appAddress: string;
+    public readonly appAddress: string;
 
     public readonly resources = inject(ResourcesService);
 

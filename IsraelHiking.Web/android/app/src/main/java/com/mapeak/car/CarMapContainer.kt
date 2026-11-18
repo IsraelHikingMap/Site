@@ -502,7 +502,11 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
     fun setupMap(pixelRatio: Float): View {
         MapLibre.getInstance(carContext)
         val sliceInterceptor = SliceProtocolInterceptor(PmTilesService(carContext))
-        val tileHttpClient = OkHttpClient.Builder().addInterceptor(sliceInterceptor).build()
+        val tileHttpClient =
+                OkHttpClient.Builder()
+                        .addInterceptor(SubscribedTilesInterceptor(store))
+                        .addInterceptor(sliceInterceptor)
+                        .build()
         sliceInterceptor.contoursProvider = CarContourTilesProvider(tileHttpClient)
         HttpRequestUtil.setOkHttpClient(tileHttpClient)
         routes = CarRouteData.listFromJson(store.load(CarStoreKeys.ROUTE))
@@ -589,7 +593,7 @@ class CarMapContainer(private val carContext: CarContext) : CapacitorStore.Liste
                 else
                         Style.Builder()
                                 .fromUri(
-                                        "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json"
+                                        "https://mapeak.com/styles/mapeak-hike.json"
                                 )
         map.setStyle(builder) { style: Style ->
             loadStyleImage(style, "public/content/gps-arrow.png", LOCATION_ICON_IMAGE, sdf = false)

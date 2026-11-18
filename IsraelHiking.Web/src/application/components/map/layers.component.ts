@@ -19,7 +19,7 @@ export class LayersComponent {
     private readonly layersService = inject(LayersService);
 
     public getBaseLayer() {
-        return this.layersService.getSelectedBaseLayer();
+        return this.layersService.selectedBaseLayer();
     }
 
     public isOverlayVisible(overlay: EditableLayer) {
@@ -27,6 +27,6 @@ export class LayersComponent {
     }
 
     public getAllOverlays() {
-        return this.layersService.getAllOverlays();
+        return this.layersService.allOverlays();
     }
 }

@@ -1,4 +1,7 @@
-- Add support for Android Auto with dynamic contours 
-- Add private POIs support to Android Auto
-- Add support for dark theme
+- Faster map loading
+- More reliable recording when interrupted
+- Better ETA and turn instructions
+- Improved WhatsApp file sharing
+- Remember the "North Up" choice
+- Add ladders and rungs
 - Various bug fixes and performance improvements

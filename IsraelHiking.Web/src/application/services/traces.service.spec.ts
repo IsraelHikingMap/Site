@@ -2,14 +2,14 @@ import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
-import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
+import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction, TracesReducer } from "../reducers/traces.reducer";
 import type { Trace } from "../models";
 
 describe("Traces Service", () => {
@@ -19,8 +19,8 @@ describe("Traces Service", () => {
             error: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([])],
             providers: [
+                provideStore([TracesReducer]),
                 TracesService,
                 {
                     provide: ResourcesService,
@@ -130,13 +130,35 @@ describe("Traces Service", () => {
 
             mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({ traces: [] });
 
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({ traces: [] });
-
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction));
             return promise;
+        }
+    ));
+
+    it("Should upload a local trace once when uploading is requested again before the first upload ends", inject([TracesService, HttpTestingController, Store],
+        async (tracesService: TracesService, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                configuration: {
+                    isAutomaticRecordingUpload: true
+                },
+                userState: {
+                    userInfo: {}
+                },
+                tracesState: {
+                    traces: [{ id: "42", visibility: "local", dataContainer: { routes: [{}] } }]
+                }
+            });
+            // This is what happens at startup when an interrupted recording is stopped while initialize runs.
+            const first = tracesService.uploadLocalTracesIfNeeded();
+            const second = tracesService.initialize();
+
+            mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({ traces: [] });
+            await Promise.all([first, second]);
+
+            mockBackend.expectNone(u => u.url.startsWith(Urls.uploadDataContainer));
         }
     ));
 
@@ -171,9 +193,7 @@ describe("Traces Service", () => {
 
             mockBackend.expectOne(u => u.url.startsWith(Urls.uploadDataContainer)).flush({});
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)).flush({
+            (await vi.waitFor(() => mockBackend.expectOne(u => u.url.startsWith(Urls.osmGpxFiles)))).flush({
                 traces: [
                     {
                         id: 1,
@@ -186,19 +206,15 @@ describe("Traces Service", () => {
                 ]
             });
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction));
             expect(vi.mocked(spy).mock.calls[0][0]).toBeInstanceOf(RemoveTraceAction);
-            expect(vi.mocked(spy).mock.calls[1][0]).toBeInstanceOf(BulkReplaceTracesAction);
 
             const req = mockBackend.match(u => u.url.startsWith(Urls.osmGpx));
             expect(req.length).toBe(2);
             req[0].flush({});
             req[1].flush({});
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
+            await vi.waitFor(() => expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction));
             expect(vi.mocked(spy).mock.calls[2][0]).toBeInstanceOf(UpdateTraceAction);
-            expect(vi.mocked(spy).mock.calls[3][0]).toBeInstanceOf(UpdateTraceAction);
 
             return promise;
         }
@@ -276,9 +292,7 @@ describe("Traces Service", () => {
             });
             const promise = tracesService.getTraceById("1");
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.traceAsDataContainer + "1").flush({ id: "1" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.traceAsDataContainer + "1"))).flush({ id: "1" });
 
             const trace = await promise;
             expect(trace.id).toBe("1");
@@ -290,9 +304,7 @@ describe("Traces Service", () => {
             const file = new File([""], "file.txt");
             const promise = tracesService.uploadTrace(file);
 
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-
-            mockBackend.expectOne(Urls.osmGpx).flush({ id: "1" });
+            (await vi.waitFor(() => mockBackend.expectOne(Urls.osmGpx))).flush({ id: "1" });
 
             const trace = await promise;
             expect(trace.id).toBe("1");

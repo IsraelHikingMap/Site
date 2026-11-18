@@ -1,40 +1,49 @@
-﻿<div class="side-control maplibregl-ctrl">
-  <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}"
-    matTooltipPosition="right" analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle GPS location">
-    @if (isDisabled() || isActive()) {
-    <i class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
-    }
-    @if (isLoading()) {
-    <div class="spinner-container">
-      <mat-spinner diameter="30"></mat-spinner>
-    </div>
-    }
+<div class="flex flex-col items-center gap-2.5 print:hidden!">
+  <button mat-mini-fab class="round-fab" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()"
+    [attr.aria-label]="resources.northUp" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
+    analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up">
+    <svg viewBox="-20 -20 40 40" class="block size-10" [style.transform]="getRotationAngle()" aria-hidden="true">
+      @for (angle of [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]; track angle) {
+      <line [attr.y1]="-18" [attr.y2]="angle % 90 === 0 ? -14 : -16" [attr.transform]="'rotate(' + angle + ')'"
+        stroke="currentColor" stroke-linecap="round" [attr.stroke-width]="angle % 90 === 0 ? 1.6 : 1"
+        [attr.opacity]="angle % 90 === 0 ? 0.8 : 0.4" />
+      }
+      <path d="M0 -11 L3.5 0 L-3.5 0 Z" fill="#e53935" />
+      <path d="M0 11 L3.5 0 L-3.5 0 Z" fill="currentColor" opacity="0.8" />
+    </svg>
   </button>
-  <button mat-button class="mt-1" (click)="toggleKeepNorthUp()" [class.active]="isKeepNorthUp()">
-    <div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right"
-      analyticsOn="click" analyticsCategory="Location" analyticsLabel="North Up"><i class="icon-north"></i>
-    </div>
-  </button>
-  @if (canRecord()) {
-  <button mat-button class="mt-1" (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
-    analyticsCategory="Location" analyticsLabel="Toggle recording">
+  <div class="flex flex-col rounded-full bg-surface shadow-md">
+    <button mat-icon-button (click)="toggleTracking()" [class.active]="isActive()"
+      matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" analyticsOn="click"
+      analyticsCategory="Location" analyticsLabel="Toggle GPS location">
+      @if (isDisabled() || isActive()) {
+      <i class="fa icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
+      }
+      @if (isLoading()) {
+      <mat-spinner diameter="24"></mat-spinner>
+      }
+    </button>
+    @if (canRecord()) {
+    <button mat-icon-button (click)="toggleRecording()" [class.active]="isRecording()" analyticsOn="click"
+      analyticsCategory="Location" analyticsLabel="Toggle recording">
+      @if (isRecording()) {
+      <i class="fa icon-stop"></i>
+      } @else {
+      <i class="fa icon-circle recording-button"></i>
+      }
+    </button>
+    }
     @if (isRecording()) {
-    <i class="fa fa-lg icon-square"></i>
-    } @else {
-    <i class="fa fa-lg icon-circle recording-button"></i>
+    <button mat-icon-button (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
+      analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
+      <i class="fa icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
+    </button>
     }
-  </button>
-  }
-  @if (isRecording()) {
-  <button mat-button class="mt-1" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()"
-    analyticsOn="click" analyticsCategory="Location" analyticsLabel="Toggle add recording POI">
-    <i class="fa fa-lg icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
-  </button>
-  }
+  </div>
 </div>
 
-<mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>
-@if (locationFeatures.features.length > 0) {
+<mgl-geojson-source id="location-source" [data]="locationFeatures()"></mgl-geojson-source>
+@if (locationFeatures().features.length > 0) {
 <mgl-layer [id]="resources.locationIcon" type="symbol" source="location-source" [filter]="['==', '$type', 'Point']"
   [layout]="{
                 'icon-image': 'gps-arrow',
@@ -49,30 +58,33 @@
                 'fill-color': '#136AEC',
                 'fill-outline-color': '#136AEC',
                 'fill-opacity': 0.2
-            }">
+            }"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="location-circle-stroke" type="line" source="location-source" [filter]="['==', '$type', 'Polygon']"
   [paint]="{
                 'line-color': '#136AEC',
                 'line-width': 2
-            }">
+            }"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 }
-@if (locationLatLng) {
-<mgl-popup [lngLat]="locationLatLng" (popupClose)="locationLatLng = null">
-  <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
+@if (locationLatLng()) {
+<mgl-popup [lngLat]="locationLatLng()" (popupClose)="locationLatLng.set(null)">
+  <gps-location-overlay [latlng]="locationLatLng()" (closed)="locationLatLng.set(null)"></gps-location-overlay>
 </mgl-popup>
 }
 
-<mgl-geojson-source id="distance-source" [data]="distanceFeatures"></mgl-geojson-source>
-@if (showDistance) {
+<mgl-geojson-source id="distance-source" [data]="distanceFeatures()"></mgl-geojson-source>
+@if (showDistance()) {
 <mgl-layer id="distance-line" type="line" source="distance-source" [filter]="['==', '$type', 'LineString']" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'
            }" [paint]="{
                 'line-color': 'magenta',
                 'line-width': 5
-            }">
+            }"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="distance-end" type="circle" source="distance-source" [filter]="['==', '$type', 'Point']" [paint]="{
                 'circle-radius': 12,

@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { computed, inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 import { firstValueFrom, timeout } from "rxjs";
@@ -14,7 +14,7 @@ import type { ApplicationState } from "../models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
-@Injectable()
+@Service()
 export class PurchaseService {
 
     private readonly runningContextService = inject(RunningContextService);
@@ -22,18 +22,37 @@ export class PurchaseService {
     private readonly httpClient = inject(HttpClient);
     private readonly store = inject(Store);
 
+    private readonly isSubscribed = this.store.selectSignal((s: ApplicationState) => s.offlineState.isSubscribed);
+    private readonly downloadedAreas = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.downloadedAreas);
+    /** Whether there are any offline files on the device, i.e. whether this user ever downloaded an area */
+    private readonly hasDownloadedAreas = computed(() => Object.keys(this.downloadedAreas()).length > 0);
+
+    /** The subscription can be bought by a user that has no offline files, and renewed by one that has */
+    public readonly isPurchaseAvailable = computed(() =>
+        this.runningContextService.isCapacitor && !this.isSubscribed() && !this.hasDownloadedAreas());
+
+    /** @see isPurchaseAvailable */
+    public readonly isRenewAvailable = computed(() =>
+        this.runningContextService.isCapacitor && !this.isSubscribed() && this.hasDownloadedAreas());
+
+    /**
+     * A subscription is bought in the app store, but it belongs to the user and not to the device, so the
+     * browser asks the server about it too - the layers that come with the subscription are shown there
+     * as well. Only the parts that talk to the store itself are limited to the app.
+     */
     public async initialize() {
-        if (!this.runningContextService.isCapacitor) {
-            return;
+        if (this.runningContextService.isCapacitor) {
+            this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         }
-        this.store.dispatch(new IncrementAppLaunchesSinceLastPaywallShown());
         this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(async (userInfo) => {
             if (userInfo == null) {
                 this.store.dispatch(new SetOfflineSubscribedAction(false));
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
-            await this.initializeStoreConnection(userInfo.id);
+            if (this.runningContextService.isCapacitor) {
+                await this.initializeStoreConnection(userInfo.id);
+            }
 
             await this.checkSubscription();
 
@@ -41,6 +60,9 @@ export class PurchaseService {
                 this.showPaywall();
             }
         });
+        if (!this.runningContextService.isCapacitor) {
+            return;
+        }
         this.store.select((state: ApplicationState) => state.configuration.language.code).subscribe(async (languageCode) => {
             if ((await Purchases.isConfigured()).isConfigured) {
                 await Purchases.overridePreferredUILocale({ locale: languageCode });
@@ -82,7 +104,7 @@ export class PurchaseService {
             }
             this.checkAndUpdateOfflineAvailability();
         } catch (error) {
-            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as any).message);
+            this.loggingService.error("[Store] Failed to initialize purchases connection: " + (error as Error).message);
         }
     }
 
@@ -97,20 +119,6 @@ export class PurchaseService {
             await Purchases.syncPurchases();
             await this.checkAndUpdateOfflineAvailability();
         }
-    }
-
-    public isPurchaseAvailable(): boolean {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isSubscribed &&
-            offlineState.downloadedTiles == null;
-    }
-
-    public isRenewAvailable() {
-        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isSubscribed &&
-            offlineState.downloadedTiles != null;
     }
 
     private shouldShowPaywall(): boolean {

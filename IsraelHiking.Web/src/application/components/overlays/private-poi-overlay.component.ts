@@ -1,7 +1,8 @@
-import { Component, inject, input, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, inject, input, OnInit, signal, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
+import type { Immutable } from "immer";
 
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
@@ -18,12 +19,12 @@ import type { MarkerData, LinkData } from "../../models";
 })
 export class PrivatePoiOverlayComponent implements OnInit {
 
-    public marker = input<MarkerData>();
-    public routeId? = input<string>();
-    public index = input<number>();
-    public color = input<string>();
+    public readonly marker = input<Immutable<MarkerData>>();
+    public readonly routeId? = input<string>();
+    public readonly index = input<number>();
+    public readonly color = input<string>();
 
-    public imageLink: LinkData;
+    public readonly imageLink = signal<LinkData>(null);
 
     public readonly resources = inject(ResourcesService);
 
@@ -31,7 +32,7 @@ export class PrivatePoiOverlayComponent implements OnInit {
     private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnInit(): void {
-        this.imageLink = this.marker().urls.find(u => u.mimeType.startsWith("image"));
+        this.imageLink.set(this.marker().urls.find(u => u.mimeType.startsWith("image")));
     }
 
     public overlayClick(event: Event) {

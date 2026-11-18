@@ -4,10 +4,10 @@
         <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
-        @if (deviceProviders.length > 0) {
+        @if (deviceProviders().length > 0) {
         <div class="flex flex-col my-1">
             <label class="ms-2 text-sm">{{resources.sendToDevice}}</label>
-            @for (provider of deviceProviders; track provider.id) {
+            @for (provider of deviceProviders(); track provider.id) {
             <div class="flex flex-row">
                 <button mat-button (click)="sendToDevice(provider.id)" mat-dialog-close analyticsOn="click"
                     analyticsCategory="Files" analyticsLabel="Send to device {{provider.id}}">

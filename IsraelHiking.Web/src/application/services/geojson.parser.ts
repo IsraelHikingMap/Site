@@ -1,19 +1,19 @@
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import type { LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class GeoJsonParser {
     public toRoutes(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>, language?: string): { latlngs: LatLngAltTime[]; name: string }[] {
         const name = this.getPropertyValue(feature.properties, "name", language);
         const routes = [];
         if (feature.geometry.type === "LineString") {
-            routes.push({ latlngs: feature.geometry.coordinates.map(c => SpatialService.toLatLng(c)), name });
+            routes.push({ latlngs: feature.geometry.coordinates.map(c => SpatialHelper.toLatLng(c)), name });
         } else {
             for (let i = 0; i < feature.geometry.coordinates.length; i++) {
                 const prefix = i > 0 ? " " + i : "";
-                routes.push({ latlngs: feature.geometry.coordinates[i].map(c => SpatialService.toLatLng(c)), name: `${name}${prefix}` });
+                routes.push({ latlngs: feature.geometry.coordinates[i].map(c => SpatialHelper.toLatLng(c)), name: `${name}${prefix}` });
             }
         }
         return routes;

@@ -1,11 +1,9 @@
-import { Component, inject, input, output } from "@angular/core";
+import { Component, inject, input, output, signal } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { AsyncPipe } from "@angular/common";
 import { Share } from "@capacitor/share";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 
@@ -26,16 +24,15 @@ import type { ApplicationState, LatLngAltTime, LinkData, MarkerData } from "../.
 @Component({
     selector: "gps-location-overlay",
     templateUrl: "./gps-location-overlay.component.html",
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, CoordinatesComponent, AsyncPipe]
+    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, CoordinatesComponent]
 })
 export class GpsLocationOverlayComponent {
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
     public closed = output();
 
-    public distance$: Observable<boolean>;
-    public hideCoordinates = true;
+    public readonly hideCoordinates = signal(true);
 
     public readonly resources = inject(ResourcesService);
 
@@ -46,9 +43,7 @@ export class GpsLocationOverlayComponent {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
-    constructor() {
-        this.distance$ = this.store.select((state: ApplicationState) => state.inMemoryState.distance);
-    }
+    public distance = this.store.selectSignal((state: ApplicationState) => state.inMemoryState.distance);
 
     public addPointToRoute() {
         const markerData: MarkerData = {

@@ -1,4 +1,5 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
+import { Location } from "@angular/common";
 import { NavigationEnd, Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 import { filter, skip } from "rxjs";
@@ -39,6 +40,7 @@ export class RouteStrings {
     public static readonly ROUTE_OFFLINE_MANAGEMENT = "/offline-management";
     public static readonly ROUTE_TRACES = "/traces";
     public static readonly ROUTE_ABOUT = "/about";
+    public static readonly ROUTE_SETTINGS = "/settings";
     public static readonly COORDINATES = "Coordinates";
 
     public static readonly LAT = "lat";
@@ -49,9 +51,10 @@ export class RouteStrings {
     public static readonly BASE_LAYER = "baselayer";
     public static readonly LANGUAGE = "language";
     public static readonly EDIT = "edit";
+    public static readonly HIGHLIGHT = "highlight";
 }
 
-@Injectable()
+@Service()
 export class HashService {
 
     private static readonly PERSICION = 4;
@@ -59,6 +62,7 @@ export class HashService {
     private static readonly ZOOM_PERSICION = 2;
 
     private readonly router = inject(Router);
+    private readonly location = inject(Location);
     private readonly mapService = inject(MapService);
     private readonly sidebarService = inject(SidebarService);
     private readonly dataContainerService = inject(DataContainerService);
@@ -74,21 +78,21 @@ export class HashService {
             this.store.dispatch(new SetUrlAction(this.router.url));
             const segments = tree.root.children.primary?.segments ?? [];
             const queryParams = tree.queryParams;
-            if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
+            if (this.router.url.startsWith(RouteStrings.ROUTE_MAP + "/")) {
                 if (segments.length >= 4) {
                     this.mapService.flyTo({
                         lng: +segments[segments.length - 1].path,
                         lat: +segments[segments.length - 2].path
                     }, +segments[segments.length - 3].path - 1);
                 }
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE + "/")) {
                 if (segments.length >= 2) {
                     this.dataContainerService.setShareUrlAfterNavigation(segments[1].path);
                 }
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL + "/")) {
                 this.dataContainerService.setFileUrlAfterNavigation(segments[1].path,
                     queryParams[RouteStrings.BASE_LAYER]);
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+            } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI + "/")) {
                 this.sidebarService.show("public-poi");
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_LAYER)) {
                 this.layersService.addLayerAfterNavigation(queryParams);
@@ -117,6 +121,12 @@ export class HashService {
         });
     }
 
+    /**
+     * Writes the map position into the address bar without navigating while already on the map, as a navigation to
+     * it would fly the map back to where it was when the address was written - midway, when that was the `moveend` of
+     * an animation another one cut off. Arriving at the map from another address is still a navigation, so the router
+     * knows it left that address and does not ignore going back to it.
+     */
     private resetAddressbar(): void {
         if (this.sidebarService.viewName === "public-poi") {
             return;
@@ -152,12 +162,17 @@ export class HashService {
             return;
         }
         const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        this.router.navigate([
+        const mapUrlSegments = [
             RouteStrings.ROUTE_MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.PERSICION),
             location.longitude.toFixed(HashService.PERSICION)
-        ], { replaceUrl: true });
+        ];
+        if (this.router.url.startsWith(RouteStrings.ROUTE_MAP + "/")) {
+            this.location.replaceState(mapUrlSegments.join("/"));
+            return;
+        }
+        this.router.navigate(mapUrlSegments, { replaceUrl: true });
     }
 
     public getHref(): string {

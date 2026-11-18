@@ -3,56 +3,64 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ConfigurationState, Language, BatteryOptimizationType, Theme } from "../models";
+import type { ConfigurationState, Language, BatteryOptimizationType, ThemeSetting } from "../models";
 
 
 export class SetLanguageAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public language: Language) { }
+    public static readonly type = "[Configuration] SetLanguageAction";
+    constructor(public readonly language: Language) { }
 }
 
 export class SetBatteryOptimizationTypeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public batteryOptimizationType: BatteryOptimizationType) { }
+    public static readonly type = "[Configuration] SetBatteryOptimizationTypeAction";
+    constructor(public readonly batteryOptimizationType: BatteryOptimizationType) { }
 }
 
 export class ToggleAutomaticRecordingUploadAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleAutomaticRecordingUploadAction";
 }
 
 export class ToggleGotLostWarningsAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleGotLostWarningsAction";
 }
 
 export class ToggleIsShowSlopeAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleIsShowSlopeAction";
 }
 
 export class ToggleIsShowKmMarkersAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] ToggleIsShowKmMarkersAction";
+}
+
+export class ToggleKeepNorthUpAction {
+    public static readonly type = "[Configuration] ToggleKeepNorthUpAction";
 }
 
 export class StopShowingBatteryConfirmationAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Configuration] StopShowingBatteryConfirmationAction";
 }
 
-export class StopShowingIntroAction {
-    public static type = this.prototype.constructor.name;
+export class StopShowingOnboardingAction {
+    public static readonly type = "[Configuration] StopShowingOnboardingAction";
+}
+
+export class SetFirstActionReportedAction {
+    public static readonly type = "[Configuration] SetFirstActionReportedAction";
 }
 
 export class SetUnitsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public units: "metric" | "imperial") { }
+    public static readonly type = "[Configuration] SetUnitsAction";
+    constructor(public readonly units: "metric" | "imperial") { }
 }
 
 export class SetDateFormatAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public dateFormat: string) { }
+    public static readonly type = "[Configuration] SetDateFormatAction";
+    constructor(public readonly dateFormat: string) { }
 }
 
 export class SetThemeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public theme: Theme) { }
+    public static readonly type = "[Configuration] SetThemeAction";
+    constructor(public readonly theme: ThemeSetting) { }
 }
 
 @State<ConfigurationState>({
@@ -102,6 +110,14 @@ export class ConfigurationReducer {
         }));
     }
 
+    @Action(ToggleKeepNorthUpAction)
+    public toggleKeepNorthUp(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isKeepNorthUp = !lastState.isKeepNorthUp;
+            return lastState;
+        }));
+    }
+
     @Action(StopShowingBatteryConfirmationAction)
     public stopShowingBatteryConfirmation(ctx: StateContext<ConfigurationState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
@@ -110,10 +126,18 @@ export class ConfigurationReducer {
         }));
     }
 
-    @Action(StopShowingIntroAction)
-    public stopShowingIntro(ctx: StateContext<ConfigurationState>) {
+    @Action(StopShowingOnboardingAction)
+    public stopShowingOnboarding(ctx: StateContext<ConfigurationState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.isShowIntro = false;
+            lastState.isShowOnboarding = false;
+            return lastState;
+        }));
+    }
+
+    @Action(SetFirstActionReportedAction)
+    public setFirstActionReported(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isFirstActionReported = true;
             return lastState;
         }));
     }

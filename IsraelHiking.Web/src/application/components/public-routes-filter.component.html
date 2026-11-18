@@ -1,25 +1,33 @@
-<div class="flex flex-row items-center bg-surface">
-    <span class="mx-2">{{resources.filter}}</span>
-    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterTypeMenu" analyticsOn="click"
-        analyticsCategory="Public routes" analyticsLabel="Open filter type menu">
-        <i class="fa fa-lg icon-sliders mx-2"></i>
+<div class="pointer-events-none flex flex-row items-center gap-2 px-[10px] py-2">
+    <button mat-stroked-button class="pointer-events-auto flex-1 px-3! shadow-sm" [matMenuTriggerFor]="listFilterTypeMenu"
+        [ngClass]="isCategoryFiltered() ? 'bg-brand-tonal!' : 'bg-surface!'" matTooltip="{{resources.routeType}}"
+        [attr.aria-label]="resources.routeType" analyticsOn="click" analyticsCategory="Public routes"
+        analyticsLabel="Open filter type menu">
+        <i class="fa fa-lg icon-sliders"></i>
         @if (isCategoryFiltered()) {
-        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        <i class="fa fa-lg icon-filter ms-1"></i>
         }
+        <i class="fa icon-chevron-down ms-2 text-[10px]! opacity-60"></i>
     </button>
-    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterLengthMenu" analyticsOn="click"
-        analyticsCategory="Public routes" analyticsLabel="Open filter length menu">
-        <i class="fa fa-lg icon-measure mx-2"></i>
+    <button mat-stroked-button class="pointer-events-auto flex-1 px-3! shadow-sm" [matMenuTriggerFor]="listFilterLengthMenu"
+        [ngClass]="isLengthFiltered() ? 'bg-brand-tonal!' : 'bg-surface!'" matTooltip="{{resources.length}}"
+        [attr.aria-label]="resources.length" analyticsOn="click" analyticsCategory="Public routes"
+        analyticsLabel="Open filter length menu">
+        <i class="fa fa-lg icon-measure"></i>
         @if (isLengthFiltered()) {
-        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        <i class="fa fa-lg icon-filter ms-1"></i>
         }
+        <i class="fa icon-chevron-down ms-2 text-[10px]! opacity-60"></i>
     </button>
-    <button mat-button class="flex-1" [matMenuTriggerFor]="listFilterDifficultyMenu" analyticsOn="click"
-        analyticsCategory="Public routes" analyticsLabel="Open filter difficulty menu">
-        <i class="fa fa-lg icon-speed mx-2"></i>
+    <button mat-stroked-button class="pointer-events-auto flex-1 px-3! shadow-sm" [matMenuTriggerFor]="listFilterDifficultyMenu"
+        [ngClass]="isDifficultyFiltered() ? 'bg-brand-tonal!' : 'bg-surface!'" matTooltip="{{resources.difficulty}}"
+        [attr.aria-label]="resources.difficulty" analyticsOn="click" analyticsCategory="Public routes"
+        analyticsLabel="Open filter difficulty menu">
+        <i class="fa fa-lg icon-speed"></i>
         @if (isDifficultyFiltered()) {
-        <i class="fa fa icon-filter mx-2 text-gray-400"></i>
+        <i class="fa fa-lg icon-filter ms-1"></i>
         }
+        <i class="fa icon-chevron-down ms-2 text-[10px]! opacity-60"></i>
     </button>
     <mat-menu #listFilterTypeMenu="matMenu">
         <span class="mx-2">{{resources.routeType}}</span>
@@ -48,19 +56,19 @@
             <div class="flex flex-row">
                 <mat-slider class="w-full" min="0" max="50" step="1" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Filter by length">
-                    <input [value]="filterLengthStart" matSliderStartThumb
-                        (input)="onFilterLengthStartChange($event.srcElement.value)">
-                    <input [value]="filterLengthEnd" matSliderEndThumb
-                        (input)="onFilterLengthEndChange($event.srcElement.value)">
+                    <input [value]="filterLengthStart()" matSliderStartThumb
+                        (input)="onFilterLengthStartChange($event.target.value)">
+                    <input [value]="filterLengthEnd()" matSliderEndThumb
+                        (input)="onFilterLengthEndChange($event.target.value)">
                 </mat-slider>
             </div>
             <div class="flex flex-row">
-                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart}}
-                    {{unitString}}</span>
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthStart()}}
+                    {{unitString()}}</span>
                 <span class="flex-grow"></span>
-                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd === 50 ?
-                    "\u200E+50" : filterLengthEnd}}
-                    {{unitString}}</span>
+                <span class="min-w-[30px] text-center" [dir]="resources.direction">{{filterLengthEnd() === 50 ?
+                    "\u200E+50" : filterLengthEnd()}}
+                    {{unitString()}}</span>
             </div>
         </div>
     </mat-menu>
@@ -92,11 +100,11 @@
         </div>
     </mat-menu>
 </div>
-@if (filterUserName) {
-<div class="flex flex-row justify-center">
-    <button mat-button class="mx-2 rounded-full! bg-gray-200! p-2 text-black!" (click)="clearUserFilter()">
-        {{filterUserName}}
-        <i class="fa fa-times mx-2"></i>
+@if (filterUserName()) {
+<div class="flex flex-row px-[10px] pb-2">
+    <button mat-flat-button class="bg-brand-tonal! text-on-surface! shadow-sm" (click)="clearUserFilter()">
+        {{filterUserName()}}
+        <i class="fa fa-lg icon-close mx-2"></i>
     </button>
 </div>
 }

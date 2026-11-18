@@ -17,6 +17,7 @@ export type Difficulty = ShareUrl["difficulty"];
 
 export type RouteEditStateType = "Poi" | "Route" | "ReadOnly" | "Hidden";
 export type { Bounds } from "./bounds";
+export type { OfflineArea, DownloadedArea, FileNameDateVersion } from "./offline-area";
 export type { EditableLayer } from "./editable-layer";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";
@@ -29,14 +30,14 @@ export type { RecordedRoute } from "./recorded-route";
 export type { CategoryType, PublicRoutesFilter } from "./public-routes-filter";
 // states:
 export type { ApplicationState, MutableApplicationState } from "./state/application-state";
-export type { ConfigurationState, BatteryOptimizationType, Theme } from "./state/configuration-state";
+export type { ConfigurationState, BatteryOptimizationType, Theme, ThemeSetting } from "./state/configuration-state";
 export type { TracesState } from "./state/traces-state";
 export type { LayersState } from "./state/layers-state";
 export type { ShareUrlsState } from "./state/share-urls-state";
 export type { UserState, DeviceServiceId, DeviceServiceToken } from "./state/user-state";
 export type { PointsOfInterestState } from "./state/poi-state";
 export type { InMemoryState } from "./state/in-memory-state";
-export type { OfflineState, TileMetadataPerFile, FileNameDateVersion } from "./state/offline-state";
+export type { OfflineState } from "./state/offline-state";
 export type { GpsState, TrackingStateType } from "./state/gps-state";
 export type { RouteEditingState } from "./state/route-editing-state";
 export type { RecordedRouteState } from "./state/recorded-route-state";

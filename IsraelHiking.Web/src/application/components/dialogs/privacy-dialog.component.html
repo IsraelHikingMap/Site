@@ -1,0 +1,19 @@
+<div [dir]="resources.direction">
+    <div mat-dialog-title>
+        <div>{{resources.privacyNotice}}</div>
+    </div>
+    <div mat-dialog-content>
+        <p>
+            {{resources.privacyNoticeDescription}}
+            <a href="https://mapeak.com/privacy-policy" target="_blank" analyticsOn="click"
+                analyticsCategory="Privacy"
+                analyticsLabel="Privacy policy from dialog">{{resources.privacyPolicyTermsOfService}}</a>
+        </p>
+    </div>
+    <div mat-dialog-actions>
+        <div class="flex flex-row w-full">
+            <button mat-flat-button class="w-full" mat-dialog-close (click)="close()" analyticsOn="click"
+                analyticsCategory="Privacy" analyticsLabel="Privacy notice acknowledged">{{resources.ok}}</button>
+        </div>
+    </div>
+</div>

@@ -3,49 +3,55 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState, PublicRoutesFilter } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, DownloadedArea } from "../models";
 
 export class ToggleDistanceAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] ToggleDistanceAction";
 }
 
 export class SetFollowingAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public following: boolean) { }
+    public static readonly type = "[In Memory] SetFollowingAction";
+    constructor(public readonly following: boolean) { }
 }
 
 export class SetPannedAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public pannedTimestamp: Date) { }
-}
-
-export class ToggleKeepNorthUpAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[In Memory] SetPannedAction";
+    constructor(public readonly pannedTimestamp: Date) { }
 }
 
 export class SetShareUrlAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public shareUrl: ShareUrl) { }
+    public static readonly type = "[In Memory] SetShareUrlAction";
+    constructor(public readonly shareUrl: ShareUrl) { }
 }
 
 export class SetFileUrlAndBaseLayerAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public fileUrl: string, public baseLayer: string) { }
+    public static readonly type = "[In Memory] SetFileUrlAndBaseLayerAction";
+    constructor(public readonly fileUrl: string, public readonly baseLayer: string) { }
 }
 
 export class SetSearchTermAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public searchTerm: string) { }
+    public static readonly type = "[In Memory] SetSearchTermAction";
+    constructor(public readonly searchTerm: string) { }
 }
 
 export class SetUrlAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public url: string) { }
+    public static readonly type = "[In Memory] SetUrlAction";
+    constructor(public readonly url: string) { }
 }
 
 export class SetPublicRoutesFilterAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public filters: PublicRoutesFilter) { }
+    public static readonly type = "[In Memory] SetPublicRoutesFilterAction";
+    constructor(public readonly filters: PublicRoutesFilter) { }
+}
+
+export class SetEffectiveThemeAction {
+    public static readonly type = "[In Memory] SetEffectiveThemeAction";
+    constructor(public readonly theme: Theme) { }
+}
+
+export class SetDownloadedAreasAction {
+    public static readonly type = "[In Memory] SetDownloadedAreasAction";
+    constructor(public readonly downloadedAreas: Record<string, DownloadedArea>) { }
 }
 
 @State({
@@ -75,14 +81,6 @@ export class InMemoryReducer {
     public setPanned(ctx: StateContext<InMemoryState>, action: SetPannedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.pannedTimestamp = action.pannedTimestamp;
-            return lastState;
-        }));
-    }
-
-    @Action(ToggleKeepNorthUpAction)
-    public toggleKeepNorthUp(ctx: StateContext<InMemoryState>) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.keepNorthUp = !lastState.keepNorthUp;
             return lastState;
         }));
     }
@@ -124,6 +122,22 @@ export class InMemoryReducer {
     public setPublicRoutesFilter(ctx: StateContext<InMemoryState>, action: SetPublicRoutesFilterAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.publicRoutesFilter = action.filters;
+            return lastState;
+        }));
+    }
+
+    @Action(SetEffectiveThemeAction)
+    public setEffectiveTheme(ctx: StateContext<InMemoryState>, action: SetEffectiveThemeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.effectiveTheme = action.theme;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDownloadedAreasAction)
+    public setDownloadedAreas(ctx: StateContext<InMemoryState>, action: SetDownloadedAreasAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.downloadedAreas = action.downloadedAreas;
             return lastState;
         }));
     }

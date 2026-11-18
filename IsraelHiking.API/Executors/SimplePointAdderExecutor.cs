@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Services.Osm;
+﻿using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
@@ -27,11 +28,12 @@ public class SimplePointAdderExecutor(
 {
 
     /// <inheritdoc/>
-    public async Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request)
+    public async Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request, ClientDetails clientDetails = null)
     {
         var change = await GetOsmChange(osmGateway, request);
         await osmGateway.UploadToOsmWithRetries(
             $"Uploading simple POI, type: {request.PointType} using {Branding.BASE_URL}",
+            clientDetails,
             async changeSetId => await osmGateway.UploadChangeset(changeSetId, change),
             logger);
     }

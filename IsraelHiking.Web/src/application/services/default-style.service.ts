@@ -1,6 +1,6 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
-import type { RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
+import type { LayerSpecification, RasterLayerSpecification, RasterSourceSpecification, StyleSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
@@ -8,7 +8,10 @@ import { FileService } from "./file.service";
 import { DEFAULT_BASE_LAYERS } from "../reducers/initial-state";
 import type { ApplicationState, EditableLayer, LayerData } from "../models";
 
-@Injectable()
+/** How the tiles of a style are reached - "online-only" keeps them on the server, the others may use the device. */
+export type StyleMode = "online-only" | "allow-offline" | "car";
+
+@Service()
 export class DefaultStyleService {
     private static indexNumber = 0;
     private static readonly NIGHT_LAND_COLOR = "#1B1B1B";
@@ -51,7 +54,7 @@ export class DefaultStyleService {
         "land_vineyard"
     ]);
 
-    public style: StyleSpecification;
+    public readonly style: StyleSpecification;
 
     private readonly mapService = inject(MapService);
     private readonly resources = inject(ResourcesService);
@@ -64,6 +67,15 @@ export class DefaultStyleService {
             sources: {},
             layers: [],
             sprite: this.mapService.getFullUrl("content/sprite/sprite")
+        };
+    }
+
+    private createPlaceholder(id: string): LayerSpecification {
+        return {
+            id,
+            type: "circle" as const,
+            source: "dummy",
+            layout: { visibility: "none" as const }
         };
     }
 
@@ -83,30 +95,14 @@ export class DefaultStyleService {
             }
         };
         styleWithPlaceholder.layers = [
-            {
-                id: this.resources.endOfBaseLayer,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfOverlays,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfClusters,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            },
-            {
-                id: this.resources.endOfRoutes,
-                type: "circle",
-                source: "dummy",
-                layout: { visibility: "none" }
-            }
+            this.createPlaceholder(this.resources.endOfBaseDrapedLayers),
+            this.createPlaceholder(this.resources.endOfOverlaysDrapedLayers),
+            this.createPlaceholder(this.resources.endOfRoutesDrapedLayers),
+            this.createPlaceholder(this.resources.endOfDrapedLayers),
+            this.createPlaceholder(this.resources.endOfBaseLayer),
+            this.createPlaceholder(this.resources.endOfOverlays),
+            this.createPlaceholder(this.resources.endOfClusters),
+            this.createPlaceholder(this.resources.endOfRoutes)
         ];
         return styleWithPlaceholder;
     }
@@ -181,19 +177,32 @@ export class DefaultStyleService {
         }
     }
 
-    private useContourProtocol(styleJson: StyleSpecification, units: "metric" | "imperial") {
-        if (styleJson.sources["Contour"]?.type !== "vector") {
+    private useContourProtocol(styleJson: StyleSpecification, units: "metric" | "imperial", isBuiltInBaseLayer: boolean) {
+        if (!isBuiltInBaseLayer || styleJson.sources["Contour"]?.type !== "vector") {
             return;
         }
         const contourSource = styleJson.sources["Contour"];
         const multiplier = units === "metric" ? 1 : 3.28084;
+        const thresholds = units === "metric" ? "9*500*2500~10*200*1000~11*100*500~12*50*250~13*20*100~14*10*50" : "9*1000*5000~10*500*2500~11*200*1000~12*100*500~13*40*200~14*20*100";
         delete contourSource.url;
-        contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=11*200*1000~12*10*100~13*10*100~14*10*100~15*10*100`
+        contourSource.tiles[0] = `dem-contour://{z}/{x}/{y}?contourLayer=contours&elevationKey=ele&levelKey=level&multiplier=${multiplier}&overzoom=1&thresholds=${thresholds}`
         contourSource.maxzoom = 16;
     }
 
-    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial") {
-        if (styleJson.sources["Contour"]?.type !== "vector") {
+    /**
+     * Reads the hillshade from the higher zooms of the DEM. It is not set in the style on the server since older
+     * versions of the app take a tile the DEM does not have for being offline.
+     */
+    private useDemMaxZoom(styleJson: StyleSpecification) {
+        for (const source of Object.values(styleJson.sources)) {
+            if (source.type === "raster-dem") {
+                source.maxzoom = MapService.DEM_MAX_ZOOM;
+            }
+        }
+    }
+
+    private useContourQuery(styleJson: StyleSpecification, units: "metric" | "imperial", isBuiltInBaseLayer: boolean) {
+        if (!isBuiltInBaseLayer || styleJson.sources["Contour"]?.type !== "vector") {
             return;
         }
         const contourSource = styleJson.sources["Contour"];
@@ -202,7 +211,7 @@ export class DefaultStyleService {
     }
 
     private applyNightModeIfNeeded(styleJson: StyleSpecification): void {
-        const theme = this.store.selectSnapshot((s: ApplicationState) => s.configuration.theme);
+        const theme = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.effectiveTheme);
         if (theme !== "dark") {
             return;
         }
@@ -226,35 +235,40 @@ export class DefaultStyleService {
         }
     }
 
-    public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: "online-only" | "allow-offline" | "car"): Promise<StyleSpecification> {
+    public async getSourcesAndLayers(layerData: EditableLayer, isVisible: boolean, mode: StyleMode): Promise<StyleSpecification> {
         if (this.isRaster(layerData.address)) {
             return this.createRasterLayer(layerData, isVisible);
         } else {
             const isBuiltInBaseLayer = DEFAULT_BASE_LAYERS.some(l => l.key === layerData.key);
-            const tryLocalStyle = mode !== "online-only" && isBuiltInBaseLayer && this.store.selectSnapshot((s: ApplicationState) => s.offlineState).downloadedTiles != null;
             const language = this.resources.getCurrentLanguageCodeSimplified();
             const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration.units);
 
-            let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, tryLocalStyle);
+            let styleAsText = await this.fileService.getStyleJsonContent(layerData.address, isBuiltInBaseLayer);
             styleAsText = styleAsText.replace(/name:he/g, `name:${language}`);
             styleAsText = styleAsText.replaceAll("Open Sans", "Noto Sans");
+            if (units === "imperial") {
+                styleAsText = styleAsText.replaceAll("1.0000000", "3.28084");
+            }
             const styleJson = JSON.parse(styleAsText) as StyleSpecification;
+            if (isBuiltInBaseLayer) {
+                this.useDemMaxZoom(styleJson);
+            }
             switch (mode) {
                 case "online-only":
-                    this.useContourProtocol(styleJson, units);
+                    this.useContourProtocol(styleJson, units, isBuiltInBaseLayer);
                     this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "allow-offline":
                     if (isBuiltInBaseLayer) {
                         this.useSliceProtocol(styleJson);
                     }
-                    this.useContourProtocol(styleJson, units);
+                    this.useContourProtocol(styleJson, units, isBuiltInBaseLayer);
                     this.applyNightModeIfNeeded(styleJson);
                     break;
                 case "car":
                     if (isBuiltInBaseLayer) {
                         this.useSliceQuery(styleJson);
-                        this.useContourQuery(styleJson, units);
+                        this.useContourQuery(styleJson, units, isBuiltInBaseLayer);
                     }
                     break;
             }

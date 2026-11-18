@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { AppUpdate, AppUpdateAvailability } from "@capawesome/capacitor-app-update";
 
 import { RunningContextService } from "./running-context.service";
@@ -6,7 +6,7 @@ import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 
-@Injectable()
+@Service()
 export class ApplicationUpdateService {
 
     private readonly resourcesService = inject(ResourcesService);

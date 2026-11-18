@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
@@ -10,6 +10,7 @@ import { ResourcesService } from "./resources.service";
 import { DatabaseService } from "./database.service";
 import { BulkReplaceTracesAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
+import { editableCopy } from "../reducers/editable-copy";
 import type { Trace, ApplicationState, DataContainer, RouteDataWithoutState } from "../models";
 
 type OsmTrace = {
@@ -30,7 +31,7 @@ type OsmTraces = {
     traces: OsmTrace[];
 }
 
-@Injectable()
+@Service()
 export class TracesService {
 
     private readonly resources = inject(ResourcesService);
@@ -38,6 +39,8 @@ export class TracesService {
     private readonly loggingService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
     private readonly store = inject(Store);
+
+    private isUploadingLocalTraces = false;
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
@@ -48,7 +51,15 @@ export class TracesService {
         await this.uploadLocalTracesIfNeeded();
     }
 
+    /**
+     * Skips the upload while another one is running, as a recording interrupted by the app being killed is uploaded
+     * when it is stopped at startup while initialize uploads it too, and both would see it as local. A trace that is
+     * skipped is uploaded the next time a recording stops or the app starts.
+     */
     public async uploadLocalTracesIfNeeded(): Promise<void> {
+        if (this.isUploadingLocalTraces) {
+            return;
+        }
         const state = this.store.selectSnapshot((s: ApplicationState) => s);
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
@@ -61,9 +72,14 @@ export class TracesService {
             return;
         }
         this.loggingService.info(`[Traces] There are ${localTraces.length} local traces that are about to be uploaded`);
-        for (const localTrace of localTraces) {
-            await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
-            await this.deleteTrace(localTrace);
+        this.isUploadingLocalTraces = true;
+        try {
+            for (const localTrace of localTraces) {
+                await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
+                await this.deleteTrace(localTrace);
+            }
+        } finally {
+            this.isUploadingLocalTraces = false;
         }
         this.loggingService.info(`[Traces] Finished uploading ${localTraces.length} local traces to server`);
         await this.syncTraces();
@@ -89,7 +105,7 @@ export class TracesService {
                     lng: traceJson.lon
                 }
             } as Trace));
-            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local") as any as Trace[]);
+            const allTraces = serverTraces.concat(existingTraces.filter(t => t.visibility === "local").map(t => editableCopy(t)));
             const serverTracesMap = serverTraces.reduce((acc, trace) => {
                 acc[trace.id] = trace;
                 return acc;
@@ -132,7 +148,7 @@ export class TracesService {
             this.loggingService.info(`[Traces] Got trace from state: ${traceId}`);
             return {
                 ...trace,
-                dataContainer: structuredClone(traceFromState.dataContainer) as DataContainer
+                dataContainer: editableCopy(traceFromState.dataContainer)
             };
         }
 
@@ -146,7 +162,7 @@ export class TracesService {
         return traceToStore;
     }
 
-    public uploadTrace(file: File): Promise<any> {
+    public uploadTrace(file: File): Promise<{ id: string }> {
         const formData = new FormData();
         formData.append("file", file, file.name);
         const filenameWithoutExtension = file.name.split(".");
@@ -154,7 +170,7 @@ export class TracesService {
         formData.append("description", filenameWithoutExtension.join("."));
         formData.append("visibility", "trackable");
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return firstValueFrom(this.httpClient.post(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
+        return firstValueFrom(this.httpClient.post<{ id: string }>(Urls.osmGpx, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async uploadRouteAsTrace(route: Immutable<RouteDataWithoutState>): Promise<void> {

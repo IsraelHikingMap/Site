@@ -1,7 +1,9 @@
-import { Component, inject } from "@angular/core";
-import { MatButton, MatMiniFabButton } from "@angular/material/button";
+import { Component, inject, computed, signal } from "@angular/core";
+import { MatButton, MatIconButton, MatMiniFabButton, MatAnchor } from "@angular/material/button";
+import { MatDivider } from "@angular/material/divider";
+import { MatBadge } from "@angular/material/badge";
+import { MatExpansionPanel, MatExpansionPanelContent } from "@angular/material/expansion";
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from "@angular/material/expansion";
 import { NgClass, NgStyle } from "@angular/common";
 import { MatDialog } from "@angular/material/dialog";
 import { Dir } from "@angular/cdk/bidi";
@@ -26,7 +28,7 @@ import { SidebarService } from "../../../services/sidebar.service";
 import { FileService } from "../../../services/file.service";
 import { ToastService } from "../../../services/toast.service";
 import { RouteStatistics, RouteStatisticsService } from "../../../services/route-statistics.service";
-import { SpatialService } from "../../../services/spatial.service";
+import { SpatialHelper } from "../../../services/spatial.helper";
 import { MapService } from "../../../services/map.service";
 import { LogReaderService } from "../../../services/log-reader.service";
 import { ShareUrlsService } from "../../../services/share-urls.service";
@@ -34,18 +36,17 @@ import { DataContainerService } from "../../../services/data-container.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { ChangeRouteStateAction, ToggleAllRoutesAction, DeleteAllRoutesAction, AddRouteAction, ChangeRoutePropertiesAction, DeleteRouteAction, BulkReplaceRoutesAction } from "../../../reducers/routes.reducer";
 import { SetOpacityAction, SetSelectedRouteAction, SetWeightAction } from "../../../reducers/route-editing.reducer";
-import type { ApplicationState, LatLngAltTime, RouteData, ShareUrl } from "../../../models";
+import { editableCopy } from "../../../reducers/editable-copy";
+import type { ApplicationState, LatLngAltTime, RouteData } from "../../../models";
 
 @Component({
     selector: "private-routes-sidebar",
     templateUrl: "./private-routes-sidebar.component.html",
     styleUrls: ["./private-routes-sidebar.component.scss"],
-    imports: [Dir, MatButton, AnalyticsDirective, MatTooltip, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, MatRadioGroup, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
+    imports: [Dir, MatButton, MatIconButton, MatAnchor, MatDivider, MatBadge, MatExpansionPanel, MatExpansionPanelContent, AnalyticsDirective, MatTooltip, NgClass, NgStyle, MatFormFieldModule, MatInput, FormsModule, MatSlider, MatError, NameInUseValidatorDirective, MatSliderThumb, MatMiniFabButton, MatRadioButton, MatRadioGroup, DistancePipe, MatMenu, MatMenuItem, MatMenuTrigger, CdkDrag, CdkDropList, CdkDragHandle]
 })
 export class PrivateRoutesSidebarComponent {
     public readonly resources = inject(ResourcesService);
-
-    private routeStatistics: Record<string, RouteStatistics> = {};
 
     private readonly store = inject(Store);
     private readonly dialog = inject(MatDialog);
@@ -60,22 +61,20 @@ export class PrivateRoutesSidebarComponent {
     private readonly shareUrlsService = inject(ShareUrlsService);
     private readonly dataContainerService = inject(DataContainerService);
 
-    public routes: Immutable<RouteData[]>;
-    public colors = this.routesFactory.colors;
+    public routes = this.store.selectSignal((state: ApplicationState) => state.routes.present);
+    public readonly colors = this.routesFactory.colors;
+    /** The route whose properties are open for editing under it - one at a time, like an accordion. */
+    public readonly editedRouteId = signal<string>(null);
     public selectedRouteId = this.store.selectSignal((state: ApplicationState) => state.routeEditingState.selectedRouteId);
     public hiddenRoutesCount = this.store.selectSignal((state: ApplicationState) => state.routes.present.filter(route => route.state === "Hidden").length);
     public isAllRoutesHidden = this.store.selectSignal((state: ApplicationState) => state.routes.present.every(route => route.state === "Hidden"));
-
-    constructor() {
-        this.store.select((state: ApplicationState) => state.routes.present).subscribe(routes => {
-            this.routes = routes;
-            this.routeStatistics = {};
-            for (const route of routes) {
-                const latlngs = this.selectedRouteService.getLatlngs(route);
-                this.routeStatistics[route.id] = this.routeStatisticsService.getStatisticsForStandAloneRoute(latlngs);
-            }
-        });
-    }
+    private readonly routeStatistics = computed(() => {
+        const result: Record<string, RouteStatistics> = {};
+        for (const route of this.routes()) {
+            result[route.id] = this.routeStatisticsService.getStatisticsForRoute(route);
+        }
+        return result;
+    });
 
     public close() {
         this.sidebarService.hide();
@@ -129,10 +128,11 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public async openFile(event: Event) {
-        const file = this.fileService.getFileFromEvent(event);
-        if (!file) {
+        const files = this.fileService.getFilesFromEvent(event);
+        if (files.length !== 1) {
             return;
         }
+        const file = files[0];
         if (file.name.endsWith(".json")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             await this.fileService.writeStyle(file.name, await file.text());
@@ -142,7 +142,9 @@ export class PrivateRoutesSidebarComponent {
         if (file.name.endsWith(".txt") && file.name.includes("log")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             const fileContent = await file.text();
-            this.logReaderService.readLogFile(fileContent);
+            if (!this.logReaderService.readLogFile(fileContent)) {
+                this.toastService.warning(this.resources.unableToLoadFromFile);
+            }
             return;
         }
         try {
@@ -156,7 +158,7 @@ export class PrivateRoutesSidebarComponent {
         event.stopPropagation();
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToDeleteAllRoutes
-                .replace("{{count}}", `${this.routes.length}`),
+                .replace("{{count}}", `${this.routes().length}`),
             type: "YesNo",
             confirmAction: () => {
                 this.store.dispatch(new DeleteAllRoutesAction());
@@ -166,20 +168,21 @@ export class PrivateRoutesSidebarComponent {
     }
 
     public getStatistics(routeData: Immutable<RouteData>): RouteStatistics {
-        return this.routeStatistics[routeData.id];
+        return this.routeStatistics()[routeData.id];
     }
 
     public getCheckIconColor(color: string) {
         return this.routesFactory.invertColorToBW(color);
     }
 
-    public updateProperty(routeData: Immutable<RouteData>, property: any, value: any) {
-        const newRouteData = structuredClone(routeData) as any;
+    public updateProperty<TProperty extends keyof RouteData>(routeData: Immutable<RouteData>, property: TProperty, value: RouteData[TProperty]) {
+        // a shallow copy is enough here since only the route's properties are read from this object.
+        const newRouteData = { ...routeData } as RouteData;
         newRouteData[property] = value;
         if (property === "opacity") {
-            this.store.dispatch(new SetOpacityAction(value));
+            this.store.dispatch(new SetOpacityAction(value as number));
         } else if (property === "weight") {
-            this.store.dispatch(new SetWeightAction(value));
+            this.store.dispatch(new SetWeightAction(value as number));
         }
         this.store.dispatch(new ChangeRoutePropertiesAction(routeData.id, newRouteData));
     }
@@ -190,7 +193,7 @@ export class PrivateRoutesSidebarComponent {
             return;
         }
         this.dialog.open<FileSaveDialogComponent, RouteData>(FileSaveDialogComponent, {
-            data: structuredClone(routeData) as RouteData
+            data: editableCopy(routeData)
         });
     }
 
@@ -200,7 +203,7 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
-        const bounds = SpatialService.getBounds(latLngs);
+        const bounds = SpatialHelper.getBounds(latLngs);
         if (routeData.state === "Hidden") {
             this.toastService.warning(this.resources.routeIsHidden);
         }
@@ -212,7 +215,7 @@ export class PrivateRoutesSidebarComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes.filter(r => r.state !== "Hidden"));
+        const dataContainer = this.dataContainerService.getContainerForRoutes(this.routes().filter(r => r.state !== "Hidden"));
         if (this.dataContainerService.isContainerEmpty(dataContainer)) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return;
@@ -220,9 +223,9 @@ export class PrivateRoutesSidebarComponent {
         this.dialog.open<ShareEditDialogComponent, ShareEditDialogComponentData>(ShareEditDialogComponent, {
             width: "480px",
             data: {
-                fullShareUrl: structuredClone(this.shareUrlsService.getSelectedShareUrl()) as ShareUrl,
+                fullShareUrl: editableCopy(this.shareUrlsService.getSelectedShareUrl()),
                 dataContainer,
-                hasHiddenRoutes: this.routes.some(r => r.state === "Hidden")
+                hasHiddenRoutes: this.routes().some(r => r.state === "Hidden")
             }
         });
     }
@@ -241,6 +244,15 @@ export class PrivateRoutesSidebarComponent {
             },
             declineAction: () => { }
         });
+    }
+
+    public duplicateRoute(routeData: Immutable<RouteData>) {
+        const duplicatedRoute = this.routesFactory.createDuplicateRouteData(routeData,
+            this.selectedRouteService.createRouteName(routeData.name),
+            this.selectedRouteService.getLeastUsedColor(routeData.color));
+        duplicatedRoute.state = routeData.state === "Hidden" ? "ReadOnly" : routeData.state;
+        this.store.dispatch(new AddRouteAction(duplicatedRoute));
+        this.selectedRouteService.setSelectedRoute(duplicatedRoute.id);
     }
 
     public reverseRoute(routeData: Immutable<RouteData>) {

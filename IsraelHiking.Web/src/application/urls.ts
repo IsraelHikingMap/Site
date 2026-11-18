@@ -13,6 +13,8 @@ export class Urls {
     public static readonly files = Urls.apiBase + "files";
     public static readonly openFile = Urls.files + "/open";
     public static readonly offlineFiles = Urls.files + "/offline";
+    public static readonly offlineAreas = Urls.offlineFiles + "/areas";
+    public static readonly offlineArea = Urls.offlineFiles + "/area";
     public static readonly subscribed = Urls.files + "/subscribed";
     public static readonly search = Urls.apiBase + "search/";
     public static readonly missingParts = Urls.apiBase + "osm/";
@@ -29,28 +31,60 @@ export class Urls {
     public static readonly permissions = Urls.apiBase + "user/permissions";
 
     public static readonly osmApi = "https://api.openstreetmap.org/api/0.6/";
-    public static readonly osmUser = Urls.osmApi + "user/details.json";
+    public static readonly osmUser = Urls.osmApi + "user/";
+    public static readonly osmUserDetails = Urls.osmUser + "details.json";
     public static readonly osmGpx = Urls.osmApi + "gpx";
-    public static readonly osmGpxFiles = Urls.osmApi + "user/gpx_files.json";
+    public static readonly osmGpxFiles = Urls.osmUser + "gpx_files.json";
     public static readonly osmBase = "https://www.openstreetmap.org";
     public static readonly osmAuth = Urls.osmBase + "/oauth2";
 
+    public static readonly satelliteTiles = "https://mapeak.com/api/satellite/";
     public static readonly overpassApi = "https://mapeak.com/api/interpreter";
+    public static readonly userImages = "https://images.mapeak.com";
+
+    public static readonly panoramaxApi = "https://api.panoramax.xyz/api/";
+    public static readonly panoramaxPictures = Urls.panoramaxApi + "pictures/";
+    public static readonly panoramaxSearch = Urls.panoramaxApi + "search";
+    public static readonly panoramaxViewer = "https://api.panoramax.xyz/";
+
+    public static readonly nakeb = "https://www.nakeb.co.il";
+    public static readonly nakebHikes = Urls.nakeb + "/api/hikes";
+
+    public static readonly inature = "https://inature.info";
+    public static readonly inatureApi = Urls.inature + "/w/api.php";
+
+    public static readonly wikidata = "https://www.wikidata.org";
+    public static readonly wikidataEntities = Urls.wikidata + "/w/rest.php/wikibase/v1/entities/items/";
+    public static readonly wikimediaCommons = "https://commons.wikimedia.org/";
 
     private static readonly deviceProxyBase = Urls.baseAddress + "/device-proxy";
     public static readonly wahooAuthorize = "https://api.wahooligan.com/oauth/authorize";
     public static readonly wahooToken = Urls.deviceProxyBase + "/wahoo/oauth/token";
     public static readonly wahooRoutes = Urls.deviceProxyBase + "/wahoo/v1/routes";
+    public static readonly garminAuthorize = "https://connect.garmin.com/oauth2Confirm";
+    public static readonly garminToken = Urls.deviceProxyBase + "/garmin-auth/di-oauth2-service/oauth/token";
+    public static readonly garminCourses = Urls.deviceProxyBase + "/garmin/training-api/courses/v1/course";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
     public static readonly googleMaps = "https://www.google.com/maps/search/?api=1&query=";
-    public static readonly tranlation = "https://mapeak.com/api/translation/translate";
+    public static readonly tranlation = Urls.apiBase + "translation/translate";
 
-    public static readonly HIKING_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-hike.json";
-    public static readonly MTB_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-bike.json";
-    public static readonly HEATMAP_STYLE_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/mapeak-traces.json";
+    public static readonly HIKING_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-hike.json";
+    public static readonly MTB_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-bike.json";
+    public static readonly HEATMAP_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-traces.json";
+    public static readonly SATELLITE_STYLE_ADDRESS = "https://mapeak.com/styles/mapeak-satellite.json";
 
     public static readonly ANDROID_APP_URL = "https://play.google.com/store/apps/details?id=com.mapeak";
     public static readonly IOS_APP_URL = "https://apps.apple.com/us/app/mapeak/id6751947875";
+
+    /**
+     * Tells whether an address belongs to our own API, as opposed to a third party service that is only
+     * proxied through our domain. Only our own API gets our token and client headers - a third party
+     * service answers the CORS preflight the app makes with the headers it knows alone, and the browser
+     * then blocks the request. It also has no business seeing the user's OSM token.
+     */
+    public static isOwnApiAddress(url: string): boolean {
+        return url.includes(Urls.apiBase) && !url.startsWith(Urls.tranlation);
+    }
 }

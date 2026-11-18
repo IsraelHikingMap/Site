@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect, afterEach } from "vitest";
+import { describe, beforeEach, it, expect } from "vitest";
 import { TestBed } from "@angular/core/testing";
 import Dexie from "dexie";
 
@@ -6,11 +6,27 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { HttpErrorResponse } from "@angular/common/http";
 
+/**
+ * Empties the log database instead of deleting it, deleting it is blocked for as long as the
+ * service of the previous test still holds a connection to it, which prints a warning.
+ */
+async function clearLogs() {
+    const database = new Dexie("Logging");
+    database.version(2).stores({
+        logging: "++, date",
+        gpsLogging: "++, date"
+    });
+    await database.table("logging").clear();
+    await database.table("gpsLogging").clear();
+    database.close();
+}
+
 describe("LoggingService", () => {
 
     let service: LoggingService;
 
     beforeEach(async () => {
+        await clearLogs();
         TestBed.configureTestingModule({
             imports: [],
             providers: [
@@ -22,11 +38,6 @@ describe("LoggingService", () => {
         service = TestBed.inject(LoggingService);
         await service.initialize(false);
     });
-
-    afterEach(async () => {
-        service.uninitialize();
-        await Dexie.delete("Logging");
-    })
 
     it("Should log info and returned logged data", async () => {
         await service.info("Hello!");
@@ -52,12 +63,17 @@ describe("LoggingService", () => {
         expect(logs.split("\n").length).toBe(1);
     });
 
-    it("Should log debug and returned logged data", async () => {
-        await service.debug("Hello!");
+    it("Should keep the gps channel apart from the general log", async () => {
+        await service.info("General!");
+        await service.info("Position!", "gps");
 
         const logs = await service.getLog();
+        const gpsLogs = await service.getLog("gps");
 
         expect(logs.split("\n").length).toBe(1);
+        expect(logs).toContain("General!");
+        expect(gpsLogs.split("\n").length).toBe(1);
+        expect(gpsLogs).toContain("Position!");
     });
 
     it("Should classify regular error as server", async () => {
@@ -78,7 +94,7 @@ describe("LoggingService", () => {
         expect(typeAndMessage.type).toBe("client");
     });
 
-    it("Should classify serverside side error and return status code", async () => {
+    it("Should classify server side error and return status code", async () => {
         const timeoutError = new HttpErrorResponse({
             status: 404
         });

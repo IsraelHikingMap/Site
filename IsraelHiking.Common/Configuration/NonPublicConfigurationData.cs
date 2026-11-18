@@ -3,14 +3,6 @@
 public class NonPublicConfigurationData
 {
     /// <summary>
-    /// Wikimedia username for public images upload
-    /// </summary>
-    public string WikiMediaUserName { get; set; }
-    /// <summary>
-    /// Wikimedia password for public images upload
-    /// </summary>
-    public string WikiMediaPassword { get; set; }
-    /// <summary>
     /// Fovea API Key for server side receipt validation
     /// </summary>
     public string FoveaApiKey { get; set; }
@@ -22,4 +14,8 @@ public class NonPublicConfigurationData
     /// RevenueCat API key for server side validation for Mapeak
     /// </summary>
     public string RevenueCatApiKey { get; set; }
+    /// <summary>
+    /// Mapbox access token used to fetch the satellite imagery tiles that are served to subscribed users
+    /// </summary>
+    public string MapboxAccessToken { get; set; }
 }

@@ -4,6 +4,7 @@ apply plugin: 'org.jetbrains.kotlin.android'
 android {
     namespace = "com.mapeak"
     compileSdk = rootProject.ext.compileSdkVersion
+    ndkVersion = rootProject.ext.ndkVersion
     packagingOptions {
         exclude 'build-data.properties'
     }
@@ -14,6 +15,9 @@ android {
         versionCode 921000
         versionName "9.21.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "arm64-v8a", "armeabi-v7a"
+        }
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -22,37 +26,45 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
+        }
+        debug {
+            ndk { abiFilters "x86_64" }
         }
     }
 }
 
 repositories {
-    flatDir{
-        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
-    }
     maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+    implementation "androidx.activity:activity:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
-    implementation project(':capacitor-cordova-android-plugins')
     implementation "androidx.car.app:app:$androidxCarAppVersion"
     implementation "org.maplibre.gl:android-sdk:$maplibreSdkVersion"
     implementation "org.maplibre.gl:android-sdk-turf:$maplibreTurfVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.github.mapeak-com:pmtiles-mobile:v0.3.2"
-    implementation "com.github.mapeak-com:maplibre-contour-rs:v0.4.1"
+    implementation "com.github.mapeak-com:pmtiles-mobile:v$pmtilesMobileVersion"
+    implementation "com.github.mapeak-com:maplibre-contour-rs:v$maplibreContourVersion"
     implementation "androidx.core:core-ktx:$androidxCoreKtxVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
+    implementation "io.github.rallista:valhalla-mobile:$valhallaMobileVersion"
+    implementation "io.github.rallista:valhalla-models:$valhallaModelsVersion"
+    implementation "io.github.rallista:valhalla-models-config:$valhallaModelsVersion"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshiVersion"
+    implementation "org.apache.commons:commons-compress:$commonsCompressVersion"
 }
 
 apply from: 'capacitor.build.gradle'

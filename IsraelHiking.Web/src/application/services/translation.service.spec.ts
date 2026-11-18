@@ -38,7 +38,7 @@ describe("TranslationService", () => {
         expect(isTranslationNeeded).toBeFalsy();
     }));
 
-    it("return false if translation is not needed beacuse of external description", inject([TranslationService], (service: TranslationService) => {
+    it("return false if translation is not needed because of external description", inject([TranslationService], (service: TranslationService) => {
         const isTranslationNeeded = service.isTranslationPossibleAndNeeded({
             type: "Feature",
             geometry: {

@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { EventEmitter } from "@angular/core";
 import { inject, TestBed } from "@angular/core/testing";
-import { NgxsModule, Store } from "@ngxs/store";
+import { provideStore, Store } from "@ngxs/store";
 
 import { LocationService } from "./location.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -9,18 +9,32 @@ import { DeviceOrientationService } from "./device-orientation.service";
 import { MapService } from "./map.service";
 import { LoggingService } from "./logging.service";
 import { SelectedRouteService } from "./selected-route.service";
+import { PaceCalculatorService } from "./pace-calculator.service";
 import { GpsReducer, SetCurrentPositionAction } from "../reducers/gps.reducer";
 import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
+import type { ApplicationState } from "../models";
+
+function resetStoreWithoutPosition(store: Store) {
+    store.reset({
+        configuration: { isKeepNorthUp: false },
+        gpsState: { currentPosition: null, tracking: "tracking" },
+        inMemoryState: { following: false }
+    });
+}
 
 describe("LocationService", () => {
     beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-01-01T08:00:00Z"));
         const geoLocationService = {
             backToForeground: new EventEmitter<number>(),
             bulkPositionChanged: {
                 subscribe: () => { }
             },
             enable: vi.fn(),
-            disable: vi.fn()
+            disable: vi.fn(),
+            restoreTracking: vi.fn()
         };
         const deviceOrientationService = {
             orientationChanged: new EventEmitter<number>(),
@@ -28,13 +42,12 @@ describe("LocationService", () => {
             disable: vi.fn()
         };
         const mapService = {
-            isMoving: () => false,
             initializationPromise: Promise.resolve(),
             moveToWithCurrentZoom: vi.fn()
         };
         TestBed.configureTestingModule({
-            imports: [NgxsModule.forRoot([InMemoryReducer, GpsReducer])],
             providers: [
+                provideStore([InMemoryReducer, GpsReducer, ConfigurationReducer]),
                 { provide: GeoLocationService, useValue: geoLocationService },
                 {
                     provide: DeviceOrientationService,
@@ -49,6 +62,7 @@ describe("LocationService", () => {
                         isEditingRoute: () => false
                     }
                 },
+                PaceCalculatorService,
                 LocationService
             ]
         });
@@ -77,7 +91,7 @@ describe("LocationService", () => {
     ));
 
     it("Should not move to gps position if position is not defined", inject([LocationService, MapService], (service: LocationService, mapService: MapService) => {
-        service.moveMapToGpsPosition();
+        service.moveMapToGpsPosition(500);
 
         expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
     }));
@@ -85,14 +99,15 @@ describe("LocationService", () => {
     it("Should move to gps position if a new valid position is received", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as any));
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as unknown as GeolocationPosition));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
             expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
@@ -102,47 +117,50 @@ describe("LocationService", () => {
     it("Should move to gps position with heading from gps", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as any));
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as unknown as GeolocationPosition));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
 
             expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 4, 1000);
         }
     ));
 
     it("Should move to gps position with heading 0 when keep north up", inject([LocationService, MapService, Store],
         async (service: LocationService, mapService: MapService, store: Store) => {
             store.reset({
-                gpsState: { currentPosition: null },
-                inMemoryState: { following: false, keepNorthUp: true }
-            });
-            await service.initialize();
-            const eventSpy = vi.fn();
-            service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as any));
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as any));
-
-            expect(eventSpy).toHaveBeenCalled();
-            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0);
-        }
-    ));
-
-    it("Should not move to gps position when given invalid location", inject([LocationService, MapService, Store],
-        async (service: LocationService, mapService: MapService, store: Store) => {
-            store.reset({
+                configuration: { isKeepNorthUp: true },
                 gpsState: { currentPosition: null },
                 inMemoryState: { following: false }
             });
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: NaN, longitude: NaN } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as unknown as GeolocationPosition));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
+
+            expect(eventSpy).toHaveBeenCalled();
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledWith({ lat: 2, lng: 3, alt: undefined }, 0, 1000);
+        }
+    ));
+
+    it("Should not move to gps position when given invalid location", inject([LocationService, MapService, Store],
+        async (service: LocationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: { currentPosition: null },
+                inMemoryState: { following: false }
+            });
+            await service.initialize();
+            const eventSpy = vi.fn();
+            service.changed.subscribe(eventSpy);
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: NaN, longitude: NaN } } as unknown as GeolocationPosition));
 
             expect(eventSpy).not.toHaveBeenCalled();
             expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
@@ -154,7 +172,8 @@ describe("LocationService", () => {
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            deviceOrientationService.orientationChanged.emit(1);
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(eventSpy).not.toHaveBeenCalled();
         }
@@ -163,6 +182,7 @@ describe("LocationService", () => {
     it("Should not do anything on orientation change and not in active state", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "searching"
@@ -172,8 +192,9 @@ describe("LocationService", () => {
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as any));
-            deviceOrientationService.orientationChanged.emit(1);
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(eventSpy).not.toHaveBeenCalledTimes(2);
         }
@@ -182,6 +203,7 @@ describe("LocationService", () => {
     it("Should not do anything on orientation change and last update time was recent", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -191,7 +213,7 @@ describe("LocationService", () => {
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2, speed: 3, heading: 4 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 1, longitude: 2, speed: 3, heading: 4 } } as unknown as GeolocationPosition));
             deviceOrientationService.orientationChanged.emit(5);
 
             expect(eventSpy).not.toHaveBeenCalledTimes(2);
@@ -201,6 +223,7 @@ describe("LocationService", () => {
     it("Should fire orientation change when in active state", inject([LocationService, DeviceOrientationService, Store],
         async (service: LocationService, deviceOrientationService: DeviceOrientationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -210,16 +233,17 @@ describe("LocationService", () => {
             await service.initialize();
             const eventSpy = vi.fn();
             service.changed.subscribe(eventSpy);
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
             deviceOrientationService.orientationChanged.emit(5);
 
             expect(eventSpy).toHaveBeenCalledTimes(2);
         }
     ));
 
-    it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, MapService, Store],
-        async (service: LocationService, geolocationService: GeoLocationService, mapService: MapService, store: Store) => {
+    it("Should move the map with a short animation on orientation change", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -227,7 +251,68 @@ describe("LocationService", () => {
                 inMemoryState: { following: true }
             });
             await service.initialize();
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as any));
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(5);
+
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenLastCalledWith({ lat: 2, lng: 3, alt: undefined }, 5, 150);
+        }
+    ));
+
+    it("Should not move the map on a small orientation change", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(10);
+            vi.mocked(mapService.moveToWithCurrentZoom).mockClear();
+            deviceOrientationService.orientationChanged.emit(12);
+            deviceOrientationService.orientationChanged.emit(8);
+
+            expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should measure the orientation change across north", inject([LocationService, DeviceOrientationService, MapService, Store],
+        async (service: LocationService, deviceOrientationService: DeviceOrientationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(355);
+            vi.mocked(mapService.moveToWithCurrentZoom).mockClear();
+            deviceOrientationService.orientationChanged.emit(357);
+            deviceOrientationService.orientationChanged.emit(1);
+
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenCalledTimes(1);
+            expect(mapService.moveToWithCurrentZoom).toHaveBeenLastCalledWith({ lat: 2, lng: 3, alt: undefined }, 1, 150);
+        }
+    ));
+
+    it("Should move to gps position after returning from background", inject([LocationService, GeoLocationService, MapService, Store],
+        async (service: LocationService, geolocationService: GeoLocationService, mapService: MapService, store: Store) => {
+            store.reset({
+                configuration: { isKeepNorthUp: false },
+                gpsState: {
+                    currentPosition: null,
+                    tracking: "tracking"
+                },
+                inMemoryState: { following: true }
+            });
+            await service.initialize();
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3 } } as unknown as GeolocationPosition));
             geolocationService.backToForeground.emit();
 
             expect(mapService.moveToWithCurrentZoom).toHaveBeenCalled();
@@ -238,6 +323,7 @@ describe("LocationService", () => {
     it("Should disable distance when centering", inject([LocationService, Store],
         async (service: LocationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -246,13 +332,14 @@ describe("LocationService", () => {
             });
             await service.initialize();
 
-            expect(store.selectSnapshot((s: any) => s.inMemoryState).distance).toBeFalsy();
+            expect(store.selectSnapshot((s: ApplicationState) => s.inMemoryState).distance).toBeFalsy();
         }
     ));
 
     it("Should not be following when panned", inject([LocationService, Store],
         async (service: LocationService, store: Store) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
@@ -269,20 +356,46 @@ describe("LocationService", () => {
     it("Should not move to gps position when editing route", inject([LocationService, Store, SelectedRouteService, MapService, DeviceOrientationService],
         async (service: LocationService, store: Store, selectedRouteService: SelectedRouteService, mapService: MapService, deviceOrientationService: DeviceOrientationService) => {
             store.reset({
+                configuration: { isKeepNorthUp: false },
                 gpsState: {
                     currentPosition: null,
                     tracking: "tracking"
                 },
                 inMemoryState: { following: true, distance: true }
             });
+            // isFollowing is a computed; set the mock before initialize() so its first (memoized) evaluation sees it.
+            (selectedRouteService as { isEditingRoute: () => boolean }).isEditingRoute = () => true;
             await service.initialize();
-            selectedRouteService.isEditingRoute = () => true;
             mapService.moveToWithCurrentZoom = vi.fn();
 
-            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as any));
-            deviceOrientationService.orientationChanged.emit(1);
+            store.dispatch(new SetCurrentPositionAction({ coords: { latitude: 2, longitude: 3, speed: 4 } } as unknown as GeolocationPosition));
+            deviceOrientationService.orientationChanged.emit(359);
+            deviceOrientationService.orientationChanged.emit(358);
 
             expect(mapService.moveToWithCurrentZoom).not.toHaveBeenCalled();
+        }
+    ));
+
+    it("Should hand the speed of every position to the pace calculator", inject([LocationService, Store, PaceCalculatorService],
+        async (service: LocationService, store: Store, paceCalculatorService: PaceCalculatorService) => {
+            resetStoreWithoutPosition(store);
+            await service.initialize();
+            const updatePace = vi.spyOn(paceCalculatorService, "updatePace");
+            store.dispatch(new SetCurrentPositionAction({
+                coords: { latitude: 1, longitude: 2, speed: 3 },
+                timestamp: Date.now()
+            } as unknown as GeolocationPosition));
+
+            expect(updatePace).toHaveBeenCalledWith(3);
+        }
+    ));
+
+    it("Should forget the measured pace when disabled", inject([LocationService, PaceCalculatorService],
+        async (service: LocationService, paceCalculatorService: PaceCalculatorService) => {
+            const clear = vi.spyOn(paceCalculatorService, "clear");
+            await service.disable();
+
+            expect(clear).toHaveBeenCalled();
         }
     ));
 });

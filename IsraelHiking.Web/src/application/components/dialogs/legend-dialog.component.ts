@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { MatIconButton } from "@angular/material/button";
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader } from "@angular/material/expansion";
 import { MAT_DIALOG_DATA, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
@@ -27,9 +27,9 @@ export type LegendSection = {
 export class LegendDialogComponent {
     public readonly resources = inject(ResourcesService);
     private readonly store = inject(Store);
-    private readonly data = inject<string>(MAT_DIALOG_DATA);
+    public readonly baseLayerKey = inject<string>(MAT_DIALOG_DATA);
 
-    public legendSections: LegendSection[] = [];
+    public readonly legendSections = signal<LegendSection[]>([]);
     private selectedSection: LegendSection = null;
 
     constructor() {
@@ -51,79 +51,73 @@ export class LegendDialogComponent {
     }
 
     private initalizeLegendSections() {
-        this.legendSections = structuredClone(legendSectionsJson) as LegendSection[];
-        for (const section of this.legendSections) {
+        let sections = structuredClone(legendSectionsJson) as LegendSection[];
+        for (const section of sections) {
             section.title = this.resources[section.key] as string;
             for (const item of section.items) {
                 item.title = this.resources[item.key] as string;
             }
         }
 
-        if (this.data === MTB_MAP) {
-            this.removeMtbUnwantedLegend();
-        } else if (this.data === HIKING_MAP) {
-            this.removeIhmUnwantedLegend();
+        if (this.baseLayerKey === MTB_MAP) {
+            this.removeMtbUnwantedLegend(sections);
+        } else if (this.baseLayerKey === HIKING_MAP) {
+            this.removeIhmUnwantedLegend(sections);
         } else {
-            this.legendSections = [];
+            sections = [];
         }
+        this.legendSections.set(sections);
     }
 
-    private removeMtbUnwantedLegend() {
-        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendMarkedTrails);
-        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendRegionalTrails);
+    private removeMtbUnwantedLegend(sections: LegendSection[]) {
+        remove(sections, sectionToRemove => sectionToRemove.title === this.resources.legendMarkedTrails);
 
-        this.removeItemInSection(this.resources.legendTrails, this.resources.legendDifficult4WD);
-        this.removeItemInSection(this.resources.legendTrails, this.resources.legendBicyclePath);
+        this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendChallenging4WDTrack);
+        this.removeItemInSection(sections, this.resources.legendTracksAndPaths, this.resources.legendBicyclePath);
 
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendMotorway);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendTrunk);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendPrimary);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendSecondary);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendTertiary);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendUnclassified);
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendResidential);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendMotorway);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendTrunk);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendPrimary);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendSecondary);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendTertiary);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendUnclassified);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendResidential);
 
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendPowerLine);
+        this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendMilitaryTraining);
 
-        this.removeItemInSection(this.resources.legendBorders, this.resources.legendMilitaryTraining);
-        this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
-        this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendAlpineHut);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendGuidepost);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBench);
 
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendGuidepost);
-
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendBeach);
+        this.removeItemInSection(sections, this.resources.legendAreas, this.resources.legendBeach);
     }
 
-    private removeIhmUnwantedLegend() {
-        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendSingles);
+    private removeIhmUnwantedLegend(sections: LegendSection[]) {
+        remove(sections, sectionToRemove => sectionToRemove.title === this.resources.legendCyclingDifficulty);
 
-        this.removeItemInSection(this.resources.legendWater, this.resources.legendRiver);
+        this.removeItemInSection(sections, this.resources.legendWater, this.resources.legendRiver);
 
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendPavedRoad);
+        this.removeItemInSection(sections, this.resources.legendRoads, this.resources.legendPavedRoad);
 
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendAttraction);
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendFlowers);
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendObservationTower);
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendAntenna);
+        this.removeItemInSection(sections, this.resources.legendPoi, this.resources.legendAttraction);
+        this.removeItemInSection(sections, this.resources.legendPoi, this.resources.legendFlowers);
+        this.removeItemInSection(sections, this.resources.legendPoi, this.resources.legendObservationTower);
+        this.removeItemInSection(sections, this.resources.legendPoi, this.resources.legendAntenna);
 
-        this.removeItemInSection(this.resources.legendBorders, this.resources.legendBikePark);
+        this.removeItemInSection(sections, this.resources.legendBorders, this.resources.legendBikePark);
 
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendBikeShop);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendFirstAid);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafe);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendRestaurant);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendConvenienceStore);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendLodging);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendToilettes);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendInformationCenter);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendPlayground);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendBikeShop);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendFirstAid);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendConvenienceStore);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendTravelInformation);
+        this.removeItemInSection(sections, this.resources.legendAmenities, this.resources.legendPlayground);
 
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendVineyard);
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
+        this.removeItemInSection(sections, this.resources.legendAreas, this.resources.legendVineyard);
+        this.removeItemInSection(sections, this.resources.legendAreas, this.resources.legendConstructionSite);
     }
 
-    private removeItemInSection(sectionTitle: string, title: string) {
-        const section = this.legendSections.find(sectionToFind => sectionToFind.title === sectionTitle);
+    private removeItemInSection(sections: LegendSection[], sectionTitle: string, title: string) {
+        const section = sections.find(sectionToFind => sectionToFind.title === sectionTitle);
         if (section) {
             remove(section.items, itemToRemove => itemToRemove.title === title);
         }

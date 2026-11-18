@@ -1,13 +1,30 @@
-services:
+﻿services:
 #  website:
 #    image: israel-hiking
 #    build: .
 #    environment:
 #      - ASPNETCORE_ENVIRONMENT=Development
+#      # Where appsettings.json and nonPublic.json are read from, see the volume below
+#      - CONFIG_FOLDER=config
 #    ports:
 #      - "5000:5000"
+#    # The folder is mounted rather than the files inside it, so that replacing a file on the host - what
+#    # "git pull", "cp" and most editors do - is picked up without recreating the container.
+#    # The folder holds:
+#    #   appsettings.json       - see ConfigurationData, and set "valhallaProfilesFilePath" in it to
+#    #                            "config/valhalla-profiles.json" so the mounted profiles are the ones used
+#    #   nonPublic.json         - the secrets, API keys and tokens, see NonPublicConfigurationData
+#    #   valhalla-profiles.json - read again whenever it changes, the rest are only read on startup, so
+#    #                            restart the container after changing them.
+#    #                            The routing profiles, the keys are the profile names, "default" is used
+#    #                            for any profile that is not listed, and "costingOptions" is sent to
+#    #                            Valhalla as-is, see
+#    #                            https://valhalla.github.io/valhalla/api/turn-by-turn/api-reference/#costing-options
+#    #   offline-areas.json     - the areas the offline screen offers, set "offlineAreasFilePath" in appsettings.json
+#    #                            to "config/offline-areas.json" to use it. It is read on every request, so it can be
+#    #                            replaced while the site is running, see IsraelHiking.Web/scripts/generate-offline-areas.ts
 #    volumes:
-#      - ./IsraelHiking.Web/appsettings.json:/israelhiking/appsettings.json
+#      - ./config:/israelhiking/config:ro
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch
@@ -47,12 +64,15 @@ services:
       - 11987:80
     restart: always
   translation:
-    image: libretranslate/libretranslate
+    image: ghcr.io/mapeak-com/translation:latest
+    platform: linux/amd64
     container_name: translation
+    environment:
+      - GOOGLE_API_KEY=invalid-dev-key
     volumes:
-      - tldata:/home/libretranslate:rw
+      - translationcache:/var/cache/nginx
     ports:
-      - 5432:5000
+      - 5432:5050
     restart: always
   user-data:
     image: ghcr.io/mapeak-com/user-data
@@ -72,7 +92,7 @@ services:
       - "5001:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d:ro
-    restart: unless-stopped
+    restart: always
   tileserver-gl:
     image: "maptiler/tileserver-gl"
     build:
@@ -85,10 +105,23 @@ services:
       - 11223:8080
     volumes:
       - ./tileserver-gl-config.json:/data/tileserver-gl-config.json:ro
+  user-images:
+    image: ghcr.io/mapeak-com/user-images
+    container_name: user-images
+    ports:
+      - 3001:3000
+    environment:
+      - PUBLIC_BASE_URL=http://localhost:3001
+      - STORAGE_DIR=/data/images
+    volumes:
+      - userimagesdata:/data/images
+    restart: always
 volumes:
   esdata:
     driver: local
   valhalladata:
     driver: local
-  tldata:
+  translationcache:
+    driver: local
+  userimagesdata:
     driver: local

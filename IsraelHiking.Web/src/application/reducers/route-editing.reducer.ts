@@ -6,23 +6,23 @@ import { initialState } from "./initial-state";
 import type { RoutingType, RouteEditingState } from "../models";
 
 export class SetSelectedRouteAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public routeId: string) { }
+    public static readonly type = "[Route Editing] SetSelectedRouteAction";
+    constructor(public readonly routeId: string) { }
 }
 
 export class SetRoutingTypeAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public routingType: RoutingType) { }
+    public static readonly type = "[Route Editing] SetRoutingTypeAction";
+    constructor(public readonly routingType: RoutingType) { }
 }
 
 export class SetOpacityAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public opacity: number) { }
+    public static readonly type = "[Route Editing] SetOpacityAction";
+    constructor(public readonly opacity: number) { }
 }
 
 export class SetWeightAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public weight: number) { }
+    public static readonly type = "[Route Editing] SetWeightAction";
+    constructor(public readonly weight: number) { }
 }
 
 @State<RouteEditingState>({

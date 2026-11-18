@@ -1,98 +1,79 @@
-﻿@if (isVisible) {
-<div class="table side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
+@if (isVisible()) {
+<div class="relative print:hidden!" [dir]="resources.direction"
+  (window:resize)="redrawChart()">
   @if (isOpen()) {
-  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated"
-    [class.expanded]="isExpanded" [class.sidebar]="isSidebarVisible()">
-    @if (isTable) {
-    <div class="chart-container">
-      <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
-        @if (!isFollowing) {
-        <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain | distance}}</span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss | distance}}</span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{length | distance}}</span>
-          </div>
-        </mat-grid-tile>
-        } @else {
-        <mat-grid-tile>
-          <div class="flex flex-col items-center">
-            ETA
-            <span><span dir="ltr">{{ETA}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-circle-right"></i>
-            <span class="mx-1">{{remainingDistance | distance}}</span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{traveledDistance | distance}}</span>
-          </div>
-        </mat-grid-tile>
-        }
-        <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-clock-o"></i>
-            <span>{{duration}} <span class="units">{{durationUnits}}</span></span>
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-avg-speed"></i>
-            @if (averageSpeed) {
-            <span>{{getSpeedString(averageSpeed)}} <span class="units">{{speedUnitString}}</span></span>
-            } @else {
-            <span>--</span>
-            }
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
-          <div class="flex flex-col items-center">
-            <i class="fa icon-speed"></i>
-            @if (currentSpeed) {
-            <span>{{getSpeedString(currentSpeed)}} <span class="units">{{speedUnitString}}</span></span>
-            } @else {
-            <span>--</span>
-            }
-          </div>
-        </mat-grid-tile>
-      </mat-grid-list>
+  <div animate.enter="chart-enter" animate.leave="chart-leave" class="chart-control-container chart-animated overflow-hidden rounded-3xl bg-surface shadow-md"
+    [class.expanded]="isExpanded()" [class.sidebar]="isSidebarVisible()">
+    @if (isTable()) {
+    <div class="chart-container grid grid-cols-3 grid-rows-2 place-items-center py-2">
+      @if (!isFollowing()) {
+      <div matTooltip="{{resources.gain}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-up"></i>
+          <span class="whitespace-nowrap text-xl">{{gain() | distance:'elevation':'value'}} <span class="text-xs opacity-70">{{gain() | distance:'elevation':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.loss}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-down"></i>
+          <span class="whitespace-nowrap text-xl">{{loss() | distance:'elevation':'value'}} <span class="text-xs opacity-70">{{loss() | distance:'elevation':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.length}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
+          <span class="whitespace-nowrap text-xl">{{length() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{length() | distance:'distance':'unit'}}</span></span>
+      </div>
+      } @else {
+      <div class="flex min-w-0 flex-col items-center gap-1">
+          <span class="text-sm opacity-70">ETA</span>
+          <span class="whitespace-nowrap text-xl"><span dir="ltr">{{ETA()}}</span></span>
+      </div>
+      <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-circle-right"></i>
+          <span class="whitespace-nowrap text-xl">{{remainingDistance() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{remainingDistance() | distance:'distance':'unit'}}</span></span>
+      </div>
+      <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-arrow-right"></i>
+          <span class="whitespace-nowrap text-xl">{{traveledDistance() | distance:'distance':'value'}} <span class="text-xs opacity-70">{{traveledDistance() | distance:'distance':'unit'}}</span></span>
+      </div>
+      }
+      <div matTooltip="{{resources.duration}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-clock-o"></i>
+          <span class="whitespace-nowrap text-xl">{{duration()}} <span class="text-xs opacity-70">{{durationUnits()}}</span></span>
+      </div>
+      <div matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-avg-speed"></i>
+          @if (averageSpeed()) {
+          <span class="whitespace-nowrap text-xl">{{getSpeedString(averageSpeed())}} <span class="text-xs opacity-70">{{speedUnitString()}}</span></span>
+          } @else {
+          <span class="whitespace-nowrap text-xl">--</span>
+          }
+      </div>
+      <div matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above" class="flex min-w-0 flex-col items-center gap-1">
+          <i class="fa text-2xl! opacity-70 icon-speed"></i>
+          @if (currentSpeed()) {
+          <span class="whitespace-nowrap text-xl">{{getSpeedString(currentSpeed())}} <span class="text-xs opacity-70">{{speedUnitString()}}</span></span>
+          } @else {
+          <span class="whitespace-nowrap text-xl">--</span>
+          }
+      </div>
     </div>
     } @else {
     <div class="chart-container" #lineChartContainer>
       <svg direction="ltr"></svg>
-      @if (subRouteRange && subRouteRange.xEnd) {
+      @if (subRouteRange() && subRouteRange().xEnd) {
       <div class="sub-route-statistics-container">
         <div class="flex flex-row justify-center items-center">
-          <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
+          <button mat-icon-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}"
             matTooltipPosition="above" analyticsOn="click" analyticsCategory="Route statistics"
-            analyticsLabel="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
+            analyticsLabel="Clear sub route selection"><i class="fa icon-close"></i></button>
           <span class="label-margin">
             <i class="fa icon-arrow-up"></i>
-            <span class="mx-1">{{gain | distance}}</span>
+            <span class="mx-1">{{gain() | distance:'elevation'}}</span>
           </span>
           <span class="label-margin">
             <i class="fa icon-arrow-down"></i>
-            <span class="mx-1">{{loss | distance}}</span>
+            <span class="mx-1">{{loss() | distance:'elevation'}}</span>
           </span>
           <span class="label-margin">
             <i class="fa icon-arrow-right"></i>
-            <span class="mx-1">{{length | distance}}</span>
+            <span class="mx-1">{{length() | distance}}</span>
           </span>
         </div>
       </div>
@@ -100,78 +81,79 @@
     </div>
     }
     <div class="absolute start-0 bottom-0 flex flex-col m-1">
-      @if (!isExpanded) {
-      <button mat-button (click)="changeState('table')" [class.active]="isTable" analyticsOn="click"
+      @if (!isExpanded()) {
+      <button mat-icon-button (click)="changeState('table')" [class.active]="isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle table view"><i
-          class="fa icon-table fa-lg"></i></button>
+          class="fa icon-table"></i></button>
       }
-      <button mat-button (click)="changeState('graph')" [class.active]="!isTable" analyticsOn="click"
+      <button mat-icon-button (click)="changeState('graph')" [class.active]="!isTable()" analyticsOn="click"
         analyticsCategory="Route statistics" analyticsLabel="Toggle graph view"><i
-          class="fa icon-area-chart fa-lg"></i></button>
+          class="fa icon-area-chart"></i></button>
     </div>
     <div class="absolute top-0 end-0 flex flex-col">
-      <button mat-button class="m-1" (click)="toggle()" analyticsCategory="Route statistics"
-        analyticsLabel="Route statistics close"><i class="fa icon-close fa-lg"></i></button>
-      @if (!isTable) {
-      <button mat-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
-        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa fa-lg"
-          [ngClass]="{ 'icon-chevron-right' : isExpanded && resources.end === 'left' || !isExpanded && resources.end === 'right', 'icon-chevron-left' : !isExpanded && resources.end === 'left' || isExpanded && resources.end === 'right'}"></i></button>
+      <button mat-icon-button class="m-1" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+        analyticsLabel="Route statistics close"><i class="fa icon-close"></i></button>
+      @if (!isTable()) {
+      <button mat-icon-button class="m-1 max-sm:hidden!" (click)="toggleExpand()" analyticsOn="click"
+        analyticsCategory="Route statistics" analyticsLabel="Toggle expand view"><i class="fa"
+          [ngClass]="{ 'icon-chevron-right' : isExpanded() && resources.end === 'left' || !isExpanded() && resources.end === 'right', 'icon-chevron-left' : !isExpanded() && resources.end === 'left' || isExpanded() && resources.end === 'right'}"></i></button>
       }
       <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
         <button mat-menu-item (click)="toggleKmMarker()" analyticsOn="click" analyticsCategory="Route statistics"
           analyticsLabel="Toggle KM markers">
-          <i [class.active]="isKmMarkersOn" class="fa icon-map-marker p-1"></i>
+          <i [class.active]="isKmMarkersOn()" class="fa icon-map-marker p-1"></i>
           <span class="ms-2">{{resources.distanceMarkers}}</span>
         </button>
         <button mat-menu-item (click)="toggleSlope()" analyticsOn="click" analyticsCategory="Route statistics"
           analyticsLabel="Toggle Slope">
-          <i [class.active]="isSlopeOn" class="fa icon-line-chart p-1"></i>
+          <i [class.active]="isSlopeOn()" class="fa icon-line-chart p-1"></i>
           <span class="ms-2">{{resources.showSlopes}}</span>
         </button>
       </mat-menu>
-      <button mat-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
+      <button mat-icon-button class="m-1" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}"
         matTooltipPosition="below" analyticsOn="click" analyticsCategory="Route statistics" analyticsLabel="More"><i
-          class="fa icon-ellipsis-v fa-lg"></i></button>
+          class="fa icon-ellipsis-v"></i></button>
     </div>
   </div>
   } @else {
-  <div class="flex flex-row" (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
+  <div animate.enter="summary-enter" class="flex flex-row items-center rounded-full bg-surface p-1 pe-3 shadow-md"
+    (click)="toggle()" analyticsOn="click" analyticsCategory="Route statistics"
     analyticsLabel="Route statistics open">
-    <button mat-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
-      matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
-    @if (!isFollowing) {
+    <button mat-icon-button [class.active]="isOpen()" matTooltip="{{resources.routeStatistics}}"
+      matTooltipPosition="above"><i class="fa {{isTable() ? 'icon-table' : 'icon-area-chart'}}"></i></button>
+    @if (!isFollowing()) {
     <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-up"></i>
-        <span class="mx-1">{{gain | distance}}</span>
+        <span class="mx-1">{{gain() | distance:'elevation'}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-down"></i>
-        <span class="mx-1">{{loss | distance}}</span>
+        <span class="mx-1">{{loss() | distance:'elevation'}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.length}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-right"></i>
-        <span class="mx-1">{{length | distance}}</span>
+        <span class="mx-1">{{length() | distance}}</span>
       </span>
     </div>
     } @else {
     <div>
-      <span class="control-container-item">ETA <span dir="ltr">{{ETA}}</span></span>
+      <span class="control-container-item">ETA <span dir="ltr">{{ETA()}}</span></span>
     </div>
     <div matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-circle-right"></i>
-        <span class="mx-1">{{remainingDistance | distance}}</span>
+        <span class="mx-1">{{remainingDistance() | distance}}</span>
       </span>
     </div>
     <div matTooltip="{{resources.traveledDistance}}" matTooltipPosition="above">
       <span class="control-container-item">
         <i class="fa icon-arrow-right"></i>
-        <span class="mx-1">{{traveledDistance | distance}}</span>
+        <span class="mx-1">{{traveledDistance() | distance}}</span>
       </span>
     </div>
     }
@@ -179,11 +161,12 @@
   }
 </div>
 
-<mgl-geojson-source id="slope-route" [data]="slopeRouteSource" [lineMetrics]="true"></mgl-geojson-source>
+<mgl-geojson-source id="slope-route" [data]="slopeRouteSource()" [lineMetrics]="true"></mgl-geojson-source>
 <mgl-layer id="slope-route-layer" type="line" source="slope-route" [layout]="{
                 'line-cap': 'round',
                 'line-join': 'bevel'
-            }" [paint]="slopeRoutePaint">
+            }" [paint]="slopeRoutePaint()"
+  [before]="resources.endOfDrapedLayers">
 </mgl-layer>
 <mgl-layer id="slope-route-layer-direction" type="symbol" source="slope-route" [layout]="{
                 'symbol-placement': 'line',
@@ -196,7 +179,7 @@
                 'icon-color': 'black'
             }">
 </mgl-layer>
-<mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
+<mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource()"></mgl-geojson-source>
 <mgl-layer id="km-markers-cricles" type="circle" source="km-markers-source" [paint]="{
           'circle-color': 'brown',
           'circle-radius': 13,
@@ -211,21 +194,23 @@
           }">
 </mgl-layer>
 
-@if (subRouteRange) {
-<mgl-geojson-source id="chart-range-selection" [data]="subRouteRange.rangeSelectionSource"></mgl-geojson-source>
+@if (subRouteRange()) {
+<mgl-geojson-source id="chart-range-selection" [data]="subRouteRange().rangeSelectionSource"></mgl-geojson-source>
 <mgl-layer id="chart-range-selection-layer-casing" type="line" source="chart-range-selection" before="chart-hover-layer"
   [paint]="{
           'line-color': 'purple',
           'line-width': 5
-          }"></mgl-layer>
+          }"
+  [before]="resources.endOfDrapedLayers"></mgl-layer>
 <mgl-layer id="chart-range-selection-layer" type="line" source="chart-range-selection" before="chart-hover-layer"
   [paint]="{
           'line-color': 'white',
           'line-width': 3
-          }"></mgl-layer>
+          }"
+  [before]="resources.endOfDrapedLayers"></mgl-layer>
 }
 
-<mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
+<mgl-geojson-source id="chart-hover" [data]="chartHoverSource()"></mgl-geojson-source>
 <mgl-layer id="chart-hover-layer" type="circle" source="chart-hover" [paint]="{
           'circle-color': ['get', 'color'],
           'circle-radius': 7,

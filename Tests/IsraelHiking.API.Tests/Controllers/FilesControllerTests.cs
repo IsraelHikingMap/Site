@@ -179,11 +179,24 @@ public class FilesControllerTests
     }
 
     [TestMethod]
+    public void GetOfflineAreas_ShouldServeTheAreasFile()
+    {
+        var content = new MemoryStream();
+        _offlineFilesService.GetAreasContent().Returns(content);
+
+        var results = _controller.GetOfflineAreas() as FileStreamResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreSame(content, results.FileStream);
+        Assert.AreEqual("application/json", results.ContentType);
+    }
+
+    [TestMethod]
     public void GetOfflineFiles_ShouldGetTheList()
     {
         _controller.SetupIdentity();
         var dict = new Dictionary<string, DateTime>();
-        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2)
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
             .Returns(dict);
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
 
@@ -193,6 +206,32 @@ public class FilesControllerTests
         var resultDict = results.Value as Dictionary<string, DateTime>;
         Assert.IsNotNull(resultDict);
         Assert.AreEqual(dict.Count, resultDict.Count);
+    }
+
+    [TestMethod]
+    public void GetOfflineFiles_OldClient_ShouldNotAskForTheRoutingTile()
+    {
+        _controller.SetupIdentity();
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
+            .Returns(new Dictionary<string, DateTime>());
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _ = _controller.GetOfflineFiles(DateTime.Now, 1, 2).Result;
+
+        _offlineFilesService.Received(1).GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, false);
+    }
+
+    [TestMethod]
+    public void GetOfflineFiles_ClientAsksForTheRoutingTile_ShouldPassItOn()
+    {
+        _controller.SetupIdentity();
+        _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, Arg.Any<bool>())
+            .Returns(new Dictionary<string, DateTime>());
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+
+        _ = _controller.GetOfflineFiles(DateTime.Now, 1, 2, true).Result;
+
+        _offlineFilesService.Received(1).GetUpdatedFilesList(Arg.Any<DateTime>(), 1, 2, true);
     }
 
     [TestMethod]
@@ -211,11 +250,12 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
+        _offlineFilesService.GetFileContent("file", null, null).Returns(((Stream)new MemoryStream(), (long?)10));
 
         var results = _controller.GetOfflineFile("file", null, null).Result as FileResult;
 
         Assert.IsNotNull(results);
+        Assert.AreEqual(10, _controller.Response.ContentLength);
     }
 
     [TestMethod]
@@ -223,7 +263,7 @@ public class FilesControllerTests
     {
         _controller.SetupIdentity();
         _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
-        _offlineFilesService.GetFileContent("7/1/2/file.extension").Returns(new MemoryStream());
+        _offlineFilesService.GetFileContent("file.extension", 1, 2).Returns(((Stream)new MemoryStream(), (long?)null));
 
         var results = _controller.GetOfflineFile("file.extension", 1, 2).Result as FileResult;
 
@@ -239,5 +279,88 @@ public class FilesControllerTests
         var results = _controller.IsSubscribed().Result;
 
         Assert.IsTrue(results);
+    }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_NotEntitled_ShouldGetForbid()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+        Assert.IsInstanceOfType<ForbidResult>(_controller.GetOfflineFilesForArea("area", DateTime.Now).Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_AreaThatIsNotOffered_ShouldGetNotFound()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns((Dictionary<string, DateTime>)null);
+
+        Assert.IsInstanceOfType<NotFoundResult>(_controller.GetOfflineFilesForArea("area", DateTime.Now).Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFilesForArea_ShouldGetTheList()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var files = new Dictionary<string, DateTime>();
+        _offlineFilesService.GetUpdatedFilesListForArea("area", Arg.Any<DateTime>()).Returns(files);
+
+        var results = _controller.GetOfflineFilesForArea("area", DateTime.Now).Result as OkObjectResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreSame(files, results.Value);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_NotEntitled_ShouldGetForbid()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+        Assert.IsInstanceOfType<ForbidResult>(_controller.GetOfflineFileForArea("area", "file").Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_UnknownFile_ShouldGetNotFound()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        _offlineFilesService.GetFileContentForArea("area", "file").Returns(((Stream Content, long? Length)?)null);
+
+        Assert.IsInstanceOfType<NotFoundResult>(_controller.GetOfflineFileForArea("area", "file").Result);
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_ShouldServeTheFile()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var content = new MemoryStream();
+        _offlineFilesService.GetFileContentForArea("area", "file").Returns((content, (long?)42));
+
+        var results = _controller.GetOfflineFileForArea("area", "file").Result as FileStreamResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreSame(content, results.FileStream);
+        Assert.AreEqual(42, _controller.Response.ContentLength);
+        Assert.IsFalse(_controller.Response.Headers.ContainsKey("X-Uncompressed-Length"));
+    }
+
+    [TestMethod]
+    public void GetOfflineFileForArea_Tar_ShouldServeTheFileWithItsUncompressedLength()
+    {
+        _controller.SetupIdentity();
+        _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+        var content = new MemoryStream();
+        _offlineFilesService.GetFileContentForArea("area", "valhalla+area.tar").Returns((content, (long?)42));
+
+        var results = _controller.GetOfflineFileForArea("area", "valhalla+area.tar").Result as FileStreamResult;
+
+        Assert.IsNotNull(results);
+        Assert.AreEqual(42, _controller.Response.ContentLength);
+        Assert.AreEqual("42", _controller.Response.Headers["X-Uncompressed-Length"].ToString());
     }
 }

@@ -6,13 +6,13 @@ import { initialState } from "./initial-state";
 import type { GpsState, TrackingStateType } from "../models";
 
 export class SetTrackingStateAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public state: TrackingStateType) {}
+    public static readonly type = "[GPS] SetTrackingStateAction";
+    constructor(public readonly state: TrackingStateType) {}
 }
 
 export class SetCurrentPositionAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public position: GeolocationPosition) {}
+    public static readonly type = "[GPS] SetCurrentPositionAction";
+    constructor(public readonly position: GeolocationPosition) {}
 }
 @State<GpsState>({
     name: "gpsState",

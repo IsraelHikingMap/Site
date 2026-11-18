@@ -4,6 +4,10 @@
 <dict>
 	<key>com.apple.developer.carplay-maps</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.mapeak</string>
+	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:mapeak.com</string>

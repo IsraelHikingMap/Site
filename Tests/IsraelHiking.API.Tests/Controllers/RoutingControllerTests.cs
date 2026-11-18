@@ -10,6 +10,7 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Tests.Controllers;
 
@@ -58,6 +59,17 @@ public class RoutingControllerTests
 
         Assert.IsNotNull(results);
         _routingGateway.DidNotReceive().GetRouting(Arg.Any<RoutingGatewayRequest>());
+    }
+
+    [TestMethod]
+    public void GetRouting_RoutingProviderReturnsNull_ShouldReturnBadRequest()
+    {
+        _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
+            .Returns(Task.FromResult((Feature)null));
+        var results = _controller.GetRouting("1,1", "2,2", RoutingType.HIKE).Result as BadRequestObjectResult;
+
+        Assert.IsNotNull(results);
+
     }
 
     [TestMethod]

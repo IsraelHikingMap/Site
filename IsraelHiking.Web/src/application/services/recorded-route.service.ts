@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, computed, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -9,16 +9,17 @@ import { ToastService } from "./toast.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { RunningContextService } from "./running-context.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction, AddPendingProcessingRoutePointAction, ClearPendingProcessingRoutePointsAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models";
+import { editableCopy } from "../reducers/editable-copy";
+import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute } from "../models";
 
-@Injectable()
+@Service()
 export class RecordedRouteService {
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
@@ -34,29 +35,37 @@ export class RecordedRouteService {
     private readonly toastService = inject(ToastService);
     private readonly store = inject(Store);
 
-    public initialize() {
+    private readonly gpsStateSignal = this.store.selectSignal((s: ApplicationState) => s.gpsState);
+    private readonly recordedRouteStateSignal = this.store.selectSignal((s: ApplicationState) => s.recordedRouteState);
+
+    // Reactive derived state exposed as signals (not methods) so the reactive contract is explicit in
+    // the type: consumers read canRecord()/isRecording() and any change away from a signal breaks them.
+    public readonly canRecord = computed(() => {
+        const gpsState = this.gpsStateSignal();
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
+    });
+
+    public readonly isRecording = computed(() => this.recordedRouteStateSignal().isRecording);
+
+    public async initialize() {
         if (this.isRecording()) {
-            this.loggingService.info("[Record] Recording was interrupted");
-            this.updateRecordingRoute(null); // This will add the last position to the route that might have not been processed.
+            const recordingInterruptedMessage = "[Record] Recording was interrupted";
+            this.loggingService.info(recordingInterruptedMessage);
+            this.loggingService.info(recordingInterruptedMessage, "gps");
+            this.addPositionsToRecording(await this.geoLocationService.readLocationLog());
             this.stopRecording(false);
             this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
-
-        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
-            this.updateRecordingRoute(position);
-        });
-        this.geoLocationService.positionWhileInBackground.subscribe((position: GeolocationPosition) => {
-            if (this.isRecording()) {
-                this.store.dispatch(new AddPendingProcessingRoutePointAction(position));
-            }
-        });
-        this.geoLocationService.backToForeground.subscribe(() => {
-            this.updateRecordingRoute(null);
+        this.geoLocationService.positionsReceived.subscribe((positions: GeolocationPosition[]) => {
+            this.addPositionsToRecording(positions);
         });
     }
 
     public startRecording() {
-        this.loggingService.info("[Record] Starting recording");
+        const startRecordingMessage = "[Record] Starting recording";
+        this.loggingService.info(startRecordingMessage);
+        this.loggingService.info(startRecordingMessage, "gps");
         this.rejectedPosition = null;
         const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
@@ -64,18 +73,10 @@ export class RecordedRouteService {
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
     }
 
-    public canRecord(): boolean {
-        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        return gpsState.tracking === "tracking"
-            && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
-    }
-
-    public isRecording() {
-        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording;
-    }
-
     public stopRecording(withToast = true) {
-        this.loggingService.info("[Record] Stop recording");
+        const stopRecordingMessage = "[Record] Stop recording";
+        this.loggingService.info(stopRecordingMessage);
+        this.loggingService.info(stopRecordingMessage, "gps");
         const recordedRoute = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
         this.store.dispatch(new StopRecordingAction());
         this.addRecordingToTraces(recordedRoute);
@@ -98,7 +99,7 @@ export class RecordedRouteService {
         const name = "Recorded using Mapeak at " + dateString;
         const routeData = this.routesFactory.createRouteData(name);
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        routeData.markers = structuredClone(route.markers) as MarkerData[];
+        routeData.markers = editableCopy(route.markers);
         for (const marker of routeData.markers) {
             marker.id = uuidv4();
         }
@@ -140,36 +141,30 @@ export class RecordedRouteService {
         await this.tracesService.uploadLocalTracesIfNeeded();
     }
 
-    private updateRecordingRoute(position: GeolocationPosition) {
+    private addPositionsToRecording(positions: GeolocationPosition[]) {
         if (!this.isRecording()) {
             return;
         }
-        const readOnlyPositions = this.store.selectSnapshot((state: ApplicationState) => state.recordedRouteState.pendingProcessing) || [];
-        const positions = [...readOnlyPositions];
-        if (positions.length > 0) {
-            this.loggingService.debug(`[Record] Processing ${positions.length} pending positions`);
-            this.store.dispatch(new ClearPendingProcessingRoutePointsAction());
+        if (positions.length > 1) {
+            this.loggingService.info(`[Record] Processing ${positions.length} positions`, "gps");
         }
-        if (position != null) {
-            positions.push(position);
-        }
-        if (positions.length === 0) {
-            return;
-        }
-        const validPositions = [];
         const routeLatLngs = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState.route).latlngs;
-        let lastValidLocation = routeLatLngs[routeLatLngs.length - 1];
+        const lastLatLng = routeLatLngs[routeLatLngs.length - 1];
+        const locations = this.getValidLocations(positions, lastLatLng);
+        if (locations.length > 0) {
+            this.store.dispatch(new AddRecordingRoutePointsAction(locations));
+        }
+    }
+
+    private getValidLocations(positions: GeolocationPosition[], lastValidLocation: LatLngAltTime): LatLngAltTime[] {
+        const locations = [];
         for (const position of positions) {
             if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
-                validPositions.push(position);
                 lastValidLocation = GeoLocationService.positionToLatLngTime(position);
+                locations.push(lastValidLocation);
             }
         }
-        if (validPositions.length === 0) {
-            return;
-        }
-        const locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
-        this.store.dispatch(new AddRecordingRoutePointsAction(locations));
+        return locations;
     }
 
     private validateRecordingAndUpdateState(position: Immutable<GeolocationPosition>, lastValidLocation: LatLngAltTime): boolean {
@@ -180,33 +175,36 @@ export class RecordedRouteService {
         }
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("[Record] Valid position, updating. " +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
+            this.loggingService.info("[Record] Valid position, updating. " + this.positionToLogString(position), "gps");
             this.rejectedPosition = null;
             return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason} ` +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
+            this.loggingService.info(`[Record] Rejecting position, reason: ${nonValidReason} ` + this.positionToLogString(position), "gps");
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("[Record] Validating a rejected position: " +
-                JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
+            this.loggingService.info("[Record] Validating a rejected position: " + this.positionToLogString(position), "gps");
             this.rejectedPosition = null;
             return true;
         }
         this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("[Record] Rejecting position for rejected: " +
-            JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason);
+        this.loggingService.info(`[Record] Rejecting position for rejected, reason: ${nonValidReason} ` + this.positionToLogString(position), "gps");
         return false;
+    }
+
+    /**
+     * The position as the gps log records it for LogReaderService, which reads it back from the json at the end of the line.
+     */
+    private positionToLogString(position: Immutable<GeolocationPosition>): string {
+        return JSON.stringify({ ...GeoLocationService.positionToLatLngTime(position), accuracy: position.coords.accuracy });
     }
 
     private isValid(test: LatLngAltTime, position: Immutable<GeolocationPosition>): string {
         const positionLatLng = GeoLocationService.positionToLatLngTime(position);
-        const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
+        const distance = SpatialHelper.getDistanceInMeters(test, positionLatLng);
         const timeDifference = (position.timestamp - new Date(test.timestamp).getTime()) / 1000;
         if (timeDifference <= 0) {
             return `Time difference below or zero: ${timeDifference}`;

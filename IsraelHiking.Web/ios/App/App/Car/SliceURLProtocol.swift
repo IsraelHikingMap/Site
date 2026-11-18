@@ -1,24 +1,45 @@
 import Foundation
 
-/**
- * Intercepts MapLibre tile requests carrying `?use=slice` and mirrors `SliceProtocolInterceptor.kt`:
- * try the network first (short timeout when an offline archive exists, long timeout otherwise), and
- * on failure fall back to the offline PMTiles archive. Registered on MapLibre's `URLSession`
- * configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
- */
+/// Intercepts MapLibre tile requests carrying `?use=slice` and mirrors `SliceProtocolInterceptor.kt`:
+/// try the network first (short timeout when an offline archive exists, long timeout otherwise), and
+/// on failure fall back to the offline PMTiles archive. Registered on MapLibre's `URLSession`
+/// configuration via `MLNNetworkConfiguration` (see `CarMapViewController.configureTileLoading`).
+/// A tile the server or the offline archive does not have is answered with a 404 and not with an
+/// error, since the DEM has its higher zooms only where there is data and the contours fall back to
+/// the zoom below on a 404. Once the server could not be reached, a tile that has an offline file is read
+/// from it without asking the server for a while, see `skipServerAfterFailure`.
 final class SliceURLProtocol: URLProtocol {
 
     static let pmTiles = PMTilesService()
     static let contours = CarContourTilesProvider()
 
+    static let notFoundStatusCode = 404
     private static let handledKey = "SliceURLProtocolHandled"
     private static let onlineTimeoutMs = 60_000.0
     private static let onlineTimeoutOfflineAvailableMs = 2_000.0
+    /// How long after the server could not be reached a tile that has an offline file is read from it without
+    /// asking the server first. Without it every zoom the map falls back through for a tile the file does not have
+    /// would wait for the server again on a slow connection.
+    private static let skipServerAfterFailure: TimeInterval = 30
+    private static let serverFailureLock = NSLock()
+    private static var lastServerFailure = Date.distantPast
+
+    private static func isSkippingServer() -> Bool {
+        serverFailureLock.lock(); defer { serverFailureLock.unlock() }
+        return Date().timeIntervalSince(lastServerFailure) < skipServerAfterFailure
+    }
+
+    /// Reads the tiles that have an offline file from it without asking the server, starting now, after a request
+    /// to the server failed.
+    private static func skipServerForAWhile() {
+        serverFailureLock.lock(); defer { serverFailureLock.unlock() }
+        lastServerFailure = Date()
+    }
 
     private var dataTask: URLSessionDataTask?
     private var isStopped = false
-    // One shared session for all tile fetches. Ephemeral config carries no custom protocols, so the
-    // network fetch can't recurse back into us.
+    /// One shared session for all tile fetches. Ephemeral config carries no custom protocols, so the
+    /// network fetch can't recurse back into us.
     private static let session = URLSession(configuration: .ephemeral)
 
     override class func canInit(with request: URLRequest) -> Bool {
@@ -49,6 +70,11 @@ final class SliceURLProtocol: URLProtocol {
             ? SliceURLProtocol.onlineTimeoutOfflineAvailableMs
             : SliceURLProtocol.onlineTimeoutMs
 
+        if offlineAvailable && SliceURLProtocol.isSkippingServer() {
+            serveOffline(parsed: parsed, offlineAvailable: true, networkError: nil, response: nil)
+            return
+        }
+
         guard let mutable = (request as NSURLRequest).mutableCopy() as? NSMutableURLRequest else {
             client?.urlProtocol(self, didFailWithError: URLError(.unknown))
             return
@@ -58,12 +84,14 @@ final class SliceURLProtocol: URLProtocol {
 
         dataTask = SliceURLProtocol.session.dataTask(with: mutable as URLRequest) { [weak self] data, response, error in
             guard let self = self else { return }
-            if let http = response as? HTTPURLResponse, http.statusCode == 200, let data = data {
+            if let http = response as? HTTPURLResponse,
+               http.statusCode == 200 || http.statusCode == SliceURLProtocol.notFoundStatusCode {
                 self.client?.urlProtocol(self, didReceive: http, cacheStoragePolicy: .notAllowed)
-                self.client?.urlProtocol(self, didLoad: data)
+                self.client?.urlProtocol(self, didLoad: data ?? Data())
                 self.client?.urlProtocolDidFinishLoading(self)
                 return
             }
+            SliceURLProtocol.skipServerForAWhile()
             self.serveOffline(parsed: parsed, offlineAvailable: offlineAvailable,
                               networkError: error, response: response)
         }
@@ -80,11 +108,17 @@ final class SliceURLProtocol: URLProtocol {
                               offlineAvailable: Bool,
                               networkError: Error?,
                               response: URLResponse?) {
-        guard offlineAvailable,
-              let data = SliceURLProtocol.pmTiles.getTileByType(
-                z: parsed.z, x: parsed.x, y: parsed.y, type: parsed.type)
-        else {
+        guard offlineAvailable else {
             client?.urlProtocol(self, didFailWithError: networkError ?? URLError(.resourceUnavailable))
+            return
+        }
+        guard let data = SliceURLProtocol.pmTiles.getTileByType(
+            z: parsed.z, x: parsed.x, y: parsed.y, type: parsed.type)
+        else {
+            let notFound = HTTPURLResponse(
+                url: request.url!, statusCode: SliceURLProtocol.notFoundStatusCode, httpVersion: "HTTP/1.1", headerFields: nil)!
+            client?.urlProtocol(self, didReceive: notFound, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocolDidFinishLoading(self)
             return
         }
         let headers = ["Content-Type": "application/x-protobuf"]
@@ -95,8 +129,8 @@ final class SliceURLProtocol: URLProtocol {
         client?.urlProtocolDidFinishLoading(self)
     }
 
+    /// Serves a contour tile, generated off the loading thread: generating blocks on fetching the DEM.
     private func serveContour(parsed: (type: String, z: Int, x: Int, y: Int), units: String) {
-        // Generating is blocking (it fetches the DEM synchronously), so run it off the loading thread.
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
             do {

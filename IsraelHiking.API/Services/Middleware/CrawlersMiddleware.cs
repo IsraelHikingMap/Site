@@ -51,8 +51,10 @@ public class CrawlersMiddleware
             await _next.Invoke(context);
             return;
         }
-        if (!context.Request.Path.StartsWithSegments("/share") &&
-            !context.Request.Path.StartsWithSegments("/poi"))
+        var split = context.Request.Path.Value.Split("/");
+        var isSharePath = context.Request.Path.StartsWithSegments("/share") && split.Length == 3;
+        var isPoiPath = context.Request.Path.StartsWithSegments("/poi") && split.Length == 4;
+        if (!isSharePath && !isPoiPath)
         {
             await _next.Invoke(context);
             return;
@@ -68,9 +70,9 @@ public class CrawlersMiddleware
         string thumbnailUrl = string.Empty;
         string description = string.Empty;
         string language = string.Empty;
-        if (context.Request.Path.StartsWithSegments("/share"))
+        if (isSharePath)
         {
-            var url = await _shareUrlGateway.GetUrlById(context.Request.Path.Value.Split("/").Last());
+            var url = await _shareUrlGateway.GetUrlById(split.Last());
             if (url == null)
             {
                 await _next.Invoke(context);
@@ -81,9 +83,8 @@ public class CrawlersMiddleware
             description = url.Description;
             thumbnailUrl = Branding.BASE_URL + "/api/urls/" + url.Id + "/thumbnail";
         }
-        else if (context.Request.Path.StartsWithSegments("/poi"))
+        else
         {
-            var split = context.Request.Path.Value.Split("/");
             context.Request.Query.TryGetValue("language", out var languages);
             language = languages.FirstOrDefault() ?? Languages.ENGLISH;
             var basicInfo = await _pointsOfInterestProvider.GetBasicInfo(split[split.Length - 2], split.Last(), language);

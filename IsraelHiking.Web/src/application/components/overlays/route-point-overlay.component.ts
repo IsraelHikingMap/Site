@@ -1,10 +1,11 @@
-import { Component, HostListener, OnChanges, inject, output, input } from "@angular/core";
+import { Component, OnChanges, inject, output, input, signal } from "@angular/core";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
 
 
 import { CoordinatesComponent } from "../coordinates.component";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import type { LatLngAltTime } from "../../models";
@@ -12,31 +13,31 @@ import type { LatLngAltTime } from "../../models";
 @Component({
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html",
-    imports: [Dir, MatButton, MatTooltip, CoordinatesComponent]
+    imports: [Dir, MatButton, MatTooltip, AnalyticsDirective, CoordinatesComponent]
 })
 export class RoutePointOverlayComponent implements OnChanges {
-    public canMerge = false;
-    public isMiddle = false;
+    public readonly canMerge = signal(false);
+    public readonly isMiddle = signal(false);
+    public readonly hideCoordinates = signal(true);
 
-    public latlng = input<LatLngAltTime>();
+    public readonly latlng = input<LatLngAltTime>();
 
-    public segmentIndex = input<number>();
+    public readonly segmentIndex = input<number>();
 
     public closed = output();
 
-    public hideCoordinates = true;
 
     public readonly resources = inject(ResourcesService);
 
     private readonly selectedRouteService = inject(SelectedRouteService);
 
     public ngOnChanges(): void {
-        this.isMiddle = this.isFirst() === false && this.isLast() === false;
-        if (this.isMiddle) {
-            this.canMerge = false;
+        this.isMiddle.set(this.isFirst() === false && this.isLast() === false);
+        if (this.isMiddle()) {
+            this.canMerge.set(false);
             return;
         }
-        this.canMerge = this.selectedRouteService.getClosestRouteToSelected(this.isFirst()) != null;
+        this.canMerge.set(this.selectedRouteService.getClosestRouteToSelected(this.isFirst()) != null);
     }
 
     public split(): void {
@@ -65,14 +66,5 @@ export class RoutePointOverlayComponent implements OnChanges {
 
     private isLast(): boolean {
         return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex();
-    }
-
-    @HostListener("window:keydown", ["$event"])
-    public onEnterPress($event: KeyboardEvent) {
-        if ($event.key !== "Delete") {
-            return true;
-        }
-        this.remove();
-        return false;
     }
 }

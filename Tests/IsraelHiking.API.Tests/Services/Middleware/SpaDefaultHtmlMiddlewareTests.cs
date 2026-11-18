@@ -46,6 +46,28 @@ public class SpaDefaultHtmlMiddlewareTests
     }
     
     [TestMethod]
+    public void TestMissingFileRequestedByTheBrowser_ShouldReturnNotFound()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = new PathString("/main-12345678.js"),
+                Host = new HostString("www.example.com"),
+                QueryString = QueryString.Empty,
+                PathBase = PathString.Empty,
+                Scheme = "http",
+                Headers = { ["Sec-Fetch-Dest"] = "script" }
+            }
+        };
+
+        _middleware.InvokeAsync(context).Wait();
+
+        Assert.AreEqual(StatusCodes.Status404NotFound, context.Response.StatusCode);
+        _next.DidNotReceive().Invoke(context);
+    }
+
+    [TestMethod]
     public void TestOther_ShouldReturnHtmlFile()
     {
         var context = new DefaultHttpContext

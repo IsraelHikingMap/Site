@@ -1,48 +1,7 @@
 <div class="overflow-hidden my-2 text-on-surface">
     <img #shareImage [src]="getImageFromShareId(256, 256)" loading="lazy" (error)="shareImage.src='content/logo.png'"
         alt="" class="float-end w-1/3 h-auto object-cover block ps-2 rounded-2xl">
-    <h4 class="m-2">
-        @if (showMenu()) {
-        <button mat-button [matMenuTriggerFor]="shareMenu">
-            <i class="fa icon-ellipsis-v"></i>
-        </button>
-        <mat-menu #shareMenu="matMenu">
-            <button mat-menu-item (click)="moveToRoute.emit()" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share move to route">
-                <i class="fa icon-crosshairs"></i>
-                {{resources.moveToRoute}}
-            </button>
-            <button mat-menu-item (click)="editProperties.emit()" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share edit properties">
-                <i class="fa icon-pencil"></i>
-                {{resources.editProperties}}
-            </button>
-            <button mat-menu-item (click)="open.emit()" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share open">
-                <i class="fa icon-external-link-square"></i>
-                {{resources.openCloudSave}}
-            </button>
-            <button mat-menu-item (click)="addToRoutes.emit()" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share add to routes">
-                <i class="fa icon-plus"></i>
-                {{resources.addToRoutes}}
-            </button>
-            @for (provider of deviceProviders; track provider.id) {
-            <button mat-menu-item (click)="sendToDevice.emit(provider.id)" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share send to device {{provider.id}}">
-                <i class="fa icon-external-link"></i>
-                {{provider.displayName}}
-            </button>
-            }
-            <button mat-menu-item (click)="delete.emit()" analyticsOn="click" analyticsCategory="Share"
-                analyticsLabel="Share delete">
-                <i class="fa icon-trash"></i>
-                {{resources.delete}}
-            </button>
-        </mat-menu>
-        }
-        {{shareUrl().title}}
-    </h4>
+    <h4 class="m-2">{{shareUrl().title}}</h4>
     <div class="m-2">
         @switch (shareUrl().difficulty) {
         @case ("Easy") {
@@ -78,11 +37,11 @@
     <div class="inline-flex flex-row gap-1 text-sm mx-2">
         <div matTooltip="{{resources.gain}}" matTooltipPosition="above">
             <i class="fa icon-arrow-up"></i>
-            <span class="mx-1 whitespace-nowrap">{{shareUrl().gain | distance}}</span>
+            <span class="mx-1 whitespace-nowrap">{{shareUrl().gain | distance:'elevation'}}</span>
         </div>
         <div matTooltip="{{resources.loss}}" matTooltipPosition="above">
             <i class="fa icon-arrow-down"></i>
-            <span class="mx-1 whitespace-nowrap">{{shareUrl().loss | distance}}</span>
+            <span class="mx-1 whitespace-nowrap">{{shareUrl().loss | distance:'elevation'}}</span>
         </div>
         <div matTooltip="{{resources.length}}" matTooltipPosition="above">
             <i class="fa icon-arrow-right"></i>
@@ -99,26 +58,26 @@
     @if (isApp()) {
     <div class="flex flex-row">
         <button mat-button class="w-full" (click)="share()" analyticsOn="click" analyticsCategory="Share"
-            analyticsLabel="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+            analyticsLabel="Share mobile button"><i class="fa fa-action icon-share-alt"></i></button>
     </div>
     } @else {
     <div class="flex flex-row">
         <div class="flex-1">
-            <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'"
+            <a mat-button class="w-full" [href]="facebookShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" analyticsOn="click"
-                analyticsCategory="Share" analyticsLabel="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
+                analyticsCategory="Share" analyticsLabel="Share facebook"><i class="fa fa-action icon-facebook"></i></a>
         </div>
         <div class="flex-1">
-            <a mat-button class="w-full" [href]="whatsappShareAddress" [target]="'_blank'"
+            <a mat-button class="w-full" [href]="whatsappShareAddress()" [target]="'_blank'"
                 matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" analyticsOn="click"
-                analyticsCategory="Share" analyticsLabel="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
+                analyticsCategory="Share" analyticsLabel="Share whatsapp"><i class="fa fa-action icon-whatsapp"></i></a>
         </div>
         <div class="flex-1">
-            <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress" (click)="copiedToClipboard = true"
-                matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" analyticsOn="click"
+            <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress()" (click)="copiedToClipboard.set(true)"
+                matTooltip="{{resources.copyLink}}" matTooltipPosition="above" analyticsOn="click"
                 analyticsCategory="Share" analyticsLabel="Share copy to clipboard">
-                <i class="fa icon-clipboard fa-lg"></i>
-                @if (copiedToClipboard) {
+                <i class="fa fa-lg icon-clipboard"></i>
+                @if (copiedToClipboard()) {
                 <i class="fa fa-lg icon-check-circle" [style.color]="'green'"></i>
                 }
             </button>

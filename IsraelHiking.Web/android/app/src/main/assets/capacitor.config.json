@@ -8,5 +8,21 @@
 	"ios": {
 		"preferredContentMode": "mobile"
 	},
-	"android": {}
+	"android": {},
+	"plugins": {
+		"CapacitorShareTarget": {
+			"appGroupId": "group.com.mapeak"
+		}
+	},
+	"experimental": {
+		"ios": {
+			"spm": {
+				"packageOptions": {
+					"@capacitor-firebase/analytics": {
+						"symlink": true
+					}
+				}
+			}
+		}
+	}
 }

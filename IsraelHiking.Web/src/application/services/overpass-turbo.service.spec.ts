@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { inject, TestBed } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
@@ -184,7 +184,7 @@ describe("OverpassTurboService", () => {
 
     it("Should get a long way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
-        const response = "<osm></osm>";
+        const response = { elements: [] as unknown[] };
         // Act
         const promise = service.getLongWay("id", "name", false, false);
 
@@ -196,7 +196,7 @@ describe("OverpassTurboService", () => {
 
     it("Should get a long mtb way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
-        const response = "<osm></osm>";
+        const response = { elements: [] as unknown[] };
         // Act
         const promise = service.getLongWay("id", "aaa", false, true);
 
@@ -208,7 +208,7 @@ describe("OverpassTurboService", () => {
 
     it("Should get a long waterway way by name", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
-        const response = "<osm></osm>";
+        const response = { elements: [] as unknown[] };
         // Act
         const promise = service.getLongWay("id", "aaa", true, false);
 
@@ -220,7 +220,7 @@ describe("OverpassTurboService", () => {
 
     it("Should get a long way by name with '\"'", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
-        const response = "<osm></osm>";
+        const response = { elements: [] as unknown[] };
         // Act
         const promise = service.getLongWay("id", "lalala\"", false, false);
 
@@ -233,7 +233,7 @@ describe("OverpassTurboService", () => {
 
     it("Should get a place by id", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {
         // Arrange
-        const response = "<osm></osm>";
+        const response = { elements: [] as unknown[] };
         // Act
         const promise = service.getPlaceGeometry("42");
 
@@ -279,8 +279,7 @@ describe("OverpassTurboService", () => {
         };
         const promise = service.getFeature("relation", "1");
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
-        await new Promise(resolve => setTimeout(resolve, 10));
-        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json"))).flush(response2);
         const results = await promise;
         expect(results.geometry.type).toBe("LineString");
     }));
@@ -323,10 +322,10 @@ describe("OverpassTurboService", () => {
         };
         const promise = service.getFeature("relation", "1");
         mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/1/full.json").flush(response1);
-        await new Promise(resolve => setTimeout(resolve, 10));
-        mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json").flush(response2);
+        (await vi.waitFor(() => mockBackend.expectOne(r => r.url === Urls.osmApi + "relation/2/full.json"))).flush(response2);
         const results = await promise;
-        expect(results).toBeUndefined();
+        expect(results.geometry.type).toBe("LineString");
+        expect((results.geometry as GeoJSON.LineString).coordinates).toEqual([[2, 1], [4, 3]]);
     }));
 
     it("Should get points in area", inject([OverpassTurboService, HttpTestingController], async (service: OverpassTurboService, mockBackend: HttpTestingController) => {

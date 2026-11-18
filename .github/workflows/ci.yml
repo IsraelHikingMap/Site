@@ -16,17 +16,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v5.4.0
+        uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: '10.0'
+          dotnet-version: '11.0'
 
       - name: Run backend tests
         run: dotnet test Tests/IsraelHiking.API.Tests  --logger "junit;LogFilePath=test-result.xml" /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*"
@@ -42,7 +42,7 @@ jobs:
           npx ng lint
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v7.0.0
+        uses: codecov/codecov-action@v7.1.1
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
@@ -52,23 +52,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
-        uses: actions/setup-java@v5.4.0
+        uses: actions/setup-java@v6.3.0
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: 'gradle'
+          cache-dependency-path: |
+            IsraelHiking.Web/android/**/*.gradle*
+            IsraelHiking.Web/android/**/gradle-wrapper.properties
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/android
           bundler-cache: true
 
@@ -89,7 +93,7 @@ jobs:
           KEYSTORE_PATH: ${{ github.workspace }}/IsraelHiking.Web/android/app/Mapeak.jks
       - name: Upload aab artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
@@ -98,27 +102,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Build Docker image
         run: |
           docker build . -t ghcr.io/israelhikingmap/website-mapeak
 
   build-ios:
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6.4.0
+        uses: actions/setup-node@v7.1.0
         with:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.1'
+          ruby-version: '3.4'
           working-directory: IsraelHiking.Web/ios/App
           bundler-cache: true
 
@@ -132,6 +136,32 @@ jobs:
           npm ci
           npm run build:mobile -- --no-progress
           npx cap sync ios
+
+      - name: Restore Swift package cache
+        id: spm-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Resolve Swift packages
+        run: |
+          cd IsraelHiking.Web/ios/App
+          xcodebuild -resolvePackageDependencies \
+            -project App.xcodeproj \
+            -clonedSourcePackagesDirPath ../.spm-cache
+
+      - name: Verify the iOS lock file is up to date
+        run: git diff --exit-code -- IsraelHiking.Web/ios
+
+      - name: Save Swift package cache
+        if: steps.spm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+
       - name: Build iOS with signing
         if: ${{ github.secret_source == 'Actions' }}
         run: |
@@ -139,9 +169,11 @@ jobs:
           bundle exec fastlane build_ios
         env:
           MATCH_PASSWORD: ${{ secrets.PASSWORD }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 5
       - name: Upload ipa artifacts
         if: ${{ github.secret_source == 'Actions' }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa

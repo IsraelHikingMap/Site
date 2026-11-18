@@ -2,13 +2,14 @@
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Middleware;
 using IsraelHiking.API.OpenApi;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
@@ -26,11 +27,17 @@ using NeoSmart.Caching.Sqlite;
 using Scalar.AspNetCore;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NLog.Extensions.Logging;
 using NLog.Web;
 using OsmSharp.IO.API;
 
-NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
+var configFolder = Environment.GetEnvironmentVariable("CONFIG_FOLDER") ?? string.Empty;
 var builder = WebApplication.CreateBuilder(args);
+if (configFolder.Length > 0)
+{
+    builder.Configuration.AddJsonFile(Path.Combine(configFolder, "appsettings.json"), optional: false, reloadOnChange: true);
+}
+NLog.LogManager.Setup().LoadConfigurationFromSection(builder.Configuration);
 SetupServices(builder.Services, builder.Environment.IsDevelopment());
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
@@ -46,7 +53,7 @@ void SetupApplication(WebApplication app)
         application.UseDeveloperExceptionPage();
     }
     app.UseResponseCompression();
-    app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("X-Uncompressed-Length"));
     app.MapControllers();
     app.MapHealthChecks("/api/health");
     // wwwroot
@@ -56,7 +63,8 @@ void SetupApplication(WebApplication app)
         ContentTypeProvider = new FileExtensionContentTypeProvider
         {
             Mappings = { { ".pbf", "application/x-protobuf" } } // for the fonts files
-        }
+        },
+        OnPrepareResponse = SetStaticFileCacheHeaders
     });
     app.MapOpenApi();
     app.MapScalarApiReference("/openapi", options => options.AddPreferredSecuritySchemes("Bearer"));
@@ -120,7 +128,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddOptions();
 
     var config = new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(Path.Combine(configFolder, "appsettings.json"), optional: false, reloadOnChange: true)
         .Build();
     services.Configure<ConfigurationData>(config);
     var nonPublicConfiguration = new ConfigurationBuilder();
@@ -130,7 +138,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     }
     else
     {
-        nonPublicConfiguration.AddJsonFile("nonPublic.json");
+        nonPublicConfiguration.AddJsonFile(Path.Combine(configFolder, "nonPublic.json"));
     }
     services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
 
@@ -143,11 +151,31 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     });
 }
 
+/// <summary>
+/// Files built by the angular CLI carry a content hash in their name, so they can be cached forever.
+/// Everything else keeps its name across deployments and is only cached for a day.
+/// HTML is never cached since it points at the hashed file names.
+/// </summary>
+void SetStaticFileCacheHeaders(StaticFileResponseContext context)
+{
+    var path = context.Context.Request.Path.Value ?? string.Empty;
+    if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Context.Response.Headers.CacheControl = "no-cache";
+        return;
+    }
+    var isHashed = path.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
+                   Regex.IsMatch(path, @"-[A-Z0-9]{8}\.(js|mjs|css)$", RegexOptions.IgnoreCase);
+    context.Context.Response.Headers.CacheControl = isHashed
+        ? "public, max-age=31536000, immutable"
+        : "public, max-age=86400";
+}
+
 void InitializeServices(IServiceProvider serviceProvider)
 {
     var logger = serviceProvider.GetRequiredService<ILogger>();
     logger.LogInformation("-----------------------------------------------");
-    logger.LogInformation($"Version: {Assembly.GetExecutingAssembly().GetName().Version?.ToString()}");
+    logger.LogInformation($"Version: {Branding.VERSION}");
     logger.LogInformation("Initializing singleton services");
     var initializableServices = serviceProvider.GetServices<IInitializable>();
     foreach (var service in initializableServices)

@@ -11,6 +11,7 @@ apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-community-keep-awake')
     implementation project(':capacitor-community-screen-brightness')
+    implementation project(':capacitor-firebase-analytics')
     implementation project(':capacitor-app')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-device')
@@ -19,12 +20,16 @@ dependencies {
     implementation project(':capacitor-text-zoom')
     implementation project(':capawesome-team-capacitor-android-battery-optimization')
     implementation project(':capawesome-capacitor-app-update')
+    implementation project(':capawesome-capacitor-mail-composer')
     implementation project(':capgo-background-geolocation')
     implementation project(':capgo-capacitor-compass')
+    implementation project(':capgo-capacitor-downloader')
     implementation project(':capgo-capacitor-inappbrowser')
+    implementation project(':capgo-capacitor-share-target')
+    implementation project(':capgo-capacitor-speech-synthesis')
     implementation project(':revenuecat-purchases-capacitor')
     implementation project(':revenuecat-purchases-capacitor-ui')
-    implementation project(':capacitor-email-composer')
+    implementation project(':appsflyer-capacitor-plugin')
 
 }
 

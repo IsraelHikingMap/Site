@@ -17,9 +17,7 @@
             },
             "index": "src/index.html",
             "tsConfig": "./tsconfig.app.json",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "polyfills": [],
             "assets": [
               "src/content",
               "src/translations",
@@ -29,13 +27,13 @@
               "src/googlef59316cdb0845a8c.html",
               "src/robots.txt",
               {
-                "glob": "**/mapbox-gl-rtl-text.js",
-                "input": "./node_modules/@mapbox/mapbox-gl-rtl-text/dist",
+                "glob": "**/add-protocol-worker.js",
+                "input": "./node_modules/maplibre-contour/dist",
                 "output": "./"
               },
               {
-                "glob": "**/add-protocol-worker.js",
-                "input": "./node_modules/maplibre-contour/dist",
+                "glob": "maplibre-gl-worker.mjs",
+                "input": "node_modules/maplibre-gl/dist",
                 "output": "./"
               }
             ],
@@ -49,19 +47,11 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "photoswipe",
+              "@mapbox/polyline",
               "lottie-web",
-              "maplibre-gl",
-              "@mapbox/vector-tile",
-              "pbf",
-              "linear-interpolator",
-              "deepmerge",
-              "xml-beautify",
-              "d3-regression",
-              "platform",
-              "osm2geojson-lite",
+              "bowser",
               "piexif-ts",
-              "isomorphic-xml2js"
+              "@appsflyer-sdk/js-core-plugin"
             ],
             "extractLicenses": false,
             "sourceMap": true,

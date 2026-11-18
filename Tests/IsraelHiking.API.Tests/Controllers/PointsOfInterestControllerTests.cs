@@ -36,7 +36,6 @@ public class PointsOfInterestControllerTests
         _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
         _tagHelper = Substitute.For<ITagsHelper>();
         _osmGateway = Substitute.For<IAuthClient>();
-        Substitute.For<IImagesUrlsStorageExecutor>();
         _persistentCache = Substitute.For<IDistributedCache>();
         _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
         var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
@@ -91,7 +90,7 @@ public class PointsOfInterestControllerTests
         var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(result);
-        _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+        _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>(), Arg.Any<ClientDetails>());
     }
 
     [TestMethod]
@@ -105,7 +104,7 @@ public class PointsOfInterestControllerTests
         });
         poi.SetLocation(new Coordinate(0, 0));
         _persistentCache.Get(Arg.Any<string>()).Returns((byte[])null);
-        _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW).Returns(new Feature(new Point(0, 0), new AttributesTable
+        _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW, Arg.Any<ClientDetails>()).Returns(new Feature(new Point(0, 0), new AttributesTable
         {
             { FeatureAttributes.ID, "new id" }
         }));
@@ -132,7 +131,7 @@ public class PointsOfInterestControllerTests
         var result = _controller.UpdatePointOfInterest("42", poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
         Assert.IsNotNull(result);
-        _pointsOfInterestProvider.DidNotReceive().UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+        _pointsOfInterestProvider.DidNotReceive().UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>(), Arg.Any<ClientDetails>());
     }
 
     [TestMethod]
@@ -200,7 +199,7 @@ public class PointsOfInterestControllerTests
         var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as OkObjectResult;
 
         Assert.IsNotNull(result);
-        _pointsOfInterestProvider.Received(1).UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+        _pointsOfInterestProvider.Received(1).UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>(), Arg.Any<ClientDetails>());
     }
 
     [TestMethod]
@@ -221,7 +220,7 @@ public class PointsOfInterestControllerTests
 
         _controller.CreatePointOfInterest(simpleFeature, Languages.HEBREW).Wait();
 
-        _simplePointAdderExecutor.Received(1).Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
+        _simplePointAdderExecutor.Received(1).Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>(), Arg.Any<ClientDetails>());
     }
 
     [TestMethod]
@@ -243,6 +242,6 @@ public class PointsOfInterestControllerTests
 
         _controller.CreatePointOfInterest(simpleFeature, Languages.HEBREW).Wait();
 
-        _simplePointAdderExecutor.DidNotReceive().Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
+        _simplePointAdderExecutor.DidNotReceive().Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>(), Arg.Any<ClientDetails>());
     }
 }

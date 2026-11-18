@@ -1,8 +1,8 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, beforeEach, it, expect, vi } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
-import { NgxsModule } from "@ngxs/store";
+import { provideStore } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
@@ -32,10 +32,8 @@ describe("ElevationProvider", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [
-                NgxsModule.forRoot([])
-            ],
             providers: [
+                provideStore([]),
                 { provide: LoggingService, useValue: { warning: () => { } } },
                 {
                     provide: PmTilesService, useValue: {
@@ -55,15 +53,13 @@ describe("ElevationProvider", () => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
-            await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
-
-            mockBackend.match(() => true)[0].flush(await getArrayBufferOfNonEmptyTile());
+            (await vi.waitFor(() => mockBackend.expectOne(() => true))).flush(await getArrayBufferOfNonEmptyTile());
             await promise;
             expect(latlngs[0].alt).toBe(32512);
         }
     ));
 
-    it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
+    it("Should not call provider because all coordinates have elevation", inject([ElevationProvider],
         async (elevationProvider: ElevationProvider) => {
 
             const latlngs = [{ lat: 32, lng: 35, alt: 1 }];
@@ -74,7 +70,7 @@ describe("ElevationProvider", () => {
         }
     ));
 
-    it("Should not update elevation when getting an error from server and offline is not available",
+    it("Should not update elevation when getting an error from server for all the zoom levels and offline is not available",
         inject([ElevationProvider, HttpTestingController],
             async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
@@ -82,11 +78,32 @@ describe("ElevationProvider", () => {
 
                 const promise = elevationProvider.updateHeights(latlngs);
 
-                await new Promise((resolve) => setTimeout(resolve, 0)); // Let the http call be made
-
-                mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
+                for (let zoom = ElevationProvider.MAX_ELEVATION_ZOOM; zoom >= ElevationProvider.FALLBACK_ELEVATION_ZOOM; zoom--) {
+                    (await vi.waitFor(() => mockBackend.expectOne(() => true))).flush(null, { status: 500, statusText: "Server Error" });
+                }
                 await promise;
                 expect(latlngs[0].alt).toBe(0);
+            }
+        ));
+
+    it("Should update elevation from a lower zoom tile when the highest zoom tile is not served",
+        inject([ElevationProvider, HttpTestingController],
+            async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+
+                const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
+
+                const promise = elevationProvider.updateHeights(latlngs);
+
+                const failed = await vi.waitFor(() => mockBackend.expectOne(() => true));
+                expect(failed.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM}/`);
+                failed.flush(null, { status: 500, statusText: "Server Error" });
+
+                const fallback = await vi.waitFor(() => mockBackend.expectOne(() => true));
+                expect(fallback.request.url).toContain(`/${ElevationProvider.MAX_ELEVATION_ZOOM - 1}/`);
+                fallback.flush(await getArrayBufferOfNonEmptyTile());
+
+                await promise;
+                expect(latlngs[0].alt).toBe(32512);
             }
         ));
 

@@ -1,24 +1,27 @@
-import { Directive, HostListener, Input } from "@angular/core";
+import { Directive, HostListener, input } from "@angular/core";
 
 @Directive({
     selector: "[scrollToOnClick]"
 })
 export class ScrollToDirective {
-    @Input("scrollToOnClick") targetId: string | undefined;
-    @Input("scrollToOnClickOffset") offset = 0;
+    public readonly targetId = input<string>(undefined, { alias: "scrollToOnClick" });
+    public readonly offset = input(0, { alias: "scrollToOnClickOffset" });
 
     @HostListener("click")
     onClick(): void {
-        if (!this.targetId) {
+        if (!this.targetId()) {
             console.warn("targetId parameter is missing");
             return;
         }
-        ScrollToDirective.scrollTo(this.targetId, this.offset)
+        ScrollToDirective.scrollTo(this.targetId(), this.offset())
     }
 
     /**
      * This allows scrolling to the relevant element without using the directive.
      * This is helpfull when there's a spcific event that happens that requires scrolling.
+     * When no scrollable parent is found - the body of this app is positioned rather than scrollable,
+     * so a target that is not inside a scrolling container of its own has none - the element is asked
+     * to bring itself into view instead, which ignores the offset.
      * @param targetId - the ID of the element to scroll to
      * @param offset - the scroll offset, positive makes the scrolling move the "screen" lower.
      */
@@ -29,6 +32,10 @@ export class ScrollToDirective {
             return;
         }
         const container = ScrollToDirective.getFirstScrollableParent(targetElement);
+        if (container == null) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
         const containerRect = container.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
 

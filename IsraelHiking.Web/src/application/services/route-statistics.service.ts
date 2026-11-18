@@ -1,9 +1,8 @@
-import { Injectable } from "@angular/core";
-import linearInterpolator from "linear-interpolator";
+import { Service } from "@angular/core";
 import type { Immutable } from "immer";
 
-import { SpatialService } from "./spatial.service";
-import type { LatLngAltTime } from "../models";
+import { SpatialHelper } from "./spatial.helper";
+import type { LatLngAltTime, RouteDataWithoutState, RouteSegmentData } from "../models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;
@@ -49,8 +48,28 @@ export type RouteStatistics = {
     traveledDistance: number;
 };
 
-@Injectable()
+@Service()
 export class RouteStatisticsService {
+    private readonly statisticsPerSegments = new WeakMap<Immutable<RouteSegmentData[]>, RouteStatistics>();
+
+    /**
+     * Same as {@link getStatisticsForStandAloneRoute}, only the result is cached by the route's segments array.
+     * The routes state is immutable, so a change that doesn't touch the route's points - renaming it for example -
+     * keeps the same segments array and the statistics are reused instead of being calculated again.
+     * The returned object is shared between all the callers, do not change it.
+     *
+     * @param route - the route to get the statistics for
+     */
+    public getStatisticsForRoute(route: Immutable<RouteDataWithoutState>): RouteStatistics {
+        const cachedStatistics = this.statisticsPerSegments.get(route.segments);
+        if (cachedStatistics != null) {
+            return cachedStatistics;
+        }
+        const statistics = this.getStatisticsForStandAloneRoute(route.segments.map(s => s.latlngs).flat());
+        this.statisticsPerSegments.set(route.segments, statistics);
+        return statistics;
+    }
+
     public getStatisticsByRange(latlngs: Immutable<LatLngAltTime[]>, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         const routeStatistics = {
             points: [] as RouteStatisticsPoint[],
@@ -69,7 +88,7 @@ export class RouteStatisticsService {
         let previousLatlng = latlngs[0];
         routeStatistics.points.push(start || { coordinate: [0, previousLatlng.alt], latlng: previousLatlng, slope: 0 });
         for (const latlng of latlngs) {
-            const distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
+            const distance = SpatialHelper.getDistanceInMeters(previousLatlng, latlng);
             routeStatistics.length += distance;
             const point = {
                 coordinate: [(routeStatistics.length / 1000), latlng.alt],
@@ -86,15 +105,12 @@ export class RouteStatisticsService {
             routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
 
-        // filter invalid points for the rest of the calculations
-        routeStatistics.points = routeStatistics.points.filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
-        for (let pointIndex = routeStatistics.points.length - 1; pointIndex > 0; pointIndex--) {
-            const prevPoint = routeStatistics.points[pointIndex - 1];
-            const currentPoint = routeStatistics.points[pointIndex];
-            if (currentPoint.coordinate[0] - prevPoint.coordinate[0] < 0.001) {
-                routeStatistics.points.splice(pointIndex, 1);
-            }
-        }
+        // filter invalid points for the rest of the calculations, also points that are two close to each other
+        let validPoints = routeStatistics.points
+            .filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
+        validPoints = validPoints.filter((point, pointIndex) =>
+            pointIndex === 0 || point.coordinate[0] - validPoints[pointIndex - 1].coordinate[0] >= 0.001);
+        routeStatistics.points = validPoints;
         if (routeStatistics.points.length < 1) {
             return routeStatistics;
         }
@@ -112,7 +128,7 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    private median(numbers: any[]) {
+    private median(numbers: number[]) {
         const sorted = numbers.slice().sort((a, b) => a - b);
         const middle = Math.floor(sorted.length / 2);
         if (sorted.length % 2 === 0) {
@@ -129,11 +145,24 @@ export class RouteStatisticsService {
     private updateGainAndLoss(routeStatistics: RouteStatistics) {
         // resample coordinates along route at uniform resolution
         const coordinates = routeStatistics.points.map(p => p.coordinate);
-        const linterp = linearInterpolator(coordinates);
+        if (coordinates.length < 2) {
+            return;
+        }
         const resamplingResolutionKm = 0.01;
         const interpolatedCoordinates = [];
+        // The coordinates are sorted by distance and the resampling advances along them, so the segment
+        // holding the current x is found by moving forward from the previous one instead of searching
+        // the whole route for every sample - searching would make this quadratic and very slow on long routes.
+        let segmentIndex = 0;
         for (let x = coordinates[0][0]; x <= coordinates[coordinates.length - 1][0]; x += resamplingResolutionKm) {
-            interpolatedCoordinates.push([x, linterp(x)]);
+            while (segmentIndex < coordinates.length - 2 && x > coordinates[segmentIndex + 1][0]) {
+                segmentIndex++;
+            }
+            const segmentStart = coordinates[segmentIndex];
+            const segmentEnd = coordinates[segmentIndex + 1];
+            const alt = segmentStart[1] +
+                (x - segmentStart[0]) * (segmentEnd[1] - segmentStart[1]) / (segmentEnd[0] - segmentStart[0]);
+            interpolatedCoordinates.push([x, alt]);
         }
 
         // pad interpolated coordinates towards applying moving median filter
@@ -173,23 +202,29 @@ export class RouteStatisticsService {
     }
 
     public getStatisticsForRouteWithLocation(
-        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        closestRouteToRecording: Immutable<RouteDataWithoutState>,
         currentLatlng: LatLngAltTime,
         heading: number
     ): RouteStatistics {
-        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        // the route's own statistics are taken from the cache, only the location dependent values are calculated
+        const closestRouteStatistics = { ...this.getStatisticsForRoute(closestRouteToRecording) };
         closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
-        this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
         return closestRouteStatistics;
     }
 
     public getStatisticsForRecordedRouteWithPlannedRoute(recordedRouteLatlngs: Immutable<LatLngAltTime[]>,
-        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        closestRouteToRecording: Immutable<RouteDataWithoutState>,
         currentLatlng: LatLngAltTime,
         heading: number) {
         const recordedRouteStatistics = this.getStatisticsByRange(recordedRouteLatlngs, null, null);
-        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        // the planned route's statistics are taken from the cache, its duration and average speed are
+        // replaced below by the ones of the recording, so they start off empty like in a plain range calculation
+        const closestRouteStatistics: RouteStatistics = {
+            ...this.getStatisticsForRoute(closestRouteToRecording),
+            duration: null,
+            averageSpeed: null
+        };
         closestRouteStatistics.remainingDistance =
             closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         this.addDurationAndAverageSpeed(recordedRouteLatlngs, recordedRouteStatistics.length, closestRouteStatistics);
@@ -227,11 +262,11 @@ export class RouteStatisticsService {
                 continue;
             }
             const ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
-            const alt = SpatialService.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
+            const alt = SpatialHelper.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
             const point: RouteStatisticsPoint = {
                 coordinate: [x, alt],
-                slope: SpatialService.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
-                latlng: SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
+                slope: SpatialHelper.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
+                latlng: SpatialHelper.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
             };
             point.latlng.alt = alt;
             return point;
@@ -248,7 +283,7 @@ export class RouteStatisticsService {
             bestPoint = this.findDistanceForLatLngInKMInternal(statistics, latLng, null);
         }
         return bestPoint
-            ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
+            ? bestPoint.coordinate[0] + SpatialHelper.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
             : 0;
     }
 
@@ -263,9 +298,9 @@ export class RouteStatisticsService {
             if (point === statistics.points[0]) {
                 continue;
             }
-            let currentWeight = SpatialService.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
+            let currentWeight = SpatialHelper.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
             if (heading != null) {
-                currentWeight += this.angleDifference(heading, SpatialService.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
+                currentWeight += this.angleDifference(heading, SpatialHelper.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
             }
             if (currentWeight < minimalWeight) {
                 minimalWeight = currentWeight;

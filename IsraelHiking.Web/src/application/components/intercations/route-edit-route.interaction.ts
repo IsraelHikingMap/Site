@@ -1,17 +1,18 @@
-import { Injectable, EventEmitter, NgZone, inject } from "@angular/core";
-import { MapMouseEvent, Map, GeoJSONSource, type Point } from "maplibre-gl";
+import { EventEmitter, NgZone, inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { v4 as uuidv4 } from "uuid";
+import type { MapMouseEvent, Map, GeoJSONSource, Point, MapTouchEvent } from "maplibre-gl";
 import type { Immutable } from "immer";
 
 import { SEGMENT, SEGMENT_POINT, SelectedRouteService } from "../../services/selected-route.service";
-import { SpatialService } from "../../services/spatial.service";
+import { SpatialHelper } from "../../services/spatial.helper";
 import { RoutingProvider } from "../../services/routing.provider";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
+import { editableCopy } from "../../reducers/editable-copy";
 import type {
     ApplicationState,
     LatLngAltTime,
@@ -23,10 +24,10 @@ const DRAG_PIXEL_TOLERANCE = 3;
 
 declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 
-@Injectable()
+@Service()
 export class RouteEditRouteInteraction {
 
-    public onRoutePointClick = new EventEmitter<number>();
+    public readonly onRoutePointClick = new EventEmitter<number>();
 
     private state: EditMouseState = "none";
     private mouseDownPoint: Point = null;
@@ -115,13 +116,13 @@ export class RouteEditRouteInteraction {
         }
     }
 
-    private cancelInteraction = () => {
+    private readonly cancelInteraction = () => {
         this.selectedRoutePoint = null;
         this.selectedRouteSegments = [];
         this.state = "canceled";
     };
 
-    private handleDown = (event: MapMouseEvent) => {
+    private readonly handleDown = (event: MapMouseEvent | MapTouchEvent) => {
         this.mouseDownPoint = event.point;
         if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             this.cancelInteraction();
@@ -166,7 +167,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleMove = (event: MapMouseEvent) => {
+    private readonly handleMove = (event: MapMouseEvent | MapTouchEvent) => {
         if (this.mouseDownPoint != null && event.point &&
             Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
             return;
@@ -188,8 +189,8 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleRoutePointDrag(event: MapMouseEvent) {
-        const coordinate = SpatialService.toCoordinate(event.lngLat);
+    private handleRoutePointDrag(event: MapMouseEvent | MapTouchEvent) {
+        const coordinate = SpatialHelper.toCoordinate(event.lngLat);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
         const featuresToUpdate: GeoJSON.Feature<GeoJSON.Point | GeoJSON.LineString>[] = [this.selectedRoutePoint];
 
@@ -214,8 +215,8 @@ export class RouteEditRouteInteraction {
         this.updateData(featuresToUpdate);
     }
 
-    private handleRouteMiddleSegmentDrag(event: MapMouseEvent) {
-        const coordinate = SpatialService.toCoordinate(event.lngLat);
+    private handleRouteMiddleSegmentDrag(event: MapMouseEvent | MapTouchEvent) {
+        const coordinate = SpatialHelper.toCoordinate(event.lngLat);
         const segment = this.selectedRouteSegments[0];
         const coordinates = segment.geometry.coordinates;
         segment.geometry.coordinates = [coordinates[0], coordinate, coordinates[coordinates.length - 1]];
@@ -226,7 +227,7 @@ export class RouteEditRouteInteraction {
         return this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0;
     }
 
-    private handleUp = (event: MapMouseEvent) => {
+    private readonly handleUp = (event: MapMouseEvent | MapTouchEvent) => {
         this.mouseDownPoint = null;
         if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
             // more than zero touches - no need to do any thing.
@@ -252,7 +253,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private handleClick = (event: MapMouseEvent) => {
+    private readonly handleClick = (event: MapMouseEvent) => {
         const latlng = event.lngLat;
         if (!this.isUpdating()) {
             // new point
@@ -268,7 +269,7 @@ export class RouteEditRouteInteraction {
         }
     };
 
-    private addPointToEndOfRoute = async (latlng: LatLngAltTime) => {
+    private readonly addPointToEndOfRoute = async (latlng: LatLngAltTime) => {
         const newSegment = this.createRouteSegment(latlng, [latlng, latlng]);
         const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute.segments.length === 0) {
@@ -283,7 +284,7 @@ export class RouteEditRouteInteraction {
         this.store.dispatch(new AddSegmentAction(selectedRoute.id, newSegment));
     };
 
-    private createRouteSegment = (latlng: LatLngAltTime, latlngs: LatLngAltTime[]): RouteSegmentData => {
+    private readonly createRouteSegment = (latlng: LatLngAltTime, latlngs: LatLngAltTime[]): RouteSegmentData => {
         const routeSegment = {
             routePoint: latlng,
             latlngs: latlngs,
@@ -292,7 +293,7 @@ export class RouteEditRouteInteraction {
         return routeSegment;
     };
 
-    private runRouting = async (startLatLng: LatLngAltTime, segment: RouteSegmentData): Promise<void> => {
+    private readonly runRouting = async (startLatLng: LatLngAltTime, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         const latLngs = await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
         segment.latlngs = latLngs;
@@ -304,14 +305,14 @@ export class RouteEditRouteInteraction {
         const index = this.getPointIndex();
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
+        const segment = editableCopy(routeData.segments[index]);
         if (routeData.segments.length === 1) {
             segment.latlngs = [latlng, latlng];
             segment.routePoint = latlng;
             segment.routingType = routingType;
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [segment]));
         } else if (index === 0) {
-            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            const nextSegment = editableCopy(routeData.segments[index + 1]);
             nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
             const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
@@ -331,7 +332,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = latlng;
             segment.routingType = routingType;
             await this.runRouting(previousSegment.routePoint, segment);
-            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            const nextSegment = editableCopy(routeData.segments[index + 1]);
             nextSegment.routingType = routingType;
             await this.runRouting(segment.routePoint, nextSegment);
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
@@ -341,7 +342,7 @@ export class RouteEditRouteInteraction {
     private async updateRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
+        const segment = editableCopy(routeData.segments[index]);
         const middleSegment = this.createRouteSegment(latlng, []);
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
@@ -351,8 +352,8 @@ export class RouteEditRouteInteraction {
     private splitRouteSegment(latlng: LatLngAltTime) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
-        const newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
+        const segment = editableCopy(routeData.segments[index]);
+        const newLatlngs = SpatialHelper.splitLine(latlng, segment.latlngs);
         segment.latlngs = newLatlngs.end;
         const middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));

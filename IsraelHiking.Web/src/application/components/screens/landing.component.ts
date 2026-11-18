@@ -1,6 +1,9 @@
 import { Component, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { SearchComponent } from "../search.component";
+import { AnalyticsDirective } from "../../directives/analytics.directive";
+
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { PurchaseService } from "../../services/purchase.service";
@@ -9,11 +12,11 @@ import { Urls } from "../../urls";
 @Component({
     selector: "landing",
     templateUrl: "./landing.component.html",
-    imports: [RouterLink]
+    imports: [RouterLink, SearchComponent, AnalyticsDirective]
 })
 export class LandingComponent {
-    public androidAppUrl: string = Urls.ANDROID_APP_URL;
-    public iosAppUrl: string = Urls.IOS_APP_URL;
+    public readonly androidAppUrl: string = Urls.ANDROID_APP_URL;
+    public readonly iosAppUrl: string = Urls.IOS_APP_URL;
 
     public readonly resources = inject(ResourcesService);
 

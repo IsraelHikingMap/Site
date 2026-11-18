@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { InAppBrowser } from "@capgo/capacitor-inappbrowser";
@@ -14,11 +14,13 @@ import type { DeviceTokenResponse } from "./device-provider";
  * run client-side. The token exchange is POSTed through the nginx proxy (the
  * caller passes a proxied token URL) to avoid CORS on the web.
  */
-@Injectable()
+@Service()
 export class DeviceOAuthService {
 
-    // Dedicated channel + redirect page so the device flows never clash with the
-    // OSM login (which uses "osm-api-auth-complete" / empty-for-oauth.html).
+    /**
+     * Its own channel and redirect page, so a device login never clashes with the OSM login, which uses
+     * "osm-api-auth-complete" and empty-for-oauth.html.
+     */
     private static readonly AUTH_CHANNEL = "device-auth-complete";
 
     private readonly httpClient = inject(HttpClient);
@@ -37,16 +39,21 @@ export class DeviceOAuthService {
         return { verifier, challenge };
     }
 
-    /** Opens the provider's authorize page and returns the authorization code. */
-    public async authorize(authorizeUrl: string, clientId: string, scope: string, codeChallenge: string): Promise<string> {
+    /**
+     * Opens the provider's authorize page and returns the authorization code.
+     * The scope is omitted for a provider, like Garmin, whose permissions are chosen by the user on its own page.
+     */
+    public async authorize(authorizeUrl: string, clientId: string, scope: string | null, codeChallenge: string): Promise<string> {
         const params = new URLSearchParams({
             client_id: clientId,
             redirect_uri: this.redirectUrl,
             response_type: "code",
-            scope,
             code_challenge: codeChallenge,
             code_challenge_method: "S256"
         });
+        if (scope) {
+            params.set("scope", scope);
+        }
         const result = await InAppBrowser.openSecureWindow({
             authEndpoint: authorizeUrl + "?" + params.toString(),
             redirectUri: this.redirectUrl,

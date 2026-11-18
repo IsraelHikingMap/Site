@@ -10,17 +10,16 @@ export class GeoJSONUtils {
         }
     }
 
-    public static setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
+    public static setProperty(feature: GeoJSON.Feature, key: string, value: string) {
         if (!feature.properties[key]) {
             feature.properties[key] = value;
-            return "";
+            return;
         }
         let index = 1;
         while (feature.properties[key + index]) {
             index++;
         }
         feature.properties[key + index] = value;
-        return `${index}`;
     }
 
     public static setLocation(feature: GeoJSON.Feature, value: LatLngAltTime) {
@@ -72,52 +71,28 @@ export class GeoJSONUtils {
         };
     }
 
-    public static hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
-        return GeoJSONUtils.getDescription(feature, language) != null ||
-            GeoJSONUtils.getValidImageUrls(feature).length > 0 ||
-            feature.properties["mtb:name"] != null;
-    }
-
-    public static getValidImageUrls(feature: Immutable<GeoJSON.Feature>): string[] {
-        return Object.keys(feature.properties)
-            .filter(k => k.startsWith("image"))
-            .map(k => feature.properties[k])
-            .filter(u => this.isValidImageUrl(u));
-    }
-
-    private static isValidImageUrl(url: string): boolean {
-        if (url.startsWith("File:")) {
-            return true;
-        }
-        if (url.startsWith("data:image")) {
-            return true;
-        }
-        if (url.includes("wikimedia.org") &&
-            !url.includes("Building_no_free_image_yet") &&
-            !url.endsWith("svg.png") &&
-            !url.endsWith("svg")) {
-            return true;
-        }
-        if (url.includes("inature.info")) {
-            return true;
-        }
-        if (url.includes("nakeb.co.il")) {
-            return true;
-        }
-        if (url.includes("jeepolog.com")) {
-            return true;
-        }
-        if (url.includes("israelhiking.osm.org.il")) {
-            return true;
-        }
-        if (url.includes("mapeak.com")) {
-            return true;
-        }
-        return false;
+    public static getImageUrls(feature: Immutable<GeoJSON.Feature>): string[] {
+        return Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]);
     }
 
     public static getUrls(feature: Immutable<GeoJSON.Feature>): string[] {
-        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]);
+        return Object.keys(feature.properties).filter(k => k.startsWith("website"))
+            .flatMap(k => GeoJSONUtils.splitUrls(feature.properties[k]));
+    }
+
+    /**
+     * OSM's recommended way to store multiple values is a single tag with semicolon separated values,
+     * while the legacy way, which is still supported for backwards compatibility, is website, website1, website2...
+     */
+    private static splitUrls(value: string): string[] {
+        return (value ?? "").split(";").map(u => u.trim()).filter(u => u.length > 0);
+    }
+
+    /**
+     * Since a semicolon separates multiple values in OSM, it needs to be encoded inside a single url
+     */
+    public static encodeUrl(url: string): string {
+        return url.replace(/;/g, "%3B");
     }
 
     public static getFeatureColor(feature: Immutable<GeoJSON.Feature>): string | null {

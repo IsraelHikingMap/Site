@@ -6,44 +6,35 @@ import { initialState } from "./initial-state";
 import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models";
 
 export class StartRecordingAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] StartRecordingAction";
 }
 
 export class StopRecordingAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] StopRecordingAction";
 }
 
 export class ToggleAddRecordingPoiAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] ToggleAddRecordingPoiAction";
 }
 
 export class AddRecordingRoutePointsAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public latlngs: LatLngAltTime[]) { }
-}
-
-export class AddPendingProcessingRoutePointAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public position: GeolocationPosition) { }
-}
-
-export class ClearPendingProcessingRoutePointsAction {
-    public static type = this.prototype.constructor.name;
+    public static readonly type = "[Recorded Route] AddRecordingRoutePointsAction";
+    constructor(public readonly latlngs: LatLngAltTime[]) { }
 }
 
 export class AddRecordingPoiAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public markerData: MarkerData) { }
+    public static readonly type = "[Recorded Route] AddRecordingPoiAction";
+    constructor(public readonly markerData: MarkerData) { }
 }
 
 export class UpdateRecordingPoiAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public index: number, public markerData: MarkerData) { }
+    public static readonly type = "[Recorded Route] UpdateRecordingPoiAction";
+    constructor(public readonly index: number, public readonly markerData: MarkerData) { }
 }
 
 export class DeleteRecordingPoiAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public index: number) { }
+    public static readonly type = "[Recorded Route] DeleteRecordingPoiAction";
+    constructor(public readonly index: number) { }
 }
 
 @State<RecordedRouteState>({
@@ -80,25 +71,6 @@ export class RecordedRouteReducer {
     public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingRoutePointsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.route.latlngs = [...lastState.route.latlngs, ...action.latlngs];
-            return lastState;
-        }));
-    }
-
-    @Action(AddPendingProcessingRoutePointAction)
-    public addPendingProcessingPoint(ctx: StateContext<RecordedRouteState>, action: AddPendingProcessingRoutePointAction) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            if (lastState.pendingProcessing == null) {
-                lastState.pendingProcessing = [];
-            }
-            lastState.pendingProcessing.push(action.position);
-            return lastState;
-        }));
-    }
-
-    @Action(ClearPendingProcessingRoutePointsAction)
-    public clearPendingProcessingPoints(ctx: StateContext<RecordedRouteState>) {
-        ctx.setState(produce(ctx.getState(), lastState => {
-            lastState.pendingProcessing = [];
             return lastState;
         }));
     }

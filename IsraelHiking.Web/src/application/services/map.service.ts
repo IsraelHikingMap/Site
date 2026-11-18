@@ -1,35 +1,69 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { Store } from "@ngxs/store";
-import type { ErrorEvent, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, SourceSpecification } from "maplibre-gl";
+import { MAPLIBRE_WORKER_URL } from "@maplibre/ngx-maplibre-gl/config";
+import type { ErrorEvent, FilterSpecification, GeoJSONFeature, LayerSpecification, Map, Point, PaddingOptions, RequestParameters, SourceSpecification, MapMovementEvent } from "maplibre-gl";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { LoggingService } from "./logging.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { SpatialService } from "./spatial.service";
+import { SpatialHelper } from "./spatial.helper";
 import { ResourcesService } from "./resources.service";
+import { DatabaseService, NO_OFFLINE_FILE_MESSAGE } from "./database.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { SetLocationAction } from "../reducers/location.reducer";
+import { Urls } from "../urls";
 import type { ApplicationState, Bounds, LatLngAltTime } from "../models";
 
-@Injectable()
+@Service()
 export class MapService {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
+
+    /**
+     * The highest zoom the hillshade and the contours read the DEM at. The DEM has zoom 12 everywhere and higher
+     * zooms only where there is data, up to 17, and every zoom above what an area has costs a request answered
+     * with a 404 before the map falls back to the zoom below.
+     */
+    public static readonly DEM_MAX_ZOOM = 14;
     private resolve: (value?: void | PromiseLike<void>) => void;
-    private missingImagesArray: string[] = [];
+    private readonly missingImagesArray: string[] = [];
     private currentMap: Map;
 
     private readonly cancelableTimeoutService = inject(CancelableTimeoutService);
     private readonly loggingService = inject(LoggingService);
     private readonly resourcesService = inject(ResourcesService)
+    private readonly databaseService = inject(DatabaseService);
+    private readonly overpassTurboService = inject(OverpassTurboService);
     private readonly store = inject(Store);
+    private readonly maplibreWorkerUrl = inject(MAPLIBRE_WORKER_URL, { optional: true });
 
     public initializationPromise = new Promise<void>((resolve) => { this.resolve = resolve; });
 
-    public async initialize() {
+
+    private initializeOncePromise: Promise<void> | null = null;
+
+    /**
+     * Loads maplibre, its workers and the protocols used by the map styles.
+     * This is deliberately not part of the application initialization since screens that do not show
+     * a map (landing, faq, etc.) should not pay for it - maplibre alone is around 200kb.
+     * Routes that do show a map wait for this using the map resolver in the routes definition.
+     */
+    public initialize(): Promise<void> {
+        this.initializeOncePromise ??= this.initializeOnce();
+        return this.initializeOncePromise;
+    }
+
+    private async initializeOnce() {
         if (typeof window === "undefined") {
             return;
         }
-        const maplibregl = (await import("maplibre-gl")).default;
-        maplibregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
+        const maplibregl = await import("maplibre-gl");
+        // The worker file name has no content hash, so the version is added to bust a stale cached copy after an upgrade.
+        const workerUrl = `${this.maplibreWorkerUrl ?? "maplibre-gl-worker.mjs"}?v=${maplibregl.getVersion()}`;
+        // This is needs to be specific since capacitor is not http protocol
+        maplibregl.setWorkerUrl(this.getFullUrl(workerUrl));
+        maplibregl.addProtocol("custom", (params) => this.databaseService.getCustomTile(params.url));
+        maplibregl.addProtocol("slice", (params) => this.databaseService.getSliceTile(params.url));
+        maplibregl.addProtocol("overpass", (params) => this.overpassTurboService.getOverpassResults(params.url));
         this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByName("panned");
             if (pannedTimestamp) {
@@ -38,13 +72,18 @@ export class MapService {
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
-        const globalDispatcher = maplibregl.getGlobalDispatcher();
+        // "contour-worker" is a custom message added by maplibre-contour and is not a part of maplibre's
+        // closed message types enum, so the dispatcher needs to be seen as accepting a free form message.
+        const globalDispatcher = maplibregl.getGlobalDispatcher() as unknown as {
+            registerMessageHandler: (type: string, handler: () => Promise<void>) => void;
+            broadcast: (type: string, data: unknown) => Promise<unknown[]>;
+        };
         const promise = new Promise<void>(resolve => {
-            globalDispatcher.registerMessageHandler("contour-worker" as any, async () => {
-                await globalDispatcher.broadcast("contour-worker" as any, {
-                    demUrlPattern: "slice://global.israelhikingmap.workers.dev/jaxa_terrarium0-11_v2/{z}/{x}/{y}.webp",
+            globalDispatcher.registerMessageHandler("contour-worker", async () => {
+                await globalDispatcher.broadcast("contour-worker", {
+                    demUrlPattern: "slice://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
-                    maxzoom: 11
+                    maxzoom: MapService.DEM_MAX_ZOOM
                 });
                 resolve();
             });
@@ -63,13 +102,16 @@ export class MapService {
     public setMap(map: Map) {
         this.loggingService.info("[Map] Initializing map");
         this.currentMap = map;
+        this.setTransformRequest(map);
         this.currentMap._zoomLevelsToOverscale = 4;
         this.resolve();
 
         this.currentMap.on("dragstart", this.onDragstart);
-        this.currentMap.on("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(this.resolveMissingStyleImage);
         this.currentMap.on("error", this.onError);
         this.currentMap.on("moveend", this.onMoveEnd);
+        this.currentMap.on("webglcontextlost", this.onContextLost);
+        this.currentMap.on("webglcontextrestored", this.onContextRestored);
     }
 
     public unsetMap() {
@@ -78,13 +120,30 @@ export class MapService {
             return;
         }
         this.currentMap.off("dragstart", this.onDragstart);
-        this.currentMap.off("styleimagemissing", this.onStyleImageMissing);
+        this.currentMap.setMissingStyleImageResolver(null);
         this.currentMap.off("error", this.onError);
         this.currentMap.off("moveend", this.onMoveEnd);
+        this.currentMap.off("webglcontextlost", this.onContextLost);
+        this.currentMap.off("webglcontextrestored", this.onContextRestored);
         this.initializationPromise = new Promise<void>((resolve) => {
             this.resolve = resolve;
         });
         this.currentMap = null;
+    }
+
+    /**
+     * Adds the user's token to the requests a map makes to our own API, whose subscribed layers are only
+     * served to a subscribed user. The satellite imagery is named on its own since a style carries its
+     * production address even when this client talks to its own API.
+     */
+    public setTransformRequest(map: Map) {
+        map.setTransformRequest((url: string): RequestParameters => {
+            if (!Urls.isOwnApiAddress(url) && !url.startsWith(Urls.satelliteTiles)) {
+                return { url };
+            }
+            const token = this.store.selectSnapshot((state: ApplicationState) => state.userState).token;
+            return token ? { url, headers: { Authorization: `Bearer ${token}` } } : { url };
+        });
     }
 
     public async addArrowToMap(map: Map) {
@@ -102,30 +161,51 @@ export class MapService {
         return linkEl.href;
     }
 
-    private onDragstart = () => {
+    private readonly onDragstart = () => {
         this.store.dispatch(new SetPannedAction(new Date()));
     }
 
-    private onStyleImageMissing = async (e: { id: string }) => {
-        if (!/^http/.test(e.id)) {
+    private readonly resolveMissingStyleImage = async (id: string) => {
+        if (!/^http/.test(id)) {
             return;
         }
-        if (this.missingImagesArray.includes(e.id)) {
+        if (this.missingImagesArray.includes(id)) {
             return;
         }
-        this.missingImagesArray.push(e.id);
-        const image = await this.currentMap.loadImage(e.id);
-        this.currentMap.addImage(e.id, image.data);
+        this.missingImagesArray.push(id);
+        const image = await this.currentMap.loadImage(id);
+        this.currentMap.addImage(id, image.data);
     }
 
-    private onError = (e: ErrorEvent) => {
-        if (e?.error?.message?.includes("418")) {
+    /**
+     * Losing the webgl context leaves the map blank, and maplibre only redraws it if the browser
+     * follows with a restore event, which does not always happen on mobile. These two lines tell
+     * a blank map caused by the context from a blank map caused by anything else.
+     */
+    private readonly onContextLost = () => {
+        this.loggingService.warning("[Map] Lost the webgl context");
+    }
+
+    private readonly onContextRestored = () => {
+        this.loggingService.info("[Map] The webgl context was restored");
+    }
+
+    /**
+     * Logs the errors of the map, but not a tile answered with a 404, which is how the DEM leaves out the zooms it
+     * has no data for and is shown from the zoom below.
+     */
+    private readonly onError = (e: ErrorEvent) => {
+        if (e?.error?.message?.includes("418") || (e?.error as { status?: number })?.status === 404) {
+            return;
+        }
+        if (e?.error?.message?.includes(NO_OFFLINE_FILE_MESSAGE)) {
+            this.loggingService.warning("[Map] " + e.error.message);
             return;
         }
         this.loggingService.error("[Map] Error: " + e?.error?.message);
     }
 
-    public onMoveEnd = (e: DragEvent) => {
+    public readonly onMoveEnd = (e: DragEvent | MapMovementEvent) => {
         if (!e || !this.currentMap) {
             return;
         }
@@ -140,14 +220,20 @@ export class MapService {
 
     public getMapBounds(): Bounds {
         const bounds = this.currentMap.getBounds();
-        return SpatialService.mBBoundsToBounds(bounds);
+        return SpatialHelper.mBBoundsToBounds(bounds);
     }
 
     public project(latlng: LatLngAltTime): Point {
         return this.currentMap.project(latlng);
     }
 
-    public getFeaturesFromTiles(): GeoJSONFeature[] {
+    /**
+     * The points the map currently draws from the tiles.
+     * @param filter limits the features to those that match it, which is done by the map itself and is
+     * far cheaper than reading every point of the tile only to throw most of them away - a tile of a
+     * dense area holds tens of thousands of points of which a caller usually wants a fraction.
+     */
+    public getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
         if (this.currentMap == null) {
             // Map is not ready yet
             return [];
@@ -155,7 +241,10 @@ export class MapService {
         if (!this.currentMap.getLayer(this.resourcesService.globalPointsExternalLayer)) {
             return [];
         }
-        return this.currentMap.queryRenderedFeatures({ layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer] });
+        return this.currentMap.queryRenderedFeatures({
+            layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer],
+            filter
+        });
     }
 
     public isMoving(): boolean {
@@ -165,7 +254,7 @@ export class MapService {
     public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
-        const mbBounds = SpatialService.boundsToMBBounds(bounds);
+        const mbBounds = SpatialHelper.boundsToMBBounds(bounds);
 
         this.store.dispatch(new SetPannedAction(new Date()));
         this.currentMap.fitBounds(mbBounds, {
@@ -189,7 +278,7 @@ export class MapService {
         if (!zoom) {
             zoom = this.currentMap.getZoom();
         }
-        if (SpatialService.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
+        if (SpatialHelper.getDistance(this.currentMap.getCenter(), latLng) < 0.0001 &&
             Math.abs(zoom - this.currentMap.getZoom()) < 0.01) {
             // ignoring flyto for small coordinates change:
             // this happens due to route percision reduce which causes another map move.
@@ -199,19 +288,16 @@ export class MapService {
         this.currentMap.flyTo({ center: latLng, zoom });
     }
 
-    public async moveToWithCurrentZoom(center: LatLngAltTime, bearing: number) {
+    public async moveToWithCurrentZoom(center: LatLngAltTime, bearing: number, duration: number) {
         if (!this.currentMap) {
             return;
         }
-        this.moveTo(center, this.currentMap.getZoom(), bearing);
-    }
-
-    public async moveTo(center: LatLngAltTime, zoom: number, bearing: number) {
         await this.initializationPromise;
         this.currentMap.easeTo({
             bearing,
             center,
-            zoom,
+            zoom: this.currentMap.getZoom(),
+            duration,
             animate: true,
             easing: (x) => x,
             offset: [0, 100]

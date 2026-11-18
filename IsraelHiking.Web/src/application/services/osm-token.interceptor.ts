@@ -6,7 +6,7 @@ import { Store } from "@ngxs/store";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models";
 
-export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
+export function osmTokenInterceptor(request: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
     const store = inject(Store);
     let token = "";
     try {
@@ -15,7 +15,7 @@ export function osmTokenInterceptor(request: HttpRequest<any>, next: HttpHandler
         // store is not ready yet
     }
 
-    if (token && (request.url.includes(Urls.apiBase) || request.url.includes(Urls.osmApi))) {
+    if (token && (Urls.isOwnApiAddress(request.url) || request.url.includes(Urls.osmApi))) {
         request = request.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`

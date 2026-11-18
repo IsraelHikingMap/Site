@@ -77,7 +77,7 @@ public class CrawlersMiddlewareTests
         {
             Request =
             {
-                Path = new PathString("/share"),
+                Path = new PathString("/share/123"),
                 Host = new HostString("www.example.com"),
                 QueryString = QueryString.Empty,
                 PathBase = PathString.Empty,
@@ -111,6 +111,24 @@ public class CrawlersMiddlewareTests
         _middleware.InvokeAsync(context, detectionService).Wait();
 
         _next.Received().Invoke(context);
+    }
+
+    [TestMethod]
+    public void TestCrawler_AssetUnderShare_ShouldPassThroughWithoutFetchingShare()
+    {
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Path = new PathString("/share/content/favicons/favicon-32x32.png")
+            }
+        };
+        var detectionService = SetupDetectionService();
+
+        _middleware.InvokeAsync(context, detectionService).Wait();
+
+        _next.Received().Invoke(context);
+        _shareUrlGateway.DidNotReceiveWithAnyArgs().GetUrlById(null);
     }
 
     [TestMethod]

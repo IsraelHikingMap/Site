@@ -1,6 +1,6 @@
 import type { ActivityType, UserInfo } from "..";
 
-export type DeviceServiceId = "wahoo";
+export type DeviceServiceId = "wahoo" | "garmin";
 
 export type DeviceServiceToken = {
     accessToken: string;

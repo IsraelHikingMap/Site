@@ -3,12 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */; };
-		0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarStatistics.swift */; };
+		0D46EA142FCC67830033E098 /* CarRouteCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */; };
 		0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */; };
 		0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */; };
 		0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */; };
@@ -16,35 +16,99 @@
 		0D46EA192FCC67830033E098 /* CarRouteData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA0E2FCC67830033E098 /* CarRouteData.swift */; };
 		0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA102FCC67830033E098 /* CapacitorStore.swift */; };
 		0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA122FCC67830033E098 /* PMTilesService.swift */; };
+		A47DAECD283CDE5B11AEEF75 /* OfflineAreas.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF007EBD2BB8AC2F5A93C7A /* OfflineAreas.swift */; };
 		0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */; };
 		0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */; };
 		0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */; };
 		0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */ = {isa = PBXBuildFile; productRef = 0D6243242FDEC57E00B2C10A /* MaplibreContour */; };
+		0D712DA23087E5F8006E6A13 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0D712DA13087E5F8006E6A13 /* GoogleService-Info.plist */; };
+		0DAA0102000000000000AA02 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAA0101000000000000AA01 /* ShareViewController.swift */; };
+		0DAA0106000000000000AA06 /* ShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 0DAA0105000000000000AA05 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0DAA0112000000000000AA12 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAA0113000000000000AA13 /* Translations.swift */; };
+		0DAA0114000000000000AA14 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAA0113000000000000AA13 /* Translations.swift */; };
+		0DCC0103000000000000CC03 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 0DCC0102000000000000CC02 /* CapApp-SPM */; };
+		0DCC0106000000000000CC06 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = 0DCC0105000000000000CC05 /* MapLibre */; };
 		0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */ = {isa = PBXBuildFile; productRef = 0DD5D9582FDBDBB300983BAA /* PMTiles */; };
+		0DFA11000000000000000002 /* ValhallaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000001 /* ValhallaPlugin.swift */; };
+		0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000003 /* ValhallaTiles.swift */; };
+		0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000005 /* ValhallaRouter.swift */; };
+		0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000007 /* ValhallaTarExtractor.swift */; };
+		0DFA1100000000000000005D /* Valhalla in Frameworks */ = {isa = PBXBuildFile; productRef = 0DFA1100000000000000005C /* Valhalla */; };
+		0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFA11000000000000000064 /* ValhallaProfiles.swift */; };
+		18B43CFDAC8C4CECAD876E75 /* CarManeuverIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963B4A8177CD4E3AA791EBCE /* CarManeuverIcons.swift */; };
+		242A4B25E0FE4CDAB9E865D9 /* CarBackendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1568390AF42F4AAAA4290510 /* CarBackendService.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
+		35321534184C47AA887C6BDC /* CarMarkerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
+		60EDF85C2EC2458EB39D211E /* SpatialHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8673A71137D8405895E8A74A /* SpatialHelper.swift */; };
+		72D9E5F5CF2F4D5889D1B626 /* CarNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */; };
+		736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */; };
+		CE10248109C84A88AD4664B1 /* CarManeuver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F6A9941331649EC9FF56E86 /* CarManeuver.swift */; };
+		DFCC4FB4566C43D8A6030DAD /* CarSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6967EF6B878441E58D848336 /* CarSearchResult.swift */; };
+		FC282DCF4C944BB1A84859FF /* CarPaceCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */; };
+		FEF30A95B95149E3AD1195CC /* CarSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		0DAA0111000000000000AA11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DAA010B000000000000AA0B;
+			remoteInfo = ShareExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0DAA010F000000000000AA0F /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				0DAA0106000000000000AA06 /* ShareExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscribedTilesURLProtocol.swift; sourceTree = "<group>"; };
 		0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStoreKeys.swift; sourceTree = "<group>"; };
 		0D46EA0B2FCC67830033E098 /* CarLocationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarLocationProvider.swift; sourceTree = "<group>"; };
 		0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMapViewController.swift; sourceTree = "<group>"; };
 		0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactivePreferencesPlugin.swift; sourceTree = "<group>"; };
 		0D46EA0E2FCC67830033E098 /* CarRouteData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarRouteData.swift; sourceTree = "<group>"; };
-		0D46EA0F2FCC67830033E098 /* CarStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarStatistics.swift; sourceTree = "<group>"; };
+		0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarRouteCalculator.swift; sourceTree = "<group>"; };
 		0D46EA102FCC67830033E098 /* CapacitorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapacitorStore.swift; sourceTree = "<group>"; };
 		0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapeakCarSceneDelegate.swift; sourceTree = "<group>"; };
 		0D46EA122FCC67830033E098 /* PMTilesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PMTilesService.swift; sourceTree = "<group>"; };
+		FDF007EBD2BB8AC2F5A93C7A /* OfflineAreas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineAreas.swift; sourceTree = "<group>"; };
 		0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliceURLProtocol.swift; sourceTree = "<group>"; };
 		0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		0D6243212FDEC4F000B2C10A /* CarContourTilesProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarContourTilesProvider.swift; sourceTree = "<group>"; };
+		0D712DA13087E5F8006E6A13 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		0DAA0101000000000000AA01 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		0DAA0103000000000000AA03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0DAA0104000000000000AA04 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		0DAA0105000000000000AA05 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DAA0113000000000000AA13 /* Translations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translations.swift; sourceTree = "<group>"; };
+		0DCC0107000000000000CC07 /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		0DFA11000000000000000001 /* ValhallaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaPlugin.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000003 /* ValhallaTiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTiles.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000005 /* ValhallaRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaRouter.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000007 /* ValhallaTarExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaTarExtractor.swift; sourceTree = "<group>"; };
+		0DFA11000000000000000064 /* ValhallaProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValhallaProfiles.swift; sourceTree = "<group>"; };
+		1568390AF42F4AAAA4290510 /* CarBackendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarBackendService.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		3F6A9941331649EC9FF56E86 /* CarManeuver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarManeuver.swift; sourceTree = "<group>"; };
+		4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarNavigation.swift; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -53,20 +117,32 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
-		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
+		6967EF6B878441E58D848336 /* CarSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarSearchResult.swift; sourceTree = "<group>"; };
+		720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPaceCalculator.swift; sourceTree = "<group>"; };
+		8673A71137D8405895E8A74A /* SpatialHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialHelper.swift; sourceTree = "<group>"; };
+		963B4A8177CD4E3AA791EBCE /* CarManeuverIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarManeuverIcons.swift; sourceTree = "<group>"; };
+		9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarMarkerData.swift; sourceTree = "<group>"; };
+		CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarSearchController.swift; sourceTree = "<group>"; };
 		F15F05A52935486900827848 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
-		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0DAA0109000000000000AA09 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3011FED79650016851F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */,
+				0DCC0103000000000000CC03 /* CapApp-SPM in Frameworks */,
+				0DCC0106000000000000CC06 /* MapLibre in Frameworks */,
 				0DD5D9592FDBDBB300983BAA /* PMTiles in Frameworks */,
 				0D6243252FDEC57E00B2C10A /* MaplibreContour in Frameworks */,
+				0DFA1100000000000000005D /* Valhalla in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,31 +157,56 @@
 				0D46EA0C2FCC67830033E098 /* CarMapViewController.swift */,
 				0D46EA0D2FCC67830033E098 /* ReactivePreferencesPlugin.swift */,
 				0D46EA0E2FCC67830033E098 /* CarRouteData.swift */,
-				0D46EA0F2FCC67830033E098 /* CarStatistics.swift */,
+				0D46EA0F2FCC67830033E098 /* CarRouteCalculator.swift */,
+				963B4A8177CD4E3AA791EBCE /* CarManeuverIcons.swift */,
+				CC3FCEBD643A4F66BD75FCF9 /* CarSearchController.swift */,
+				4FCEF3705D394A2AABD49D8C /* CarNavigation.swift */,
+				1568390AF42F4AAAA4290510 /* CarBackendService.swift */,
+				3F6A9941331649EC9FF56E86 /* CarManeuver.swift */,
+				6967EF6B878441E58D848336 /* CarSearchResult.swift */,
+				9C8D109AFEE642C28AF234D6 /* CarMarkerData.swift */,
+				720F1955A33A4BD48A5EEAB5 /* CarPaceCalculator.swift */,
+				8673A71137D8405895E8A74A /* SpatialHelper.swift */,
 				0D46EA102FCC67830033E098 /* CapacitorStore.swift */,
 				0D4587EC2FCCC8A300269001 /* CarStoreKeys.swift */,
 				0D46EA112FCC67830033E098 /* MapeakCarSceneDelegate.swift */,
 				0D46EA122FCC67830033E098 /* PMTilesService.swift */,
+				FDF007EBD2BB8AC2F5A93C7A /* OfflineAreas.swift */,
 				0D46EA132FCC67830033E098 /* SliceURLProtocol.swift */,
+				0D03895453B8E00A61684072 /* SubscribedTilesURLProtocol.swift */,
 			);
 			path = Car;
 			sourceTree = "<group>";
 		};
-		27E2DDA53C4D2A4D1A88CE4A /* Frameworks */ = {
+		0DAA0107000000000000AA07 /* ShareExtension */ = {
 			isa = PBXGroup;
 			children = (
-				AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */,
+				0DAA0101000000000000AA01 /* ShareViewController.swift */,
+				0DAA0104000000000000AA04 /* ShareExtension.entitlements */,
+				0DAA0103000000000000AA03 /* Info.plist */,
 			);
-			name = Frameworks;
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		0DFA1100000000000000005A /* Valhalla */ = {
+			isa = PBXGroup;
+			children = (
+				0DFA11000000000000000001 /* ValhallaPlugin.swift */,
+				0DFA11000000000000000003 /* ValhallaTiles.swift */,
+				0DFA11000000000000000005 /* ValhallaRouter.swift */,
+				0DFA11000000000000000007 /* ValhallaTarExtractor.swift */,
+				0DFA11000000000000000064 /* ValhallaProfiles.swift */,
+			);
+			path = Valhalla;
 			sourceTree = "<group>";
 		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				0DCC0107000000000000CC07 /* debug.xcconfig */,
 				504EC3051FED79650016851F /* Products */,
-				7F8756D8B27F46E3366F6CEA /* Pods */,
-				27E2DDA53C4D2A4D1A88CE4A /* Frameworks */,
 				504EC3061FED79650016851F /* App */,
+				0DAA0107000000000000AA07 /* ShareExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -113,6 +214,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				0DAA0105000000000000AA05 /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,8 +222,11 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				0D712DA13087E5F8006E6A13 /* GoogleService-Info.plist */,
 				0D46EA1D2FCC68230033E098 /* SceneDelegate.swift */,
+				0DAA0113000000000000AA13 /* Translations.swift */,
 				0D46EA0A2FCC67430033E098 /* Car */,
+				0DFA1100000000000000005A /* Valhalla */,
 				F15F05A52935486900827848 /* App.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
@@ -135,33 +240,47 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		7F8756D8B27F46E3366F6CEA /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */,
-				AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		504EC3031FED79650016851F /* App */ = {
+		0DAA010B000000000000AA0B /* ShareExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
+			buildConfigurationList = 0DAA010C000000000000AA0C /* Build configuration list for PBXNativeTarget "ShareExtension" */;
 			buildPhases = (
-				6634F4EFEBD30273BCE97C65 /* [CP] Check Pods Manifest.lock */,
-				504EC3001FED79650016851F /* Sources */,
-				504EC3011FED79650016851F /* Frameworks */,
-				504EC3021FED79650016851F /* Resources */,
-				9592DBEFFC6D2A0C8D5DEB22 /* [CP] Embed Pods Frameworks */,
+				0DAA0108000000000000AA08 /* Sources */,
+				0DAA0109000000000000AA09 /* Frameworks */,
+				0DAA010A000000000000AA0A /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = 0DAA0105000000000000AA05 /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		504EC3031FED79650016851F /* App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 504EC3161FED79650016851F /* Build configuration list for PBXNativeTarget "App" */;
+			buildPhases = (
+				504EC3001FED79650016851F /* Sources */,
+				504EC3011FED79650016851F /* Frameworks */,
+				504EC3021FED79650016851F /* Resources */,
+				0DAA010F000000000000AA0F /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0DAA0110000000000000AA10 /* PBXTargetDependency */,
+			);
 			name = App;
+			packageProductDependencies = (
+				0DCC0102000000000000CC02 /* CapApp-SPM */,
+				0DCC0105000000000000CC05 /* MapLibre */,
+				0DD5D9582FDBDBB300983BAA /* PMTiles */,
+				0D6243242FDEC57E00B2C10A /* MaplibreContour */,
+			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
@@ -176,6 +295,9 @@
 				LastSwiftUpdateCheck = 920;
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
+					0DAA010B000000000000AA0B = {
+						CreatedOnToolsVersion = 15.3;
+					};
 					504EC3031FED79650016851F = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
@@ -192,19 +314,30 @@
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
+				0DCC0101000000000000CC01 /* XCLocalSwiftPackageReference "CapApp-SPM" */,
+				0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
 				0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */,
 				0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */,
+				0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */,
 			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				0DAA010B000000000000AA0B /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0DAA010A000000000000AA0A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3021FED79650016851F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -215,69 +348,68 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+				0D712DA23087E5F8006E6A13 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		6634F4EFEBD30273BCE97C65 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-App-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9592DBEFFC6D2A0C8D5DEB22 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-App/Pods-App-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
+		0DAA0108000000000000AA08 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DAA0102000000000000AA02 /* ShareViewController.swift in Sources */,
+				0DAA0114000000000000AA14 /* Translations.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		504EC3001FED79650016851F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				0D6243222FDEC4F900B2C10A /* CarContourTilesProvider.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
-				0D46EA142FCC67830033E098 /* CarStatistics.swift in Sources */,
+				0D46EA142FCC67830033E098 /* CarRouteCalculator.swift in Sources */,
+				18B43CFDAC8C4CECAD876E75 /* CarManeuverIcons.swift in Sources */,
+				FEF30A95B95149E3AD1195CC /* CarSearchController.swift in Sources */,
+				72D9E5F5CF2F4D5889D1B626 /* CarNavigation.swift in Sources */,
+				242A4B25E0FE4CDAB9E865D9 /* CarBackendService.swift in Sources */,
+				CE10248109C84A88AD4664B1 /* CarManeuver.swift in Sources */,
+				DFCC4FB4566C43D8A6030DAD /* CarSearchResult.swift in Sources */,
+				35321534184C47AA887C6BDC /* CarMarkerData.swift in Sources */,
+				FC282DCF4C944BB1A84859FF /* CarPaceCalculator.swift in Sources */,
+				60EDF85C2EC2458EB39D211E /* SpatialHelper.swift in Sources */,
 				0D46EA152FCC67830033E098 /* SliceURLProtocol.swift in Sources */,
+				736A2699744AE3C3CBB7BA7E /* SubscribedTilesURLProtocol.swift in Sources */,
 				0D46EA162FCC67830033E098 /* CarMapViewController.swift in Sources */,
 				0D46EA172FCC67830033E098 /* CarLocationProvider.swift in Sources */,
 				0D46EA182FCC67830033E098 /* ReactivePreferencesPlugin.swift in Sources */,
 				0D46EA192FCC67830033E098 /* CarRouteData.swift in Sources */,
 				0D46EA1E2FCC68230033E098 /* SceneDelegate.swift in Sources */,
+				0DAA0112000000000000AA12 /* Translations.swift in Sources */,
 				0D4587ED2FCCC8A300269001 /* CarStoreKeys.swift in Sources */,
 				0D46EA1A2FCC67830033E098 /* CapacitorStore.swift in Sources */,
 				0D46EA1B2FCC67830033E098 /* PMTilesService.swift in Sources */,
+				A47DAECD283CDE5B11AEEF75 /* OfflineAreas.swift in Sources */,
 				0D46EA1C2FCC67830033E098 /* MapeakCarSceneDelegate.swift in Sources */,
+				0DFA11000000000000000002 /* ValhallaPlugin.swift in Sources */,
+				0DFA11000000000000000004 /* ValhallaTiles.swift in Sources */,
+				0DFA11000000000000000006 /* ValhallaRouter.swift in Sources */,
+				0DFA11000000000000000008 /* ValhallaTarExtractor.swift in Sources */,
+				0DFA11000000000000000065 /* ValhallaProfiles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0DAA0110000000000000AA10 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DAA010B000000000000AA0B /* ShareExtension */;
+			targetProxy = 0DAA0111000000000000AA11 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -299,8 +431,62 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0DAA010D000000000000AA0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9.21.0;
+				DEVELOPMENT_TEAM = 2KT88923M5;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 9.20.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mapeak.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0DAA010E000000000000AA0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 9.21.0;
+				DEVELOPMENT_TEAM = 2KT88923M5;
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2KT88923M5;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 9.21.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mapeak.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.mapeak.ShareExtension";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0DCC0107000000000000CC07 /* debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -352,7 +538,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -408,7 +594,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -419,7 +605,7 @@
 		};
 		504EC3171FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */;
+			baseConfigurationReference = 0DCC0107000000000000CC07 /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
@@ -428,13 +614,19 @@
 				CURRENT_PROJECT_VERSION = 9.21.0;
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 9.20.0;
-				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Xlinker",
+					"-ignore_auto_link_library",
+					"-Xlinker",
+					SwiftUICore,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapeak;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -446,7 +638,6 @@
 		};
 		504EC3181FED79650016851F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
@@ -456,12 +647,19 @@
 				DEVELOPMENT_TEAM = 2KT88923M5;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 2KT88923M5;
 				INFOPLIST_FILE = App/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 9.21.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Xlinker",
+					"-ignore_auto_link_library",
+					"-Xlinker",
+					SwiftUICore,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mapeak;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "16734540-bf0f-4c60-a332-77984ddbddf1";
@@ -475,6 +673,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0DAA010C000000000000AA0C /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DAA010D000000000000AA0D /* Debug */,
+				0DAA010E000000000000AA0E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		504EC2FF1FED79650016851F /* Build configuration list for PBXProject "App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -495,21 +702,44 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		0DCC0101000000000000CC01 /* XCLocalSwiftPackageReference "CapApp-SPM" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "CapApp-SPM";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Mapeak-com/maplibre-contour-rs";
+			repositoryURL = "https://github.com/mapeak-com/maplibre-contour-rs";
 			requirement = {
 				kind = exactVersion;
-				version = 0.4.1;
+				version = 0.4.4;
+			};
+		};
+		0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = exactVersion;
+				version = 7.0.0;
 			};
 		};
 		0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile.git";
+			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile";
 			requirement = {
 				kind = exactVersion;
-				version = 0.3.2;
+				version = 0.3.5;
+			};
+		};
+		0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Rallista/valhalla-mobile.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.6.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -520,10 +750,25 @@
 			package = 0D6243232FDEC57E00B2C10A /* XCRemoteSwiftPackageReference "maplibre-contour-rs" */;
 			productName = MaplibreContour;
 		};
+		0DCC0102000000000000CC02 /* CapApp-SPM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DCC0101000000000000CC01 /* XCLocalSwiftPackageReference "CapApp-SPM" */;
+			productName = "CapApp-SPM";
+		};
+		0DCC0105000000000000CC05 /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DCC0104000000000000CC04 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
+		};
 		0DD5D9582FDBDBB300983BAA /* PMTiles */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */;
 			productName = PMTiles;
+		};
+		0DFA1100000000000000005C /* Valhalla */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */;
+			productName = Valhalla;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

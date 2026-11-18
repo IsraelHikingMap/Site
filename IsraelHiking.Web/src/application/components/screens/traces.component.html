@@ -1,5 +1,5 @@
 <div class="flex flex-row relative h-dvh" [dir]="resources.direction">
-    <div class="hidden max-md:block absolute bottom-safe bg-surface left-1/2 -translate-x-1/2 z-10">
+    <div class="hidden max-md:block absolute bottom-safe left-1/2 -translate-x-1/2 z-10">
         <mat-button-toggle-group [(ngModel)]="showMap">
             <mat-button-toggle [value]="false" analyticsOn="click" analyticsCategory="Traces"
                 analyticsLabel="Open list view">
@@ -13,13 +13,12 @@
             </mat-button-toggle>
         </mat-button-toggle-group>
     </div>
-    <div [ngClass]="{'max-md:hidden': showMap, 'max-md:w-full': !showMap}"
-        class="w-1/3 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button">
-        <div class="flex flex-row sticky top-0 z-10 bg-surface">
-            <mat-form-field subscriptSizing="dynamic">
-                <mat-label>{{resources.sort}}</mat-label>
-                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" analyticsOn="click"
-                    analyticsCategory="Traces" analyticsLabel="Open sort menu">
+    <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
+        class="w-1/3 shrink-0 overflow-y-auto magrin-top-with-toolbar pb-safe-w-button md:min-w-[400px]">
+        <div class="flex flex-row items-center gap-2 p-2 sticky top-0 z-10 bg-surface">
+            <mat-form-field subscriptSizing="dynamic" class="pill-select w-40 min-w-0">
+                <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()" [aria-label]="resources.sort"
+                    analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Open sort menu">
                     <mat-option value="timeStamp" analyticsOn="click" analyticsCategory="Traces"
                         analyticsLabel="Sort by date">
                         {{resources.date}}
@@ -30,98 +29,111 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            <button mat-button class="!h-[56px] ms-2" (click)="onSortDirectionChange()" analyticsOn="click"
+            <button mat-icon-button class="shrink-0" (click)="onSortDirectionChange()" analyticsOn="click"
                 analyticsCategory="Traces" analyticsLabel="Change sort direction">
-                <i class="fa icon-sort mx-2"></i>
+                <i class="fa icon-sort"></i>
             </button>
-            <label class="flex-1 !h-[56px] ms-2">
-                <a class="w-full !h-full" mat-flat-button analyticsOn="click"
-                    analyticsCategory="Traces" analyticsLabel="Upload OSM trace"><i
-                        class="fa icon-folder-open fa-lg"></i>
-                    {{resources.uploadFileToOsm}}</a>
+            <span class="flex-1"></span>
+            <label class="shrink-0">
+                <a class="whitespace-nowrap" mat-flat-button analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Upload OSM trace">
+                    <i class="fa fa-lg icon-cloud-upload"></i>
+                    <span class="mx-1">{{resources.uploadTrace}}</span>
+                </a>
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
             </label>
         </div>
-        @for (trace of filteredTraces; track trace.id) {
+        @for (trace of filteredTraces(); track trace.id) {
         <div [id]="'trace-' + trace.id">
-            <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
-            <h4 class="m-2">
-                <button mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click" analyticsCategory="Traces"
-                    analyticsLabel="Open trace menu">
+            <div (click)="traceMenuTrigger.openMenu()" analyticsOn="click" analyticsCategory="Traces"
+                analyticsLabel="Open trace menu"
+                class="flex flex-row items-center gap-3 p-2 text-on-surface border-b border-outline-variant hover:bg-on-surface/5 cursor-pointer">
+                <trace-thumbnail [src]="trace.imageUrl"
+                    class="block shrink-0 size-20 rounded-xl overflow-hidden"></trace-thumbnail>
+                <div class="flex flex-col flex-1 min-w-0 gap-1">
+                    <div class="break-words">
+                        <highlighted-text [text]="getTraceDisplayName(trace)" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    <div class="text-sm">
+                        {{trace.timeStamp | date:resources.getDateFormat()}} · {{getVisibilityTranslation(trace.visibility)}}
+                    </div>
+                    @if (trace.tagsString) {
+                    <div class="text-sm break-words">
+                        <highlighted-text [text]="trace.tagsString" [searchTerm]="searchTerm()"></highlighted-text>
+                    </div>
+                    }
+                </div>
+                <button mat-icon-button type="button" [matMenuTriggerFor]="traceMenu" #traceMenuTrigger="matMenuTrigger"
+                    class="shrink-0" [attr.aria-label]="resources.more">
                     <i class="fa icon-ellipsis-v"></i>
                 </button>
-                <mat-menu #shareMenu="matMenu">
-                    @if (canUploadToOsm(trace)) {
-                    <button mat-menu-item (click)="uploadRecordingToOsm(trace)" analyticsOn="click"
-                        analyticsCategory="Traces" analyticsLabel="Upload locally recorded trace">
-                        <i class="fa icon-cloud-upload"></i>
-                        {{resources.uploadFileToOsm}}
-                    </button>
-                    }
-                    <button mat-menu-item (click)="moveToTrace(trace.id)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Move to trace">
-                        <i class="fa icon-crosshairs"></i>
-                        {{resources.moveToRoute}}
-                    </button>
-                    <button mat-menu-item (click)="editTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Edit OSM trace properties">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.editProperties}}
-                    </button>
-                    @if (!isMobile()) {
-                    <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="editInOsm(trace)"
-                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Edit OSM trace in OSM">
-                        <i class="fa icon-map-editing fa-lg"></i>
-                        {{resources.editThisMapUsingOsm}}
-                    </button>
-                    }
-                    <button mat-menu-item (click)="addTraceToRoutes(trace)" analyticsOn="click"
-                        analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes">
-                        <i class="fa icon-plus"></i>
-                        {{resources.addToRoutes}}
-                    </button>
-                    <button mat-menu-item (click)="deleteTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
-                        analyticsLabel="Delete OSM trace">
-                        <i class="fa icon-trash"></i>
-                        {{resources.delete}}
-                    </button>
-                    <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="findUnmappedRoutes(trace)"
-                        analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts">
-                        <i class="fa icon-search"></i>
-                        {{resources.findUnmappedRoutes}}
-                    </button>
-                </mat-menu>
-                {{getTraceDisplayName(trace)}}
-            </h4>
-            <div class="ms-2">
-                {{trace.timeStamp | date:resources.getDateFormat()}}
             </div>
-            <div class="ms-2">
-                {{getVisibilityTranslation(trace.visibility)}}
-            </div>
-            <div class="ms-2">
-                {{trace.tagsString}}
-            </div>
+            <mat-menu #traceMenu="matMenu" xPosition="before">
+                @if (canUploadToOsm(trace)) {
+                <button mat-menu-item (click)="uploadRecordingToOsm(trace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Upload locally recorded trace">
+                    <i class="fa icon-cloud-upload"></i>
+                    {{resources.uploadTrace}}
+                </button>
+                }
+                <button mat-menu-item (click)="moveToTrace(trace.id)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Move to trace">
+                    <i class="fa icon-crosshairs"></i>
+                    {{resources.moveToRoute}}
+                </button>
+                <button mat-menu-item (click)="editTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Edit OSM trace properties">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+                @if (!isMobile()) {
+                <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="editInOsm(trace)"
+                    analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Edit OSM trace in OSM">
+                    <i class="fa icon-map-editing fa-lg"></i>
+                    {{resources.editThisMapUsingOsm}}
+                </button>
+                }
+                <button mat-menu-item (click)="addTraceToRoutes(trace)" analyticsOn="click"
+                    analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+                <button mat-menu-item (click)="deleteTrace(trace)" analyticsOn="click" analyticsCategory="Traces"
+                    analyticsLabel="Delete OSM trace">
+                    <i class="fa icon-trash"></i>
+                    {{resources.delete}}
+                </button>
+                <button mat-menu-item [disabled]="canUploadToOsm(trace)" (click)="findUnmappedRoutes(trace)"
+                    analyticsOn="click" analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts">
+                    <i class="fa icon-search"></i>
+                    {{resources.findUnmappedRoutes}}
+                </button>
+            </mat-menu>
         </div>
-        <div class="clear-left"></div>
         } @empty {
-        <p>{{resources.noTraces}}</p>
+        <p class="mx-2">{{resources.noTraces}}</p>
         }
-        @if (loadingTraces) {
+        @if (loading()) {
         <mat-spinner></mat-spinner>
         }
     </div>
-    <div [ngClass]="{'max-md:w-full': showMap, 'max-md:hidden': !showMap}" class="w-2/3">
+    <div [ngClass]="{'max-md:w-full': showMap(), 'max-md:hidden': !showMap()}" class="min-w-0 flex-1">
         <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
             <layers [allowOffline]="true"></layers>
-            <routes-path [routesGeoJson]="selectedTraceGeoJson"></routes-path>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-left' : 'top-right'">
-                <zoom></zoom>
-            </mgl-control>
-            <mgl-control [position]="resources.direction === 'rtl' ? 'top-right' : 'top-left'">
-                <osm-attribution></osm-attribution>
-            </mgl-control>
-            <mgl-geojson-source id="traces-source" [data]="tracesGeoJson" [cluster]="true" [clusterMaxZoom]="14"
+            <routes-path [routesGeoJson]="selectedTraceGeoJson()"></routes-path>
+            <map-overlay>
+                <div class="absolute inset-0 magrin-top-with-toolbar pb-safe px-safe" [dir]="resources.direction">
+                    <div class="relative size-full">
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 end-2.5 items-end">
+                            <zoom class="max-md:hidden"></zoom>
+                        </div>
+                        <div class="absolute flex flex-col gap-2.5 pointer-events-none *:pointer-events-auto top-2.5 start-2.5 items-start">
+                            <osm-attribution></osm-attribution>
+                        </div>
+                    </div>
+                </div>
+            </map-overlay>
+            <mgl-geojson-source id="traces-source" [data]="tracesGeoJson()" [cluster]="true" [clusterMaxZoom]="14"
                 [clusterRadius]="100" #tracesClusterSource></mgl-geojson-source>
             <mgl-markers-for-clusters source="traces-source">
                 <ng-template mglPoint let-feature>
@@ -140,25 +152,25 @@
                     </div>
                 </ng-template>
             </mgl-markers-for-clusters>
-            <mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
+            <mgl-geojson-source id="missing-parts" [data]="missingParts()"></mgl-geojson-source>
             <mgl-layer id="missing-part-line" source="missing-parts" type="line" [paint]="{
                     'line-color': 'red',
                     'line-width': 3
                 }">
             </mgl-layer>
-            <mgl-geojson-source id="selected-feature" [data]="selectedFeatureSource"></mgl-geojson-source>
+            <mgl-geojson-source id="selected-feature" [data]="selectedFeatureSource()"></mgl-geojson-source>
             <mgl-layer id="missing-part-line-selected" source="selected-feature" type="line" [paint]="{
                     'line-color': 'brown',
                     'line-width': 5
                 }">
             </mgl-layer>
-            @if (missingCoordinates) {
-            <mgl-popup [lngLat]="missingCoordinates" [offset]="[0, -30]" (popupClose)="clearSelection()">
-                <missing-part-overlay [feature]="selectedFeature" [latlng]="missingCoordinates"
-                    (removed)="removeMissingPart()"></missing-part-overlay>
+            @if (missingCoordinates()) {
+            <mgl-popup [lngLat]="missingCoordinates()" [offset]="[0, -30]" (popupClose)="clearSelection()">
+                <missing-part-overlay [feature]="selectedFeature()" (featureChange)="updateSelectedFeature($event)"
+                    [latlng]="missingCoordinates()" (removed)="removeMissingPart()"></missing-part-overlay>
             </mgl-popup>
             }
-            @for (feature of missingParts.features; track feature) {
+            @for (feature of missingParts().features; track feature) {
             <mgl-marker [lngLat]="getLatLngLikeForFeature(feature)" anchor="bottom">
                 <div (click)="setSelectedFeature(feature, $event)">
                     <span class='fa-stack fa-lg'>
@@ -170,43 +182,43 @@
             </mgl-marker>
             }
         </mgl-map>
-        @if (selectedTrace) {
-        <div class="hidden max-md:block fixed bottom-safe bg-surface w-full z-30">
+        @if (selectedTrace()) {
+        <bottom-sheet class="md:hidden" (closed)="selectedTrace.set(null)">
             <div class="flex flex-row justify-center items-center mx-2">
-                <div class="flex-1 text-center text-xl">{{getTraceDisplayName(selectedTrace)}}</div>
-                <button mat-button class="w-1/6" type="button" (click)="selectedTrace = null" tabindex="-1">
-                    <i class="fa fa-lg icon-close"></i>
+                <div class="flex-1 text-center text-xl">{{getTraceDisplayName(selectedTrace())}}</div>
+                <button mat-button class="w-1/6" type="button" (click)="selectedTrace.set(null)" tabindex="-1">
+                    <i class="fa fa-action icon-close"></i>
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="editTrace(selectedTrace)" analyticsOn="click" analyticsCategory="Traces"
+                <button mat-button (click)="editTrace(selectedTrace())" analyticsOn="click" analyticsCategory="Traces"
                     analyticsLabel="Edit OSM trace properties from popup">
-                    <i class="fa icon-pencil"></i>
+                    <i class="fa fa-lg icon-pencil"></i>
                     {{resources.editProperties}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="addTraceToRoutes(selectedTrace)" analyticsOn="click"
+                <button mat-button (click)="addTraceToRoutes(selectedTrace())" analyticsOn="click"
                     analyticsCategory="Traces" analyticsLabel="Add OSM trace to routes from popup">
-                    <i class="fa icon-plus"></i>
+                    <i class="fa fa-lg icon-plus"></i>
                     {{resources.addToRoutes}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="deleteTrace(selectedTrace)" analyticsOn="click" analyticsCategory="Traces"
+                <button mat-button (click)="deleteTrace(selectedTrace())" analyticsOn="click" analyticsCategory="Traces"
                     analyticsLabel="Delete OSM trace parts from popup">
-                    <i class="fa icon-trash"></i>
+                    <i class="fa fa-lg icon-trash"></i>
                     {{resources.delete}}
                 </button>
             </div>
             <div class="flex flex-row">
-                <button mat-button (click)="findUnmappedRoutes(selectedTrace)" analyticsOn="click"
+                <button mat-button (click)="findUnmappedRoutes(selectedTrace())" analyticsOn="click"
                     analyticsCategory="Traces" analyticsLabel="Find unmapped trace parts from popup">
-                    <i class="fa icon-search"></i>
+                    <i class="fa fa-lg icon-search"></i>
                     {{resources.findUnmappedRoutes}}
                 </button>
             </div>
-        </div>
+        </bottom-sheet>
         }
     </div>
 </div>

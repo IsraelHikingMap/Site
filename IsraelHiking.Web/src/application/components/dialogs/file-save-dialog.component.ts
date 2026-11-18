@@ -10,7 +10,6 @@ import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { DeviceServicesService } from "../../services/device-providers/device-services.service";
-import type { DeviceProvider } from "../../services/device-providers/device-provider";
 import type { DataContainer, DeviceServiceId, RouteData } from "../../models";
 
 @Component({
@@ -24,10 +23,10 @@ export class FileSaveDialogComponent {
     private readonly fileService = inject(FileService);
     private readonly toastService = inject(ToastService);
     private readonly deviceServices = inject(DeviceServicesService);
-    private data = inject<RouteData>(MAT_DIALOG_DATA)
+    private readonly data = inject<RouteData>(MAT_DIALOG_DATA)
 
-    public formats: FormatViewModel[] = this.fileService.formats;
-    public deviceProviders: DeviceProvider[] = this.deviceServices.getProviders();
+    public readonly formats: FormatViewModel[] = this.fileService.formats;
+    public readonly deviceProviders = this.deviceServices.availableProviders;
 
     public async saveAs(format: FormatViewModel) {
         const outputFormat = format.outputFormat;
@@ -37,7 +36,7 @@ export class FileSaveDialogComponent {
         try {
             await this.fileService.saveToFile(`${this.getName(data)}.${format.extension}`, outputFormat, data);
         } catch (ex) {
-            this.toastService.error(ex as Error, this.resources.unableToSaveToFile);
+            this.toastService.error(ex as Error, this.resources.unableToExport);
         }
     }
 

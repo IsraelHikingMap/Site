@@ -14,9 +14,9 @@ import type { ShareUrl } from "../../models";
     imports: [MatIconButton, MatDialogContent, Dir, MatDialogClose, ShareItemComponent]
 })
 export class ShareShowDialogComponent {
-    public resources = inject(ResourcesService);
+    public readonly resources = inject(ResourcesService);
 
-    public shareUrl = inject<Immutable<ShareUrl>>(MAT_DIALOG_DATA);
+    public readonly shareUrl = inject<Immutable<ShareUrl>>(MAT_DIALOG_DATA);
 
     constructor() { }
 }

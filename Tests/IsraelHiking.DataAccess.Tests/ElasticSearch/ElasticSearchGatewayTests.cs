@@ -66,11 +66,17 @@ public class ElasticSearchGatewayTests
 
     [TestMethod]
     [Ignore]
-    public void GetImageHash_ShouldGetIt()
+    public void GetContainerName_TrackWhoseEnvelopeSticksOutOfTheArea_ShouldGetTheArea()
     {
-        var imageItem = _gateway.GetImageByHash("7F4E8F16362FD1E527FFBC516E0197C7").Result;
+        // Every point is inside Ramot Menashe but their envelope is not, which used to return Megiddo Regional Council
+        var name = _gateway.GetContainerName([
+            new Coordinate(35.059925, 32.596253),
+            new Coordinate(35.05829, 32.597951),
+            new Coordinate(35.056224, 32.598374),
+            new Coordinate(35.055908, 32.596352)
+        ], Languages.HEBREW).Result;
 
-        Assert.IsNotNull(imageItem);
+        Assert.AreEqual("רמות מנשה", name);
     }
 
     [TestMethod]

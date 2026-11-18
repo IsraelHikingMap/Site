@@ -58,7 +58,7 @@ public class PointsOfInterestController : ControllerBase
     /// <summary>
     /// Create a point of interest
     /// </summary>
-    /// <remarks>Creates a new POI, uploading its image to Wikimedia Commons when needed.</remarks>
+    /// <remarks>Creates a new POI, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
     /// <returns></returns>
@@ -68,7 +68,8 @@ public class PointsOfInterestController : ControllerBase
     public async Task<IActionResult> CreatePointOfInterest([FromBody] IFeature feature,
         [FromQuery] string language)
     {
-        _logger.LogInformation("Processing create point of interest request, " + feature.GetId());
+        var clientDetails = HttpContext?.Request.GetClientDetails();
+        _logger.LogInformation($"Processing create point of interest request, {feature.GetId()}, client: {clientDetails?.Info}");
         var validationResults = ValidateFeature(feature, language);
         if (!string.IsNullOrEmpty(validationResults))
         {
@@ -82,7 +83,7 @@ public class PointsOfInterestController : ControllerBase
                 Guid = feature.GetId(),
                 LatLng = new LatLng(feature.GetLocation().Y, feature.GetLocation().X),
                 PointType = Enum.Parse<SimplePointType>(feature.Attributes[FeatureAttributes.POI_TYPE].ToString(), true)
-            });
+            }, clientDetails);
             return Ok();
         }
         if (!string.IsNullOrEmpty(_persistentCache.GetString(feature.GetId())))
@@ -92,14 +93,14 @@ public class PointsOfInterestController : ControllerBase
         _persistentCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
 
         var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
+        var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language, clientDetails);
         return Ok(newFeature);
     }
 
     /// <summary>
     /// Update a point of interest
     /// </summary>
-    /// <remarks>Updates an existing POI by id, uploading its image to Wikimedia Commons when needed.</remarks>
+    /// <remarks>Updates an existing POI by id, uploading its image to the image host of the site when needed.</remarks>
     /// <param name="id">The feature ID</param>
     /// <param name="feature"></param>
     /// <param name="language">The language code</param>
@@ -110,7 +111,8 @@ public class PointsOfInterestController : ControllerBase
     public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody] IFeature feature,
         [FromQuery] string language)
     {
-        _logger.LogInformation("Processing update point of interest request, " + id);
+        var clientDetails = HttpContext?.Request.GetClientDetails();
+        _logger.LogInformation($"Processing update point of interest request, {id}, client: {clientDetails?.Info}");
         var validationResults = ValidateFeature(feature, language);
         if (!string.IsNullOrEmpty(validationResults))
         {
@@ -123,7 +125,7 @@ public class PointsOfInterestController : ControllerBase
         }
 
         var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
+        return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language, clientDetails));
     }
 
     private string ValidateFeature(IFeature feature, string language)
@@ -141,15 +143,13 @@ public class PointsOfInterestController : ControllerBase
             return "Title must not be more than 255 characters...";
         }
 
-        var invalidWebsites = feature.Attributes.GetNames()
-            .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-            .Select(n => feature.Attributes[n].ToString())
-            .Any(w => w.Length > 255);
-        var invalidAddedWebsites = feature.Attributes.GetNames()
-            .Where(n => n == FeatureAttributes.POI_ADDED_URLS)
-            .SelectMany(n => feature.Attributes[n] as IEnumerable<object>)
-            .Any(w => w.ToString().Length > 255);
-        if (invalidWebsites || invalidAddedWebsites)
+        var websites = feature.GetWebsiteUrls();
+        if (feature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
+        {
+            websites.AddRange((feature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
+                .Select(w => w.ToString()));
+        }
+        if (websites.Any(w => w.Length > 255))
         {
             return "Website address length must not be more than 255 characters...";
         }
@@ -160,8 +160,9 @@ public class PointsOfInterestController : ControllerBase
     /// Creates a simple POI
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="clientDetails"></param>
     /// <returns></returns>
-    private async Task AddSimplePoint(AddSimplePointOfInterestRequest request)
+    private async Task AddSimplePoint(AddSimplePointOfInterestRequest request, ClientDetails clientDetails)
     {
         if (!string.IsNullOrEmpty(_persistentCache.GetString(request.Guid)))
         {
@@ -170,6 +171,6 @@ public class PointsOfInterestController : ControllerBase
         _persistentCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
         _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
         var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
-        await _simplePointAdderExecutor.Add(osmGateway, request);
+        await _simplePointAdderExecutor.Add(osmGateway, request, clientDetails);
     }
 }
