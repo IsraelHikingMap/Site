@@ -1,4 +1,5 @@
 import { computed, inject, Service } from "@angular/core";
+import { Router } from "@angular/router";
 import { Store } from "@ngxs/store";
 
 import { WahooDeviceProvider } from "./wahoo.device-provider";
@@ -6,6 +7,7 @@ import { GarminDeviceProvider } from "./garmin.device-provider";
 import { LoggingService } from "../logging.service";
 import { ToastService } from "../toast.service";
 import { ResourcesService } from "../resources.service";
+import { RouteStrings } from "../hash.service";
 import { RemoveDeviceProviderConnectionAction, SetDeviceProviderConnectionAction } from "../../reducers/user.reducer";
 import type { DeviceProvider } from "./device-provider";
 import type { ApplicationState, DeviceProviderId, RouteDataWithoutState } from "../../models";
@@ -27,6 +29,7 @@ export class DeviceProvidersService {
     private readonly loggingService = inject(LoggingService);
     private readonly toastService = inject(ToastService);
     private readonly resources = inject(ResourcesService);
+    private readonly router = inject(Router);
     private readonly providers: DeviceProvider[] = [
         inject(WahooDeviceProvider),
         inject(GarminDeviceProvider)
@@ -74,7 +77,13 @@ export class DeviceProvidersService {
      */
     public async sendRouteGated(id: DeviceProviderId, routes: RouteDataWithoutState[]): Promise<void> {
         if (!this.isConnected(id)) {
-            this.toastService.info(this.resources.connectDeviceFirst);
+            this.toastService.confirm({
+                type: "Custom",
+                message: this.resources.connectServiceFirst,
+                confirmAction: () => this.router.navigate([RouteStrings.ROUTE_SETTINGS]),
+                customConfirmText: this.resources.settings,
+                customDeclineText: this.resources.cancel
+            });
             return;
         }
         try {
