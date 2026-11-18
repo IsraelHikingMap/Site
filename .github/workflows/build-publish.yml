@@ -90,7 +90,7 @@ jobs:
           node-version-file: IsraelHiking.Web/.nvmrc
 
       - name: Setup Java
-        uses: actions/setup-java@v6.2.0
+        uses: actions/setup-java@v6.3.0
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -182,7 +182,7 @@ jobs:
           VERSION: ${{ needs.version.outputs.version_string }}
 
   ios:
-    runs-on: macos-26
+    runs-on: xcode-27
     needs: version
     steps:
       - name: Checkout code

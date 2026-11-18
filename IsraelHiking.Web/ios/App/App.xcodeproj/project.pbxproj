@@ -723,7 +723,7 @@
 			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
 			requirement = {
 				kind = exactVersion;
-				version = 6.28.0;
+				version = 7.0.0;
 			};
 		};
 		0DD5D9572FDBDBB300983BAA /* XCRemoteSwiftPackageReference "pmtiles-mobile" */ = {
@@ -731,7 +731,7 @@
 			repositoryURL = "https://github.com/mapeak-com/pmtiles-mobile";
 			requirement = {
 				kind = exactVersion;
-				version = 0.3.4;
+				version = 0.3.5;
 			};
 		};
 		0DFA1100000000000000005B /* XCRemoteSwiftPackageReference "valhalla-mobile" */ = {
@@ -739,7 +739,7 @@
 			repositoryURL = "https://github.com/Rallista/valhalla-mobile.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.6.4;
+				version = 0.6.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

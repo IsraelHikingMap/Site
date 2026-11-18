@@ -177,8 +177,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/maplibre/maplibre-gl-native-distribution",
       "state" : {
-        "revision" : "5ee345ca5d65238a6fce29bba87816204be7df20",
-        "version" : "6.28.0"
+        "revision" : "c2e6e6bd24efa037a8ab13463d8ad047b929eb9f",
+        "version" : "7.0.0"
       }
     },
     {
@@ -195,8 +195,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mapeak-com/pmtiles-mobile",
       "state" : {
-        "revision" : "c099fedbf8ffbb0f8cc147231c2ccfb112c0a962",
-        "version" : "0.3.4"
+        "revision" : "ca4858a3f821c786c29d1fc06406a2b8353ab61e",
+        "version" : "0.3.5"
       }
     },
     {
@@ -231,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Rallista/valhalla-mobile.git",
       "state" : {
-        "revision" : "852dd75c356ecbcd0fa693dcbdd7178059013f4c",
-        "version" : "0.6.4"
+        "revision" : "d03c3f51925f9e0211013a6e90a69dd216654810",
+        "version" : "0.6.6"
       }
     },
     {
