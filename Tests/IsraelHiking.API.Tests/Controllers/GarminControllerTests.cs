@@ -1,9 +1,9 @@
-using System.Text.Json;
+using System.Collections.Generic;
 using IsraelHiking.API.Controllers;
-using IsraelHiking.Common.Api;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -19,13 +19,16 @@ public class GarminControllerTests
     public void TestInitialize()
     {
         _garminGateway = Substitute.For<IGarminGateway>();
-        _controller = new GarminController(_garminGateway);
+        _controller = new GarminController(_garminGateway)
+        {
+            ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
+        };
     }
 
     [TestMethod]
     public void GetCallback_FromTheApp_ShouldRedirectToTheApp()
     {
-        SetupQuery("?code=c&state=app-123");
+        _controller.Request.QueryString = new QueryString("?code=c&state=app-123");
 
         var result = _controller.GetCallback() as RedirectResult;
 
@@ -35,7 +38,7 @@ public class GarminControllerTests
     [TestMethod]
     public void GetCallback_FromTheSite_ShouldRedirectToTheSitePage()
     {
-        SetupQuery("?code=c&state=web-123");
+        _controller.Request.QueryString = new QueryString("?code=c&state=web-123");
 
         var result = _controller.GetCallback() as RedirectResult;
 
@@ -43,53 +46,20 @@ public class GarminControllerTests
     }
 
     [TestMethod]
-    public void PostToken_ShouldRelayGarminsResponse()
+    public void PostToken_ShouldForwardTheFormAndRelayGarminsResponse()
     {
-        _garminGateway.ExchangeCode("code", "verifier", "redirect").Returns(new GarminResponse(200, "{\"access_token\":\"a\"}"));
+        var form = new FormCollection(new Dictionary<string, StringValues>
+        {
+            { "grant_type", "refresh_token" },
+            { "refresh_token", "refresh" }
+        });
+        _garminGateway.RequestToken(Arg.Any<IEnumerable<KeyValuePair<string, string>>>()).Returns(new GarminResponse(400, "{}"));
 
-        var result = _controller.PostToken(new GarminCodeExchangeRequest { Code = "code", CodeVerifier = "verifier", RedirectUri = "redirect" }).Result as ContentResult;
+        var result = _controller.PostToken(form).Result as ContentResult;
 
-        Assert.IsNotNull(result);
-        Assert.AreEqual(200, result.StatusCode);
-        Assert.AreEqual("{\"access_token\":\"a\"}", result.Content);
-    }
-
-    [TestMethod]
-    public void PostRefresh_GarminRejects_ShouldRelayTheError()
-    {
-        _garminGateway.RefreshToken("refresh").Returns(new GarminResponse(400, "{}"));
-
-        var result = _controller.PostRefresh(new GarminRefreshRequest { RefreshToken = "refresh" }).Result as ContentResult;
-
-        Assert.IsNotNull(result);
         Assert.AreEqual(400, result.StatusCode);
-    }
-
-    [TestMethod]
-    public void PostCourse_ShouldSendTheCourseAsIs()
-    {
-        var course = JsonDocument.Parse("{\"courseName\":\"name\"}").RootElement;
-        _garminGateway.CreateCourse("token", Arg.Any<string>()).Returns(new GarminResponse(200, "{}"));
-
-        _controller.PostCourse(new GarminCourseRequest { AccessToken = "token", Course = course }).Wait();
-
-        _garminGateway.Received().CreateCourse("token", "{\"courseName\":\"name\"}");
-    }
-
-    [TestMethod]
-    public void PostDisconnect_ShouldDeleteTheRegistration()
-    {
-        _garminGateway.DeleteRegistration("token").Returns(new GarminResponse(204, ""));
-
-        var result = _controller.PostDisconnect(new GarminUserRequest { AccessToken = "token" }).Result as ContentResult;
-
-        Assert.AreEqual(204, result.StatusCode);
-        _garminGateway.Received().DeleteRegistration("token");
-    }
-
-    private void SetupQuery(string query)
-    {
-        _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
-        _controller.Request.QueryString = new QueryString(query);
+        Assert.AreEqual("{}", result.Content);
+        _garminGateway.Received().RequestToken(Arg.Is<IEnumerable<KeyValuePair<string, string>>>(p =>
+            new Dictionary<string, string>(p)["refresh_token"] == "refresh"));
     }
 }
