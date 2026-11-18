@@ -48,6 +48,15 @@ const OVERPASS_BATCH_SIZE = 100;
 const NAME_OVERRIDES: Record<string, Record<string, string>> = {
     "israel-and-palestine": { "name:he": "ישראל והשטחים" }
 };
+/** The words that say what kind of region an area is, by language, removed from the names of an area whose English name has them */
+const NAME_AFFIXES: Record<string, RegExp> = {
+    en: /^Regierungsbezirk | (Administrative |Government )?Region$| Federal District$/i,
+    he: /^המחוז הפדרלי של /,
+    ar: /^(منطقة (فدرالية |فيدرالية )?|مقاطعة )/,
+    ru: /^(Административный округ |Край )| (федеральный округ|край)$/i,
+    es: /^(Distrito federal (del? )?|Región de )/i,
+    de: /^(Regierungsbezirk |Föderationskreis |Region )| Region$/i
+};
 
 const index = await (await fetch(GEOFABRIK_INDEX_ADDRESS)).json() as GeoJSON.FeatureCollection<GeoJSON.MultiPolygon>;
 const regions = index.features as GeofabrikRegion[];
@@ -242,7 +251,8 @@ function isOverlapping(bounds: GeoJSON.BBox, otherBounds: GeoJSON.BBox): boolean
 
 /**
  * An area as the client gets it: its names in the languages of the app, where "name" is the English one, and
- * a region of a few countries is named after all of them, in the order the Geofabrik name lists them.
+ * a region of a few countries is named after all of them, in the order the Geofabrik name lists them, and words like
+ * "Region" are left out of them.
  * The id is the Geofabrik one, where the "/" of the US states, like "us/georgia", is a "-" so that it can be in a file name.
  */
 function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feature<GeoJSON.Geometry, Record<string, string>> {
@@ -252,15 +262,25 @@ function toArea(region: GeofabrikRegion, relations: OsmRelation[]): GeoJSON.Feat
     const roundedGeometry = { ...geometry, coordinates: roundCoordinates(geometry.coordinates) };
     const properties: Record<string, string> = {
         id: region.properties.id.replace("/", "-"),
-        name: ordered.length === 0 ? englishName : ordered.map(relation => relation.tags["name:en"] ?? relation.tags.name).join(" – ")
+        name: ordered.length === 0 ? englishName.replace(NAME_AFFIXES.en, "") : ordered.map(relation => getName(relation, "en")).join(" – ")
     };
     for (const language of LANGUAGES.filter(language => language !== "en")) {
         if (ordered.some(relation => relation.tags[`name:${language}`] != null)) {
-            properties[`name:${language}`] = ordered.map(relation => relation.tags[`name:${language}`] ?? relation.tags["name:en"] ?? relation.tags.name).join(" – ");
+            properties[`name:${language}`] = ordered.map(relation => getName(relation, language)).join(" – ");
         }
     }
     Object.assign(properties, NAME_OVERRIDES[properties.id]);
     return { type: "Feature", properties, geometry: roundedGeometry };
+}
+
+/** The name of a boundary in a language, or its English one when it has none, without NAME_AFFIXES */
+function getName(relation: OsmRelation, language: string): string {
+    const englishName = relation.tags["name:en"] ?? relation.tags.name;
+    const name = relation.tags[`name:${language}`];
+    if (name == null) {
+        return englishName.replace(NAME_AFFIXES.en, "");
+    }
+    return NAME_AFFIXES.en.test(englishName) ? name.replace(NAME_AFFIXES[language], "") : name;
 }
 
 function getNamePosition(englishName: string, relation: OsmRelation): number {
