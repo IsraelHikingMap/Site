@@ -6,6 +6,7 @@ import { CdkScrollable } from "@angular/cdk/scrolling";
 import { MatDialogTitle, MatDialogClose, MatDialogContent, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
+import { DeviceLogoComponent } from "../device-logo.component";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -15,7 +16,7 @@ import type { DataContainer, DeviceServiceId, RouteData } from "../../models";
 @Component({
     selector: "file-save-dialog",
     templateUrl: "./file-save-dialog.component.html",
-    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective, MatAnchor, MatDivider]
+    imports: [MatIconButton, Dir, MatDialogTitle, MatButton, MatDialogClose, CdkScrollable, MatDialogContent, AnalyticsDirective, MatAnchor, MatDivider, DeviceLogoComponent]
 })
 export class FileSaveDialogComponent {
     public readonly resources = inject(ResourcesService);

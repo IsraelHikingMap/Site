@@ -26,6 +26,8 @@ export interface DeviceProvider {
     readonly id: DeviceServiceId;
     /** Brand name shown in the UI (not translated). */
     readonly displayName: string;
+    /** The service's app icon, shown next to its name. */
+    readonly icon: string;
     /** False until the provider's developer program issued a client id, which keeps it out of the UI. */
     readonly isAvailable: boolean;
 

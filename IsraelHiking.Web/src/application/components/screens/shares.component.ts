@@ -30,6 +30,7 @@ import { MapOverlayComponent } from "../map/map-overlay.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { BottomSheetComponent } from "../bottom-sheet.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
+import { DeviceLogoComponent } from "../device-logo.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ResourcesService } from "../../services/resources.service";
@@ -49,7 +50,7 @@ import type { ApplicationState, DeviceServiceId, ShareUrl } from "../../models";
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption, DeviceLogoComponent]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);

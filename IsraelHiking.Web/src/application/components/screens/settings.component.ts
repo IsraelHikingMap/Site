@@ -10,6 +10,7 @@ import { MatOption, MatSelect } from "@angular/material/select";
 import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
+import { DeviceLogoComponent } from "../device-logo.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -36,7 +37,7 @@ type KeyboardShortcut = {
 @Component({
     selector: "settings",
     templateUrl: "./settings.component.html",
-    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
+    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel, DeviceLogoComponent]
 })
 export class SettingsComponent {
 

@@ -203,6 +203,8 @@ export class ResourcesService {
     public addPointToActiveRoute: string;
     public settings: string;
     public connectedServices: string;
+    public connectedServicesHint: string;
+    public connected: string;
     public connect: string;
     public disconnect: string;
     public sendToDevice: string;
@@ -519,7 +521,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795028590002");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795034307282");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -672,6 +674,8 @@ export class ResourcesService {
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.settings = this.gettextCatalog.getString("Settings");
         this.connectedServices = this.gettextCatalog.getString("Connected services");
+        this.connectedServicesHint = this.gettextCatalog.getString("Send the routes you plan to your watch or bike computer");
+        this.connected = this.gettextCatalog.getString("Connected");
         this.connect = this.gettextCatalog.getString("Connect");
         this.disconnect = this.gettextCatalog.getString("Disconnect");
         this.sendToDevice = this.gettextCatalog.getString("Send to device");

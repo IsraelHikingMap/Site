@@ -34,6 +34,7 @@ export class GarminDeviceProvider implements DeviceProvider {
 
     public readonly id: DeviceServiceId = "garmin";
     public readonly displayName = "Garmin";
+    public readonly icon = "content/device-logos/garmin.png";
 
     private static readonly CLIENT_ID = "717bf25f-aafa-4a33-a4ae-b26ac14446f2";
 

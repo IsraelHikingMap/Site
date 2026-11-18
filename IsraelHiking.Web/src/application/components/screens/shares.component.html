@@ -203,8 +203,10 @@
                 @for (provider of deviceProviders(); track provider.id) {
                 <button mat-menu-item (click)="sendShareUrlToDevice(shareUrl, provider.id)" analyticsOn="click"
                     analyticsCategory="Shares" analyticsLabel="Share send to device {{provider.id}}">
-                    <i class="fa icon-external-link"></i>
-                    {{resources.sendToDevice}} - {{provider.displayName}}
+                    <span class="inline-flex items-center gap-2">
+                        {{resources.sendToDevice}}
+                        <device-logo [provider]="provider" class="h-5"></device-logo>
+                    </span>
                 </button>
                 }
                 <button mat-menu-item (click)="deleteShareUrl(shareUrl)" analyticsOn="click" analyticsCategory="Shares"

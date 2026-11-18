@@ -38,6 +38,7 @@ export class WahooDeviceProvider implements DeviceProvider {
 
     public readonly id: DeviceServiceId = "wahoo";
     public readonly displayName = "Wahoo";
+    public readonly icon = "content/device-logos/wahoo.png";
     public readonly isAvailable = true;
 
     private static readonly CLIENT_ID = "amZH1PBW99VdHFWN6zgzo5953jXPo3Hv8DCTJBnv0CQ";
