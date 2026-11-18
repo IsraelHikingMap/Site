@@ -75,7 +75,8 @@ export class OfflineManagementComponent {
     };
 
     public readonly offlineMapStyle: StyleSpecification;
-    public readonly currentLocation: GeoJSON.FeatureCollection;
+    /** Where the main map is, which the map opens at, zoomed out far enough to see the areas around it */
+    public readonly initialCenter: [number, number];
     public readonly baseLayerData: EditableLayer;
     /** The areas that can be downloaded, fetched every time the screen is opened, so that the ones shown are the ones the server offers now */
     public readonly areas = signal<OfflineArea[]>([]);
@@ -244,33 +245,9 @@ export class OfflineManagementComponent {
             this.baseLayerData = { ...DEFAULT_BASE_LAYERS[0] };
         }
         this.offlineAreasService.getAreas().then(areas => this.areas.set(areas));
+        const { longitude, latitude } = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
+        this.initialCenter = [longitude, latitude];
         this.showMap.set(this.incompatibleAreaIds().length === 0);
-        const stateLocation = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-        this.currentLocation = {
-            type: "FeatureCollection",
-            features: [{
-                type: "Feature",
-                properties: {},
-                geometry: {
-                    type: "Point",
-                    coordinates: [stateLocation.longitude, stateLocation.latitude]
-                }
-            }]
-        }
-    }
-
-    /** Shows every downloaded area, or where the user is when there is none */
-    private initializeCenterAndZoom() {
-        const areas = this.downloadedAreaDetails().map(details => details.area).filter(area => area != null);
-        if (areas.length === 0) {
-            const mapCenter = this.store.selectSnapshot((state: ApplicationState) => state.locationState);
-            this.map.flyTo({
-                center: [mapCenter.longitude, mapCenter.latitude],
-                zoom: 7
-            });
-            return;
-        }
-        this.fitBounds({ type: "FeatureCollection", features: areas });
     }
 
     public downloadSelected() {
@@ -498,7 +475,6 @@ export class OfflineManagementComponent {
         this.map.dragRotate.disable();
         this.map.doubleClickZoom.disable();
         this.map.touchZoomRotate.disableRotation();
-        this.initializeCenterAndZoom();
     }
 
     public deleteSelected() {
