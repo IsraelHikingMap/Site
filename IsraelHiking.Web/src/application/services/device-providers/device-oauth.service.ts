@@ -2,6 +2,7 @@ import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { InAppBrowser } from "@capgo/capacitor-inappbrowser";
+import { encode } from "base64-arraybuffer";
 
 import { RunningContextService } from "../running-context.service";
 import { Urls } from "../../urls";
@@ -84,11 +85,7 @@ export class DeviceOAuthService {
         }));
     }
 
-    private base64UrlEncode(bytes: Uint8Array): string {
-        let binary = "";
-        for (const byte of bytes) {
-            binary += String.fromCharCode(byte);
-        }
-        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    private base64UrlEncode(bytes: Uint8Array<ArrayBuffer>): string {
+        return encode(bytes.buffer).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     }
 }
