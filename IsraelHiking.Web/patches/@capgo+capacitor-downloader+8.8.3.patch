@@ -310,26 +310,236 @@ index 2223a86..8f83eab 100644
                              }
                              int percent = (int) (active.progress * 100f);
                              if (percent != lastReportedPercent) {
+diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadForegroundService.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadForegroundService.java
+index c153051..03e9c6f 100644
+--- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadForegroundService.java
++++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadForegroundService.java
+@@ -14,7 +14,7 @@ import androidx.core.app.ServiceCompat;
+  */
+ public class OkHttpDownloadForegroundService extends Service {
+ 
+-    private static final int SERVICE_NOTIFICATION_ID = 0x4f4b4854;
++    static final int SERVICE_NOTIFICATION_ID = 0x4f4b4854;
+     private static final Object stateLock = new Object();
+     private static boolean foregroundEstablished;
+     private static boolean stopWhenForegroundReady;
 diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
-index c5eeb48..d5c2a91 100644
+index c5eeb48..7f93bd7 100644
 --- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
 +++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/OkHttpDownloadProgressNotifier.java
-@@ -155,6 +155,7 @@ final class OkHttpDownloadProgressNotifier {
-             .setContentTitle(contentTitle)
+@@ -10,17 +10,21 @@ import android.os.Build;
+ import android.os.SystemClock;
+ import androidx.annotation.VisibleForTesting;
+ import androidx.core.app.NotificationCompat;
++import java.util.ArrayList;
++import java.util.Comparator;
++import java.util.List;
+ import java.util.concurrent.ConcurrentHashMap;
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
+ /**
+- * Ongoing progress notifications for OkHttp downloads when {@code notification} is {@code progress}.
++ * The ongoing progress notification of OkHttp downloads when {@code notification} is {@code progress}. All the running
++ * downloads share one notification, the one the foreground service is required to show, so that a single download shows
++ * a single notification and several show their combined progress rather than one each next to an empty one.
+  */
+ final class OkHttpDownloadProgressNotifier {
+ 
+     static final String CHANNEL_ID = "capgo_capacitor_downloader_okhttp";
+     private static final String CHANNEL_NAME = "Downloads";
+-    private static final int NOTIFICATION_ID = 0x44554f57;
+     private static final long UPDATE_INTERVAL_MS = 1_000L;
+ 
+     private final Context context;
+@@ -47,10 +51,10 @@ final class OkHttpDownloadProgressNotifier {
+         synchronized (serviceLock) {
+             entries.put(downloadId, new ProgressEntry(title, description, notificationMode, SystemClock.elapsedRealtime()));
+             activeDownloads.incrementAndGet();
++            postProgress();
+             OkHttpDownloadForegroundService.notifyActiveDownloads(context, activeDownloads.get());
+             OkHttpDownloadForegroundService.requestStart(context);
+         }
+-        postProgress(downloadId, 0f, true);
+         return true;
+     }
+ 
+@@ -59,11 +63,12 @@ final class OkHttpDownloadProgressNotifier {
+         if (entry == null) {
+             return;
+         }
++        entry.progress = progress;
+         long now = SystemClock.elapsedRealtime();
+         if (now - entry.lastPostedAt < UPDATE_INTERVAL_MS && progress < 1f) {
+             return;
+         }
+-        postProgress(downloadId, progress, false);
++        postProgress();
+         entry.lastPostedAt = now;
+     }
+ 
+@@ -74,11 +79,7 @@ final class OkHttpDownloadProgressNotifier {
+                 return;
+             }
+             releaseOneActiveDownload();
+-            if (!success || "progress".equals(entry.notificationMode)) {
+-                cancelNotification(downloadId);
+-            } else if (success) {
+-                postCompleted(downloadId, entry);
+-            }
++            postProgress();
+             scheduleForegroundStopIfIdle();
+         }
+     }
+@@ -87,7 +88,7 @@ final class OkHttpDownloadProgressNotifier {
+         synchronized (serviceLock) {
+             if (entries.remove(downloadId) != null) {
+                 releaseOneActiveDownload();
+-                cancelNotification(downloadId);
++                postProgress();
+                 scheduleForegroundStopIfIdle();
+             }
+         }
+@@ -95,10 +96,8 @@ final class OkHttpDownloadProgressNotifier {
+ 
+     void shutdown() {
+         synchronized (serviceLock) {
+-            for (String downloadId : entries.keySet()) {
+-                cancelNotification(downloadId);
+-            }
+             entries.clear();
++            cancelNotification();
+             activeDownloads.set(0);
+             lastForegroundNotification = null;
+             sharedForegroundNotification = null;
+@@ -139,66 +138,57 @@ final class OkHttpDownloadProgressNotifier {
+         OkHttpDownloadForegroundService.notifyActiveDownloads(context, activeDownloads.get());
+     }
+ 
+-    private void postProgress(String downloadId, float progress, boolean force) {
+-        ProgressEntry entry = entries.get(downloadId);
+-        if (entry == null) {
++    /**
++     * Shows the progress of the running downloads in the shared notification, the title and description of the one
++     * download when there is only one, and the titles of all of them with their combined progress when there are more.
++     * The notification is removed once none is left.
++     */
++    private void postProgress() {
++        List<ProgressEntry> running = new ArrayList<>(entries.values());
++        if (running.isEmpty()) {
++            cancelNotification();
+             return;
+         }
+-        int percentage = Math.round(Math.min(Math.max(progress, 0f), 1f) * 100f);
+-        String contentTitle = resolveTitle(entry);
++        running.sort(Comparator.comparingLong((ProgressEntry entry) -> entry.startedAt));
++        float progress = 0f;
++        List<String> titles = new ArrayList<>();
++        for (ProgressEntry entry : running) {
++            progress += Math.min(Math.max(entry.progress, 0f), 1f);
++            titles.add(resolveTitle(entry));
++        }
++        int percentage = Math.round(progress / running.size() * 100f);
++        ProgressEntry first = running.get(0);
+         String contentText = percentage + "%";
+-        if (entry.description != null && !entry.description.isEmpty()) {
+-            contentText = entry.description + " · " + contentText;
++        if (first.description != null && !first.description.isEmpty()) {
++            contentText = first.description + " · " + contentText;
+         }
+         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+             .setSmallIcon(android.R.drawable.stat_sys_download)
+-            .setContentTitle(contentTitle)
++            .setContentTitle(String.join(", ", titles))
              .setContentText(contentText)
              .setProgress(100, percentage, false)
-+            .setWhen(entry.startedAt)
++            .setWhen(first.startedAt)
              .setOngoing(true)
              .setOnlyAlertOnce(true)
++            .setSilent(true)
              .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-@@ -258,6 +259,7 @@ final class OkHttpDownloadProgressNotifier {
+             .setContentIntent(launchIntent())
+             .build();
++        lastForegroundNotification = notification;
++        sharedForegroundNotification = notification;
+         try {
+             if (simulateNotificationPostSecurityExceptionForTests) {
+                 throw new SecurityException("test: POST_NOTIFICATIONS denied");
+             }
+-            notificationManager.notify(notificationTagFor(downloadId), NOTIFICATION_ID, notification);
+-            lastForegroundNotification = notification;
+-            sharedForegroundNotification = notification;
+-        } catch (SecurityException ignored) {
+-            handleNotificationPostFailure(downloadId);
+-        }
+-    }
+-
+-    private void handleNotificationPostFailure(String downloadId) {
+-        synchronized (serviceLock) {
+-            if (entries.remove(downloadId) != null) {
+-                releaseOneActiveDownload();
+-                scheduleForegroundStopIfIdle();
+-            }
+-        }
+-    }
+-
+-    private void postCompleted(String downloadId, ProgressEntry entry) {
+-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+-            .setContentTitle(resolveTitle(entry))
+-            .setContentText(entry.description != null && !entry.description.isEmpty() ? entry.description : "Download complete")
+-            .setOngoing(false)
+-            .setAutoCancel(true)
+-            .setContentIntent(launchIntent())
+-            .build();
+-        try {
+-            notificationManager.notify(notificationTagFor(downloadId), NOTIFICATION_ID, notification);
++            notificationManager.notify(OkHttpDownloadForegroundService.SERVICE_NOTIFICATION_ID, notification);
+         } catch (SecurityException ignored) {
+             return;
+         }
+     }
+ 
+-    private void cancelNotification(String downloadId) {
+-        notificationManager.cancel(notificationTagFor(downloadId), NOTIFICATION_ID);
++    private void cancelNotification() {
++        sharedForegroundNotification = null;
++        notificationManager.cancel(OkHttpDownloadForegroundService.SERVICE_NOTIFICATION_ID);
+     }
+ 
+     private String resolveTitle(ProgressEntry entry) {
+@@ -212,22 +202,10 @@ final class OkHttpDownloadProgressNotifier {
+         return "progress".equals(notificationMode);
+     }
+ 
+-    static String notificationTagForDownload(String downloadId) {
+-        return "capgo_okhttp_" + (downloadId != null ? downloadId : "");
+-    }
+-
+-    static int notificationIdForDownload(String downloadId) {
+-        return NOTIFICATION_ID;
+-    }
+-
+     private boolean shouldShowProgress(String notificationMode) {
+         return shouldShowProgressForMode(notificationMode);
+     }
+ 
+-    private String notificationTagFor(String downloadId) {
+-        return notificationTagForDownload(downloadId);
+-    }
+-
+     private PendingIntent launchIntent() {
+         Intent launch = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+         if (launch == null) {
+@@ -258,7 +236,9 @@ final class OkHttpDownloadProgressNotifier {
          final String title;
          final String description;
          final String notificationMode;
 +        final long startedAt = System.currentTimeMillis();
          long lastPostedAt;
++        volatile float progress;
  
          ProgressEntry(String title, String description, String notificationMode, long lastPostedAt) {
+             this.title = title;
 diff --git a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
 index d453822..aeff223 100644
 --- a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
