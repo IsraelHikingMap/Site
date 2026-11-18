@@ -131,7 +131,7 @@ describe("OfflineFilesDownloadService", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideStore([OfflineReducer, InMemoryReducer]),
-                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download", downloadMapForOfflineViewing: "title", mapeakPro: "description", downloadFinishedSuccessfully: "completed" } },
+                { provide: ResourcesService, useValue: { recommendOfflineDownload: "recommend-offline-download", mapeakPro: "description" } },
                 {
                     provide: FileService, useValue: {
                         writeStyle: vi.fn(() => Promise.resolve()),
@@ -638,10 +638,10 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/${AREA_ID}/${AREA_MAP_FILE}`, fileName: AREA_MAP_FILE },
                     { url: `${Urls.offlineArea}/${AREA_ID}/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
-                ], "token", expect.objectContaining({ title: AREA.properties.name }), expect.any(Function), expect.any(AbortController));
+                ], "token", AREA.properties.name, expect.any(Function), expect.any(AbortController));
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/${otherAreaId}/${otherAreaFile}`, fileName: otherAreaFile }
-                ], "token", expect.objectContaining({ title: "Other area" }), expect.any(Function), expect.any(AbortController));
+                ], "token", "Other area", expect.any(Function), expect.any(AbortController));
 
                 progressCallbacks[0](0, 1);
                 progressCallbacks[1](0, 0.5);
@@ -715,11 +715,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith([
                     { url: `${Urls.offlineArea}/israel-and-palestine/${areaFile}`, fileName: areaFile },
                     { url: `${Urls.offlineArea}/israel-and-palestine/${ROOT_MAP_FILE}`, fileName: ROOT_MAP_FILE }
-                ], "token", {
-                    title: "Israel – Palestinian Territories",
-                    description: "title",
-                    completed: "Israel – Palestinian Territories: completed"
-                }, expect.any(Function), expect.any(AbortController));
+                ], "token", "Israel – Palestinian Territories", expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(areaFile);
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(ROOT_MAP_FILE);
                 expect(offlineAreasService.saveAreaMetadata).toHaveBeenCalledWith(area, { minZoom: 5, maxZoom: 14 });
@@ -856,7 +852,7 @@ describe("OfflineFilesDownloadService", () => {
                 expect(await promise).toEqual(["downloaded"]);
                 expect(fileService.downloadFilesToCacheAuthenticated).toHaveBeenCalledWith(
                     [{ url: expect.stringContaining(AREA_ROUTING_TILES_FILE), fileName: AREA_ROUTING_TILES_FILE }],
-                    "token", expect.any(Object), expect.any(Function), expect.any(AbortController));
+                    "token", expect.any(String), expect.any(Function), expect.any(AbortController));
                 expect(fileService.moveFileFromCacheToDataDirectory).toHaveBeenCalledWith(AREA_MAP_FILE);
             }
         )

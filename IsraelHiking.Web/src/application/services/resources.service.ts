@@ -362,6 +362,7 @@ export class ResourcesService {
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
     public downloadFinishedSuccessfully: string;
+    public downloadFailedOpenTheAppToTryAgain: string;
     public recommendOfflineDownload: string;
     public allFilesAreUpToDate: string;
     public thisWillDeleteAllCurrentRoutesAreYouSure: string;
@@ -520,7 +521,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795038209713");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795042622657");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -844,6 +845,7 @@ export class ResourcesService {
         this.areYouSureYouWantToStopRecording = this.gettextCatalog.getString("Are you sure you want to stop the current recording?");
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("Log in to see your traces - tap the frowning face icon at the top.");
         this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
+        this.downloadFailedOpenTheAppToTryAgain = this.gettextCatalog.getString("Download failed, open the app to try again");
         this.recommendOfflineDownload = this.gettextCatalog
             .getString("We recommend you to download offline files, would you like to do that now?");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");

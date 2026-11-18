@@ -12,6 +12,7 @@ import { MapService } from "./map.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
 import { ElevationProvider } from "./elevation.provider";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models";
 
@@ -46,6 +47,7 @@ describe("FileService", () => {
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
                 { provide: ElevationProvider, useValue: {} },
+                { provide: ResourcesService, useValue: {} },
                 FileService,
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()

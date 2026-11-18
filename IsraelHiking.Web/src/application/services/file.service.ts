@@ -15,6 +15,7 @@ import { SpatialHelper } from "./spatial.helper";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { ElevationProvider } from "./elevation.provider";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import type { DataContainer } from "../models";
 
@@ -65,16 +66,6 @@ export type OfflineFileToDownload = {
     fileName: string;
 };
 
-/**
- * The text the notification of a download shows while it goes on in the background, and the text of the notification
- * left behind once all of it is done, so that a download finished in the background is not missed.
- */
-export type DownloadNotificationText = {
-    title: string;
-    description: string;
-    completed: string;
-};
-
 /** A file in the app's data directory, the time it was last written to and its size in bytes */
 export type DataDirectoryFile = {
     fileName: string;
@@ -113,6 +104,7 @@ export class FileService {
     private readonly gpxDataContainerConverterService = inject(GpxDataContainerConverterService);
     private readonly loggingService = inject(LoggingService);
     private readonly elevationProvider = inject(ElevationProvider);
+    private readonly resources = inject(ResourcesService);
 
     public readonly formats: FormatViewModel[] = [
         {
@@ -433,8 +425,10 @@ export class FileService {
      * the app is in the background - from a foreground service that shows the notification on android, and from a continued
      * processing task on iOS 26. A file only takes its name once it is whole, so the cache never holds a part of a file.
      * Resolves once all of them are whole, rejects once one of them failed, and resolves straight away on an abort.
+     * The notifications are titled with the name of the area, and the one left behind once the download is done or has
+     * failed starts with it, so that a download that ended in the background is not missed.
      */
-    public async downloadFilesToCacheAuthenticated(files: OfflineFileToDownload[], token: string, notificationText: DownloadNotificationText,
+    public async downloadFilesToCacheAuthenticated(files: OfflineFileToDownload[], token: string, areaName: string,
         progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         await this.ensureOfflineCacheDirectory();
         const id = `offline-files-${FileService.batchCounter++}`;
@@ -471,11 +465,13 @@ export class FileService {
                 files: files.map((file, index) => ({ url: file.url, destination: destinations[index].uri })),
                 headers: { Authorization: `Bearer ${token}` },
                 lengthHeader: "X-Uncompressed-Length",
+                retries: 3,
                 androidHttpEngine: "okhttp",
                 notification: "progress",
-                title: notificationText.title,
-                description: notificationText.description,
-                downloadCompletedNotificationText: notificationText.completed,
+                title: areaName,
+                description: this.resources.downloadMapForOfflineViewing,
+                downloadCompletedNotificationText: `${areaName}: ${this.resources.downloadFinishedSuccessfully}`,
+                downloadFailedNotificationText: `${areaName}: ${this.resources.downloadFailedOpenTheAppToTryAgain}`,
                 iosContinuedProcessing: true
             });
             await finished;

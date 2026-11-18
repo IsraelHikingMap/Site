@@ -125,6 +125,7 @@
     "Distance markers": "Marcadores de distancia",
     "Don't show this message again": "No mostrar este mensaje de nuevo",
     "Download": "Descargar",
+    "Download failed, open the app to try again": "La descarga falló, abre la aplicación para volver a intentarlo",
     "Download finished successfully!": "¡Descarga completada con éxito!",
     "Download Map for Offline viewing": "Descargar mapa para uso sin conexión",
     "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "Al descargar esta zona se eliminarán las zonas antiguas con las que se superpone: {{names}}. ¿Continuar?",

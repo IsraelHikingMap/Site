@@ -404,11 +404,7 @@ export class OfflineFilesDownloadService {
         await this.fileService.downloadFilesToCacheAuthenticated(
             filesToDownload.map(({ fileName, areaId }) => ({ url: `${Urls.offlineArea}/${areaId}/${fileName}`, fileName })),
             token,
-            {
-                title: name,
-                description: this.resources.downloadMapForOfflineViewing,
-                completed: `${name}: ${this.resources.downloadFinishedSuccessfully}`
-            },
+            name,
             (fileIndex, progress) => {
                 fileProgress[fileIndex] = progress;
                 const sum = fileProgress.reduce((total, value) => total + value, skippedCount);

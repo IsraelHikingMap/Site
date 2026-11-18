@@ -125,6 +125,7 @@
     "Distance markers": "Маркеры расстояния",
     "Don't show this message again": "Не показывать это сообщение снова",
     "Download": "Загрузить",
+    "Download failed, open the app to try again": "Загрузка не удалась, откройте приложение, чтобы повторить попытку",
     "Download finished successfully!": "Загрузка завершена успешно!",
     "Download Map for Offline viewing": "Загрузите карту для офлайн-использования",
     "Downloading this area will delete the old areas it overlaps: {{names}}. Continue?": "При загрузке этой области будут удалены старые области, которые она перекрывает: {{names}}. Продолжить?",
