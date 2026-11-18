@@ -31,110 +31,106 @@
     <p class="text-center">{{resources.length}}: {{length() | distance}}</p>
     }
     <description [feature]="fullFeature()" [isEditable]="isEditable()"></description>
-    @if (isShowSeeAlso()) {
-    <div class="flex flex-row max-sm:hidden">
-      <h4>{{resources.seeAlso}}</h4>
-    </div>
-    }
-    <div class="flex flex-row">
-      @if (getElementOsmAddress()) {
-      <a [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" analyticsOn="click" analyticsCategory="OSM"
-        analyticsLabel="View element in OSM">
-        <img src="content/openstreetmap-logo.png" height="32" width="32" />
-      </a>
-      }
-      @for (urlPair of sourceImageUrls(); track urlPair) {
-      <a [href]="urlPair.url" [target]="'_blank'" class="me-2" analyticsOn="click" analyticsCategory="POI"
-        analyticsLabel="View extended POI data outside site">
-        @if (!urlPair.imageUrl) {
-        <div style="width: 32px; height: 32px">
-          <i class="fa fa-2x icon-external-link"></i>
-        </div>
-        } @else {
-        <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title())" />
-        }
-      </a>
-      }
-    </div>
-  <div class="mt-4 flex flex-row items-start gap-1" [attr.lang]="resources.getCurrentLanguageCodeSimplified()">
-    <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="navigateHere()" analyticsOn="click"
-      analyticsCategory="POI" analyticsLabel="Navigate here">
-      <span class="flex flex-col items-center gap-1">
-        <span class="flex size-10 items-center justify-center rounded-full bg-brand"><i class="fa fa-lg icon-recordings"></i></span>
-        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.planRouteHere}}</span>
-      </span>
-    </button>
-    @if (isRoute()) {
-    <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="convertToRoute()" analyticsOn="click"
-      analyticsCategory="POI" analyticsLabel="Convert POI to route">
-      <span class="flex flex-col items-center gap-1">
-        <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
-        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.convertToRoute}}</span>
-      </span>
-    </button>
-    } @else {
-    <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="addPointToRoute()" analyticsOn="click"
-      analyticsCategory="POI" analyticsLabel="Convert POI to point">
-      <span class="flex flex-col items-center gap-1">
-        <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
-        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.addPointToRoute}}</span>
-      </span>
-    </button>
-    }
-    @if (shareLinks().poiLink) {
-    <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" [matMenuTriggerFor]="shareMenu">
-      <span class="flex flex-col items-center gap-1">
-        <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-share-alt"></i></span>
-        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.share}}</span>
-      </span>
-    </button>
-    <mat-menu #shareMenu="matMenu">
-      <a mat-menu-item [href]="shareLinks().waze" [target]="'_blank'" analyticsOn="click" analyticsCategory="Share"
-        analyticsLabel="Navigate with waze">
-        <i class="fa fa-lg icon-waze mat-icon"></i>
-        <span class="mx-1">{{resources.navigateWithWaze}}</span>
-      </a>
-      <a mat-menu-item [href]="shareLinks().googleMaps" [target]="'_blank'" analyticsOn="click"
-        analyticsCategory="Share" analyticsLabel="Navigate with google maps">
-        <i class="fa fa-lg icon-map-marker mat-icon"></i>
-        <span class="mx-1">{{resources.navigateWithGoogleMaps}}</span>
-      </a>
-      <mat-divider></mat-divider>
-      @if (isApp()) {
-      <button mat-menu-item (click)="share()" analyticsOn="click" analyticsCategory="Share"
-        analyticsLabel="Share with os capabilities">
-        <i class="fa fa-lg icon-share-alt mat-icon"></i>
-        <span class="mx-1">{{resources.share}}</span>
+    <div class="sticky bottom-0 z-10 -mx-4 mt-4 flex bg-surface px-4 py-2 flex-row items-start gap-1" [attr.lang]="resources.getCurrentLanguageCodeSimplified()">
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="navigateHere()" analyticsOn="click"
+        analyticsCategory="POI" analyticsLabel="Navigate here">
+        <span class="flex flex-col items-center gap-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-brand"><i class="fa fa-lg icon-recordings"></i></span>
+          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.planRouteHere}}</span>
+        </span>
+      </button>
+      @if (isRoute()) {
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="convertToRoute()" analyticsOn="click"
+        analyticsCategory="POI" analyticsLabel="Convert POI to route">
+        <span class="flex flex-col items-center gap-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
+          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.convertToRoute}}</span>
+        </span>
       </button>
       } @else {
-      <a mat-menu-item [href]="shareLinks().facebook" [target]="'_blank'" analyticsOn="click"
-        analyticsCategory="Share" analyticsLabel="Share facebook poi">
-        <i class="fa fa-lg icon-facebook mat-icon"></i>
-        <span class="mx-1">{{resources.shareWithFacebook}}</span>
-      </a>
-      <a mat-menu-item [href]="shareLinks().whatsapp" [target]="'_blank'" analyticsOn="click"
-        analyticsCategory="Share" analyticsLabel="Share whatsapp poi">
-        <i class="fa fa-lg icon-whatsapp mat-icon"></i>
-        <span class="mx-1">{{resources.shareWithWhatsapp}}</span>
-      </a>
-      <button mat-menu-item [cdkCopyToClipboard]="shareLinks().poiLink" analyticsOn="click"
-        analyticsCategory="Share" analyticsLabel="Share copy to clipboard poi">
-        <i class="fa fa-lg icon-clipboard mat-icon"></i>
-        <span class="mx-1">{{resources.copyLink}}</span>
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="addPointToRoute()" analyticsOn="click"
+        analyticsCategory="POI" analyticsLabel="Convert POI to point">
+        <span class="flex flex-col items-center gap-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
+          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.addPointToRoute}}</span>
+        </span>
       </button>
       }
-    </mat-menu>
+      @if (shareLinks().poiLink) {
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" [matMenuTriggerFor]="shareMenu">
+        <span class="flex flex-col items-center gap-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-share-alt"></i></span>
+          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.share}}</span>
+        </span>
+      </button>
+      <mat-menu #shareMenu="matMenu">
+        <a mat-menu-item [href]="shareLinks().waze" [target]="'_blank'" analyticsOn="click" analyticsCategory="Share"
+          analyticsLabel="Navigate with waze">
+          <i class="fa fa-lg icon-waze mat-icon"></i>
+          <span class="mx-1">{{resources.navigateWithWaze}}</span>
+        </a>
+        <a mat-menu-item [href]="shareLinks().googleMaps" [target]="'_blank'" analyticsOn="click"
+          analyticsCategory="Share" analyticsLabel="Navigate with google maps">
+          <i class="fa fa-lg icon-map-marker mat-icon"></i>
+          <span class="mx-1">{{resources.navigateWithGoogleMaps}}</span>
+        </a>
+        <mat-divider></mat-divider>
+        @if (isApp()) {
+        <button mat-menu-item (click)="share()" analyticsOn="click" analyticsCategory="Share"
+          analyticsLabel="Share with os capabilities">
+          <i class="fa fa-lg icon-share-alt mat-icon"></i>
+          <span class="mx-1">{{resources.share}}</span>
+        </button>
+        } @else {
+        <a mat-menu-item [href]="shareLinks().facebook" [target]="'_blank'" analyticsOn="click"
+          analyticsCategory="Share" analyticsLabel="Share facebook poi">
+          <i class="fa fa-lg icon-facebook mat-icon"></i>
+          <span class="mx-1">{{resources.shareWithFacebook}}</span>
+        </a>
+        <a mat-menu-item [href]="shareLinks().whatsapp" [target]="'_blank'" analyticsOn="click"
+          analyticsCategory="Share" analyticsLabel="Share whatsapp poi">
+          <i class="fa fa-lg icon-whatsapp mat-icon"></i>
+          <span class="mx-1">{{resources.shareWithWhatsapp}}</span>
+        </a>
+        <button mat-menu-item [cdkCopyToClipboard]="shareLinks().poiLink" analyticsOn="click"
+          analyticsCategory="Share" analyticsLabel="Share copy to clipboard poi">
+          <i class="fa fa-lg icon-clipboard mat-icon"></i>
+          <span class="mx-1">{{resources.copyLink}}</span>
+        </button>
+        }
+      </mat-menu>
+      }
+      @if (!isHideEditMode()) {
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="setEditMode()" analyticsOn="click"
+        analyticsCategory="POI" analyticsLabel="Edit POI">
+        <span class="flex flex-col items-center gap-1">
+          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-pencil"></i></span>
+          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.edit}}</span>
+        </span>
+      </button>
+      }
+    </div>
+    @if (isShowSeeAlso()) {
+    <h4 class="mt-4 mb-0 text-sm font-normal opacity-70">{{resources.seeAlso}}</h4>
+    <mat-nav-list class="pt-0!">
+      @for (urlPair of sourceImageUrls(); track urlPair.url) {
+      <a mat-list-item [href]="urlPair.url" [target]="'_blank'" analyticsOn="click" analyticsCategory="POI"
+        analyticsLabel="View extended POI data outside site">
+        <img matListItemAvatar [src]="urlPair.imageUrl" alt="" class="rounded-none! bg-transparent! object-contain" />
+        <span matListItemTitle dir="ltr">{{urlPair.label}}</span>
+        <i matListItemMeta class="fa icon-external-link"></i>
+      </a>
+      }
+      @if (getElementOsmAddress()) {
+      <a mat-list-item [href]="getElementOsmAddress()" [target]="'_blank'" analyticsOn="click" analyticsCategory="OSM"
+        analyticsLabel="View element in OSM">
+        <img matListItemAvatar src="content/openstreetmap-logo.png" alt="" class="rounded-none! bg-transparent! object-contain" />
+        <span matListItemTitle>openstreetmap.org</span>
+        <i matListItemMeta class="fa icon-external-link"></i>
+      </a>
+      }
+    </mat-nav-list>
     }
-    @if (!isHideEditMode()) {
-    <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="setEditMode()" analyticsOn="click"
-      analyticsCategory="POI" analyticsLabel="Edit POI">
-      <span class="flex flex-col items-center gap-1">
-        <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-pencil"></i></span>
-        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.edit}}</span>
-      </span>
-    </button>
-    }
-  </div>
   </div>
 </div>
 }

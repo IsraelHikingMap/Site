@@ -511,7 +511,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794857073538");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794990930079");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -613,7 +613,7 @@ export class ResourcesService {
         this.private = this.gettextCatalog.getString("Private");
         this.tags = this.gettextCatalog.getString("Tags");
         this.categories = this.gettextCatalog.getString("Categories");
-        this.emptyPoiDescription = this.gettextCatalog.getString("Add a description here by clicking the edit button above.");
+        this.emptyPoiDescription = this.gettextCatalog.getString("Add a description here by clicking the edit button.");
         this.other = this.gettextCatalog.getString("Other");
         this.natural = this.gettextCatalog.getString("Natural");
         this.camping = this.gettextCatalog.getString("Camping");

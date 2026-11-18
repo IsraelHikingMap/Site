@@ -8,6 +8,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatDivider } from "@angular/material/divider";
+import { MatNavList, MatListItem, MatListItemAvatar, MatListItemTitle, MatListItemMeta } from "@angular/material/list";
 import { FormsModule } from "@angular/forms";
 import { Router, NavigationEnd } from "@angular/router";
 import { Share } from "@capacitor/share";
@@ -47,6 +48,7 @@ import type { Immutable } from "immer";
 export type SourceImageUrlPair = {
     imageUrl: string;
     url: string;
+    label: string;
 };
 
 /**
@@ -66,7 +68,7 @@ const SOURCE_IMAGE_URL_BY_DOMAIN = [
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatIconButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, PublicPointOfInterestEditComponent, FormsModule, NgClass, MatDivider, ImageScrollerComponent, DistancePipe, DescriptionComponent]
+    imports: [Dir, MatButton, MatIconButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, PublicPointOfInterestEditComponent, FormsModule, NgClass, MatDivider, ImageScrollerComponent, DistancePipe, DescriptionComponent, MatNavList, MatListItem, MatListItemAvatar, MatListItemTitle, MatListItemMeta]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public readonly isLoading = signal(true);
@@ -217,12 +219,13 @@ export class PublicPoiSidebarComponent implements OnDestroy {
 
     private getSourceImageUrls(feature: Immutable<GeoJSON.Feature>): SourceImageUrlPair[] {
         return GeoJSONUtils.getUrls(feature).filter(url => !this.isBadWikipediaUrl(url)).map(url => {
+            const domain = new URL(url).hostname;
+            const label = domain.replace(/^www\./, "");
             const knownSource = SOURCE_IMAGE_URL_BY_DOMAIN.find(s => url.includes(s.domain));
             if (knownSource) {
-                return { url, imageUrl: knownSource.imageUrl } as SourceImageUrlPair;
+                return { url, label, imageUrl: knownSource.imageUrl };
             }
-            const domain = new URL(url).hostname;
-            return { url, imageUrl: `https://www.google.com/s2/favicons?domain=${domain}&sz=128` } as SourceImageUrlPair;
+            return { url, label, imageUrl: `https://www.google.com/s2/favicons?domain=${domain}&sz=128` };
         });
     }
 

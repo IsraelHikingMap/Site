@@ -1,10 +1,15 @@
 @use '@angular/material' as mat;
 
 /* The field is the pill itself, at the 48px height of the toolbar. The corner is half that height rather than a
-   "full" radius, since the outlined field also sizes its side padding from this value. */
+   "full" radius, since the outlined field also sizes its side padding from this value. The outline only shows
+   on focus, so at rest the pill matches the borderless menu pill next to it. */
 .search-input-container {
     @include mat.form-field-density(-2);
-    @include mat.form-field-overrides((outlined-container-shape: 24px));
+    @include mat.form-field-overrides((
+        outlined-container-shape: 24px,
+        outlined-outline-color: transparent,
+        outlined-hover-outline-color: transparent
+    ));
 
     .mat-mdc-form-field-infix {
         width: auto;
