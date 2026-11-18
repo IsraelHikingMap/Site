@@ -25,7 +25,7 @@ public class GarminGateway(
     private readonly NonPublicConfigurationData _options = options.Value;
 
     /// <inheritdoc/>
-    public async Task<GarminResponse> RequestToken(IEnumerable<KeyValuePair<string, string>> parameters)
+    public Task<HttpResponseMessage> RequestToken(IEnumerable<KeyValuePair<string, string>> parameters)
     {
         var client = httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
@@ -35,7 +35,6 @@ public class GarminGateway(
             Content = new FormUrlEncodedContent(parameters)
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-        var response = await client.SendAsync(request);
-        return new GarminResponse((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        return client.SendAsync(request);
     }
 }

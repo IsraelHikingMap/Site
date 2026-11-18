@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
@@ -53,7 +55,7 @@ public class GarminControllerTests
             { "grant_type", "refresh_token" },
             { "refresh_token", "refresh" }
         });
-        _garminGateway.RequestToken(Arg.Any<IEnumerable<KeyValuePair<string, string>>>()).Returns(new GarminResponse(400, "{}"));
+        _garminGateway.RequestToken(Arg.Any<IEnumerable<KeyValuePair<string, string>>>()).Returns(new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("{}") });
 
         var result = _controller.PostToken(form).Result as ContentResult;
 

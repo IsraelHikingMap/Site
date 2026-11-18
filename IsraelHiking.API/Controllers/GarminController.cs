@@ -49,8 +49,8 @@ public class GarminController(IGarminGateway garminGateway) : ControllerBase
         var response = await garminGateway.RequestToken(form.Select(p => new KeyValuePair<string, string>(p.Key, p.Value.ToString())));
         return new ContentResult
         {
-            StatusCode = response.StatusCode,
-            Content = response.Content,
+            StatusCode = (int)response.StatusCode,
+            Content = await response.Content.ReadAsStringAsync(),
             ContentType = "application/json"
         };
     }
