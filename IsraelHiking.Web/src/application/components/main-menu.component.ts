@@ -96,7 +96,11 @@ export class MainMenuComponent {
     }
 
     public logout() {
-        this.authorizationService.logout();
+        this.toastService.confirm({
+            message: this.resources.areYouSure,
+            type: "YesNo",
+            confirmAction: () => this.authorizationService.logout()
+        });
     }
 
     public async reportAnIssue() {
