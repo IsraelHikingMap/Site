@@ -35,6 +35,8 @@ export interface DeviceProvider {
     refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo>;
     /** Uploads the route to the user's account so it syncs to their device. */
     sendRoute(accessToken: string, route: RouteDataWithoutState): Promise<void>;
+    /** Tells the provider the user disconnected, for a provider that requires it. */
+    disconnect?(accessToken: string): Promise<void>;
 }
 
 /** The route's points across all its segments, in order. */

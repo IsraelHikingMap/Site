@@ -26,7 +26,8 @@ type GarminCourse = {
  * Garmin Connect Courses API integration. Pushes a planned route as a Garmin Connect course,
  * which then syncs to the user's watch or bike computer.
  *
- * @remarks Dormant until the Garmin Connect Developer Program issues a client id for {@link CLIENT_ID}.
+ * @remarks Garmin requires the token requests and the API calls to be made by a server holding the client
+ * secret, so only the consent page is opened from here and everything else goes through the GarminController.
  */
 @Service()
 export class GarminDeviceProvider implements DeviceProvider {
@@ -34,9 +35,9 @@ export class GarminDeviceProvider implements DeviceProvider {
     public readonly id: DeviceServiceId = "garmin";
     public readonly displayName = "Garmin";
 
-    private static readonly CLIENT_ID = "";
+    private static readonly CLIENT_ID = "717bf25f-aafa-4a33-a4ae-b26ac14446f2";
 
-    public readonly isAvailable = GarminDeviceProvider.CLIENT_ID !== "";
+    public readonly isAvailable = true;
 
     private readonly deviceOAuthService = inject(DeviceOAuthService);
     private readonly httpClient = inject(HttpClient);
@@ -45,30 +46,28 @@ export class GarminDeviceProvider implements DeviceProvider {
     public async login(): Promise<DeviceConnectionInfo> {
         const { verifier, challenge } = await this.deviceOAuthService.generatePkcePair();
         const code = await this.deviceOAuthService.authorize(
-            Urls.garminAuthorize, GarminDeviceProvider.CLIENT_ID, null, challenge);
-        const token = await this.deviceOAuthService.exchangeToken(Urls.garminToken, {
-            client_id: GarminDeviceProvider.CLIENT_ID,
-            grant_type: "authorization_code",
+            Urls.garminAuthorize, GarminDeviceProvider.CLIENT_ID, null, challenge, Urls.garmin + "callback");
+        const token = await firstValueFrom(this.httpClient.post<DeviceTokenResponse>(Urls.garmin + "token", {
             code,
-            redirect_uri: this.deviceOAuthService.getRedirectUri(),
-            code_verifier: verifier
-        });
+            codeVerifier: verifier,
+            redirectUri: Urls.garmin + "callback"
+        }));
         return this.toConnectionInfo(token, verifier);
     }
 
     public async refresh(connection: DeviceConnectionInfo): Promise<DeviceConnectionInfo> {
-        const token = await this.deviceOAuthService.exchangeToken(Urls.garminToken, {
-            client_id: GarminDeviceProvider.CLIENT_ID,
-            grant_type: "refresh_token",
-            refresh_token: connection.refreshToken
-        });
+        const token = await firstValueFrom(this.httpClient.post<DeviceTokenResponse>(Urls.garmin + "refresh", {
+            refreshToken: connection.refreshToken
+        }));
         return this.toConnectionInfo(token, connection.codeVerifier);
     }
 
     public async sendRoute(accessToken: string, route: RouteDataWithoutState): Promise<void> {
-        await firstValueFrom(this.httpClient.post(Urls.garminCourses, this.toCourse(route), {
-            headers: { Authorization: `Bearer ${accessToken}` }
-        }));
+        await firstValueFrom(this.httpClient.post(Urls.garmin + "course", { accessToken, course: this.toCourse(route) }));
+    }
+
+    public async disconnect(accessToken: string): Promise<void> {
+        await firstValueFrom(this.httpClient.post(Urls.garmin + "disconnect", { accessToken }));
     }
 
     private toConnectionInfo(token: DeviceTokenResponse, codeVerifier: string): DeviceConnectionInfo {

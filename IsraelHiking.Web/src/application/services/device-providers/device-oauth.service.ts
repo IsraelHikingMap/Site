@@ -42,12 +42,17 @@ export class DeviceOAuthService {
     /**
      * Opens the provider's authorize page and returns the authorization code.
      * The scope is omitted for a provider, like Garmin, whose permissions are chosen by the user on its own page.
+     * A provider that allows a single redirect uri passes the server's callback, which uses the state's
+     * "app-" or "web-" prefix to send the result on to {@link getRedirectUri}.
      */
-    public async authorize(authorizeUrl: string, clientId: string, scope: string | null, codeChallenge: string): Promise<string> {
+    public async authorize(authorizeUrl: string, clientId: string, scope: string | null, codeChallenge: string,
+        providerRedirectUri = this.redirectUrl): Promise<string> {
+        const state = (this.runningContextService.isCapacitor ? "app-" : "web-") + this.base64UrlEncode(crypto.getRandomValues(new Uint8Array(16)));
         const params = new URLSearchParams({
             client_id: clientId,
-            redirect_uri: this.redirectUrl,
+            redirect_uri: providerRedirectUri,
             response_type: "code",
+            state,
             code_challenge: codeChallenge,
             code_challenge_method: "S256"
         });
@@ -59,9 +64,16 @@ export class DeviceOAuthService {
             redirectUri: this.redirectUrl,
             broadcastChannelName: DeviceOAuthService.AUTH_CHANNEL
         });
-        const code = new URL(result.redirectedUri).searchParams.get("code");
+        const searchParams = new URL(result.redirectedUri).searchParams;
+        if (searchParams.has("error")) {
+            throw new Error(`Authorization failed: ${searchParams.get("error")} ${searchParams.get("error_description") ?? ""}`);
+        }
+        if (searchParams.get("state") !== state) {
+            throw new Error(`Authorization state does not match, got: ${searchParams.get("state")}`);
+        }
+        const code = searchParams.get("code");
         if (!code) {
-            throw new Error("Authorization was cancelled or failed");
+            throw new Error(`Authorization returned no code, got parameters: ${[...searchParams.keys()].join(", ")}`);
         }
         return code;
     }

@@ -10,8 +10,8 @@ import { RemoveDeviceServiceAction, SetDeviceServiceTokenAction } from "../../re
 import type { DeviceProvider } from "./device-provider";
 import type { ApplicationState, DeviceServiceId, RouteDataWithoutState } from "../../models";
 
-/** Token is considered expired this many ms before its real expiry, to be safe. */
-const TOKEN_EXPIRY_MARGIN = 60000;
+/** Token is considered expired this many ms before its real expiry, the margin Garmin recommends. */
+const TOKEN_EXPIRY_MARGIN = 600000;
 
 /**
  * Registry and orchestration for the external device services. The settings UI
@@ -51,7 +51,19 @@ export class DeviceServicesService {
         this.loggingService.info(`[DeviceServices] Connected to ${id}`);
     }
 
-    public disconnect(id: DeviceServiceId): void {
+    /**
+     * Forgets the connection on this device even when the provider can not be told about it, so that a user
+     * is never stuck connected to a service they want to leave.
+     */
+    public async disconnect(id: DeviceServiceId): Promise<void> {
+        const provider = this.getProvider(id);
+        if (provider.disconnect != null) {
+            try {
+                await provider.disconnect(await this.getValidAccessToken(id, provider));
+            } catch (ex) {
+                this.loggingService.warning(`[DeviceServices] Unable to disconnect from ${id}: ${(ex as Error).message}`);
+            }
+        }
         this.store.dispatch(new RemoveDeviceServiceAction(id));
         this.loggingService.info(`[DeviceServices] Disconnected from ${id}`);
     }

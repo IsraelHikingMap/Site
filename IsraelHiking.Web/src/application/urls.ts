@@ -62,8 +62,7 @@ export class Urls {
     public static readonly wahooToken = Urls.deviceProxyBase + "/wahoo/oauth/token";
     public static readonly wahooRoutes = Urls.deviceProxyBase + "/wahoo/v1/routes";
     public static readonly garminAuthorize = "https://connect.garmin.com/oauth2Confirm";
-    public static readonly garminToken = Urls.deviceProxyBase + "/garmin-auth/di-oauth2-service/oauth/token";
-    public static readonly garminCourses = Urls.deviceProxyBase + "/garmin/training-api/courses/v1/course";
+    public static readonly garmin = Urls.apiBase + "garmin/";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

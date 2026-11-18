@@ -160,8 +160,8 @@ export class SettingsComponent {
         }
     }
 
-    public disconnectDevice(id: DeviceServiceId) {
-        this.deviceServices.disconnect(id);
+    public async disconnectDevice(id: DeviceServiceId) {
+        await this.deviceServices.disconnect(id);
     }
 
     public setDateFormat(dateFormat: string) {
