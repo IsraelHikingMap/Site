@@ -1,7 +1,7 @@
-- Faster map loading
-- More reliable recording when interrupted
-- Better ETA and turn instructions
-- Improved WhatsApp file sharing
-- Remember the "North Up" choice
-- Add ladders and rungs
+- A fresh, modern look
+- Download offline maps by area, in the background
+- Send routes to your Wahoo or Garmin device
+- Improved compass stability
+- Better elevation data and contours
+- Wikipedia info in other languages
 - Various bug fixes and performance improvements
