@@ -486,6 +486,10 @@
   content: "\e96b";
 }
 
+.icon-route-search:before {
+  content: "\e996";
+}
+
 .icon-ruins:before {
   content: "\e96c";
 }
