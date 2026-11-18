@@ -3,11 +3,21 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ActivityType, UserInfo, UserState } from "../models";
+import type { ActivityType, DeviceProviderId, DeviceProviderConnection, UserInfo, UserState } from "../models";
 
 export class SetUserInfoAction {
     public static readonly type = "[User] SetUserInfoAction";
     constructor(public readonly userInfo: UserInfo) { }
+}
+
+export class SetDeviceProviderConnectionAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public serviceId: DeviceProviderId, public token: DeviceProviderConnection) { }
+}
+
+export class RemoveDeviceProviderConnectionAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public serviceId: DeviceProviderId) { }
 }
 
 export class SetTokenAction {
@@ -60,6 +70,24 @@ export class UserInfoReducer {
     public setActivityType(ctx: StateContext<UserState>, action: SetActivityTypeAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.prefferedActivityType = action.activityType;
+            return lastState;
+        }));
+    }
+
+    @Action(SetDeviceProviderConnectionAction)
+    public setDeviceProviderConnection(ctx: StateContext<UserState>, action: SetDeviceProviderConnectionAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.connectedDeviceProviders ??= {};
+            lastState.connectedDeviceProviders[action.serviceId] = action.token;
+            return lastState;
+        }));
+    }
+
+    @Action(RemoveDeviceProviderConnectionAction)
+    public removeDeviceProviderConnection(ctx: StateContext<UserState>, action: RemoveDeviceProviderConnectionAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.connectedDeviceProviders ??= {};
+            delete lastState.connectedDeviceProviders[action.serviceId];
             return lastState;
         }));
     }

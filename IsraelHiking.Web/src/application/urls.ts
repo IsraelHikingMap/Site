@@ -5,6 +5,7 @@ export class Urls {
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyAuthHtml = Urls.baseAddress + "/empty-for-oauth.html";
+    public static readonly deviceAuthHtml = Urls.baseAddress + "/device-oauth.html";
     public static readonly mapeakAuthUrl = "mapeak://oauth_callback/";
     public static readonly translations = "translations/";
     public static readonly health = Urls.apiBase + "health/";
@@ -55,6 +56,16 @@ export class Urls {
     public static readonly wikidata = "https://www.wikidata.org";
     public static readonly wikidataEntities = Urls.wikidata + "/w/rest.php/wikibase/v1/entities/items/";
     public static readonly wikimediaCommons = "https://commons.wikimedia.org/";
+
+    private static readonly deviceProxyBase = Urls.baseAddress + "/device-proxy";
+    public static readonly wahooAuthorize = "https://api.wahooligan.com/oauth/authorize";
+    public static readonly wahooToken = Urls.deviceProxyBase + "/wahoo/oauth/token";
+    public static readonly wahooRoutes = Urls.deviceProxyBase + "/wahoo/v1/routes";
+    public static readonly garminAuthorize = "https://connect.garmin.com/oauth2Confirm";
+    public static readonly garminCallback = Urls.apiBase + "garmin/callback";
+    public static readonly garminToken = Urls.apiBase + "garmin/token";
+    public static readonly garminCourses = Urls.deviceProxyBase + "/garmin/training-api/courses/v1/course";
+    public static readonly garminRegistration = Urls.deviceProxyBase + "/garmin/partner-gateway/rest/user/registration";
 
     public static readonly facebook = "https://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

@@ -238,7 +238,8 @@ export const initialState =
             userInfo: null,
             token: null,
             agreedToTheTermsOfService: false,
-            prefferedActivityType: "Hiking"
+            prefferedActivityType: "Hiking",
+            connectedDeviceProviders: {}
         },
         poiState: {
             selectedPointOfInterest: null,

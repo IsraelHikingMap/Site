@@ -104,9 +104,33 @@
       </mat-select>
     </mat-form-field>
   </div>
+  @if (deviceProviders().length > 0) {
+  <div class="flex flex-col mb-4">
+    <label>{{resources.connectedServices}}</label>
+    <span class="text-sm opacity-70">{{resources.connectedServicesHint}}</span>
+    <div class="flex flex-col mt-2 rounded-xl border border-outline-variant divide-y divide-outline-variant">
+      @for (provider of deviceProviders(); track provider.id) {
+      <div class="flex flex-row items-center gap-3 px-4 py-3">
+        <device-provider-logo [provider]="provider" class="h-8"></device-provider-logo>
+        <span class="flex-1 text-sm">
+          @if (connectedDeviceProviders()?.[provider.id]) {
+          <i class="fa icon-check text-brand"></i> {{resources.connected}}
+          }
+        </span>
+        @if (connectedDeviceProviders()?.[provider.id]) {
+        <button mat-stroked-button (click)="disconnectDeviceProvider(provider.id)" analyticsOn="click"
+          analyticsCategory="Configuration" analyticsLabel="Disconnect device provider {{provider.id}}">{{resources.disconnect}}</button>
+        } @else {
+        <button mat-flat-button (click)="connectDeviceProvider(provider.id)" analyticsOn="click"
+          analyticsCategory="Configuration" analyticsLabel="Connect device provider {{provider.id}}">{{resources.connect}}</button>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  }
   @if (isSubscribed()) {
   <p class="ms-2">
-    {{resources.offlinePurchaseGratitude}}<br />
     <a [href]="manageSubscriptions" target="_blank" analyticsOn="click" analyticsCategory="Configuration"
       analyticsLabel="Manage subscriptions">{{resources.manageSubscriptions}}</a>
   </p>

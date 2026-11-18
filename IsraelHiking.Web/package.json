@@ -32,6 +32,7 @@
     "@capgo/capacitor-inappbrowser": "^8.27.9",
     "@capgo/capacitor-share-target": "^8.0.68",
     "@capgo/capacitor-speech-synthesis": "^8.0.29",
+    "@garmin/fitsdk": "^21.222.0",
     "@mapbox/polyline": "^1.2.1",
     "@maplibre/ngx-maplibre-gl": "^22.3.1",
     "@ngxs/store": "^22.0.0",

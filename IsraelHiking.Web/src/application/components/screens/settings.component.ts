@@ -10,12 +10,14 @@ import { MatOption, MatSelect } from "@angular/material/select";
 import { Store } from "@ngxs/store";
 
 import { AnalyticsDirective } from "../../directives/analytics.directive";
+import { DeviceProviderLogoComponent } from "../device-provider-logo.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { DatabaseService } from "../../services/database.service";
+import { DeviceProvidersService } from "../../services/device-providers/device-providers.service";
 import { RouteStrings } from "../../services/hash.service";
 import {
     SetBatteryOptimizationTypeAction,
@@ -25,7 +27,7 @@ import {
     ToggleAutomaticRecordingUploadAction,
     ToggleGotLostWarningsAction
 } from "../../reducers/configuration.reducer";
-import type { ApplicationState, BatteryOptimizationType, ThemeSetting } from "../../models";
+import type { ApplicationState, BatteryOptimizationType, DeviceProviderId, ThemeSetting } from "../../models";
 
 type KeyboardShortcut = {
     keys: string[];
@@ -35,7 +37,7 @@ type KeyboardShortcut = {
 @Component({
     selector: "settings",
     templateUrl: "./settings.component.html",
-    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel]
+    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel, DeviceProviderLogoComponent]
 })
 export class SettingsComponent {
 
@@ -51,6 +53,7 @@ export class SettingsComponent {
     private readonly toastService = inject(ToastService);
     private readonly loggingService = inject(LoggingService);
     private readonly databaseService = inject(DatabaseService);
+    private readonly deviceProvidersService = inject(DeviceProvidersService);
     private readonly activatedRoute = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
@@ -63,6 +66,8 @@ export class SettingsComponent {
     public isGotLostWarnings = this.store.selectSignal((state: ApplicationState) => state.configuration.isGotLostWarnings);
     public batteryOptimizationType = this.store.selectSignal((state: ApplicationState) => state.configuration.batteryOptimizationType);
     public isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
+    public connectedDeviceProviders = this.store.selectSignal((state: ApplicationState) => state.userState.connectedDeviceProviders);
+    public deviceProviders = this.deviceProvidersService.availableProviders;
 
     public readonly keyboardShortcuts = computed<KeyboardShortcut[]>(() => {
         const controlKey = this.runningContextService.isMac ? "Cmd" : "Ctrl";
@@ -146,6 +151,18 @@ export class SettingsComponent {
                 }
             }
         });
+    }
+
+    public async connectDeviceProvider(id: DeviceProviderId) {
+        try {
+            await this.deviceProvidersService.connect(id);
+        } catch (ex) {
+            this.toastService.error(ex as Error, this.resources.unableToConnectToService);
+        }
+    }
+
+    public async disconnectDeviceProvider(id: DeviceProviderId) {
+        await this.deviceProvidersService.disconnect(id);
     }
 
     public setDateFormat(dateFormat: string) {

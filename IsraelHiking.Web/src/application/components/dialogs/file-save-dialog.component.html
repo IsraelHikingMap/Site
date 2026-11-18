@@ -4,6 +4,20 @@
         <button mat-icon-button aria-label="Close" type="button" mat-dialog-close tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
+        @if (deviceProviders().length > 0) {
+        <div class="flex flex-col gap-2 mx-2 mt-1 mb-3">
+            <label class="text-sm">{{resources.sendToDevice}}</label>
+            <div class="flex flex-row flex-wrap gap-2">
+                @for (provider of deviceProviders(); track provider.id) {
+                <button mat-stroked-button (click)="sendToDevice(provider.id)" mat-dialog-close analyticsOn="click"
+                    analyticsCategory="Files" analyticsLabel="Send to device {{provider.id}}">
+                    <device-provider-logo [provider]="provider" class="h-5"></device-provider-logo>
+                </button>
+                }
+            </div>
+        </div>
+        <mat-divider></mat-divider>
+        }
         @for (format of formats; track format) {
         <div class="flex flex-row">
             <button mat-button (click)="saveAs(format)" mat-dialog-close analyticsOn="click" analyticsCategory="Files"

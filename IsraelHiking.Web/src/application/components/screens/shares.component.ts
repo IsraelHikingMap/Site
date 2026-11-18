@@ -30,6 +30,7 @@ import { MapOverlayComponent } from "../map/map-overlay.component";
 import { OsmAttributionComponent } from "../osm-attribution.component";
 import { BottomSheetComponent } from "../bottom-sheet.component";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
+import { DeviceProviderLogoComponent } from "../device-provider-logo.component";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ResourcesService } from "../../services/resources.service";
@@ -40,15 +41,16 @@ import { MapService } from "../../services/map.service";
 import { SpatialHelper } from "../../services/spatial.helper";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { DeviceProvidersService } from "../../services/device-providers/device-providers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { SetSearchTermAction } from "../../reducers/in-memory.reducer";
-import type { ApplicationState, ShareUrl } from "../../models";
+import type { ApplicationState, DeviceProviderId, ShareUrl } from "../../models";
 
 @Component({
     selector: "shares",
     templateUrl: "./shares.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption]
+    imports: [MapComponent, LayersComponent, MatButton, MatIconButton, Dir, FormsModule, MatMenu, MatMenuTrigger, MatCheckbox, MatMenuItem, MarkerComponent, RoutesPathComponent, MatDivider, MatProgressSpinner, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, MatButtonToggle, MatButtonToggleGroup, NgClass, DatePipe, DistancePipe, HighlightedTextComponent, AnalyticsDirective, BottomSheetComponent, MatFormField, MatSelect, MatOption, DeviceProviderLogoComponent]
 })
 export class SharesComponent implements OnInit {
     public readonly loading = signal(false);
@@ -75,8 +77,11 @@ export class SharesComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
     private readonly toastService = inject(ToastService);
     private readonly dataContainerService = inject(DataContainerService);
+    private readonly deviceProvidersService = inject(DeviceProvidersService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
+
+    public readonly deviceProviders = this.deviceProvidersService.availableProviders;
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -228,6 +233,21 @@ export class SharesComponent implements OnInit {
             },
             type: "YesNo"
         });
+    }
+
+    public async sendShareUrlToDevice(shareUrl: Immutable<ShareUrl>, id: DeviceProviderId) {
+        if (!this.deviceProvidersService.isConnected(id)) {
+            this.toastService.confirm({
+                type: "Custom",
+                message: this.resources.connectServiceFirst,
+                confirmAction: () => this.router.navigate([RouteStrings.ROUTE_SETTINGS]),
+                customConfirmText: this.resources.settings,
+                customDeclineText: this.resources.cancel
+            });
+            return;
+        }
+        const share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        await this.deviceProvidersService.sendRoutes(id, share.dataContainer.routes);
     }
 
     public async addShareUrlToRoutes(shareUrl: Immutable<ShareUrl>) {

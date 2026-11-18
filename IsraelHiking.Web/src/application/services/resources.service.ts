@@ -202,6 +202,16 @@ export class ResourcesService {
     public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
     public settings: string;
+    public connectedServices: string;
+    public connectedServicesHint: string;
+    public connected: string;
+    public connect: string;
+    public disconnect: string;
+    public sendToDevice: string;
+    public connectServiceFirst: string;
+    public routeSentToDevice: string;
+    public unableToSendToDevice: string;
+    public unableToConnectToService: string;
     public theme: string;
     public themeLight: string;
     public themeDark: string;
@@ -213,7 +223,6 @@ export class ResourcesService {
     public gotLostWarningsHint: string;
     public navigateWithWaze: string;
     public navigateWithGoogleMaps: string;
-    public offlinePurchaseGratitude: string;
     public mapeakPro: string;
     public availableWithMapeakPro: string;
     public mapeakProIsPurchasedInTheApp: string;
@@ -511,7 +520,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1794990930079");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795038209713");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -663,6 +672,16 @@ export class ResourcesService {
         this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.settings = this.gettextCatalog.getString("Settings");
+        this.connectedServices = this.gettextCatalog.getString("Connected services");
+        this.connectedServicesHint = this.gettextCatalog.getString("Send the routes you plan to your watch or bike computer");
+        this.connected = this.gettextCatalog.getString("Connected");
+        this.connect = this.gettextCatalog.getString("Connect");
+        this.disconnect = this.gettextCatalog.getString("Disconnect");
+        this.sendToDevice = this.gettextCatalog.getString("Send to device");
+        this.connectServiceFirst = this.gettextCatalog.getString("Connect the service in the settings first");
+        this.routeSentToDevice = this.gettextCatalog.getString("The route was sent to your device");
+        this.unableToSendToDevice = this.gettextCatalog.getString("Unable to send the route to your device");
+        this.unableToConnectToService = this.gettextCatalog.getString("Unable to connect to the service");
         this.theme = this.gettextCatalog.getString("Theme");
         this.themeLight = this.gettextCatalog.getString("Light");
         this.themeDark = this.gettextCatalog.getString("Dark");
@@ -676,7 +695,6 @@ export class ResourcesService {
             "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.navigateWithGoogleMaps = this.gettextCatalog.getString("Navigate with Google Maps");
-        this.offlinePurchaseGratitude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.mapeakPro = this.gettextCatalog.getString("Mapeak Pro");
         this.availableWithMapeakPro = this.gettextCatalog.getString("Available with Mapeak Pro");
         this.mapeakProIsPurchasedInTheApp = this.gettextCatalog.getString("Mapeak Pro can be purchased in the Mapeak app for Android and iOS");

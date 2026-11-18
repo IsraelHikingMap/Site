@@ -22,6 +22,7 @@ public static class RegisterDataAccess
         services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();
         services.AddTransient<IWikidataGateway, WikidataGateway>();
         services.AddTransient<IShareUrlGateway, ShareUrlGateway>();
+        services.AddTransient<IGarminGateway, GarminGateway>();
         // Initializables
         services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
         services.AddSingleton<IInitializable>(x => x.GetService<ValhallaGateway>());
