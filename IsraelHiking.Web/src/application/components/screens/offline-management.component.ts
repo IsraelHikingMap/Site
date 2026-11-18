@@ -213,8 +213,6 @@ export class OfflineManagementComponent {
         return { type: "FeatureCollection", features };
     });
 
-    public readonly areasCollection = computed<GeoJSON.FeatureCollection>(() => ({ type: "FeatureCollection", features: this.areas() }));
-
     /** The areas the user selected with their names, they are not drawn during a download */
     public readonly selectedAreaFeatures = computed<GeoJSON.FeatureCollection>(() => {
         if (this.isDownloadInProgress()) {

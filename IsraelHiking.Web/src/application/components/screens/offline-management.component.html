@@ -92,13 +92,6 @@
                 <auto-layer [layerData]="baseLayerData" [visible]="true" [isBaselayer]="true" [allowOffline]="false"
                     [before]="resources.endOfBaseLayer">
                 </auto-layer>
-                <mgl-geojson-source id="offline-areas" [data]="areasCollection()">
-                </mgl-geojson-source>
-                <mgl-layer id="offline-areas-border" type="line" source="offline-areas" [paint]="{
-                      'line-color': '#757575',
-                      'line-width': 1
-                  }">
-                </mgl-layer>
                 <mgl-geojson-source id="downloaded-areas" [data]="downloadedAreasFeatures()">
                 </mgl-geojson-source>
                 <mgl-layer id="downloaded-areas-fill" type="fill" source="downloaded-areas" [paint]="{
