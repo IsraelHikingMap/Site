@@ -19,6 +19,7 @@ const TOKEN_EXPIRY_MARGIN = 600000;
  * provider, so adding another provider later requires no UI changes.
  *
  * @remarks Sending a route to a device is offered to subscribed users only, so no provider is listed to anyone else.
+ * Every provider is shown by default, so that users learn the feature exists, and each can be hidden in the settings.
  */
 @Service()
 export class DeviceProvidersService {
@@ -34,7 +35,13 @@ export class DeviceProvidersService {
 
     private readonly isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
 
+    private readonly hiddenProviders = this.store.selectSignal((state: ApplicationState) => state.userState.hiddenDeviceProviders ?? []);
+
     public readonly availableProviders = computed(() => this.isSubscribed() ? this.providers : []);
+
+    /** The providers offered when sending a route, leaving out the ones the user hid in the settings. */
+    public readonly visibleProviders = computed(() =>
+        this.availableProviders().filter(provider => !this.hiddenProviders().includes(provider.id)));
 
     public getProvider(id: DeviceProviderId): DeviceProvider {
         return this.providers.find(provider => provider.id === id);

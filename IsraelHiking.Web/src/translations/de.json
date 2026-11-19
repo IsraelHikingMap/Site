@@ -389,6 +389,7 @@
     "Tree": "Baum",
     "Trunk": "Schnellstraße",
     "Tunnel": "Tunnel",
+    "Turn off the services you do not use to hide them when sending a route": "Schalte die Dienste aus, die du nicht nutzt, um sie beim Senden einer Route auszublenden",
     "Type to search...": "Tippe, um zu suchen …",
     "Unable to connect to the service": "Verbindung zum Dienst nicht möglich",
     "Unable to delete the saved route...": "Die gespeicherte Route konnte nicht gelöscht werden …",

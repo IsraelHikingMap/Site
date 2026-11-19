@@ -389,6 +389,7 @@
     "Tree": "شجرة",
     "Trunk": "طريق بين المدن",
     "Tunnel": "نفق",
+    "Turn off the services you do not use to hide them when sending a route": "أوقف الخدمات التي لا تستخدمها لإخفائها عند إرسال مسار",
     "Type to search...": "اكتب للبحث...",
     "Unable to connect to the service": "تعذّر الاتصال بالخدمة",
     "Unable to delete the saved route...": "لا يمكن حذف المسار المحفوظ...",

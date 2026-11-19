@@ -4,7 +4,7 @@ import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatAnchor } from "@angular/material/button";
 import { MatFormField, MatLabel } from "@angular/material/input";
 import { MatRadioGroup, MatRadioButton } from "@angular/material/radio";
-import { MatCheckbox } from "@angular/material/checkbox";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { FormsModule } from "@angular/forms";
 import { MatOption, MatSelect } from "@angular/material/select";
 import { Store } from "@ngxs/store";
@@ -19,6 +19,7 @@ import { LoggingService } from "../../services/logging.service";
 import { DatabaseService } from "../../services/database.service";
 import { DeviceProvidersService } from "../../services/device-providers/device-providers.service";
 import { RouteStrings } from "../../services/hash.service";
+import { ToggleDeviceProviderVisibilityAction } from "../../reducers/user.reducer";
 import {
     SetBatteryOptimizationTypeAction,
     SetDateFormatAction,
@@ -37,7 +38,7 @@ type KeyboardShortcut = {
 @Component({
     selector: "settings",
     templateUrl: "./settings.component.html",
-    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatCheckbox, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel, DeviceProviderLogoComponent]
+    imports: [Dir, MatButton, MatRadioGroup, MatRadioButton, AnalyticsDirective, MatAnchor, FormsModule, MatFormField, MatSelect, MatOption, MatLabel, MatSlideToggle, DeviceProviderLogoComponent]
 })
 export class SettingsComponent {
 
@@ -67,6 +68,7 @@ export class SettingsComponent {
     public batteryOptimizationType = this.store.selectSignal((state: ApplicationState) => state.configuration.batteryOptimizationType);
     public isSubscribed = this.store.selectSignal((state: ApplicationState) => state.offlineState.isSubscribed);
     public connectedDeviceProviders = this.store.selectSignal((state: ApplicationState) => state.userState.connectedDeviceProviders);
+    public hiddenDeviceProviders = this.store.selectSignal((state: ApplicationState) => state.userState.hiddenDeviceProviders ?? []);
     public deviceProviders = this.deviceProvidersService.availableProviders;
 
     public readonly keyboardShortcuts = computed<KeyboardShortcut[]>(() => {
@@ -159,6 +161,10 @@ export class SettingsComponent {
         } catch (ex) {
             this.toastService.error(ex as Error, this.resources.unableToConnectToService);
         }
+    }
+
+    public toggleDeviceProviderVisibility(id: DeviceProviderId) {
+        this.store.dispatch(new ToggleDeviceProviderVisibilityAction(id));
     }
 
     public async disconnectDeviceProvider(id: DeviceProviderId) {

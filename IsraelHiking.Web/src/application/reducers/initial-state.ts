@@ -239,7 +239,8 @@ export const initialState =
             token: null,
             agreedToTheTermsOfService: false,
             prefferedActivityType: "Hiking",
-            connectedDeviceProviders: {}
+            connectedDeviceProviders: {},
+            hiddenDeviceProviders: []
         },
         poiState: {
             selectedPointOfInterest: null,

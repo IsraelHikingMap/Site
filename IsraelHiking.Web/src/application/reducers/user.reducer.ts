@@ -12,12 +12,17 @@ export class SetUserInfoAction {
 
 export class SetDeviceProviderConnectionAction {
     public static type = this.prototype.constructor.name;
-    constructor(public serviceId: DeviceProviderId, public token: DeviceProviderConnection) { }
+    constructor(public providerId: DeviceProviderId, public token: DeviceProviderConnection) { }
 }
 
 export class RemoveDeviceProviderConnectionAction {
     public static type = this.prototype.constructor.name;
-    constructor(public serviceId: DeviceProviderId) { }
+    constructor(public providerId: DeviceProviderId) { }
+}
+
+export class ToggleDeviceProviderVisibilityAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public providerId: DeviceProviderId) { }
 }
 
 export class SetTokenAction {
@@ -78,7 +83,7 @@ export class UserInfoReducer {
     public setDeviceProviderConnection(ctx: StateContext<UserState>, action: SetDeviceProviderConnectionAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.connectedDeviceProviders ??= {};
-            lastState.connectedDeviceProviders[action.serviceId] = action.token;
+            lastState.connectedDeviceProviders[action.providerId] = action.token;
             return lastState;
         }));
     }
@@ -87,7 +92,18 @@ export class UserInfoReducer {
     public removeDeviceProviderConnection(ctx: StateContext<UserState>, action: RemoveDeviceProviderConnectionAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.connectedDeviceProviders ??= {};
-            delete lastState.connectedDeviceProviders[action.serviceId];
+            delete lastState.connectedDeviceProviders[action.providerId];
+            return lastState;
+        }));
+    }
+
+    @Action(ToggleDeviceProviderVisibilityAction)
+    public toggleDeviceProviderVisibility(ctx: StateContext<UserState>, action: ToggleDeviceProviderVisibilityAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            const hidden = lastState.hiddenDeviceProviders ?? [];
+            lastState.hiddenDeviceProviders = hidden.includes(action.providerId)
+                ? hidden.filter(id => id !== action.providerId)
+                : [...hidden, action.providerId];
             return lastState;
         }));
     }

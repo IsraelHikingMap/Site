@@ -389,6 +389,7 @@
     "Tree": "עץ בודד",
     "Trunk": "כביש בין-עירוני",
     "Tunnel": "מנהרה",
+    "Turn off the services you do not use to hide them when sending a route": "ניתן לכבות שירותים שאינם בשימוש כדי להסתיר אותם בעת שליחת מסלול",
     "Type to search...": "אני רוצה למצוא...",
     "Unable to connect to the service": "לא ניתן להתחבר לשירות",
     "Unable to delete the saved route...": "אין אפשרות למחוק את המסלול השמור...",

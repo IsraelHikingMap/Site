@@ -18,4 +18,6 @@ export type UserState = {
     agreedToTheTermsOfService: boolean;
     prefferedActivityType: ActivityType;
     connectedDeviceProviders: Partial<Record<DeviceProviderId, DeviceProviderConnection>>;
+    /** The providers the user chose not to see in the menus that send a route */
+    hiddenDeviceProviders: DeviceProviderId[];
 };

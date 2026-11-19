@@ -36,6 +36,14 @@ html {
     --brand-color: #32cd6d;
     --warning-color: #8a5a00;
     @include mat.theme-overrides((primary: var(--brand-color), on-primary: #003018));
+    /* The handle of a checked toggle is on-primary, which is dark for the text of the green buttons and looks
+       almost black on the toggle, so it is white with a green check instead. */
+    @include mat.slide-toggle-overrides((selected-handle-color: #fff,
+            selected-focus-handle-color: #fff,
+            selected-hover-handle-color: #fff,
+            selected-pressed-handle-color: #fff,
+            selected-icon-color: var(--brand-color),
+        ));
 }
 
 .dark-theme {

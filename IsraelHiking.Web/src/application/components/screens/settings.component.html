@@ -73,10 +73,10 @@
     @if (isLoggedIn()) {
     <div class="flex flex-row">
       <div class="flex-1">
-        <mat-checkbox [checked]="isAutomaticRecordingUpload()" (change)="toggleAutomaticRecordingUpload()"
+        <mat-slide-toggle [checked]="isAutomaticRecordingUpload()" (change)="toggleAutomaticRecordingUpload()"
           analyticsOn="click" analyticsCategory="Configuration" analyticsLabel="Toggle automatic upload">
           {{resources.automaticRecordingUpload}}
-        </mat-checkbox>
+        </mat-slide-toggle>
         <br />
         <span class="text-sm">{{resources.automaticRecordingUploadHint}}</span>
       </div>
@@ -84,10 +84,10 @@
     }
     <div class="flex flex-row">
       <div class="flex-1">
-        <mat-checkbox [checked]="isGotLostWarnings()" (change)="toggleGotLostWarnings()" analyticsOn="click"
+        <mat-slide-toggle [checked]="isGotLostWarnings()" (change)="toggleGotLostWarnings()" analyticsOn="click"
           analyticsCategory="Configuration" analyticsLabel="Toggle got lost warnings">
           {{resources.gotLostWarnings}}
-        </mat-checkbox>
+        </mat-slide-toggle>
         <br />
         <span class="text-sm">{{resources.gotLostWarningsHint}}</span>
       </div>
@@ -108,10 +108,15 @@
   <div class="flex flex-col mb-4">
     <label>{{resources.connectedServices}}</label>
     <span class="text-sm opacity-70">{{resources.connectedServicesHint}}</span>
+    <span class="text-sm opacity-70">{{resources.hideUnusedServicesHint}}</span>
     <div class="flex flex-col mt-2 rounded-xl border border-outline-variant divide-y divide-outline-variant">
       @for (provider of deviceProviders(); track provider.id) {
-      <div class="flex flex-row items-center gap-3 px-4 py-3">
-        <device-provider-logo [provider]="provider" class="h-8"></device-provider-logo>
+      @let isShown = !hiddenDeviceProviders().includes(provider.id);
+      <div class="flex flex-row items-center gap-3 px-4 py-3 min-h-16">
+        <mat-slide-toggle [checked]="isShown" (change)="toggleDeviceProviderVisibility(provider.id)"
+          [attr.aria-label]="provider.displayName" analyticsOn="click" analyticsCategory="Configuration"
+          analyticsLabel="Toggle device provider {{provider.id}}"></mat-slide-toggle>
+        <device-provider-logo [provider]="provider" class="h-8" [class.opacity-50]="!isShown"></device-provider-logo>
         <span class="flex-1 text-sm">
           @if (connectedDeviceProviders()?.[provider.id]) {
           <i class="fa icon-check text-brand"></i> {{resources.connected}}
@@ -120,7 +125,7 @@
         @if (connectedDeviceProviders()?.[provider.id]) {
         <button mat-stroked-button (click)="disconnectDeviceProvider(provider.id)" analyticsOn="click"
           analyticsCategory="Configuration" analyticsLabel="Disconnect device provider {{provider.id}}">{{resources.disconnect}}</button>
-        } @else {
+        } @else if (isShown) {
         <button mat-flat-button (click)="connectDeviceProvider(provider.id)" analyticsOn="click"
           analyticsCategory="Configuration" analyticsLabel="Connect device provider {{provider.id}}">{{resources.connect}}</button>
         }

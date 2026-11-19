@@ -2,7 +2,7 @@ import { afterNextRender, Component, inject, Injector, signal } from "@angular/c
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Dir } from "@angular/cdk/bidi";
 import { MatButton, MatIconButton } from "@angular/material/button";
-import { MatCheckbox } from "@angular/material/checkbox";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { MatTooltip } from "@angular/material/tooltip";
 import { MatExpansionPanel, MatExpansionPanelContent } from "@angular/material/expansion";
@@ -35,7 +35,7 @@ export type ManageLayersDialogData = {
 @Component({
     selector: "manage-layers-dialog",
     templateUrl: "./manage-layers-dialog.component.html",
-    imports: [Dir, MatButton, MatIconButton, MatCheckbox, MatTooltip, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent, LayerThumbnailComponent]
+    imports: [Dir, MatButton, MatIconButton, MatSlideToggle, MatTooltip, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent, LayerThumbnailComponent]
 })
 export class ManageLayersDialogComponent {
     public readonly resources = inject(ResourcesService);

@@ -204,6 +204,7 @@ export class ResourcesService {
     public settings: string;
     public connectedServices: string;
     public connectedServicesHint: string;
+    public hideUnusedServicesHint: string;
     public connected: string;
     public connect: string;
     public disconnect: string;
@@ -521,7 +522,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795042622657");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795078778375");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -675,6 +676,7 @@ export class ResourcesService {
         this.settings = this.gettextCatalog.getString("Settings");
         this.connectedServices = this.gettextCatalog.getString("Connected services");
         this.connectedServicesHint = this.gettextCatalog.getString("Send the routes you plan to your watch or bike computer");
+        this.hideUnusedServicesHint = this.gettextCatalog.getString("Turn off the services you do not use to hide them when sending a route");
         this.connected = this.gettextCatalog.getString("Connected");
         this.connect = this.gettextCatalog.getString("Connect");
         this.disconnect = this.gettextCatalog.getString("Disconnect");

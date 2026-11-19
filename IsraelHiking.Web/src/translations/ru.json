@@ -389,6 +389,7 @@
     "Tree": "Дерево",
     "Trunk": "Междугородняя дорога",
     "Tunnel": "Туннель",
+    "Turn off the services you do not use to hide them when sending a route": "Отключите неиспользуемые сервисы, чтобы скрыть их при отправке маршрута",
     "Type to search...": "Начните вводить для поиска...",
     "Unable to connect to the service": "Не удалось подключиться к сервису",
     "Unable to delete the saved route...": "Не удалось удалить сохранённый маршрут...",

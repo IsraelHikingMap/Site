@@ -30,7 +30,7 @@ export class FileSaveDialogComponent {
     private readonly data = inject<RouteData>(MAT_DIALOG_DATA)
 
     public readonly formats: FormatViewModel[] = this.fileService.formats;
-    public readonly deviceProviders = this.deviceProvidersService.availableProviders;
+    public readonly deviceProviders = this.deviceProvidersService.visibleProviders;
 
     public async saveAs(format: FormatViewModel) {
         const outputFormat = format.outputFormat;

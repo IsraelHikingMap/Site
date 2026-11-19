@@ -81,7 +81,7 @@ export class SharesComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly store = inject(Store);
 
-    public readonly deviceProviders = this.deviceProvidersService.availableProviders;
+    public readonly deviceProviders = this.deviceProvidersService.visibleProviders;
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
