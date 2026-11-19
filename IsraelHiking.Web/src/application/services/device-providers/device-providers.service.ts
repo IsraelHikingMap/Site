@@ -1,4 +1,5 @@
 import { computed, inject, Service } from "@angular/core";
+import { HttpErrorResponse } from "@angular/common/http";
 import { Store } from "@ngxs/store";
 
 import { WahooDeviceProvider } from "./wahoo.device-provider";
@@ -88,8 +89,25 @@ export class DeviceProvidersService {
             }
             this.toastService.success(this.resources.routeSentToDevice);
         } catch (ex) {
-            this.toastService.error(ex as Error, this.resources.unableToSendToDevice);
+            this.toastService.error(this.withResponseBody(ex), this.getSendErrorMessage(ex));
         }
+    }
+
+    /**
+     * Garmin answers 412 when the user switched off the permission to import courses, which only the user can turn
+     * back on, so they are told how instead of being shown a failure they can do nothing about.
+     */
+    private getSendErrorMessage(ex: unknown): string {
+        return ex instanceof HttpErrorResponse && ex.status === 412
+            ? this.resources.allowSendingRoutes
+            : this.resources.unableToSendToDevice;
+    }
+
+    /** Adds the body of a failed request to its message, since that is where the provider says what was wrong. */
+    private withResponseBody(ex: unknown): Error {
+        return ex instanceof HttpErrorResponse
+            ? new Error(`${ex.message} ${JSON.stringify(ex.error)}`)
+            : ex as Error;
     }
 
     private async getValidAccessToken(id: DeviceProviderId, provider: DeviceProvider): Promise<string> {

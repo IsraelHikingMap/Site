@@ -212,6 +212,7 @@ export class ResourcesService {
     public connectServiceFirst: string;
     public routeSentToDevice: string;
     public unableToSendToDevice: string;
+    public allowSendingRoutes: string;
     public unableToConnectToService: string;
     public theme: string;
     public themeLight: string;
@@ -522,7 +523,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795078778375");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795094157619");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -684,6 +685,7 @@ export class ResourcesService {
         this.connectServiceFirst = this.gettextCatalog.getString("Connect the service in the settings first");
         this.routeSentToDevice = this.gettextCatalog.getString("The route was sent to your device");
         this.unableToSendToDevice = this.gettextCatalog.getString("Unable to send the route to your device");
+        this.allowSendingRoutes = this.gettextCatalog.getString("Sending routes is not allowed, disconnect and connect again in the settings and keep all permissions on");
         this.unableToConnectToService = this.gettextCatalog.getString("Unable to connect to the service");
         this.theme = this.gettextCatalog.getString("Theme");
         this.themeLight = this.gettextCatalog.getString("Light");

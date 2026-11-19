@@ -1,5 +1,5 @@
 import { inject, Service } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 import { Encoder, Profile } from "@garmin/fitsdk";
 import { encode } from "base64-arraybuffer";
@@ -43,7 +43,7 @@ export class WahooDeviceProvider implements DeviceProvider {
 
     private static readonly CLIENT_ID = "amZH1PBW99VdHFWN6zgzo5953jXPo3Hv8DCTJBnv0CQ";
     private static readonly CYCLING_WORKOUT_TYPE_FAMILY_ID = 0;
-    private static readonly SCOPE = "user_read routes_write";
+    private static readonly SCOPE = "user_read routes_read routes_write";
 
     private readonly deviceProviderOAuthService = inject(DeviceProviderOAuthService);
     private readonly httpClient = inject(HttpClient);
@@ -74,13 +74,17 @@ export class WahooDeviceProvider implements DeviceProvider {
         return this.toConnectionInfo(token, connection.codeVerifier);
     }
 
+    /**
+     * Creates the route in Wahoo, or updates the one an earlier send created, since Wahoo rejects a second route
+     * with the same external id.
+     */
     public async sendRoute(accessToken: string, route: RouteDataWithoutState): Promise<void> {
         const payload = this.toFitCourse(route);
-        const body = new URLSearchParams({
+        const externalId = "mapeak-" + (route.id || Date.now().toString());
+        const fields = {
             "route[file]": "data:application/vnd.fit;base64," + payload.base64,
             "route[filename]": payload.name + ".fit",
             "route[name]": payload.name,
-            "route[external_id]": "mapeak-" + (route.id || Date.now().toString()),
             "route[provider_updated_at]": new Date().toISOString(),
             "route[workout_type_family_id]": WahooDeviceProvider.CYCLING_WORKOUT_TYPE_FAMILY_ID.toString(),
             "route[start_lat]": payload.startLat.toString(),
@@ -88,13 +92,36 @@ export class WahooDeviceProvider implements DeviceProvider {
             "route[distance]": payload.distance.toFixed(1),
             "route[ascent]": payload.ascent.toFixed(1),
             "route[descent]": payload.descent.toFixed(1)
-        });
-        await firstValueFrom(this.httpClient.post(Urls.wahooRoutes, body.toString(), {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Authorization: `Bearer ${accessToken}`
+        };
+        const headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${accessToken}`
+        };
+        try {
+            const body = new URLSearchParams({ ...fields, "route[external_id]": externalId });
+            await firstValueFrom(this.httpClient.post(Urls.wahooRoutes, body.toString(), { headers }));
+        } catch (ex) {
+            const existingId = await this.findExistingRouteId(ex, accessToken, externalId);
+            if (existingId == null) {
+                throw ex;
             }
+            const body = new URLSearchParams(fields);
+            await firstValueFrom(this.httpClient.put(`${Urls.wahooRoutes}/${existingId}`, body.toString(), { headers }));
+        }
+    }
+
+    /**
+     * The Wahoo id of the route an earlier send created, when the failure of the create is Wahoo refusing a duplicate.
+     */
+    private async findExistingRouteId(ex: unknown, accessToken: string, externalId: string): Promise<number> {
+        if (!(ex instanceof HttpErrorResponse) || ex.status !== 422) {
+            return null;
+        }
+        const routes = await firstValueFrom(this.httpClient.get<{ id: number }[]>(Urls.wahooRoutes, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            params: { external_id: externalId }
         }));
+        return routes[0]?.id;
     }
 
     private toConnectionInfo(token: DeviceProviderTokenResponse, codeVerifier: string): DeviceProviderConnection {
