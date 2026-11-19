@@ -84,4 +84,17 @@
         </div>
     </div>
     }
+    @if (deviceProviders().length > 0) {
+    <div class="flex flex-col gap-2 mx-2 mt-2">
+        <label class="text-sm">{{resources.sendToDevice}}</label>
+        <div class="flex flex-row flex-wrap gap-2">
+            @for (provider of deviceProviders(); track provider.id) {
+            <button mat-stroked-button (click)="sendToDevice(provider.id)" analyticsOn="click"
+                analyticsCategory="Share" analyticsLabel="Share send to device {{provider.id}}">
+                <device-provider-logo [provider]="provider" class="h-5"></device-provider-logo>
+            </button>
+            }
+        </div>
+    </div>
+    }
 </div>
