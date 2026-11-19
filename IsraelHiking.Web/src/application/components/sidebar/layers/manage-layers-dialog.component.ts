@@ -5,6 +5,7 @@ import { MatButton, MatIconButton } from "@angular/material/button";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogClose, MatDialogContent, MatDialogTitle } from "@angular/material/dialog";
 import { MatTooltip } from "@angular/material/tooltip";
+import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatExpansionPanel, MatExpansionPanelContent } from "@angular/material/expansion";
 import { Share } from "@capacitor/share";
 import { Store } from "@ngxs/store";
@@ -35,7 +36,7 @@ export type ManageLayersDialogData = {
 @Component({
     selector: "manage-layers-dialog",
     templateUrl: "./manage-layers-dialog.component.html",
-    imports: [Dir, MatButton, MatIconButton, MatSlideToggle, MatTooltip, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent, LayerThumbnailComponent]
+    imports: [Dir, MatButton, MatIconButton, MatSlideToggle, MatTooltip, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger, MatExpansionPanel, MatExpansionPanelContent, CdkCopyToClipboard, MatDialogTitle, MatDialogClose, MatDialogContent, AnalyticsDirective, LayerPropertiesComponent, LayerThumbnailComponent]
 })
 export class ManageLayersDialogComponent {
     public readonly resources = inject(ResourcesService);
@@ -60,7 +61,7 @@ export class ManageLayersDialogComponent {
      * Opens the dialog, with the properties of the given layer already open when there is one.
      */
     public static open(dialog: MatDialog, data: ManageLayersDialogData) {
-        dialog.open(ManageLayersDialogComponent, { width: "480px", data, autoFocus: "dialog" });
+        dialog.open(ManageLayersDialogComponent, { width: "480px", maxWidth: "95vw", data, autoFocus: "dialog" });
     }
 
     constructor() {

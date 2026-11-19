@@ -24,29 +24,33 @@
                 <div class="flex flex-row items-center gap-1 py-1 ps-1 pe-1">
                     <mat-slide-toggle class="min-w-0 flex-1 wrap-anywhere" [checked]="isShownInPanel(layer)"
                         [disabled]="isLocked(layer)" (change)="setShownInPanel(layer, $event.checked)">
-                        <span class="flex flex-row items-center gap-3">
+                        <span class="flex flex-row items-center gap-2">
                             <layer-thumbnail class="size-10" [small]="true" [label]="resources.translate(layer.key)"
                                 [thumbnail]="getThumbnail(layer)"></layer-thumbnail>
                             {{resources.translate(layer.key)}}
                         </span>
                     </mat-slide-toggle>
                     @if (isApp) {
-                    <button mat-icon-button type="button" class="shrink-0" (click)="share(layer)"
+                    <button mat-icon-button type="button" class="shrink-0 max-md:hidden!" (click)="share(layer)"
                         [matTooltip]="resources.share" [attr.aria-label]="resources.share" analyticsOn="click"
                         analyticsCategory="Layers" analyticsLabel="Share layer from app">
                         <i class="fa icon-share-alt"></i>
                     </button>
                     } @else {
-                    <button mat-icon-button type="button" class="shrink-0" [cdkCopyToClipboard]="getShareAddress(layer)"
+                    <button mat-icon-button type="button" class="shrink-0 max-md:hidden!" [cdkCopyToClipboard]="getShareAddress(layer)"
                         (click)="copiedKey.set(layer.key)" [matTooltip]="resources.copyLink" [attr.aria-label]="resources.copyLink"
                         analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Share layer from web">
                         <i class="fa" [class]="copiedKey() === layer.key ? 'icon-check-circle text-brand' : 'icon-clipboard'"></i>
                     </button>
                     }
-                    <button mat-icon-button type="button" class="shrink-0" (click)="remove(layer)"
+                    <button mat-icon-button type="button" class="shrink-0 max-md:hidden!" (click)="remove(layer)"
                         matTooltip="{{resources.deleteLayer}}" [attr.aria-label]="resources.deleteLayer"
                         analyticsOn="click" analyticsCategory="Layers" analyticsLabel="Delete layer">
                         <i class="fa icon-trash"></i>
+                    </button>
+                    <button mat-icon-button type="button" class="shrink-0 md:hidden!" [matMenuTriggerFor]="layerMenu"
+                        [matMenuTriggerData]="{layer}" [attr.aria-label]="resources.more">
+                        <i class="fa" [class]="copiedKey() === layer.key ? 'icon-check-circle text-brand' : 'icon-ellipsis-v'"></i>
                     </button>
                     <button mat-icon-button type="button" class="shrink-0" (click)="toggleEditing(layer.key)"
                         matTooltip="{{isOverlay ? resources.overlayProperties : resources.baseLayerProperties}}"
@@ -67,4 +71,24 @@
             }
         </div>
     </div>
+    <mat-menu #layerMenu="matMenu">
+        <ng-template matMenuContent let-layer="layer">
+            @if (isApp) {
+            <button mat-menu-item type="button" (click)="share(layer)" analyticsOn="click" analyticsCategory="Layers"
+                analyticsLabel="Share layer from app">
+                <i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.share}}
+            </button>
+            } @else {
+            <button mat-menu-item type="button" [cdkCopyToClipboard]="getShareAddress(layer)"
+                (click)="copiedKey.set(layer.key)" analyticsOn="click" analyticsCategory="Layers"
+                analyticsLabel="Share layer from web">
+                <i class="fa fa-lg icon-clipboard mat-icon"></i> {{resources.copyLink}}
+            </button>
+            }
+            <button mat-menu-item type="button" (click)="remove(layer)" analyticsOn="click" analyticsCategory="Layers"
+                analyticsLabel="Delete layer">
+                <i class="fa fa-lg icon-trash mat-icon"></i> {{resources.deleteLayer}}
+            </button>
+        </ng-template>
+    </mat-menu>
 </div>
