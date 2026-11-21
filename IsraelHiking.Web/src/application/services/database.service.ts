@@ -8,7 +8,7 @@ import deepmerge from "deepmerge";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { PmTilesService } from "./pmtiles.service";
-import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
+import { POPULARITY_HEATMAP, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models";
@@ -67,6 +67,7 @@ export class DatabaseService {
             traces: "id",
         });
         if (this.runningContext.isIFrame) {
+            this.redirectToMapeak();
             initialState.layersState.visibleCategories = [];
             this.store.reset(initialState);
             return;
@@ -88,6 +89,24 @@ export class DatabaseService {
         this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
             this.updateState(state);
         });
+    }
+
+    /**
+     * Embedded users are moved to mapeak.com, which supports the same urls, except for the renamed base layers
+     */
+    private redirectToMapeak() {
+        const mapeakBaseLayers: Record<string, string> = {
+            [ISRAEL_HIKING_MAP]: "Hiking Map",
+            [ISRAEL_MTB_MAP]: "MTB Map",
+            [SATELLITE]: "Satellite Map"
+        };
+        const searchParams = new URLSearchParams(window.location.search);
+        const baseLayer = searchParams.get("baselayer")?.split("_").join(" ");
+        if (mapeakBaseLayers[baseLayer]) {
+            searchParams.set("baselayer", mapeakBaseLayers[baseLayer]);
+        }
+        const search = searchParams.toString() ? "?" + searchParams.toString() : "";
+        window.location.replace("https://mapeak.com" + window.location.pathname + search + window.location.hash);
     }
 
     private initCustomTileLoadFunction() {
