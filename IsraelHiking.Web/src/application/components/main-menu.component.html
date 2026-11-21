@@ -1,4 +1,9 @@
-﻿@if (!isIFrame()) {
+﻿@if (isIFrame()) {
+<button mat-icon-button (click)="openLanguage()" aria-label="Language" analyticsOn="click" analyticsCategory="Menu"
+  analyticsLabel="Open language selection" class="text-current!">
+  <i class="fa fa-lg icon-language"></i>
+</button>
+} @else {
 <button mat-button routerLink="/map" routerLinkActive="bg-brand/20!" analyticsOn="click"
   analyticsCategory="Menu" analyticsLabel="Plan & Explore" class="max-md:hidden! text-current!">
   <i class="fa fa-lg icon-map-o mat-icon"></i>
@@ -9,8 +14,7 @@
   <i class="fa fa-lg icon-route-search mat-icon"></i>
   <span class="mx-1">{{resources.findRoutes}}</span>
 </button>
-}
-@if (isUserKnown() && !isIFrame() && !isLoggedIn()) {
+@if (isUserKnown() && !isLoggedIn()) {
 <button mat-flat-button (click)="login()" analyticsOn="click" analyticsCategory="User Menu"
   analyticsLabel="Login">{{resources.signIn}}</button>
 }
@@ -32,7 +36,6 @@
 </button>
 <mat-menu #appMenu="matMenu" xPosition="before" class="mt-3!">
   <div [dir]="resources.direction">
-    @if (!isIFrame()) {
     <button mat-menu-item routerLink="/map" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       class="block md:hidden!" analyticsOn="click" analyticsCategory="Menu" analyticsLabel="Plan & Explore">
       <i class="fa fa-lg icon-map-o mat-icon"></i>
@@ -44,7 +47,6 @@
       <span class="mx-1">{{resources.findRoutes}}</span>
     </button>
     <mat-divider class="md:hidden!"></mat-divider>
-    }
     @if (isLoggedIn()) {
     <button mat-menu-item routerLink="/shares" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="User Menu" analyticsLabel="User shares open">
@@ -93,7 +95,6 @@
       <i class="fa fa-lg icon-language mat-icon"></i>
       <span class="mx-1">Language</span>
     </button>
-    @if (!isIFrame()) {
     <button mat-menu-item routerLink="/about" routerLinkActive="bg-[#528CFA40]! border-s-4! border-brand!"
       analyticsOn="click" analyticsCategory="Menu" analyticsLabel="About">
       <i class="fa fa-lg icon-info-circle mat-icon"></i>
@@ -104,6 +105,6 @@
       <i class="fa fa-lg icon-envelope mat-icon"></i>
       <span class="mx-1">{{resources.reportAnIssue}}</span>
     </button>
-    }
   </div>
 </mat-menu>
+}
