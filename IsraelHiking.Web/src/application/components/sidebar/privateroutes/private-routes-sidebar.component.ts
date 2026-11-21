@@ -157,8 +157,9 @@ export class PrivateRoutesSidebarComponent {
     public deleteAllRoutes(event: Event) {
         event.stopPropagation();
         this.toastService.confirm({
-            message: this.resources.areYouSureYouWantToDeleteAllRoutes
-                .replace("{{count}}", `${this.routes().length}`),
+            message: this.routes().length === 1
+                ? this.resources.areYouSureYouWantToDeleteTheRoute
+                : this.resources.areYouSureYouWantToDeleteAllRoutes.replace("{{count}}", `${this.routes().length}`),
             type: "YesNo",
             confirmAction: () => {
                 this.store.dispatch(new DeleteAllRoutesAction());

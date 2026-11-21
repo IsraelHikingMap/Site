@@ -31,7 +31,7 @@
                 </a>
                 <input type="file" name="file" (change)="openFile($event)" [style.display]="'none'" />
             </label>
-            <button mat-icon-button (click)="deleteAllRoutes($event)" matTooltip="{{resources.deleteAllRoutes}}"
+            <button mat-icon-button (click)="deleteAllRoutes($event)" [disabled]="routes().length === 0" matTooltip="{{resources.deleteAllRoutes}}"
                 matTooltipPosition="below" analyticsOn="click" analyticsCategory="Private Routes"
                 analyticsLabel="Delete all routes">
                 <i class="fa icon-trash"></i>

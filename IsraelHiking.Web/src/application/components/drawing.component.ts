@@ -207,7 +207,7 @@ export class DrawingComponent {
             const history = editableCopy(this.store.selectSnapshot((s: ApplicationState) => s.routes.past));
             history.push(editableCopy(presentRoutes));
             this.deleteAllRoutesInternal();
-            this.toastService.undo(this.resources.routesDeleted, () => {
+            this.toastService.undo(this.resources.routeDeleted, () => {
                 this.store.dispatch(new RestoreHistoryAction(history));
                 this.undo();
             });

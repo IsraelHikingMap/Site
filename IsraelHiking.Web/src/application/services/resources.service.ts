@@ -354,6 +354,7 @@ export class ResourcesService {
     public turnOffBatteryOptimization: string;
     public dontShowThisMessageAgain: string;
     public areYouSureYouWantToDeleteAllRoutes: string;
+    public areYouSureYouWantToDeleteTheRoute: string;
     public clickBackAgainToCloseTheApp: string;
     public wrappingThingsUp: string;
     public unableToDeleteSavedRoute: string;
@@ -378,7 +379,7 @@ export class ResourcesService {
     public trackingIsDisabledWhileEditing: string;
     public jammedPositionReceived: string;
     public newVersionAvailable: string;
-    public routesDeleted: string;
+    public routeDeleted: string;
     public uploadingDataFromExternalSourceIsNotAllowed: string;
     public pleaseAllowLocationTracking: string;
     public turnOffBatteryOptimizationForDownload: string;
@@ -523,7 +524,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795094157619");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1795293084830");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -839,6 +840,7 @@ export class ResourcesService {
             .getString("For reliable tracking, turn off battery optimization for this app in your device settings.");
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
         this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all {{count}} routes?");
+        this.areYouSureYouWantToDeleteTheRoute = this.gettextCatalog.getString("Are you sure you want to delete the route?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
         this.unableToDeleteSavedRoute = this.gettextCatalog.getString("Unable to delete the saved route...");
@@ -870,7 +872,7 @@ export class ResourcesService {
         this.trackingIsDisabledWhileEditing = this.gettextCatalog.getString("GPS tracking is disabled while editing.");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
         this.newVersionAvailable = this.gettextCatalog.getString("A new app version is available. Do you want to update?");
-        this.routesDeleted = this.gettextCatalog.getString("Routes deleted");
+        this.routeDeleted = this.gettextCatalog.getString("Route deleted");
         this.uploadingDataFromExternalSourceIsNotAllowed = this.gettextCatalog.getString("Uploading data from external source is not allowed...");
         this.pleaseAllowLocationTracking = this.gettextCatalog.getString("Please allow location tracking");
         this.turnOffBatteryOptimizationForDownload = this.gettextCatalog

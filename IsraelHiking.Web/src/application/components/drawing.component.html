@@ -113,7 +113,7 @@
       <i class="fa icon-close"></i>
       <span class="mx-1">{{resources.clearBoth}}</span>
     </button>
-    <button mat-menu-item (click)="deleteAllRoutes()" analyticsOn="click" analyticsCategory="Drawing"
+    <button mat-menu-item (click)="deleteAllRoutes()" [disabled]="!hasRoutes()" analyticsOn="click" analyticsCategory="Drawing"
       analyticsLabel="Delete all routes">
       <i class="fa icon-trash"></i>
       <span class="mx-1">{{resources.deleteAllRoutes}}</span>
