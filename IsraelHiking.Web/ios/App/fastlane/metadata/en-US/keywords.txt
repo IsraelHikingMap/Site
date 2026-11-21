@@ -1,1 +1,1 @@
-utv,mtb,ride,finder,4x4,walking,route,path,maker,biking,mount,tracker,running,planner,topographic
+utv,atv,4x4,jeep,mtb,cycling,gps,running,route,planner,tracker,topo,topographic,elevation,riding

@@ -1,1 +1,1 @@
-Trail finder & tracker for hiking, biking, running with offline topographic maps
+Offline topo maps & trail tracker for hiking, biking, MTB, running and offroad
