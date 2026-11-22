@@ -79,7 +79,7 @@ interface IChartElements {
     imports: [Dir, NgClass, MatTooltip, MatIconButton, AnalyticsDirective, MatMenu, MatMenuItem, MatMenuTrigger, SourceDirective, GeoJSONSourceComponent, LayerComponent, DistancePipe]
 })
 export class RouteStatisticsComponent implements OnInit {
-    private static readonly HOVER_BOX_WIDTH = 110;
+    private static readonly HOVER_BOX_PADDING = 10;
     private static readonly MAX_SLOPE = 20;
 
     public readonly length = signal(0);
@@ -351,13 +351,14 @@ export class RouteStatisticsComponent implements OnInit {
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
+        this.buildAllTextInHoverBox(point);
+        const boxWidth = this.fitHoverBoxToText();
         const safeDistance = 20;
         let boxPosition = safeDistance;
         if (chartXCoordinate + 40 > +this.chartElements.svg.attr("width") / 2) {
-            boxPosition = -RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
+            boxPosition = -boxWidth - safeDistance;
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
-        this.buildAllTextInHoverBox(point);
         this.updatePointOnMap(point);
     }
 
@@ -589,7 +590,6 @@ export class RouteStatisticsComponent implements OnInit {
             .attr("x", 0)
             .attr("y", 0)
             .attr("height", 70)
-            .attr("width", RouteStatisticsComponent.HOVER_BOX_WIDTH)
             .attr("rx", 10)
             .attr("fill-opacity", "0.95");
     }
@@ -665,14 +665,23 @@ export class RouteStatisticsComponent implements OnInit {
 
     }
 
+    /**
+     * Sizes the hover box to its widest line, since the labels' length depends on the language.
+     * In RTL the lines are anchored to the box's right edge, which is only known once they are measured.
+     */
+    private fitHoverBoxToText(): number {
+        const padding = RouteStatisticsComponent.HOVER_BOX_PADDING;
+        const texts = this.chartElements.hoverGroup.selectAll<SVGTextElement, unknown>("text");
+        const width = Math.max(...texts.nodes().map(t => t.getComputedTextLength())) + 2 * padding;
+        this.chartElements.hoverGroup.select(".hover-box").attr("width", width);
+        texts.attr("x", this.resources.direction === "rtl" ? width - padding : padding);
+        return width;
+    }
+
     private createHoverBoxText(title: string, value: string, units: string, y: number, useBidi = false) {
-        let x = 10;
-        if (this.resources.direction === "rtl") {
-            x = RouteStatisticsComponent.HOVER_BOX_WIDTH - x;
-        }
         const text = this.chartElements.hoverGroup.select("g")
             .append("text")
-            .attr("transform", `translate(${x}, ${y})`)
+            .attr("y", y)
             .attr("text-anchor", "start")
             .attr("direction", this.resources.direction)
             .style("-webkit-user-select", "none")
