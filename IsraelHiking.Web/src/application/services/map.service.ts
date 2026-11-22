@@ -83,7 +83,8 @@ export class MapService {
                 await globalDispatcher.broadcast("contour-worker", {
                     demUrlPattern: "slice://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp",
                     encoding: "terrarium",
-                    maxzoom: MapService.DEM_MAX_ZOOM
+                    maxzoom: MapService.DEM_MAX_ZOOM,
+                    sparse: true
                 });
                 resolve();
             });
