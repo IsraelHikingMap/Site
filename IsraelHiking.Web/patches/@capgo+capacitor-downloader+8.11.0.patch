@@ -1,0 +1,674 @@
+diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
+index a548bf4..46f3187 100644
+--- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
++++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/CapacitorDownloaderPlugin.java
+@@ -42,6 +42,7 @@ public class CapacitorDownloaderPlugin extends Plugin {
+     private final Map<String, DownloadBatchState> batches = new ConcurrentHashMap<>();
+     private final Map<String, String> batchChildOwners = new ConcurrentHashMap<>();
+     private final Map<String, File> okHttpDestinationFiles = new ConcurrentHashMap<>();
++    private final Map<String, List<BatchFileRequest>> okHttpBatches = new ConcurrentHashMap<>();
+     private final Map<String, Long> downloadGenerations = new ConcurrentHashMap<>();
+     private final AtomicLong pendingDownloadSequence = new AtomicLong(0);
+     private ExecutorService downloadManagerExecutor;
+@@ -80,7 +81,12 @@ public class CapacitorDownloaderPlugin extends Plugin {
+     private void presentFailedDownloadNotification(String downloadId, long generation) {
+         String failedText = failedNotificationStore.takeText(downloadId, generation);
+         if (failedText != null) {
+-            DownloadCompletedNotificationPresenter.showIfAllowed(getContext(), downloadId, failedText);
++            DownloadCompletedNotificationPresenter.showIfAllowed(
++                getContext(),
++                downloadId,
++                failedText,
++                android.R.drawable.stat_notify_error
++            );
+         }
+     }
+ 
+@@ -443,14 +449,18 @@ public class CapacitorDownloaderPlugin extends Plugin {
+                     androidHttpEngine,
+                     resolvedDestination.preferOkHttpInAutoMode
+                 );
+-                if (httpEngine == AndroidHttpEngineSelector.Engine.OKHTTP) {
++                boolean okHttp = httpEngine == AndroidHttpEngineSelector.Engine.OKHTTP;
++                if (okHttp && extendedDestinationRoots && destination.trim().startsWith("public-downloads/")) {
++                    rollbackBatch(batchState);
++                    call.reject("OkHttp cannot write to public-downloads/ paths. Use androidHttpEngine 'auto' or 'downloadManager'.");
++                    return;
++                }
++                if (!fileRequests.isEmpty() && fileRequests.get(0).okHttp != okHttp) {
+                     rollbackBatch(batchState);
+-                    call.reject(
+-                        "Multi-file batch downloads currently require DownloadManager. Set androidHttpEngine to 'downloadManager' or omit it."
+-                    );
++                    call.reject("All files of a batch must resolve to the same Android HTTP engine");
+                     return;
+                 }
+-                fileRequests.add(new BatchFileRequest(index, url, resolvedDestination.file));
++                fileRequests.add(new BatchFileRequest(index, url, resolvedDestination.file, okHttp));
+             }
+         } catch (JSONException e) {
+             rollbackBatch(batchState);
+@@ -465,6 +475,19 @@ public class CapacitorDownloaderPlugin extends Plugin {
+         final JSObject headers = call.getObject("headers");
+         final String network = call.getString("network");
+ 
++        if (!fileRequests.isEmpty() && fileRequests.get(0).okHttp) {
++            final int retries;
++            try {
++                retries = DownloadConnectionRetry.normalizeRetries(call.getInt("retries"));
++            } catch (IllegalArgumentException e) {
++                rollbackBatch(batchState);
++                call.reject(e.getMessage(), e);
++                return;
++            }
++            downloadBatchWithOkHttp(call, batchState, fileRequests, headers, network, call.getString("lengthHeader"), retries);
++            return;
++        }
++
+         runDownloadManagerWork(
+             call,
+             () -> {
+@@ -577,14 +600,177 @@ public class CapacitorDownloaderPlugin extends Plugin {
+         final int index;
+         final String url;
+         final File destinationFile;
++        final boolean okHttp;
+ 
+-        BatchFileRequest(int index, String url, File destinationFile) {
++        BatchFileRequest(int index, String url, File destinationFile, boolean okHttp) {
+             this.index = index;
+             this.url = url;
+             this.destinationFile = destinationFile;
++            this.okHttp = okHttp;
++        }
++    }
++
++    /**
++     * Runs a batch whose files all resolve to OkHttp on the shared transfer pool, with one progress notification and
++     * foreground service for the whole batch. The first file that fails, after its retries, fails the batch.
++     */
++    private void downloadBatchWithOkHttp(
++        PluginCall call,
++        DownloadBatchState batch,
++        List<BatchFileRequest> fileRequests,
++        JSObject headers,
++        String network,
++        String lengthHeader,
++        int retries
++    ) {
++        final String batchId = batch.batchId;
++        if (!okHttpDownloadExecutor.isWifiSatisfied(network)) {
++            rollbackBatch(batch);
++            call.reject("Wi-Fi required for this download");
++            return;
++        }
++
++        List<OkHttpDownloadExecutor.ActiveDownload> reservations = new ArrayList<>();
++        for (BatchFileRequest fileRequest : fileRequests) {
++            OkHttpDownloadExecutor.ActiveDownload reservation = okHttpDownloadExecutor.beginTransfer(
++                DownloadBatchState.fileTaskId(batchId, fileRequest.index)
++            );
++            if (reservation == null) {
++                for (OkHttpDownloadExecutor.ActiveDownload reserved : reservations) {
++                    okHttpDownloadExecutor.abandonTransfer(reserved);
++                }
++                rollbackBatch(batch);
++                call.reject("Download already exists");
++                return;
++            }
++            reservations.add(reservation);
++        }
++
++        okHttpBatches.put(batchId, fileRequests);
++        batch.committed.set(true);
++        okHttpProgressNotifier.started(batchId, call.getString("title"), call.getString("description"), okHttpBatchNotificationMode(batch));
++
++        JSObject result = new JSObject();
++        result.put("id", batchId);
++        result.put("state", "RUNNING");
++        result.put("progress", 0);
++        call.resolve(result);
++
++        for (int i = 0; i < fileRequests.size(); i++) {
++            startOkHttpBatchFile(batch, fileRequests.get(i), reservations.get(i), headers, network, lengthHeader, retries);
++        }
++    }
++
++    private static String okHttpBatchNotificationMode(DownloadBatchState batch) {
++        return batch.notification != null ? batch.notification : "completed";
++    }
++
++    private void startOkHttpBatchFile(
++        DownloadBatchState batch,
++        BatchFileRequest fileRequest,
++        OkHttpDownloadExecutor.ActiveDownload reservation,
++        JSObject headers,
++        String network,
++        String lengthHeader,
++        int retries
++    ) {
++        final String batchId = batch.batchId;
++        boolean submitted = runOkHttpTransferWork(() -> {
++            try {
++                okHttpDownloadExecutor.start(
++                    reservation,
++                    fileRequest.url,
++                    fileRequest.destinationFile,
++                    headers,
++                    network,
++                    retries,
++                    lengthHeader,
++                    (childId, progress) ->
++                        handler.post(() -> {
++                            if (!ownsBatch(batchId, batch)) {
++                                return;
++                            }
++                            notifyBatchProgress(batchId, fileRequest.index, progress, 0, 0);
++                            okHttpProgressNotifier.update(batchId, batch.overallProgress());
++                        }),
++                    (childId, success, cancelled, errorMessage) ->
++                        handler.post(() -> {
++                            okHttpDownloadExecutor.clearCompleted(childId);
++                            if (cancelled || !ownsBatch(batchId, batch)) {
++                                return;
++                            }
++                            if (success) {
++                                completeOkHttpBatchFile(batch, fileRequest.index);
++                            } else {
++                                failOkHttpBatch(batch, errorMessage != null ? errorMessage : "Download failed", fileRequest.index);
++                            }
++                        })
++                );
++            } catch (RuntimeException e) {
++                okHttpDownloadExecutor.abandonTransfer(reservation);
++                handler.post(() -> {
++                    if (ownsBatch(batchId, batch)) {
++                        failOkHttpBatch(batch, e.getMessage() != null ? e.getMessage() : "Download failed", fileRequest.index);
++                    }
++                });
++            }
++        });
++        if (!submitted) {
++            okHttpDownloadExecutor.abandonTransfer(reservation);
++            handler.post(() -> failOkHttpBatch(batch, "Download manager is shutting down", fileRequest.index));
++        }
++    }
++
++    private void completeOkHttpBatchFile(DownloadBatchState batch, int fileIndex) {
++        completeBatchFile(batch.batchId, fileIndex, 0, 0);
++        if (!ownsBatch(batch.batchId, batch) && okHttpBatches.remove(batch.batchId) != null) {
++            okHttpProgressNotifier.finished(batch.batchId, true);
++            String notificationMode = okHttpBatchNotificationMode(batch);
++            if (!OkHttpDownloadProgressNotifier.shouldShowProgressForMode(notificationMode)) {
++                DownloadCompletionNotifier.notifyIfRequested(getContext(), batch.batchId, notificationMode, true);
++            }
++        }
++    }
++
++    private void failOkHttpBatch(DownloadBatchState batch, String error, int fileIndex) {
++        List<BatchFileRequest> fileRequests = okHttpBatches.remove(batch.batchId);
++        if (fileRequests == null) {
++            return;
++        }
++        cancelOkHttpBatchFiles(batch, fileRequests);
++        okHttpProgressNotifier.finished(batch.batchId, false);
++        failBatch(batch.batchId, error, fileIndex);
++    }
++
++    /**
++     * Cancels the transfers of a batch that did not finish yet, keeping the files that already completed, including
++     * one whose file is in place while its completion callback is still queued.
++     */
++    private void cancelOkHttpBatchFiles(DownloadBatchState batch, List<BatchFileRequest> fileRequests) {
++        for (BatchFileRequest fileRequest : fileRequests) {
++            String childId = DownloadBatchState.fileTaskId(batch.batchId, fileRequest.index);
++            OkHttpDownloadExecutor.ActiveDownload active = okHttpDownloadExecutor.getActive(childId);
++            boolean committed = active != null && active.state == OkHttpDownloadExecutor.State.DONE;
++            if (!batch.isFileCompleted(fileRequest.index) && !committed) {
++                okHttpDownloadExecutor.cancel(childId, null);
++            }
+         }
+     }
+ 
++    private void stopOkHttpBatch(PluginCall call, String batchId, List<BatchFileRequest> fileRequests) {
++        DownloadBatchState batch = batches.get(batchId);
++        if (batch == null) {
++            call.reject("Download not found");
++            return;
++        }
++        batch.cancelled.set(true);
++        cancelOkHttpBatchFiles(batch, fileRequests);
++        okHttpProgressNotifier.finished(batchId, false);
++        batches.remove(batchId, batch);
++        removeDownloadNotificationTexts(batchId, batch.generation);
++        call.resolve(new JSObject().put("removed", true));
++    }
++
+     private DownloadManager.Request buildDownloadRequest(
+         String url,
+         File destinationFile,
+@@ -1331,6 +1517,12 @@ public class CapacitorDownloaderPlugin extends Plugin {
+             return;
+         }
+ 
++        List<BatchFileRequest> okHttpBatchFiles = okHttpBatches.remove(id);
++        if (okHttpBatchFiles != null) {
++            stopOkHttpBatch(call, id, okHttpBatchFiles);
++            return;
++        }
++
+         if (batches.containsKey(id)) {
+             stopBatch(call, id);
+             return;
+diff --git a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/DownloadCompletedNotificationPresenter.java b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/DownloadCompletedNotificationPresenter.java
+index 690b9d6..a0ff316 100644
+--- a/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/DownloadCompletedNotificationPresenter.java
++++ b/node_modules/@capgo/capacitor-downloader/android/src/main/java/ee/forgr/capacitor/plugin/downloader/DownloadCompletedNotificationPresenter.java
+@@ -26,6 +26,10 @@ final class DownloadCompletedNotificationPresenter {
+     }
+ 
+     static void showIfAllowed(Context context, String downloadId, String bodyText) {
++        showIfAllowed(context, downloadId, bodyText, android.R.drawable.stat_sys_download_done);
++    }
++
++    static void showIfAllowed(Context context, String downloadId, String bodyText, int smallIcon) {
+         String body = DownloadCompletedNotificationText.normalize(bodyText);
+         if (body == null || downloadId == null) {
+             return;
+@@ -53,7 +57,7 @@ final class DownloadCompletedNotificationPresenter {
+         CharSequence appLabel = context.getApplicationInfo().loadLabel(context.getPackageManager());
+ 
+         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
++            .setSmallIcon(smallIcon)
+             .setContentTitle(appLabel)
+             .setContentText(body)
+             .setStyle(new NotificationCompat.BigTextStyle().bigText(body))
+diff --git a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
+index e58b82e..63379c6 100644
+--- a/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
++++ b/node_modules/@capgo/capacitor-downloader/dist/esm/definitions.d.ts
+@@ -35,7 +35,7 @@ export interface DownloadFileSpec {
+      * - `public-downloads/...` saves to the public Downloads folder (DownloadManager).
+      * - Any other relative path saves under app external files (DownloadManager with `'auto'`).
+      *
+-     * Multi-file batches on Android use the same destination rules as single downloads for the batch `androidHttpEngine` value (including extended roots when `'auto'` or `'okhttp'` is set). The batch is rejected only when a file would use OkHttp (for example `cache/...` or `files/...` with `'okhttp'`).
++     * Multi-file batches on Android use the same destination rules as single downloads for the batch `androidHttpEngine` value (including extended roots when `'auto'` or `'okhttp'` is set). A batch whose files all resolve to OkHttp runs through OkHttp; a batch that mixes engines is rejected.
+      *
+      * Absolute paths and `file://` URIs are supported on iOS and on Android single downloads.
+      *
+@@ -96,18 +96,19 @@ export interface DownloadOptions {
+      */
+     notification?: 'completed' | 'progress' | 'hidden';
+     /**
+-     * Title shown on the Android DownloadManager progress notification.
++     * Title shown on the Android progress notification, and on iOS on the continued processing task when
++     * `iosContinuedProcessing` is set.
+      *
+-     * When omitted or empty, the system uses its default (typically the destination file name).
+-     * Ignored on iOS, Web, and the OkHttp Android download path.
++     * When omitted or empty, the system uses its default (typically the destination file name). Ignored on Web.
+      *
+      * @since 8.6.0
+      */
+     title?: string;
+     /**
+-     * Description shown on the Android DownloadManager progress notification.
++     * Description shown on the Android progress notification, and on iOS as the subtitle of the continued processing
++     * task when `iosContinuedProcessing` is set.
+      *
+-     * When omitted or empty, the system uses its default. Ignored on iOS, Web, and the OkHttp Android download path.
++     * When omitted or empty, the system uses its default. Ignored on Web.
+      *
+      * @since 8.6.0
+      */
+@@ -173,19 +174,26 @@ export interface DownloadOptions {
+      */
+     lengthHeader?: string;
+     /**
+-     * iOS 26 and later: opt in to a `BGContinuedProcessingTask` so the system can show download progress while the
+-     * device is locked. Falls back to the background URL session when the task does not launch in time. If the continued
+-     * processing task expires, the active transfer is cancelled with `downloadFailed` and is not resumed automatically.
+-     * Ignored on Android and Web. The host app must allow
+-     * `$(PRODUCT_BUNDLE_IDENTIFIER).CapacitorDownloader.continuedProcessing.*` in
+-     * `BGTaskSchedulerPermittedIdentifiers` (see plugin README).
++     * iOS 26 and later: run the download in a `BGContinuedProcessingTask`, which shows `title` and `description` with the
++     * download progress while the device is locked. Requires `title`. Falls back to the background URL session when the
++     * task does not launch in time. If the task expires, the download fails with `downloadFailed` and is not resumed
++     * automatically. The host app must allow `$(PRODUCT_BUNDLE_IDENTIFIER).CapacitorDownloader.continuedProcessing.*` in
++     * `BGTaskSchedulerPermittedIdentifiers` (see plugin README). Ignored on Android and Web.
+      *
++     * @since 8.12.0
++     */
++    iosContinuedProcessing?: boolean;
++    /**
++     * Title of the iOS continued processing task, see {@link DownloadOptions.iosContinuedProcessing}.
++     *
++     * @deprecated Use `title` with `iosContinuedProcessing: true`.
+      * @since 8.8.0
+      */
+     iosContinuedProcessingTitle?: string;
+     /**
+-     * Subtitle for the iOS continued processing task. Ignored when `iosContinuedProcessingTitle` is omitted.
++     * Subtitle of the iOS continued processing task. Ignored when `iosContinuedProcessingTitle` is omitted.
+      *
++     * @deprecated Use `description` with `iosContinuedProcessing: true`.
+      * @since 8.8.0
+      */
+     iosContinuedProcessingSubtitle?: string;
+@@ -210,7 +218,7 @@ export interface DownloadOptions {
+ /**
+  * Configuration options for a multi-file batch download.
+  *
+- * On Android, multi-file batches use the system DownloadManager only. Each file uses the same `androidHttpEngine` destination rules as a single download; `download()` rejects before enqueue if any file would use OkHttp.
++ * On Android, each file uses the same `androidHttpEngine` destination rules as a single download. A batch whose files all resolve to OkHttp runs through OkHttp, with one progress notification and foreground service for the whole batch when `notification` is `'progress'`; a batch that mixes engines is rejected.
+  *
+  * **Process death:** On Android, batch state lives in memory only and is lost when the host process is killed (DownloadManager work may still finish, but the plugin does not rebuild batch progress). On iOS, batch metadata is persisted in `DownloadBatchStore` (UserDefaults) and restored when the plugin initializes.
+  *
+@@ -226,7 +234,7 @@ export interface DownloadBatchOptions {
+      *
+      * The batch shares the top-level `id`. Progress events use `progress` and `fileProgress` from 0 to 1 (same scale as DownloadTask).
+      * `downloadCompleted` fires once when every file succeeds. Any failure cancels the batch.
+-     * There is no fixed maximum file count. On Android, multi-file batches use DownloadManager only (the system schedules transfers). On Android single-file OkHttp downloads, at most 4 transfers run at once (fair queue). On iOS, URLSession queues work per host.
++     * There is no fixed maximum file count. On Android, DownloadManager batches are scheduled by the system, and OkHttp transfers (single files and batches) share a pool where at most 4 run at once (fair queue). On iOS, URLSession queues work per host.
+      *
+      * @since 8.7.0
+      */
+@@ -242,31 +250,39 @@ export interface DownloadBatchOptions {
+     /** Download priority level */
+     priority?: 'high' | 'normal' | 'low';
+     /**
+-     * Android DownloadManager notification visibility for batch transfers only (batches reject OkHttp).
++     * Android notification visibility for batch transfers.
+      *
++     * DownloadManager batches:
+      * - `'completed'` (default): show while downloading and keep the notification after completion.
+      * - `'progress'`: show while downloading, remove the notification when finished.
+      * - `'hidden'`: no DownloadManager progress notification; use plugin progress events instead.
+-     *   `downloadCompletedNotificationText` can still post a completion notification when the transfer succeeds.
+      *
++     * OkHttp batches:
++     * - `'completed'` (default): no notification during the transfer, one completion notification when the whole batch succeeds.
++     * - `'progress'`: one ongoing progress notification for the whole batch, from an optional foreground service that keeps
++     *   the batch going while the app is in the background.
++     * - `'hidden'`: no notification; use plugin progress events instead.
++     *
++     * `downloadCompletedNotificationText` can still post a completion notification when the batch succeeds.
+      * Ignored on iOS and Web.
+      *
+      * @since 8.2.0
+      */
+     notification?: 'completed' | 'progress' | 'hidden';
+     /**
+-     * Title shown on the Android DownloadManager progress notification.
++     * Title shown on the Android progress notification of the batch, and on iOS on the continued processing task when
++     * `iosContinuedProcessing` is set.
+      *
+-     * When omitted or empty, the system uses its default (typically the destination file name).
+-     * Ignored on iOS and Web.
++     * When omitted or empty, the system uses its default (typically the destination file name). Ignored on Web.
+      *
+      * @since 8.6.0
+      */
+     title?: string;
+     /**
+-     * Description shown on the Android DownloadManager progress notification.
++     * Description shown on the Android progress notification of the batch, and on iOS as the subtitle of the continued
++     * processing task when `iosContinuedProcessing` is set.
+      *
+-     * When omitted or empty, the system uses its default. Ignored on iOS and Web.
++     * When omitted or empty, the system uses its default. Ignored on Web.
+      *
+      * @since 8.6.0
+      */
+@@ -282,7 +298,7 @@ export interface DownloadBatchOptions {
+      *   in the app process and do not continue after the process is killed (unlike DownloadManager on those paths).
+      * - `'downloadManager'`: always use the system DownloadManager with legacy destination resolution.
+      *
+-     * Ignored on iOS and Web. On Android batches, each file uses these rules; the call is rejected if any file would use OkHttp.
++     * Ignored on iOS and Web. On Android batches, each file uses these rules; the call is rejected if the files resolve to different engines.
+      *
+      * @since 8.5.0
+      */
+@@ -323,14 +339,14 @@ export interface DownloadBatchOptions {
+      * When the response includes this header with a positive integer, native code uses it for
+      * `downloadProgress` totals and progress is clamped at 1. Examples: `X-Uncompressed-Length`.
+      *
+-     * Batch downloads: iOS only (same header name applies to every file in `files`). Android batches always
+-     * use DownloadManager and ignore this option. Ignored on Web.
++     * Batch downloads: the same header name applies to every file in `files`. Android DownloadManager batches ignore
++     * this option. Ignored on Web.
+      *
+      * @since 8.9.0
+      */
+     lengthHeader?: string;
+     /**
+-     * Number of times to retry each file after a connection failure (iOS URLSession).
++     * Number of times to retry each file after a connection failure (iOS URLSession and Android OkHttp batches).
+      *
+      * Defaults to `0` (no retries). Applied to every entry in `files`. See {@link DownloadOptions.retries} for delay and
+      * error rules. While one file retries, the batch continues and other files are unaffected. Android DownloadManager
+@@ -340,6 +356,13 @@ export interface DownloadBatchOptions {
+      * @since 8.9.0
+      */
+     retries?: number;
++    /**
++     * iOS 26 and later: run the whole batch in one `BGContinuedProcessingTask` that shows `title` and `description`, see
++     * {@link DownloadOptions.iosContinuedProcessing}. If the task expires, the batch fails with `downloadFailed`.
++     *
++     * @since 8.12.0
++     */
++    iosContinuedProcessing?: boolean;
+ }
+ /**
+  * Capacitor plugin for downloading files with background support.
+diff --git a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
+index df0ce5a..37122f2 100644
+--- a/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
++++ b/node_modules/@capgo/capacitor-downloader/ios/Sources/CapacitorDownloaderPlugin/CapacitorDownloaderPlugin.swift
+@@ -105,6 +105,10 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+     }
+ 
+     private func cancelDownloadFromContinuedProcessingExpiry(_ downloadId: String) {
++        if batchCoordinator.isBatch(batchId: downloadId), let generation = batchCoordinator.generation(for: downloadId) {
++            failBatch(batchId: downloadId, generation: generation, fileIndex: nil, error: "Continued processing task expired")
++            return
++        }
+         tasksLock.lock()
+         let hasPendingForegroundRetry = pendingRetryWorkItems[downloadId] != nil
+         tasksLock.unlock()
+@@ -626,15 +630,20 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         }
+     }
+ 
++    /// The continued processing task to run the download in: `title` and `description` with `iosContinuedProcessing`,
++    /// or the deprecated `iosContinuedProcessingTitle` and `iosContinuedProcessingSubtitle`.
+     private func parseContinuedProcessingRequest(_ call: CAPPluginCall) -> DownloadContinuedProcessingCoordinator.Request? {
+-        guard let title = call.getString("iosContinuedProcessingTitle")?.trimmingCharacters(in: .whitespacesAndNewlines),
+-              !title.isEmpty else {
++        let useShared = call.getBool("iosContinuedProcessing") == true
++        guard let title = Self.nonEmpty(useShared ? call.getString("title") : call.getString("iosContinuedProcessingTitle")) else {
+             return nil
+         }
+-        let subtitle = call.getString("iosContinuedProcessingSubtitle")?
+-            .trimmingCharacters(in: .whitespacesAndNewlines)
+-        let normalizedSubtitle = (subtitle?.isEmpty == false) ? subtitle : nil
+-        return DownloadContinuedProcessingCoordinator.Request(title: title, subtitle: normalizedSubtitle)
++        let subtitle = Self.nonEmpty(useShared ? call.getString("description") : call.getString("iosContinuedProcessingSubtitle"))
++        return DownloadContinuedProcessingCoordinator.Request(title: title, subtitle: subtitle)
++    }
++
++    private static func nonEmpty(_ value: String?) -> String? {
++        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines)
++        return trimmed?.isEmpty == false ? trimmed : nil
+     }
+ 
+     private func markContinuedProcessingFinished(downloadId: String, success: Bool) {
+@@ -650,7 +659,6 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         let lengthHeader = normalizedLengthHeader(from: call)
+         let wifiOnly = call.getString("network") == "wifi-only"
+         let retries = DownloadConnectionRetry.normalizeRetries(call.getInt("retries"))
+-        let batchSession = downloadSession(allowsCellularAccess: !wifiOnly, preferForegroundCapable: false)
+ 
+         for fileObject in files {
+             guard let urlString = pluginString(fileObject["url"]),
+@@ -688,9 +696,45 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+             generation: generation
+         )
+ 
++        let continuedRequest = parseContinuedProcessingRequest(call)
++        continuedProcessing.beginIfPossible(downloadId: batchId, request: continuedRequest) { [weak self] useForeground in
++            guard let self else {
++                return
++            }
++            guard self.batchCoordinator.generation(for: batchId) == generation else {
++                self.markContinuedProcessingFinished(downloadId: batchId, success: false)
++                call.reject("Download was cancelled")
++                return
++            }
++            self.startBatchTasks(
++                call,
++                batchId: batchId,
++                generation: generation,
++                files: parsed,
++                headers: headers,
++                lengthHeader: lengthHeader,
++                retries: retries,
++                session: self.downloadSession(allowsCellularAccess: !wifiOnly, preferForegroundCapable: useForeground),
++                foreground: useForeground
++            )
++        }
++    }
++
++    // swiftlint:disable:next function_parameter_count
++    private func startBatchTasks(
++        _ call: CAPPluginCall,
++        batchId: String,
++        generation: UInt64,
++        files: [(url: URL, destination: String)],
++        headers: [String: String],
++        lengthHeader: String?,
++        retries: Int,
++        session batchSession: URLSession,
++        foreground: Bool
++    ) {
+         var stagedTasks: [(taskId: String, task: URLSessionDownloadTask)] = []
+ 
+-        for (index, entry) in parsed.enumerated() {
++        for (index, entry) in files.enumerated() {
+             let taskId = batchCoordinator.fileTaskId(batchId: batchId, generation: generation, fileIndex: index)
+             DownloadDestinationStore.shared.setDestination(entry.destination, for: taskId)
+             batchCoordinator.registerChildTask(batchId: batchId, taskId: taskId, fileIndex: index)
+@@ -708,12 +752,24 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+ 
+         batchCoordinator.persistBatchChildRegistrations(batchId: batchId)
+ 
++        if foreground {
++            foregroundSessionLock.lock()
++            stagedTasks.forEach { foregroundSessionDownloadIds.insert($0.taskId) }
++            foregroundSessionLock.unlock()
++        }
++
+         for staged in stagedTasks {
+             setRetryBudget(for: staged.taskId, retries: retries)
+             setTask(staged.task, for: staged.taskId)
+-            if !skipBatchTaskResumeForTests {
+-                staged.task.resume()
+-            }
++        }
++        guard batchCoordinator.generation(for: batchId) == generation else {
++            discardStagedBatchTasks(stagedTasks, session: batchSession)
++            markBatchContinuedProcessingFinished(batchId: batchId, generation: generation, success: false)
++            call.reject("Download was cancelled")
++            return
++        }
++        if !skipBatchTaskResumeForTests {
++            stagedTasks.forEach { $0.task.resume() }
+         }
+ 
+         call.resolve([
+@@ -723,6 +779,28 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         ])
+     }
+ 
++    /// Cancels the transfers of a batch that was stopped while they were being created. They are published before the
++    /// batch is checked again, so a `stop` that comes after that check cancels them itself through `cancelBatchTasks`.
++    private func discardStagedBatchTasks(_ stagedTasks: [(taskId: String, task: URLSessionDownloadTask)], session: URLSession) {
++        for staged in stagedTasks {
++            staged.task.cancel()
++            removeTask(for: staged.taskId, completing: staged.task, in: session)
++            DownloadDestinationStore.shared.removeDestination(for: staged.taskId)
++            clearRetryBudget(for: staged.taskId)
++            batchCoordinator.unregisterChildTask(staged.taskId)
++        }
++    }
++
++    /// Ends the continued processing task of a batch and forgets which of its transfers ran in the in-process session,
++    /// by their id prefix since a batch that succeeded has already unregistered them.
++    private func markBatchContinuedProcessingFinished(batchId: String, generation: UInt64, success: Bool) {
++        markContinuedProcessingFinished(downloadId: batchId, success: success)
++        let childIdPrefix = batchCoordinator.fileTaskId(batchId: batchId, generation: generation, fileIndex: 0).dropLast()
++        foregroundSessionLock.lock()
++        foregroundSessionDownloadIds = foregroundSessionDownloadIds.filter { !$0.hasPrefix(childIdPrefix) }
++        foregroundSessionLock.unlock()
++    }
++
+     private func cancelBatchTasks(batchId: String) {
+         let taskIds = batchCoordinator.childTaskIds(batchId: batchId)
+         for taskId in taskIds {
+@@ -852,20 +930,22 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+         return Set(taskGenerations.keys)
+     }
+ 
+-    private func failBatch(batchId: String, generation: UInt64, fileIndex: Int, error: String) {
++    private func failBatch(batchId: String, generation: UInt64, fileIndex: Int?, error: String) {
+         guard batchCoordinator.beginFailure(batchId: batchId, generation: generation) else {
+             return
+         }
+         cancelBatchTasks(batchId: batchId)
++        markBatchContinuedProcessingFinished(batchId: batchId, generation: generation, success: false)
+         batchCoordinator.removeBatch(batchId: batchId, unregisterChildren: false)
+         DownloadCompletedNotificationStore.shared.removeText(for: batchId, generation: generation)
+         if let failedText = DownloadFailedNotificationStore.shared.takeText(for: batchId, generation: generation) {
+             DownloadCompletedNotificationPresenter.presentIfAllowed(downloadId: batchId, body: failedText)
+         }
+-        notifyListeners(
+-            "downloadFailed",
+-            data: ["id": batchId, "fileIndex": fileIndex, "error": error]
+-        )
++        var data: [String: Any] = ["id": batchId, "error": error]
++        if let fileIndex {
++            data["fileIndex"] = fileIndex
++        }
++        notifyListeners("downloadFailed", data: data)
+     }
+ 
+     private func presentFailedDownloadNotificationIfStored(downloadId: String, generation: UInt64?) {
+@@ -885,6 +965,9 @@ public class CapacitorDownloaderPlugin: CAPPlugin, CAPBridgedPlugin {
+             let generation = batchCoordinator.generation(for: id)
+             batchCoordinator.markCancelled(batchId: id)
+             cancelBatchTasks(batchId: id)
++            if let generation {
++                markBatchContinuedProcessingFinished(batchId: id, generation: generation, success: false)
++            }
+             deleteDownloadedFiles(destinations: destinations)
+             batchCoordinator.removeBatch(batchId: id, unregisterChildren: false)
+             if let generation {
+@@ -1160,7 +1243,9 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+                         DownloadCompletedNotificationPresenter.presentIfAllowed(downloadId: batchId, body: completionText)
+                     }
+                     DownloadFailedNotificationStore.shared.removeText(for: batchId, generation: generation)
++                    markBatchContinuedProcessingFinished(batchId: batchId, generation: generation, success: true)
+                 case .inProgress(let overall):
++                    continuedProcessing.reportProgress(downloadId: batchParts.batchId, fraction: Double(overall))
+                     notifyListeners(
+                         "downloadProgress",
+                         data: [
+@@ -1295,6 +1380,7 @@ extension CapacitorDownloaderPlugin: URLSessionDownloadDelegate {
+             ) else {
+                 return
+             }
++            continuedProcessing.reportProgress(downloadId: batchParts.batchId, fraction: Double(batchProgress.overall))
+             notifyListeners(
+                 "downloadProgress",
+                 data: [

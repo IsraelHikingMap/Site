@@ -28,7 +28,7 @@
     "@capawesome/capacitor-mail-composer": "^0.2.2",
     "@capgo/background-geolocation": "^8.6.5",
     "@capgo/capacitor-compass": "^8.1.26",
-    "@capgo/capacitor-downloader": "^8.8.3",
+    "@capgo/capacitor-downloader": "^8.11.0",
     "@capgo/capacitor-inappbrowser": "^8.27.9",
     "@capgo/capacitor-share-target": "^8.0.68",
     "@capgo/capacitor-speech-synthesis": "^8.0.29",
