@@ -23,8 +23,17 @@ appId: com.mapeak
       text: "My point"
       above: "Description"
     timeout: 10000
-- hideKeyboard:
-    optional: true
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard
+# The keyboard covers the save button
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Done"
 - runFlow:
     file: tap-button.yaml
     env:
