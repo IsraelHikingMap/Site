@@ -1,0 +1,14 @@
+# Taps on a button with an icon, whose aria-label Maestro exposes as its id on the web and as its text elsewhere.
+appId: com.mapeak
+---
+- runFlow:
+    when:
+      platform: Web
+    commands:
+      - tapOn:
+          id: ${BUTTON}
+- runFlow:
+    when:
+      true: ${maestro.platform != 'web'}
+    commands:
+      - tapOn: ${BUTTON}

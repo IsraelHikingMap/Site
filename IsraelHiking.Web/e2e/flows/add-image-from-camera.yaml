@@ -1,12 +1,13 @@
 # Taking a photo asks for the camera permission, which a wrong R8 configuration crashes on.
-# Runs only on Android since the iOS simulator does not have a camera.
 appId: com.mapeak
 tags:
   - android
+env:
+  CAMERA_WITH_ICON: ". Camera"
 ---
 - runFlow: ../common/start-at-location.yaml
 - runFlow: ../common/add-point.yaml
-- tapOn: ". Camera"
+- tapOn: ${CAMERA_WITH_ICON}
 - tapOn: "While using the app"
 - tapOn:
     id: "com.android.camera2:id/shutter_button"

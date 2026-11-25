@@ -6,6 +6,10 @@ appId: com.mapeak
 tags:
   - android
   - ios
+env:
+  GALLERY_WITH_ICON: ". Gallery"
+  LATEST_PHOTO: "Photo taken on.*"
+  ADD_SELECTED: "Add.*"
 ---
 # On iOS the image is added by start-ios-simulator.sh, adding it to a simulator that already runs the tests hangs
 - runFlow:
@@ -16,13 +20,13 @@ tags:
           - image-with-exif.jpg
 - runFlow: ../common/start-at-location.yaml
 - runFlow: ../common/add-point.yaml
-- tapOn: ". Gallery"
+- tapOn: ${GALLERY_WITH_ICON}
 - runFlow:
     when:
       platform: Android
     commands:
-      - tapOn: "Photo taken on.*"
-      - tapOn: "Add.*"
+      - tapOn: ${LATEST_PHOTO}
+      - tapOn: ${ADD_SELECTED}
 - runFlow:
     when:
       platform: iOS
@@ -35,8 +39,8 @@ tags:
           visible: "Done"
           timeout: 120000
       - waitForAnimationToEnd
-      # The picker does not expose its content, the latest image is the one the test added
       - tapOn:
           point: "16%,52%"
+          label: "Tap on the image that was added, after the six images of the simulator"
       - tapOn: "Done"
 - runFlow: ../common/save-point-with-image.yaml

@@ -1,6 +1,8 @@
 # Starts a clean app on a known location. Permissions are left for the app to ask for and are granted
 # here, since asking for them is where a wrong R8 configuration takes the app down.
 appId: com.mapeak
+env:
+  ALLOW_LOCATION: "(While using the app|Allow While Using App)"
 ---
 - setLocation:
     latitude: 31.7734
@@ -14,9 +16,9 @@ appId: com.mapeak
           permissions:
             all: unset
       - extendedWaitUntil:
-          visible: "(While using the app|Allow While Using App)"
+          visible: ${ALLOW_LOCATION}
           timeout: 60000
-- tapOn: "(While using the app|Allow While Using App)"
+- tapOn: ${ALLOW_LOCATION}
 - tapOn:
     text: "Allow"
     optional: true

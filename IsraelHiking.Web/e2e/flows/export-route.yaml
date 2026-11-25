@@ -1,26 +1,9 @@
-# The route depends on the production routing server and on OSM, so nothing is expected of it beyond
-# not being empty. Does not run on iOS since the simulator of the CI is too slow for more than one flow.
 appId: com.mapeak
 tags:
   - android
 ---
 - runFlow: ../common/start-at-location.yaml
-- tapOn: "Edit Route"
-- waitForAnimationToEnd
-- retry:
-    maxRetries: 3
-    commands:
-      - tapOn:
-          point: "60%,40%"
-      - tapOn:
-          point: "70%,55%"
-      - extendedWaitUntil:
-          visible: '[^0-9]*[1-9][0-9.,]* (mi|km|ft|m)'
-          timeout: 15000
-- tapOn: "Private Routes"
-- tapOn: "More.*"
-- tapOn: ".*Export Route"
-- tapOn: "GPX version 1.1.*"
+- runFlow: ../common/export-route.yaml
 - extendedWaitUntil:
     visible: "Route.gpx"
     timeout: 120000
