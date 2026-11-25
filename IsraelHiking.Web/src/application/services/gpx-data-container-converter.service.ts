@@ -1,5 +1,5 @@
 import { Service } from "@angular/core";
-import { minBy, maxBy, flatten, last } from "lodash-es";
+import { minBy, maxBy, flatten } from "lodash-es";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 import type { Immutable } from "immer";
@@ -376,7 +376,7 @@ export class GpxDataContainerConverterService {
             description: r.desc,
             segments: [{
                 latlngs: r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })),
-                routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
+                routePoint: r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })).at(-1)
             }],
             markers: []
         } as RouteDataWithoutState));
@@ -403,12 +403,12 @@ export class GpxDataContainerConverterService {
                         timestamp: p.time ? new Date(p.time).toISOString() : undefined
                     })),
                     routingType: this.convertExtensionAfterXmlnsRemoval(s.extensions, { RoutingType: { _: "Hike" } }).RoutingType._,
-                    routePoint: last(s.trkpt.map(p => ({
+                    routePoint: s.trkpt.map(p => ({
                         alt: +p.ele,
                         lat: +p.$.lat,
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time).toISOString() : undefined
-                    })))
+                    })).at(-1)
                 })),
                 markers: []
             } as RouteDataWithoutState;

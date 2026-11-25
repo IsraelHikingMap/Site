@@ -2,7 +2,6 @@ import { inject, Service } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
-import { last } from "lodash-es";
 import { firstValueFrom, timeout } from "rxjs";
 import { zipSync, strToU8 } from "fflate";
 import { CapacitorDownloader } from "@capgo/capacitor-downloader";
@@ -171,7 +170,7 @@ export class FileService {
      */
     public async getStyleJsonContent(url: string, isBuiltInBaseLayer: boolean): Promise<string> {
         if (this.runningContextService.isCapacitor && url.startsWith(".")) {
-            const styleOnDevice = await this.readStyleFile(last(url.split("/")), Directory.Data);
+            const styleOnDevice = await this.readStyleFile(url.split("/").at(-1), Directory.Data);
             if (styleOnDevice == null) {
                 this.loggingService.error(`[Files] Missing local style file: ${url}`);
                 return EMPTY_STYLE;
@@ -180,7 +179,7 @@ export class FileService {
         }
         const startTime = performance.now();
         const styleOnDevice = isBuiltInBaseLayer
-            ? await this.readStyleFile(last(url.split("/")), Directory.Data)
+            ? await this.readStyleFile(url.split("/").at(-1), Directory.Data)
             : await this.readStyleFile(FileService.getStyleCacheFileName(url), Directory.Cache);
         const timeoutMs = styleOnDevice != null ? FileService.STYLE_TIMEOUT_WITH_COPY_MS : FileService.STYLE_TIMEOUT_WITHOUT_COPY_MS;
         try {
@@ -202,7 +201,7 @@ export class FileService {
 
     /** The style of a base layer as it is on the device, an empty style when it is not there. */
     public async getStyleJsonContentFromDevice(url: string): Promise<string> {
-        return await this.readStyleFile(last(url.split("/")), Directory.Data) ?? EMPTY_STYLE;
+        return await this.readStyleFile(url.split("/").at(-1), Directory.Data) ?? EMPTY_STYLE;
     }
 
     /**
@@ -297,7 +296,7 @@ export class FileService {
             this.loggingService.warning(`[Files] Unable to get the file name using stat: ${url}, ${(ex as Error).message}`);
         }
         if (!name) {
-            name = this.decodeUrlPart(last(url.split("/"))) || "file";
+            name = this.decodeUrlPart(url.split("/").at(-1)) || "file";
         }
         if (name.indexOf(".") === -1) {
             name += this.getExtensionFromContent(base64Content);
