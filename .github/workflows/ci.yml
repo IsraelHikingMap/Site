@@ -261,6 +261,7 @@ jobs:
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
       - name: Run iOS end to end tests
+        timeout-minutes: 30
         run: |
           IsraelHiking.Web/e2e/start-ios-simulator.sh
           maestro test --include-tags ios IsraelHiking.Web/e2e/flows
