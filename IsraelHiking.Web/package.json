@@ -132,6 +132,7 @@
     "build:watch": "ng build --configuration development --watch",
     "build:prod": "npm run generate-user-data-types && ng build --configuration production",
     "build:mobile": "npm run generate-user-data-types && ng build -c mobile",
+    "build:web-e2e": "npm run generate-user-data-types && ng build -c production,e2e",
     "build:mobile-e2e": "npm run generate-user-data-types && ng build -c mobile,mobile-e2e",
     "cap:update": "npx cap sync && xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App",
     "test": "ng test",

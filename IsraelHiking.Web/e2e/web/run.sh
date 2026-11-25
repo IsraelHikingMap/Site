@@ -1,5 +1,5 @@
 #!/bin/bash
-# Serves the build of the production,e2e configurations, which uses the production server, and runs the web flows against it.
+# Serves the output of build:web-e2e, which uses the production server, and runs the web flows against it.
 # The addresses of the map have dots in them, which are taken for a file extension without --no-ignores.
 set -e
 cd "$(dirname "$0")/../.."

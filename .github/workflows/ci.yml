@@ -57,7 +57,7 @@ jobs:
       - name: Run web end to end tests
         run: |
           cd IsraelHiking.Web
-          npx ng build --configuration production,e2e --no-progress
+          npm run build:web-e2e -- --no-progress
           npm run e2e:web
         env:
           MAESTRO_CLI_NO_ANALYTICS: 1
