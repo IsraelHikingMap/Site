@@ -344,9 +344,6 @@ jobs:
           run_tests() {
             IsraelHiking.Web/e2e/start-ios-simulator.sh && maestro test IsraelHiking.Web/e2e/mobile/flows/ios.yaml
           }
-          # Temporary: shows what keeps the machine busy while the tests run
-          (while true; do date; uptime; top -l 2 -s 2 -n 10 -o cpu -stats command,cpu,mem | tail -11; sleep 45; done) &
-          trap "kill $! 2> /dev/null || true" EXIT
           run_tests || run_tests
         env:
           MAESTRO_CLI_NO_ANALYTICS: 1
