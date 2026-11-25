@@ -3,7 +3,6 @@
 appId: com.mapeak
 env:
   IMAGE_ALT_TEXT: "My point"
-  POINT_ON_MAP: ".?My point"
 ---
 - extendedWaitUntil:
     visible:
@@ -14,10 +13,7 @@ env:
 - extendedWaitUntil:
     notVisible: "Save"
     timeout: 10000
-- tapOn: ${POINT_ON_MAP}
-- extendedWaitUntil:
-    visible: "Save"
-    timeout: 10000
+- runFlow: open-point.yaml
 - assertVisible:
     text: ${IMAGE_ALT_TEXT}
     rightOf: "Description"

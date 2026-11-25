@@ -1,32 +1,5 @@
 url: http://localhost:4173/map/13.00/31.7734/35.2106
-env:
-  POINT_ON_MAP: ".*My point.*"
 ---
 - runFlow: ../common/start-at-location.yaml
-- tapOn:
-    id: "Edit Point"
-- retry:
-    maxRetries: 3
-    commands:
-      - tapOn:
-          point: "60%,40%"
-          label: "Tap on the map to add a point"
-      - extendedWaitUntil:
-          visible: "Title"
-          timeout: 10000
-- tapOn: "Title"
-- inputText: "My point"
-- tapOn:
-    id: "Save"
-- extendedWaitUntil:
-    notVisible:
-      id: "Save"
-    timeout: 10000
-- extendedWaitUntil:
-    visible: ${POINT_ON_MAP}
-    timeout: 15000
-- tapOn: ${POINT_ON_MAP}
-- extendedWaitUntil:
-    visible:
-      id: "Save"
-    timeout: 10000
+- runFlow: ../../common/add-point.yaml
+- runFlow: ../../common/open-point.yaml

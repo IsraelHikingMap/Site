@@ -1,3 +1,4 @@
+# Adds an image from the gallery to the point that is open.
 # An image from the native picker has to make it through the resize, EXIF included, into the point.
 # The image has to be a jpeg with EXIF data, the code that reads it does not run for anything else.
 appId: com.mapeak
@@ -6,6 +7,7 @@ env:
   LATEST_PHOTO: "Photo taken on.*"
   ADD_SELECTED: "Add.*"
 ---
+- tapOn: "Camera"
 - tapOn: ${GALLERY_WITH_ICON}
 - runFlow:
     when:

@@ -1,0 +1,12 @@
+# Opens the point that was added by tapping on it on the map.
+appId: com.mapeak
+env:
+  POINT_ON_MAP: ".*My point.*"
+---
+- extendedWaitUntil:
+    visible: ${POINT_ON_MAP}
+    timeout: 15000
+- tapOn: ${POINT_ON_MAP}
+- extendedWaitUntil:
+    visible: "Description"
+    timeout: 10000

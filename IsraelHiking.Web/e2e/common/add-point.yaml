@@ -1,6 +1,10 @@
+# Adds a point with a title and saves it.
 appId: com.mapeak
 ---
-- tapOn: "Edit Point"
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Edit Point"
 - retry:
     maxRetries: 3
     commands:
@@ -21,4 +25,10 @@ appId: com.mapeak
     timeout: 10000
 - hideKeyboard:
     optional: true
-- tapOn: "Camera"
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Save"
+- extendedWaitUntil:
+    notVisible: "Description"
+    timeout: 10000

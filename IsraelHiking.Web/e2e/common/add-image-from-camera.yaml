@@ -1,8 +1,10 @@
+# Adds a photo to the point that is open.
 # Taking a photo asks for the camera permission, which a wrong R8 configuration crashes on.
 appId: com.mapeak
 env:
   CAMERA_WITH_ICON: ". Camera"
 ---
+- tapOn: "Camera"
 - tapOn: ${CAMERA_WITH_ICON}
 - tapOn: "While using the app"
 - tapOn:

@@ -5,12 +5,14 @@ appId: com.mapeak
 - runFlow: ../common/start-at-location.yaml
 
 - runFlow: ../common/add-point.yaml
-- runFlow: ../common/choose-from-gallery.yaml
+- runFlow: ../common/open-point.yaml
+- runFlow: ../common/add-image-from-gallery.yaml
 - runFlow: ../common/save-point-with-image.yaml
 - runFlow: ../common/delete-point.yaml
 
 - runFlow: ../common/add-point.yaml
-- runFlow: ../common/take-photo.yaml
+- runFlow: ../common/open-point.yaml
+- runFlow: ../common/add-image-from-camera.yaml
 - runFlow: ../common/save-point-with-image.yaml
 - runFlow: ../common/delete-point.yaml
 
