@@ -1,15 +1,13 @@
 appId: com.mapeak
 ---
 - tapOn: "Edit Point"
-- retry:
-    maxRetries: 3
-    commands:
-      - tapOn:
-          point: "70%,40%"
-          label: "Tap on the map to add a point"
-      - extendedWaitUntil:
-          visible: "Title"
-          timeout: 10000
+- waitForAnimationToEnd
+- tapOn:
+    point: "70%,40%"
+    label: "Tap on the map to add a point"
+- extendedWaitUntil:
+    visible: "Title"
+    timeout: 30000
 # The keyboard moves the title when it opens
 - waitForAnimationToEnd
 - tapOn: "Title"
