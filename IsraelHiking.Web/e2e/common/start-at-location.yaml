@@ -35,11 +35,16 @@ env:
       notVisible: "Close"
     commands:
       - tapOn: "Next"
-- tapOn: "Close"
-# The map can be seen behind the introduction
-- extendedWaitUntil:
-    notVisible: "Close"
-    timeout: 30000
+# A slow emulator can miss a tap, and the map can be seen behind the introduction
+- repeat:
+    times: 5
+    while:
+      visible: "Close"
+    commands:
+      - tapOn:
+          text: "Close"
+          optional: true
+- assertNotVisible: "Close"
 - extendedWaitUntil:
     visible: "Edit Point"
     timeout: 30000
