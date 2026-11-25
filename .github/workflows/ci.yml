@@ -241,12 +241,49 @@ jobs:
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
-      - name: Build iOS for end to end tests
+
+  ios-end-to-end-tests:
+    runs-on: xcode-27
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          working-directory: IsraelHiking.Web/ios/App
+          bundler-cache: true
+
+      - name: Build UI
         run: |
           cd IsraelHiking.Web
+          npm ci
           npm run build:mobile-e2e -- --no-progress
-          npx cap copy ios
-          cd ios/App
+          npx cap sync ios
+
+      - name: Restore Swift package cache
+        uses: actions/cache/restore@v6
+        with:
+          path: IsraelHiking.Web/ios/.spm-cache
+          key: spm-${{ runner.os }}-${{ hashFiles('IsraelHiking.Web/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Resolve Swift packages
+        run: |
+          cd IsraelHiking.Web/ios/App
+          xcodebuild -resolvePackageDependencies \
+            -project App.xcodeproj \
+            -clonedSourcePackagesDirPath ../.spm-cache
+
+      - name: Build iOS for end to end tests
+        run: |
+          cd IsraelHiking.Web/ios/App
           bundle exec fastlane build_e2e
         env:
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180

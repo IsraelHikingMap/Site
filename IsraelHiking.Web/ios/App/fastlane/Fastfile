@@ -44,7 +44,7 @@ platform :ios do
       destination: "generic/platform=iOS Simulator",
       skip_archive: true,
       skip_codesigning: true,
-      xcargs: "ARCHS=arm64",
+      xcargs: "ARCHS=arm64 COMPILER_INDEX_STORE_ENABLE=NO DEBUG_INFORMATION_FORMAT=dwarf",
       derived_data_path: File.expand_path("../../.e2e-build", __dir__),
       cloned_source_packages_path: File.expand_path("../../.spm-cache", __dir__),
       skip_package_dependencies_resolution: true,
