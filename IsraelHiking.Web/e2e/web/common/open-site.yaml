@@ -1,4 +1,4 @@
-# Starts a clean site with the map at a fixed place. The buttons with an icon are found by their id in the web flows,
+# Opens a clean site with the map at a fixed place. The buttons with an icon are found by their id in the web flows,
 # as Maestro exposes the aria-label as the id of an element on the web and not as its text.
 url: http://localhost:4173/map/13.00/31.7734/35.2106
 ---

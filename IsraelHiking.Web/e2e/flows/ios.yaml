@@ -1,6 +1,6 @@
 appId: com.mapeak
 ---
-- runFlow: ../common/start-app.yaml
+- runFlow: ../common/start-mobile-app.yaml
 - runFlow: ../common/add-point.yaml
 - runFlow: ../common/open-point.yaml
 - runFlow: ../common/add-image-from-gallery.yaml

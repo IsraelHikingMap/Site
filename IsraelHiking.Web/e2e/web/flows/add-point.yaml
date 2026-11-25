@@ -1,5 +1,5 @@
 url: http://localhost:4173/map/13.00/31.7734/35.2106
 ---
-- runFlow: ../common/start-app.yaml
+- runFlow: ../common/open-site.yaml
 - runFlow: ../../common/add-point.yaml
 - runFlow: ../../common/open-point.yaml
