@@ -7,8 +7,10 @@ tags:
   - android
   - ios
 ---
-- retry:
-    maxRetries: 2
+# On iOS the image is added by start-ios-simulator.sh, adding it to a simulator that already runs the tests hangs
+- runFlow:
+    when:
+      platform: Android
     commands:
       - addMedia:
           - image-with-exif.jpg
