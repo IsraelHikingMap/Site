@@ -13,7 +13,7 @@ env:
 - extendedWaitUntil:
     notVisible: "Save"
     timeout: 10000
-- runFlow: open-point.yaml
+- runFlow: ../../common/open-point.yaml
 - assertVisible:
     text: ${IMAGE_ALT_TEXT}
     rightOf: "Description"

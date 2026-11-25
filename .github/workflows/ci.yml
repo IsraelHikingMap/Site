@@ -153,7 +153,7 @@ jobs:
           script: |
             adb install IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
             IsraelHiking.Web/e2e/settle-android-emulator.sh
-            maestro test IsraelHiking.Web/e2e/flows/android.yaml
+            maestro test IsraelHiking.Web/e2e/mobile/flows/android.yaml
         env:
           MAESTRO_CLI_NO_ANALYTICS: 1
       - name: Upload android end to end results
@@ -303,7 +303,7 @@ jobs:
         run: |
           # The simulator of the runner sometimes gets stuck, so the tests get a second chance on a new one
           run_tests() {
-            IsraelHiking.Web/e2e/start-ios-simulator.sh && maestro test IsraelHiking.Web/e2e/flows/ios.yaml
+            IsraelHiking.Web/e2e/start-ios-simulator.sh && maestro test IsraelHiking.Web/e2e/mobile/flows/ios.yaml
           }
           run_tests || run_tests
         env:

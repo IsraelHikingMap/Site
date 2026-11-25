@@ -4,19 +4,19 @@ appId: com.mapeak
     - image-with-exif.jpg
 - runFlow: ../common/start-mobile-app.yaml
 
-- runFlow: ../common/add-point.yaml
-- runFlow: ../common/open-point.yaml
+- runFlow: ../../common/add-point.yaml
+- runFlow: ../../common/open-point.yaml
 - runFlow: ../common/add-image-from-gallery.yaml
 - runFlow: ../common/save-point-with-image.yaml
-- runFlow: ../common/delete-point.yaml
+- runFlow: ../../common/delete-point.yaml
 
-- runFlow: ../common/add-point.yaml
-- runFlow: ../common/open-point.yaml
+- runFlow: ../../common/add-point.yaml
+- runFlow: ../../common/open-point.yaml
 - runFlow: ../common/add-image-from-camera.yaml
 - runFlow: ../common/save-point-with-image.yaml
-- runFlow: ../common/delete-point.yaml
+- runFlow: ../../common/delete-point.yaml
 
-- runFlow: ../common/plan-and-export-route.yaml
+- runFlow: ../../common/plan-and-export-route.yaml
 - extendedWaitUntil:
     visible: "Route.gpx"
     timeout: 120000

@@ -17,5 +17,5 @@ xcrun simctl delete mapeak-e2e 2> /dev/null || true
 DEVICE=$(xcrun simctl create mapeak-e2e "iPhone 17")
 xcrun simctl boot "$DEVICE"
 retry xcrun simctl bootstatus "$DEVICE"
-retry xcrun simctl addmedia "$DEVICE" flows/image-with-exif.jpg
+retry xcrun simctl addmedia "$DEVICE" mobile/flows/image-with-exif.jpg
 retry xcrun simctl install "$DEVICE" ../ios/.e2e-build/Build/Products/Release-iphonesimulator/App.app

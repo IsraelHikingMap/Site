@@ -1,8 +1,16 @@
-# Deletes the point that is open and leaves the editing of points.
+# Deletes the point that is open, expects it to be gone from the map and leaves the editing of points.
 appId: com.mapeak
+env:
+  POINT_ON_MAP: ".*My point.*"
 ---
-- tapOn: "Delete Point"
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Delete Point"
 - extendedWaitUntil:
-    notVisible: "Save"
+    notVisible: ${POINT_ON_MAP}
     timeout: 10000
-- tapOn: "Edit Point"
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Edit Point"
