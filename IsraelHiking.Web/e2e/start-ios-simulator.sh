@@ -13,6 +13,7 @@ retry() {
 }
 
 cd "$(dirname "$0")"
+xcrun simctl delete mapeak-e2e 2> /dev/null || true
 DEVICE=$(xcrun simctl create mapeak-e2e "iPhone 17")
 xcrun simctl boot "$DEVICE"
 retry xcrun simctl bootstatus "$DEVICE"
