@@ -1,6 +1,5 @@
 import { Service } from "@angular/core";
 import { Capacitor } from "@capacitor/core";
-import { Device } from "@capacitor/device";
 
 import { environment } from "../../environments/environment";
 
@@ -13,8 +12,6 @@ export class RunningContextService {
     public readonly isMac: boolean;
     public readonly isProduction = environment.production;
     public readonly isFacebook: boolean;
-    /** Whether the app runs on an emulator or a simulator, known only after {@link initialize} */
-    public isVirtualDevice = false;
 
     constructor() {
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
@@ -32,12 +29,5 @@ export class RunningContextService {
             || this.isCapacitor;
         /* eslint-enable */
         this.isFacebook = agent.indexOf("FBAN") !== -1 || agent.indexOf("FBAV") !== -1;
-    }
-
-    /** Reads what can only be asked for asynchronously, a browser never counts as a virtual device */
-    public async initialize() {
-        if (this.isCapacitor) {
-            this.isVirtualDevice = (await Device.getInfo()).isVirtual;
-        }
     }
 }

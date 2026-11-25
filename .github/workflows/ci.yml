@@ -54,8 +54,6 @@ jobs:
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
-      - name: Block analytics
-        run: echo "127.0.0.1 www.googletagmanager.com www.google-analytics.com" | sudo tee -a /etc/hosts
       - name: Run web end to end tests
         run: |
           cd IsraelHiking.Web
@@ -128,7 +126,10 @@ jobs:
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
       - name: Build Android for end to end tests
         run: |
-          cd IsraelHiking.Web/android
+          cd IsraelHiking.Web
+          npm run build:mobile-e2e -- --no-progress
+          npx cap copy android
+          cd android
           bundle exec fastlane build_e2e
       - name: Install Maestro
         run: |
@@ -242,7 +243,10 @@ jobs:
           path: IsraelHiking.Web/ios/App/App.ipa
       - name: Build iOS for end to end tests
         run: |
-          cd IsraelHiking.Web/ios/App
+          cd IsraelHiking.Web
+          npm run build:mobile-e2e -- --no-progress
+          npx cap copy ios
+          cd ios/App
           bundle exec fastlane build_e2e
       - name: Setup Java
         uses: actions/setup-java@v6.3.0

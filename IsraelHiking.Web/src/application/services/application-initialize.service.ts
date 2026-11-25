@@ -110,7 +110,6 @@ export class ApplicationInitializeService {
             this.loggingService.info("---------------------------------------");
             this.loggingService.info(`Starting Mapeak Application Initialization, ${timeToBootstrap} ms after the page started loading`);
             await this.databaseService.initialize();
-            await this.runningContextService.initialize();
             this.analyticsService.initialize();
             this.screenService.initialize();
             this.themeService.initialize();

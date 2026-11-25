@@ -30,8 +30,10 @@ export class AnalyticsService {
     private readonly store = inject(Store);
 
     initialize() {
-        if (this.runningContextService.isVirtualDevice) {
-            this.disableFirebase();
+        if (!this.runningContextService.isProduction) {
+            if (this.runningContextService.isCapacitor) {
+                this.disableFirebase();
+            }
             return;
         }
         // Analytics is not needed for the first paint, so it is loaded only once the page has
@@ -49,9 +51,8 @@ export class AnalyticsService {
     }
 
     /**
-     * An emulator is a developer or an end to end test, and the latter starts from a clean app every time,
-     * which is an install as far as firebase and appsflyer are concerned. Appsflyer is simply not started
-     * there, while firebase starts by itself and has to be turned off.
+     * Firebase starts by itself, so it has to be turned off for a build that is not a production one to not be
+     * counted - the end to end tests start from a clean app every time, which is an install as far as it knows.
      */
     private async disableFirebase() {
         try {
@@ -185,7 +186,7 @@ export class AnalyticsService {
     }
 
     trackEvent(category: string, action: string) {
-        if (this.runningContextService.isVirtualDevice) {
+        if (!this.runningContextService.isProduction) {
             return;
         }
         try {
