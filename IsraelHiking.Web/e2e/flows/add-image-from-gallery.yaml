@@ -1,7 +1,5 @@
 # An image from the native picker has to make it through the resize, EXIF included, into the point.
 # The image has to be a jpeg with EXIF data, the code that reads it does not run for anything else.
-# It also has to be as big as a photo: the loading screen of the Android plugin stays open when an image is
-# ready before that screen is.
 appId: com.mapeak
 tags:
   - android
@@ -27,6 +25,16 @@ env:
     commands:
       - tapOn: ${LATEST_PHOTO}
       - tapOn: ${ADD_SELECTED}
+      # The loading screen of the camera plugin stays open when the image is ready before that screen is
+      - extendedWaitUntil:
+          visible: "Save"
+          timeout: 20000
+          optional: true
+      - runFlow:
+          when:
+            notVisible: "Save"
+          commands:
+            - back
 - runFlow:
     when:
       platform: iOS
