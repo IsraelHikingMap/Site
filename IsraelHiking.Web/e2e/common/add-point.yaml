@@ -10,19 +10,15 @@ appId: com.mapeak
       - extendedWaitUntil:
           visible: "Title"
           timeout: 10000
-# A slow emulator can drop letters that are typed before the field is ready, or move the field once the keyboard opens
-- retry:
-    maxRetries: 3
-    commands:
-      - waitForAnimationToEnd
-      - tapOn: "Title"
-      - eraseText: 20
-      - inputText: "My point"
-      - extendedWaitUntil:
-          visible:
-            text: "My point"
-            above: "Description"
-          timeout: 5000
+# The keyboard moves the title when it opens
+- waitForAnimationToEnd
+- tapOn: "Title"
+- inputText: "My point"
+- extendedWaitUntil:
+    visible:
+      text: "My point"
+      above: "Description"
+    timeout: 10000
 - hideKeyboard:
     optional: true
 - tapOn: "Camera"

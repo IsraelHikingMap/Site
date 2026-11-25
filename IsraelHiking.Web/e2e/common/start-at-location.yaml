@@ -7,17 +7,13 @@ env:
 - setLocation:
     latitude: 31.7734
     longitude: 35.2106
-# An emulator that has just booted may restart the Google services, which takes the apps that use them down.
-- retry:
-    maxRetries: 2
-    commands:
-      - launchApp:
-          clearState: true
-          permissions:
-            all: unset
-      - extendedWaitUntil:
-          visible: ${ALLOW_LOCATION}
-          timeout: 60000
+- launchApp:
+    clearState: true
+    permissions:
+      all: unset
+- extendedWaitUntil:
+    visible: ${ALLOW_LOCATION}
+    timeout: 120000
 - tapOn: ${ALLOW_LOCATION}
 - tapOn:
     text: "Allow"
@@ -35,16 +31,11 @@ env:
       notVisible: "Close"
     commands:
       - tapOn: "Next"
-# A slow emulator can miss a tap, and the map can be seen behind the introduction
-- repeat:
-    times: 5
-    while:
-      visible: "Close"
-    commands:
-      - tapOn:
-          text: "Close"
-          optional: true
-- assertNotVisible: "Close"
+- tapOn: "Close"
+# The map can be seen behind the introduction
+- extendedWaitUntil:
+    notVisible: "Close"
+    timeout: 30000
 - extendedWaitUntil:
     visible: "Edit Point"
     timeout: 30000
