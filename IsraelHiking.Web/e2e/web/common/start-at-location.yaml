@@ -1,0 +1,15 @@
+# Starts a clean site on a known location. The buttons with an icon are found by their id in the web flows,
+# as Maestro exposes the aria-label as the id of an element on the web and not as its text.
+url: http://localhost:4173/map/13.00/31.7734/35.2106
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 60000
+- tapOn: "OK"
+- extendedWaitUntil:
+    visible:
+      id: "Edit Point"
+    timeout: 30000
+- waitForAnimationToEnd

@@ -1,0 +1,21 @@
+# Expects the image in the point, saves the point and expects the image when opening it again.
+# The image is the one with the title of the point that is next to the description, as its
+# alternative text is the title, and the title itself is above the description.
+appId: com.mapeak
+---
+- extendedWaitUntil:
+    visible:
+      text: "My point"
+      rightOf: "Description"
+    timeout: 30000
+- tapOn: "Save"
+- extendedWaitUntil:
+    notVisible: "Save"
+    timeout: 10000
+- tapOn: ".?My point"
+- extendedWaitUntil:
+    visible: "Save"
+    timeout: 10000
+- assertVisible:
+    text: "My point"
+    rightOf: "Description"

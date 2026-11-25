@@ -1,0 +1,31 @@
+# An image from the native picker has to make it through the resize, EXIF included, into the point.
+# The image has to be a jpeg with EXIF data, the code that reads it does not run for anything else.
+# It also has to be as big as a photo: the loading screen of the Android plugin stays open when an image is
+# ready before that screen is.
+appId: com.mapeak
+tags:
+  - android
+  - ios
+---
+- addMedia:
+    - image-with-exif.jpg
+- runFlow: ../common/start-at-location.yaml
+- runFlow: ../common/add-point.yaml
+- tapOn: ". Gallery"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: "Photo taken on.*"
+      - tapOn: "Add.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: "Allow Full Access"
+      - waitForAnimationToEnd
+      # The picker does not expose its content, the latest image is the one the test added
+      - tapOn:
+          point: "16%,52%"
+      - tapOn: "Done"
+- runFlow: ../common/save-point-with-image.yaml

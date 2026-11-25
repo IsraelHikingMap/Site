@@ -2,6 +2,7 @@ name: CI
 
 # This workflow is triggered on every push.
 # It runs the backend and frontend tests and uploads the coverage to Codecov.
+# The web, Android and iOS end to end tests run after the build of each of them, see IsraelHiking.Web/e2e.
 
 on:
   push:
@@ -40,6 +41,32 @@ jobs:
         run: |
           cd IsraelHiking.Web
           npx ng lint
+      - name: Setup Java
+        uses: actions/setup-java@v6.3.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+        env:
+          MAESTRO_VERSION: 2.12.1
+      - name: Block analytics
+        run: echo "127.0.0.1 www.googletagmanager.com www.google-analytics.com" | sudo tee -a /etc/hosts
+      - name: Run web end to end tests
+        run: |
+          cd IsraelHiking.Web
+          npx ng build --configuration production,e2e --no-progress
+          npm run e2e:web
+        env:
+          MAESTRO_CLI_NO_ANALYTICS: 1
+      - name: Upload web end to end results
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: e2e-web
+          path: ~/.maestro/tests
       - name: Codecov upload
         if: always()
         uses: codecov/codecov-action@v7.1.1
@@ -97,6 +124,42 @@ jobs:
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+      - name: Build Android for end to end tests
+        run: |
+          cd IsraelHiking.Web/android
+          bundle exec fastlane build_e2e
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+        env:
+          MAESTRO_VERSION: 2.12.1
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run Android end to end tests
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_3a
+          cores: 4
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back emulated
+          script: |
+            adb install IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
+            maestro test --include-tags android IsraelHiking.Web/e2e/flows
+        env:
+          MAESTRO_CLI_NO_ANALYTICS: 1
+      - name: Upload android end to end results
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: e2e-android
+          path: ~/.maestro/tests
 
   build-docker: 
     runs-on: ubuntu-latest
@@ -177,3 +240,30 @@ jobs:
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App/App.ipa
+      - name: Build iOS for end to end tests
+        run: |
+          cd IsraelHiking.Web/ios/App
+          bundle exec fastlane build_e2e
+      - name: Setup Java
+        uses: actions/setup-java@v6.3.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+        env:
+          MAESTRO_VERSION: 2.12.1
+      - name: Run iOS end to end tests
+        run: |
+          IsraelHiking.Web/e2e/start-ios-simulator.sh
+          maestro test --include-tags ios IsraelHiking.Web/e2e/flows
+        env:
+          MAESTRO_CLI_NO_ANALYTICS: 1
+      - name: Upload ios end to end results
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: e2e-ios
+          path: ~/.maestro/tests

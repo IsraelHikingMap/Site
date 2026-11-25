@@ -1,0 +1,24 @@
+appId: com.mapeak
+---
+- tapOn: "Edit Point"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          point: "70%,40%"
+      - extendedWaitUntil:
+          visible: "Title"
+          timeout: 10000
+# A slow emulator can drop letters that are typed before the field is ready
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Title"
+      - eraseText: 20
+      - inputText: "My point"
+      - extendedWaitUntil:
+          visible: "My point"
+          timeout: 5000
+- hideKeyboard:
+    optional: true
+- tapOn: "Camera"

@@ -44,6 +44,27 @@ platform :android do
     )
   end
 
+  desc "Build the minified Android apk for the end to end tests, signed with the debug key and with the abi of the emulator"
+  lane :build_e2e do |options|
+    keystore = File.expand_path("~/.android/debug.keystore")
+    unless File.exist?(keystore)
+      FileUtils.mkdir_p(File.dirname(keystore))
+      sh("keytool", "-genkeypair", "-keystore", keystore, "-storepass", "android", "-keypass", "android",
+        "-alias", "androiddebugkey", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
+        "-dname", "CN=Android Debug,O=Android,C=US")
+    end
+    gradle(
+      task: ":app:assembleRelease",
+      properties: {
+        "e2eAbi" => options[:abi] || "x86_64",
+        "android.injected.signing.store.file" => keystore,
+        "android.injected.signing.store.password" => "android",
+        "android.injected.signing.key.alias" => "androiddebugkey",
+        "android.injected.signing.key.password" => "android",
+      }
+    )
+  end
+
   lane :upload do
     desc "Deploy a new version to the Google Play"
     upload_to_play_store(

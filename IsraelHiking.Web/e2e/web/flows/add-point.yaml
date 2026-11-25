@@ -1,0 +1,30 @@
+# Adding an image is covered only on the devices, Maestro can not choose a file on the web.
+url: http://localhost:4173/map/13.00/31.7734/35.2106
+---
+- runFlow: ../common/start-at-location.yaml
+- tapOn:
+    id: "Edit Point"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          point: "60%,40%"
+      - extendedWaitUntil:
+          visible: "Title"
+          timeout: 10000
+- tapOn: "Title"
+- inputText: "My point"
+- tapOn:
+    id: "Save"
+- extendedWaitUntil:
+    notVisible:
+      id: "Save"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: ".*My point.*"
+    timeout: 15000
+- tapOn: ".*My point.*"
+- extendedWaitUntil:
+    visible:
+      id: "Save"
+    timeout: 10000
