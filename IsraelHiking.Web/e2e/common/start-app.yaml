@@ -1,4 +1,4 @@
-# Starts a clean app on a known location. Permissions are left for the app to ask for and are granted
+# Starts a clean app with the map at a fixed place. Permissions are left for the app to ask for and are granted
 # here, since asking for them is where a wrong R8 configuration takes the app down.
 appId: com.mapeak
 env:

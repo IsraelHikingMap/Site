@@ -2,7 +2,7 @@ appId: com.mapeak
 ---
 - addMedia:
     - image-with-exif.jpg
-- runFlow: ../common/start-at-location.yaml
+- runFlow: ../common/start-app.yaml
 
 - runFlow: ../common/add-point.yaml
 - runFlow: ../common/open-point.yaml
