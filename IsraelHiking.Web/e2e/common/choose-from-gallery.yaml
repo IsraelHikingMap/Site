@@ -1,23 +1,11 @@
 # An image from the native picker has to make it through the resize, EXIF included, into the point.
 # The image has to be a jpeg with EXIF data, the code that reads it does not run for anything else.
 appId: com.mapeak
-tags:
-  - android
-  - ios
 env:
   GALLERY_WITH_ICON: ". Gallery"
   LATEST_PHOTO: "Photo taken on.*"
   ADD_SELECTED: "Add.*"
 ---
-# On iOS the image is added by start-ios-simulator.sh, adding it to a simulator that already runs the tests hangs
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - addMedia:
-          - image-with-exif.jpg
-- runFlow: ../common/start-at-location.yaml
-- runFlow: ../common/add-point.yaml
 - tapOn: ${GALLERY_WITH_ICON}
 - runFlow:
     when:
@@ -51,4 +39,3 @@ env:
           point: "16%,52%"
           label: "Tap on the image that was added, after the six images of the simulator"
       - tapOn: "Done"
-- runFlow: ../common/save-point-with-image.yaml

@@ -1,0 +1,8 @@
+# Deletes the point that is open and leaves the editing of points.
+appId: com.mapeak
+---
+- tapOn: "Delete Point"
+- extendedWaitUntil:
+    notVisible: "Save"
+    timeout: 10000
+- tapOn: "Edit Point"

@@ -1,0 +1,20 @@
+appId: com.mapeak
+---
+- addMedia:
+    - image-with-exif.jpg
+- runFlow: ../common/start-at-location.yaml
+
+- runFlow: ../common/add-point.yaml
+- runFlow: ../common/choose-from-gallery.yaml
+- runFlow: ../common/save-point-with-image.yaml
+- runFlow: ../common/delete-point.yaml
+
+- runFlow: ../common/add-point.yaml
+- runFlow: ../common/take-photo.yaml
+- runFlow: ../common/save-point-with-image.yaml
+- runFlow: ../common/delete-point.yaml
+
+- runFlow: ../common/export-route.yaml
+- extendedWaitUntil:
+    visible: "Route.gpx"
+    timeout: 120000

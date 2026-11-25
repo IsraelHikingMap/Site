@@ -1,9 +1,0 @@
-appId: com.mapeak
-tags:
-  - android
----
-- runFlow: ../common/start-at-location.yaml
-- runFlow: ../common/export-route.yaml
-- extendedWaitUntil:
-    visible: "Route.gpx"
-    timeout: 120000

@@ -1,16 +1,11 @@
 # Taking a photo asks for the camera permission, which a wrong R8 configuration crashes on.
 appId: com.mapeak
-tags:
-  - android
 env:
   CAMERA_WITH_ICON: ". Camera"
 ---
-- runFlow: ../common/start-at-location.yaml
-- runFlow: ../common/add-point.yaml
 - tapOn: ${CAMERA_WITH_ICON}
 - tapOn: "While using the app"
 - tapOn:
     id: "com.android.camera2:id/shutter_button"
 - tapOn:
     id: "com.android.camera2:id/done_button"
-- runFlow: ../common/save-point-with-image.yaml

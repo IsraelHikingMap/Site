@@ -1,0 +1,6 @@
+appId: com.mapeak
+---
+- runFlow: ../common/start-at-location.yaml
+- runFlow: ../common/add-point.yaml
+- runFlow: ../common/choose-from-gallery.yaml
+- runFlow: ../common/save-point-with-image.yaml
