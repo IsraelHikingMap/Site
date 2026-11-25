@@ -2,7 +2,7 @@ name: CI
 
 # This workflow is triggered on every push.
 # It runs the backend and frontend tests and uploads the coverage to Codecov.
-# The web, Android and iOS end to end tests run after the build of each of them, see IsraelHiking.Web/e2e.
+# It also runs the end to end tests on the web, Android and iOS, see IsraelHiking.Web/e2e.
 
 on:
   push:
@@ -124,12 +124,44 @@ jobs:
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
-      - name: Build Android for end to end tests
+
+  android-end-to-end-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: IsraelHiking.Web/.nvmrc
+
+      - name: Setup Java
+        uses: actions/setup-java@v6.3.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+          cache-dependency-path: |
+            IsraelHiking.Web/android/**/*.gradle*
+            IsraelHiking.Web/android/**/gradle-wrapper.properties
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          working-directory: IsraelHiking.Web/android
+          bundler-cache: true
+
+      - name: Build UI
         run: |
           cd IsraelHiking.Web
+          npm ci
           npm run build:mobile-e2e
-          npx cap copy android
-          cd android
+          npx cap sync android
+      - name: Build Android for end to end tests
+        run: |
+          cd IsraelHiking.Web/android
           bundle exec fastlane build_e2e
       - name: Install Maestro
         run: |
