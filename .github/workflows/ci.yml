@@ -114,6 +114,7 @@ jobs:
         run: |
           cd IsraelHiking.Web/android
           bundle exec fastlane build_aab
+          bundle exec fastlane build_apk
         env:
           STORE_PASSWORD: ${{ secrets.MAPEAK_STORE_PASSWORD }}
           PASSWORD: ${{ secrets.MAPEAK_PASSWORD }}
@@ -124,6 +125,12 @@ jobs:
         with:
           name: Mapeak_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+      - name: Upload apk artifacts
+        if: ${{ github.secret_source == 'Actions' }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: Mapeak_signed_${{ needs.version.outputs.version_string }}.apk
+          path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
 
   android-end-to-end-tests:
     runs-on: ubuntu-latest
