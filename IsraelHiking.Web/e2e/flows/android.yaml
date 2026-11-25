@@ -16,7 +16,7 @@ appId: com.mapeak
 - runFlow: ../common/save-point-with-image.yaml
 - runFlow: ../common/delete-point.yaml
 
-- runFlow: ../common/export-route.yaml
+- runFlow: ../common/plan-and-export-route.yaml
 - extendedWaitUntil:
     visible: "Route.gpx"
     timeout: 120000
