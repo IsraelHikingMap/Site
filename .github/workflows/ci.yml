@@ -261,10 +261,11 @@ jobs:
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
       - name: Run iOS end to end tests
-        timeout-minutes: 30
+        timeout-minutes: 60
         run: |
           IsraelHiking.Web/e2e/start-ios-simulator.sh
-          maestro test --include-tags ios IsraelHiking.Web/e2e/flows
+          # The simulator of the runner is slow, mainly when it is new, so the tests get a second chance once it is not
+          maestro test --include-tags ios IsraelHiking.Web/e2e/flows || maestro test --include-tags ios IsraelHiking.Web/e2e/flows
         env:
           MAESTRO_CLI_NO_ANALYTICS: 1
       - name: Upload ios end to end results

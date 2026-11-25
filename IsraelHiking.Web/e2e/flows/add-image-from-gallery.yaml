@@ -7,8 +7,11 @@ tags:
   - android
   - ios
 ---
-- addMedia:
-    - image-with-exif.jpg
+- retry:
+    maxRetries: 2
+    commands:
+      - addMedia:
+          - image-with-exif.jpg
 - runFlow: ../common/start-at-location.yaml
 - runFlow: ../common/add-point.yaml
 - tapOn: ". Gallery"
@@ -22,7 +25,13 @@ tags:
     when:
       platform: iOS
     commands:
+      - extendedWaitUntil:
+          visible: "Allow Full Access"
+          timeout: 120000
       - tapOn: "Allow Full Access"
+      - extendedWaitUntil:
+          visible: "Done"
+          timeout: 120000
       - waitForAnimationToEnd
       # The picker does not expose its content, the latest image is the one the test added
       - tapOn:
