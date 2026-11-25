@@ -32,7 +32,7 @@
     }
     <description [feature]="fullFeature()" [isEditable]="isEditable()"></description>
     <div class="sticky bottom-0 z-10 -mx-4 mt-4 flex bg-surface px-4 py-2 flex-row items-start gap-1" [attr.lang]="resources.getCurrentLanguageCodeSimplified()">
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="navigateHere()" analyticsOn="click"
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="navigateHere()" [disabled]="!fullFeature()" analyticsOn="click"
         analyticsCategory="POI" analyticsLabel="Navigate here">
         <span class="flex flex-col items-center gap-1">
           <span class="flex size-10 items-center justify-center rounded-full bg-brand"><i class="fa fa-lg icon-recordings"></i></span>
@@ -48,7 +48,7 @@
         </span>
       </button>
       } @else {
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="addPointToRoute()" analyticsOn="click"
+      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="addPointToRoute()" [disabled]="!fullFeature()" analyticsOn="click"
         analyticsCategory="POI" analyticsLabel="Convert POI to point">
         <span class="flex flex-col items-center gap-1">
           <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
