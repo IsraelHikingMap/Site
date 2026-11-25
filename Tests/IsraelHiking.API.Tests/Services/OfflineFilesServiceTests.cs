@@ -25,10 +25,10 @@ public class OfflineFilesServiceTests
     private const string Style = """
     {
         "sources": {
-            "IHM": { "url": "https://mapeak.com/vector/data/IHM-schema.json" },
-            "IHM-code": { "url": "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": { "url": "https://mapeak.com/vector/data/raster-dem.json" },
-            "Contour": { "url": "https://global.israelhikingmap.workers.dev/JAXA_AW3D30_2024_contour_z5-Z12_vector.json" }
+            "IHM": { "tiles": ["https://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt"] },
+            "IHM-code": { "tiles": ["https://mapeak.com/vector/data/IHM-code/{z}/{x}/{y}.mvt"] },
+            "DEM": { "tiles": ["https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp"] },
+            "Contour": { "tiles": ["https://mapeak.com/vector/data/contour/{z}/{x}/{y}.mvt"] }
         }
     }
     """;
@@ -99,6 +99,21 @@ public class OfflineFilesServiceTests
         Assert.AreEqual(DateTime.UtcNow.Date, results["IHM-code+7-52-75.pmtiles"]);
         Assert.AreEqual(DateTime.UtcNow.Date, results["global_points+7-52-75.pmtiles"]);
         Assert.IsTrue(results.ContainsKey("raster-dem+7-52-75.pmtiles"));
+    }
+
+    [TestMethod]
+    [DataRow("""{ "tiles": [] }""")]
+    [DataRow("""{ "tiles": [""] }""")]
+    [DataRow("""{ "url": "https://mapeak.com/vector/data/raster-dem.json" }""")]
+    public async Task GetUpdatedFilesList_SourceWithoutTiles_ShouldThrow(string source)
+    {
+        SetupStyleResponse($$"""{ "sources": { "DEM": {{source}} } }""");
+
+        var exception = await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>
+            _service.GetUpdatedFilesList(DateTime.MinValue, null, null, false));
+
+        Assert.Contains("DEM", exception.Message);
+        await _remoteFileFetcherGateway.Received(1).GetFileContent(StyleAddress);
     }
 
     [TestMethod]

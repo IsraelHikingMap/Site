@@ -293,33 +293,22 @@ public class OfflineFilesService : IOfflineFilesService
     /// Gets the names of the files that are needed for offline usage, based on the sources of the style,
     /// without the contours and with the global points added.
     /// </summary>
+    /// <remarks>
+    /// The last known list is only used when the style can not be fetched. A style that is missing information throws,
+    /// so that it is noticed and reported instead of leaving files out of the downloads.
+    /// </remarks>
     private async Task<List<string>> GetSourceNames()
     {
         if (_sourceNames != null && DateTime.UtcNow < _sourceNamesExpiryDate)
         {
             return _sourceNames;
         }
-        for (var attempt = 1; attempt <= STYLE_FETCH_ATTEMPTS; attempt++)
+        var styleContent = await FetchStyle();
+        if (styleContent != null)
         {
-            try
-            {
-                var response = await _remoteFileFetcherGateway.GetFileContent(STYLE_ADDRESS);
-                if (response.Content == null || response.Content.Length == 0)
-                {
-                    throw new InvalidOperationException("Got an empty style response");
-                }
-                _sourceNames = GetSourceNamesFromStyle(response.Content);
-                _sourceNamesExpiryDate = DateTime.UtcNow.Add(STYLE_CACHE_DURATION);
-                return _sourceNames;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning($"Failed to get the sources list from the style: {STYLE_ADDRESS}, attempt {attempt} of {STYLE_FETCH_ATTEMPTS}, error: {ex.Message}");
-                if (attempt < STYLE_FETCH_ATTEMPTS)
-                {
-                    await Task.Delay(STYLE_FETCH_RETRY_DELAY);
-                }
-            }
+            _sourceNames = GetSourceNamesFromStyle(styleContent);
+            _sourceNamesExpiryDate = DateTime.UtcNow.Add(STYLE_CACHE_DURATION);
+            return _sourceNames;
         }
         if (_sourceNames != null)
         {
@@ -330,30 +319,65 @@ public class OfflineFilesService : IOfflineFilesService
     }
 
     /// <summary>
-    /// Extracts the sources names from a style's json content, a source name is the file name of its url, with or
-    /// without an extension, for example: "https://mapeak.com/vector/data/mapeak-schema.json" translates to "mapeak-schema"
-    /// and "https://mapeak.com/vector/data/raster-dem" translates to "raster-dem".
+    /// The content of the style, null when it could not be fetched after a few attempts.
     /// </summary>
-    private List<string> GetSourceNamesFromStyle(byte[] styleContent)
+    private async Task<byte[]> FetchStyle()
+    {
+        for (var attempt = 1; attempt <= STYLE_FETCH_ATTEMPTS; attempt++)
+        {
+            try
+            {
+                var response = await _remoteFileFetcherGateway.GetFileContent(STYLE_ADDRESS);
+                if (response.Content == null || response.Content.Length == 0)
+                {
+                    throw new InvalidOperationException("Got an empty style response");
+                }
+                return response.Content;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Failed to get the style: {STYLE_ADDRESS}, attempt {attempt} of {STYLE_FETCH_ATTEMPTS}, error: {ex.Message}");
+                if (attempt < STYLE_FETCH_ATTEMPTS)
+                {
+                    await Task.Delay(STYLE_FETCH_RETRY_DELAY);
+                }
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Extracts the sources names from a style's json content, a source name is the last part of the address of its
+    /// tiles before the zoom, for example: "https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp" translates to "raster-dem".
+    /// </summary>
+    private static List<string> GetSourceNamesFromStyle(byte[] styleContent)
     {
         using var document = JsonDocument.Parse(styleContent);
         var names = new List<string>();
         foreach (var source in document.RootElement.GetProperty("sources").EnumerateObject())
         {
-            if (!source.Value.TryGetProperty("url", out var urlElement))
+            var name = Path.GetFileName(GetSourceAddress(source.Value));
+            if (string.IsNullOrWhiteSpace(name))
             {
-                _logger.LogWarning($"The source {source.Name} in the style has no url, ignoring it");
-                continue;
+                throw new InvalidOperationException($"The source {source.Name} in the style {STYLE_ADDRESS} has no tiles to name its offline files by");
             }
-            var name = Path.GetFileNameWithoutExtension(urlElement.GetString() ?? string.Empty);
-            if (string.IsNullOrWhiteSpace(name) || name.Contains(CONTOUR, StringComparison.OrdinalIgnoreCase))
+            if (!name.Contains(CONTOUR, StringComparison.OrdinalIgnoreCase))
             {
-                continue;
+                names.Add(name);
             }
-            names.Add(name);
         }
         names.Add(GLOBAL_POINTS);
         return names;
+    }
+
+    /// <summary>
+    /// The address of the tiles of a source up to the zoom, which is what it is named by. Null when it has no tiles.
+    /// </summary>
+    private static string GetSourceAddress(JsonElement source)
+    {
+        return source.TryGetProperty("tiles", out var tiles)
+            ? tiles.EnumerateArray().Select(tile => tile.GetString()).FirstOrDefault()?.Split("/{z}")[0]
+            : null;
     }
 
     private static void AddIfUpdated(Dictionary<string, DateTime> filesDictionary, string fileName, DateTime fileModifiedDate, DateTime lastModifiedDate)
