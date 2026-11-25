@@ -1,13 +1,15 @@
 appId: com.mapeak
 ---
 - tapOn: "Edit Point"
-- waitForAnimationToEnd
-- tapOn:
-    point: "70%,40%"
-    label: "Tap on the map to add a point"
-- extendedWaitUntil:
-    visible: "Title"
-    timeout: 30000
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          point: "70%,40%"
+          label: "Tap on the map to add a point"
+      - extendedWaitUntil:
+          visible: "Title"
+          timeout: 10000
 # A slow emulator can drop letters that are typed before the field is ready, or move the field once the keyboard opens
 - retry:
     maxRetries: 3
