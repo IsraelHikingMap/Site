@@ -432,7 +432,7 @@ export class FileService {
         progressCallback: FileDownloadProgressCallback, abortController: AbortController): Promise<void> {
         await this.ensureOfflineCacheDirectory();
         const id = `offline-files-${FileService.batchCounter++}`;
-        this.loggingService.info(`[Files] Starting downloading ${files.length} files to cache, ${id}: ${files.map(f => f.fileName).join(", ")}`);
+        this.loggingService.info(`[Files] Starting downloading ${files.length} files of ${areaName} to cache: ${files.map(f => f.fileName).join(", ")}`);
         const destinations = await Promise.all(files.map(f => Filesystem.getUri({ path: FileService.offlineCachePath(f.fileName), directory: Directory.Cache })));
         let settle: { resolve: () => void, reject: (error: Error) => void };
         const finished = new Promise<void>((resolve, reject) => settle = { resolve, reject });
@@ -449,12 +449,12 @@ export class FileService {
             }),
             CapacitorDownloader.addListener("downloadFailed", event => {
                 if (event.id === id) {
-                    settle.reject(new Error(`Failed to download ${files[event.fileIndex]?.fileName ?? "a file"} of ${id}: ${event.error}`));
+                    settle.reject(new Error(`Failed to download ${files[event.fileIndex]?.fileName ?? "a file"} of ${areaName}: ${event.error}`));
                 }
             })
         ]);
         const abort = () => {
-            this.loggingService.info(`[Files] Aborting the download of ${id}`);
+            this.loggingService.info(`[Files] Aborting the download of ${areaName}`);
             CapacitorDownloader.stop({ id }).catch(() => { });
             settle.resolve();
         };
@@ -476,7 +476,7 @@ export class FileService {
             });
             await finished;
             if (!abortController.signal.aborted) {
-                this.loggingService.info(`[Files] Finished downloading ${files.length} files to cache, ${id}`);
+                this.loggingService.info(`[Files] Finished downloading ${files.length} files of ${areaName} to cache`);
             }
         } catch (ex) {
             this.loggingService.error(`[Files] ${(ex as Error).message}`);

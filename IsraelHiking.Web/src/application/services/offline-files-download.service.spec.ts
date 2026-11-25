@@ -49,19 +49,25 @@ type MinVersions = Record<string, string>;
 
 /**
  * The sources of the real styles - the name of a source and the name of the file it is downloaded as,
- * taken from the source's url, are not the same.
+ * taken from the address of its tiles, are not the same.
  */
 function createStyle(minVersions: MinVersions) {
     return {
         version: 8,
         metadata: Object.fromEntries(Object.entries(minVersions).map(([name, version]) => [`sources:${name}:min-version`, version])),
         sources: {
-            "IHM": { type: "vector", url: "https://mapeak.com/vector/data/IHM-schema.json" },
-            "IHM-code": { type: "vector", url: "https://mapeak.com/vector/data/IHM-code.json" },
-            "DEM": { type: "raster-dem", url: "https://mapeak.com/vector/data/raster-dem.json" }
+            "IHM": { type: "vector", tiles: ["https://mapeak.com/vector/data/IHM-schema/{z}/{x}/{y}.mvt"] },
+            "IHM-code": { type: "vector", tiles: ["https://mapeak.com/vector/data/IHM-code/{z}/{x}/{y}.mvt"] },
+            "DEM": { type: "raster-dem", tiles: ["https://mapeak.com/vector/data/raster-dem/{z}/{x}/{y}.webp"] },
+            "Contour": { type: "vector", tiles: ["https://mapeak.com/vector/data/contour/{z}/{x}/{y}.mvt"] }
         },
         layers: [] as object[]
     };
+}
+
+/** The files of an area that has one of every source that is downloaded: those of the styles without the contours and with the global points */
+function createFileNames(id: string) {
+    return ["IHM-schema", "IHM-code", "raster-dem", "global_points"].map(name => `${name}+${id}.pmtiles`);
 }
 
 /**
@@ -141,7 +147,7 @@ describe("OfflineFilesDownloadService", () => {
                         moveFileFromCacheToDataDirectory: vi.fn(() => Promise.resolve()),
                         deleteFileInDataDirectory: vi.fn(() => Promise.resolve()),
                         renameFileInDataDirectory: vi.fn(() => Promise.resolve()),
-                        listOfflineFilesInDataDirectory: vi.fn(() => Promise.resolve([MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
+                        listOfflineFilesInDataDirectory: vi.fn(() => Promise.resolve([...createFileNames(TILE_ID), ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })))),
                         listFilesInOfflineCache: vi.fn(() => Promise.resolve([] as string[])),
                         clearOfflineCache: vi.fn(() => Promise.resolve())
                     }
@@ -382,9 +388,45 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
                 await initialize(service, mockBackend, store, {});
 
-                // The device holds IHM-schema files for tiles, so a tile without one can not be drawn
+                // A tile without a file of IHM-schema can not be drawn
                 expect(service.getAreaCompatibility(TILE_ID, [{ fileName: "raster-dem+76-51.pmtiles", date: "2026-01-01" }]))
                     .not.toBe("compatible");
+            }
+        )
+    );
+
+    it("Should log why an area is still incompatible once it was downloaded, when no other area holds the missing source either",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store, FileService, LoggingService],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
+                fileService: FileService, loggingService: LoggingService) => {
+                vi.mocked(fileService.getStyleJsonContentFromDevice).mockResolvedValue(JSON.stringify(createStyle({})));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
+                    [AREA_MAP_FILE, `IHM-code+${AREA_ID}.pmtiles`].map(fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
+                store.reset({
+                    userState: { token: "token" },
+                    offlineState: { isSubscribed: true },
+                    inMemoryState: { downloadedAreas: {} }
+                });
+                const warningSpy = vi.spyOn(loggingService, "warning");
+
+                const promise = service.downloadAreas([{ area: AREA, replacedAreaIds: [] }]);
+                await flushStyles(mockBackend, {});
+                await flushFilesToDownload(mockBackend, { [AREA_MAP_FILE]: "2026-06-01" });
+
+                expect(await promise).toEqual(["downloaded"]);
+                expect(warningSpy).toHaveBeenCalledWith(expect.stringContaining(
+                    `${AREA_ID} needs to be downloaded again, it is unusable: there is no file of raster-dem`));
+            }
+        )
+    );
+
+    it("Should consider a tile that has no file of the global points incompatible, though they are not in the styles",
+        inject([OfflineFilesDownloadService, HttpTestingController, Store],
+            async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store) => {
+                await initialize(service, mockBackend, store, {});
+
+                const files = createFileNames(TILE_ID).filter(fileName => !fileName.startsWith("global_points"));
+                expect(service.getAreaCompatibility(TILE_ID, files.map(fileName => ({ fileName, date: "2026-01-01" })))).not.toBe("compatible");
             }
         )
     );
@@ -394,7 +436,7 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store,
                 fileService: FileService) => {
                 vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue(
-                    [MAP_FILE, "raster-dem+76-51.pmtiles", ROOT_MAP_FILE].map(
+                    [...createFileNames(TILE_ID), ROOT_MAP_FILE].map(
                         fileName => ({ fileName, modifiedDate: DOWNLOAD_DATE, size: FILE_SIZE })));
 
                 await initialize(service, mockBackend, store, {});
@@ -458,7 +500,7 @@ describe("OfflineFilesDownloadService", () => {
                 await initialize(service, mockBackend, store, {});
                 store.reset({ inMemoryState: { downloadedAreas: {} } });
 
-                expect(service.getAreaCompatibility(TILE_ID, [{ fileName: MAP_FILE, date: "2026-01-01" }])).toBe("outdated");
+                expect(service.getAreaCompatibility(TILE_ID, createFileNames(TILE_ID).map(fileName => ({ fileName, date: "2026-01-01" })))).toBe("outdated");
                 expect(service.getAreaCompatibility(ROOT_ID, [{ fileName: ROOT_MAP_FILE, date: "2026-01-01" }])).toBe("compatible");
             }
         )
@@ -469,7 +511,7 @@ describe("OfflineFilesDownloadService", () => {
             async (service: OfflineFilesDownloadService, mockBackend: HttpTestingController, store: Store, fileService: FileService,
                 routingProvider: RoutingProvider) => {
                 const downloadDate = new Date();
-                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([AREA_MAP_FILE, ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: downloadDate, size: FILE_SIZE })));
+                vi.mocked(fileService.listOfflineFilesInDataDirectory).mockResolvedValue([...createFileNames(AREA_ID), ROOT_MAP_FILE].map(fileName => ({ fileName, modifiedDate: downloadDate, size: FILE_SIZE })));
                 vi.mocked(routingProvider.getAreasWithRoutingTiles).mockResolvedValue([AREA_ID]);
                 store.reset({
                     userState: { token: "token" },
