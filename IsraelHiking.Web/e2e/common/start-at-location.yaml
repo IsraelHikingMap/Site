@@ -5,13 +5,17 @@ appId: com.mapeak
 - setLocation:
     latitude: 31.7734
     longitude: 35.2106
-- launchApp:
-    clearState: true
-    permissions:
-      all: unset
-- extendedWaitUntil:
-    visible: "(While using the app|Allow While Using App)"
-    timeout: 120000
+# An emulator that has just booted may restart the Google services, which takes the apps that use them down.
+- retry:
+    maxRetries: 2
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+      - extendedWaitUntil:
+          visible: "(While using the app|Allow While Using App)"
+          timeout: 60000
 - tapOn: "(While using the app|Allow While Using App)"
 - tapOn:
     text: "Allow"

@@ -248,6 +248,9 @@ jobs:
           npx cap copy ios
           cd ios/App
           bundle exec fastlane build_e2e
+        env:
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 5
       - name: Setup Java
         uses: actions/setup-java@v6.3.0
         with:
