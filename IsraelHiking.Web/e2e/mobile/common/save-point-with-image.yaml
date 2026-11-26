@@ -1,0 +1,19 @@
+# Expects the image in the point, saves the point and expects the image when opening it again.
+# The alternative text of the image is the title of the point, and only the image is to the right of the description.
+appId: com.mapeak
+env:
+  IMAGE_ALT_TEXT: "My point"
+---
+- extendedWaitUntil:
+    visible:
+      text: ${IMAGE_ALT_TEXT}
+      rightOf: "Description"
+    timeout: 30000
+- tapOn: "Save"
+- extendedWaitUntil:
+    notVisible: "Save"
+    timeout: 10000
+- runFlow: ../../common/open-point.yaml
+- assertVisible:
+    text: ${IMAGE_ALT_TEXT}
+    rightOf: "Description"

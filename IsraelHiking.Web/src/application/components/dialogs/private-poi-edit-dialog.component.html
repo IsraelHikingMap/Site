@@ -35,7 +35,7 @@
         <div class="flex flex-row">
           @if (!imageLink()) {
           <label>
-            <a mat-button class="w-full h-[unset]!" imageCapture (changed)="onFileInputChanged($event)"
+            <a mat-button class="w-full h-[unset]!" role="button" [attr.aria-label]="resources.camera" imageCapture (changed)="onFileInputChanged($event)"
               analyticsOn="click" analyticsCategory="POI" analyticsLabel="Upload image">
               <i class="fa icon-camera fa-4x align-middle me-1"></i>
               <i class="fa icon-plus fa-2x align-middle"></i>
@@ -44,7 +44,7 @@
               accept="image/*;capture=camera" />
           </label>
           } @else {
-          <img [src]="resources.getResizedImageUrl(imageLink().url, 330)" class="max-w-full w-full" />
+          <img [src]="resources.getResizedImageUrl(imageLink().url, 330)" [alt]="title()" class="max-w-full w-full" />
           }
         </div>
         @if (imageLink()) {
@@ -116,7 +116,7 @@
           class="fa fa-action icon-ellipsis-v"></i></button>
     </div>
     <div class="flex-1">
-      <button mat-button class="w-full" type="button" mat-dialog-close (click)="remove()"
+      <button mat-button class="w-full" type="button" mat-dialog-close (click)="remove()" [aria-label]="resources.deletePoint"
         matTooltip="{{resources.deletePoint}}" matTooltipPosition="above"><i class="fa fa-action icon-trash"></i></button>
     </div>
     <div class="flex-1">
@@ -126,7 +126,7 @@
           class="fa fa-action icon-cloud-upload"></i></button>
     </div>
     <div class="flex-1">
-      <button mat-button class="w-full" type="button" mat-dialog-close (click)="save()" matTooltip="{{resources.save}}"
+      <button mat-button class="w-full" type="button" mat-dialog-close (click)="save()" [aria-label]="resources.save" matTooltip="{{resources.save}}"
         matTooltipPosition="above" analyticsOn="click" analyticsCategory="Private POI" analyticsLabel="Save"><i
           class="fa fa-action icon-check"></i></button>
     </div>

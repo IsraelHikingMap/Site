@@ -30,6 +30,12 @@ export class AnalyticsService {
     private readonly store = inject(Store);
 
     initialize() {
+        if (!this.runningContextService.isProduction) {
+            if (this.runningContextService.isCapacitor) {
+                this.disableFirebase();
+            }
+            return;
+        }
         // Analytics is not needed for the first paint, so it is loaded only once the page has
         // rendered, instead of competing with the app's own scripts and fonts for bandwidth.
         // afterNextRender never runs while prerendering, so this is browser only by construction.
@@ -41,6 +47,18 @@ export class AnalyticsService {
             this.initializeFirebase();
             this.initializeAppsFlyer();
             this.reportUserId();
+        }
+    }
+
+    /**
+     * Firebase starts by itself, so it has to be turned off for a build that is not a production one to not be
+     * counted - the end to end tests start from a clean app every time, which is an install as far as it knows.
+     */
+    private async disableFirebase() {
+        try {
+            await FirebaseAnalytics.setEnabled({ enabled: false });
+        } catch (ex) {
+            this.loggingService.error(`[Analytics] Failed to disable firebase: ${(ex as Error).message}`);
         }
     }
 
@@ -168,6 +186,9 @@ export class AnalyticsService {
     }
 
     trackEvent(category: string, action: string) {
+        if (!this.runningContextService.isProduction) {
+            return;
+        }
         try {
             gtag("event", action, {
                 event_category: category

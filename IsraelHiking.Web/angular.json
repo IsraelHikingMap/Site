@@ -91,6 +91,14 @@
                 }
               ]
             },
+            "e2e": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.e2e.ts"
+                }
+              ]
+            },
             "mobile": {
               "budgets": [
                 {
@@ -115,25 +123,11 @@
                 }
               ]
             },
-            "mobile-debug": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "10kb"
-                }
-              ],
-              "namedChunks": false,
-              "aot": false,
-              "extractLicenses": true,
-              "outputPath": {
-                "base": "www",
-                "browser": ""
-              },
-              "baseHref": "./",
+            "mobile-e2e": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.mobile-debug.ts"
+                  "with": "src/environments/environment.mobile-e2e.ts"
                 }
               ]
             }

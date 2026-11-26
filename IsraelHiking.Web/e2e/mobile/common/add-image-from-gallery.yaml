@@ -1,0 +1,43 @@
+# Adds an image from the gallery to the point that is open.
+# An image from the native picker has to make it through the resize, EXIF included, into the point.
+# The image has to be a jpeg with EXIF data, the code that reads it does not run for anything else.
+appId: com.mapeak
+env:
+  GALLERY_WITH_ICON: ". Gallery"
+  LATEST_PHOTO: "Photo taken on.*"
+  ADD_SELECTED: "Add.*"
+---
+- tapOn: "Camera"
+- tapOn: ${GALLERY_WITH_ICON}
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: ${LATEST_PHOTO}
+      - tapOn: ${ADD_SELECTED}
+      # The loading screen of the camera plugin stays open when the image is ready before that screen is
+      - extendedWaitUntil:
+          visible: "Save"
+          timeout: 20000
+          optional: true
+      - runFlow:
+          when:
+            notVisible: "Save"
+          commands:
+            - back
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Allow Full Access"
+          timeout: 120000
+      - tapOn: "Allow Full Access"
+      - extendedWaitUntil:
+          visible: "Done"
+          timeout: 120000
+      - waitForAnimationToEnd
+      - tapOn:
+          point: "16%,52%"
+          label: "Tap on the image that was added, after the six images of the simulator"
+      - tapOn: "Done"

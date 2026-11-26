@@ -1,14 +1,14 @@
 <div class="flex flex-col rounded-full bg-surface shadow-md print:hidden!" [dir]="resources.direction">
-  <button mat-icon-button (click)="togglePrivateRoutes()" matTooltip="{{resources.privateRoutes}}" matTooltipPosition="after"
+  <button mat-icon-button (click)="togglePrivateRoutes()" [attr.aria-label]="resources.privateRoutes" matTooltip="{{resources.privateRoutes}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Private routes">
     <i class="fa icon-list-ul"></i>
   </button>
-  <button mat-icon-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}"
+  <button mat-icon-button (click)="toggleEditPoi()" [attr.aria-label]="resources.editPoint" [ngClass]="{active : isPoiEditActive()}"
     [style.color]="routeColor()" matTooltip="{{resources.editPoint}}" matTooltipPosition="after"
     analyticsOn="click" analyticsCategory="Drawing" analyticsLabel="Draw POI toggle">
     <i class="fa icon-map-pin"></i>
   </button>
-  <button mat-icon-button (click)="toggleEditRoute()" [ngClass]="{active : isRouteEditActive() }"
+  <button mat-icon-button (click)="toggleEditRoute()" [attr.aria-label]="resources.editRoute" [ngClass]="{active : isRouteEditActive() }"
     [style.color]="routeColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="after" analyticsOn="click"
     analyticsCategory="Drawing" analyticsLabel="Draw route toggle">
     <i class="fa icon-pencil"></i>

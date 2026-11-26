@@ -1,0 +1,18 @@
+# Deletes the point that is open, expects it to be gone from the map and leaves the editing of points.
+appId: com.mapeak
+env:
+  POINT_ON_MAP: ".*My point.*"
+---
+# The dialog grows when the image of the point is loaded, which moves its buttons
+- waitForAnimationToEnd
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Delete Point"
+- extendedWaitUntil:
+    notVisible: ${POINT_ON_MAP}
+    timeout: 10000
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Edit Point"

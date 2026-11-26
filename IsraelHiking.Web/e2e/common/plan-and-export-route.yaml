@@ -1,0 +1,33 @@
+# The route depends on the production routing server and on OSM, so nothing is expected of it beyond
+# not being empty.
+appId: com.mapeak
+env:
+  NON_ZERO_STATISTIC: "‎.*[1-9].*"
+---
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Edit Route"
+- waitForAnimationToEnd
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          point: "60%,40%"
+          label: "Tap on the map to start the route"
+      - tapOn:
+          point: "65%,55%"
+          label: "Tap on the map to end the route"
+      - extendedWaitUntil:
+          visible: ${NON_ZERO_STATISTIC}
+          timeout: 15000
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "Private Routes"
+- runFlow:
+    file: tap-button.yaml
+    env:
+      BUTTON: "More.*"
+- tapOn: ".*Export Route"
+- tapOn: "GPX version 1.1.*"
