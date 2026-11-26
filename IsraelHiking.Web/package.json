@@ -28,7 +28,7 @@
     "@capawesome/capacitor-mail-composer": "^0.2.2",
     "@capgo/background-geolocation": "^8.6.5",
     "@capgo/capacitor-compass": "^8.1.26",
-    "@capgo/capacitor-downloader": "^8.11.0",
+    "@capgo/capacitor-downloader": "^8.12.0",
     "@capgo/capacitor-inappbrowser": "^8.27.9",
     "@capgo/capacitor-share-target": "^8.0.68",
     "@capgo/capacitor-speech-synthesis": "^8.0.29",
@@ -107,7 +107,6 @@
     "eslint": "^10.15.0",
     "jsts": "^2.12.1",
     "openapi-typescript": "^7.13.0",
-    "patch-package": "^8.0.1",
     "pbf": "^5.2.0",
     "playwright": "^1.65.1",
     "postcss": "^8.5.33",
@@ -145,8 +144,7 @@
     "generate-icon-font": "node ./scripts/generate-icon-font.ts",
     "generate-offline-areas": "node ./scripts/generate-offline-areas.ts",
     "generate-user-data-types": "openapi-typescript https://raw.githubusercontent.com/Mapeak-com/user-data/refs/heads/main/user-data.openapi.yml -o ./src/application/models/user-data.g.d.ts",
-    "set-version": "node ./scripts/set-version.ts",
-    "postinstall": "patch-package"
+    "set-version": "node ./scripts/set-version.ts"
   },
   "type": "module",
   "version": "9.21.0",
