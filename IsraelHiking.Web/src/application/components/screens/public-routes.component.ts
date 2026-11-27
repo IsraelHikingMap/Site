@@ -1,11 +1,12 @@
 import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgClass } from "@angular/common";
+import { NgClass, NgTemplateOutlet } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
-import { MatButton } from "@angular/material/button";
+import { MatButton, MatIconButton } from "@angular/material/button";
+import { MatCard } from "@angular/material/card";
 import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
@@ -15,7 +16,7 @@ import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
 import { filter, skip } from "rxjs";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
-import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification } from "maplibre-gl";
+import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification, MapLayerMouseEvent } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
 import { ZoomComponent } from "../zoom.component";
@@ -24,6 +25,7 @@ import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
 import { DescriptionComponent } from "../description.component";
 import { BottomSheetComponent } from "../bottom-sheet.component";
+import { RoutesPathComponent } from "../map/routes-path.component";
 import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
@@ -32,7 +34,8 @@ import { MapService } from "../../services/map.service";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService } from "../../services/poi.service";
 import { SpatialHelper } from "../../services/spatial.helper";
-import { SelectedRouteService } from "../../services/selected-route.service";
+import { END_COLOR, SelectedRouteService, START_COLOR } from "../../services/selected-route.service";
+import { RoutesFactory } from "../../services/routes.factory";
 import { RunningContextService } from "../../services/running-context.service";
 import { TranslationService } from "../../services/translation.service";
 import { GeoJSONUtils } from "../../services/geojson-utils";
@@ -41,17 +44,19 @@ import { RouteStrings } from "../../services/hash.service";
 import { initialState } from "../../reducers/initial-state";
 import { SetPublicRoutesSearchResultAction } from "../../reducers/in-memory.reducer";
 import { Urls } from "../../urls";
-import type { ApplicationState, SearchResultsPointOfInterest } from "../../models";
+import type { ApplicationState, CategoryType, LatLngAltTime, SearchResultsPointOfInterest } from "../../models";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent, RoutesPathComponent, MatCard, MatIconButton, NgTemplateOutlet]
 })
 export class PublicRoutesComponent {
+    /** Covers the frame of the image it stands in for, cropping the empty ground at its bottom to keep the sky and the birds */
     public readonly lottieScenery: AnimationOptions = {
-        path: "content/lottie/placeholder-scenery.json"
+        path: "content/lottie/placeholder-scenery.json",
+        rendererSettings: { preserveAspectRatio: "xMidYMin slice" }
     };
     public readonly mapStyle: StyleSpecification;
     public readonly showMap = signal(true);
@@ -74,6 +79,14 @@ export class PublicRoutesComponent {
     private static readonly ROUTE_CATEGORIES_FILTER: FilterSpecification =
         ["in", ["get", "poiCategory"], ["literal", ["Hiking", "Bicycle", "4x4"]]];
 
+    /** The layer of the tiles with the lines of the routes whose trail heads are on the points layer */
+    public readonly routesSourceLayer = "global_routes";
+
+    public readonly routeLinesLayer = "public-routes-lines";
+
+    /** The color of a route whose lines the map has not loaded and whose tags give it none */
+    private static readonly DEFAULT_ROUTE_COLOR = "magenta";
+
     public readonly poisVectorTileAddress = [Urls.baseTilesAddress.replace("https://", "slice://") + "/vector/data/global_points/{z}/{x}/{y}.mvt"];
     public readonly poiGeoJsonData = signal<GeoJSON.FeatureCollection<GeoJSON.Point, PoiProperties>>({
         type: "FeatureCollection",
@@ -85,6 +98,7 @@ export class PublicRoutesComponent {
         features: []
     });
     public readonly selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
+    public readonly selectedRouteId = computed(() => this.selectedRoutePoint()?.properties.poiId);
 
     /** The place picked in the search, marked on the map once the map got there and found it is not a route */
     public readonly searchedPlace = signal<SearchResultsPointOfInterest>(null);
@@ -103,6 +117,16 @@ export class PublicRoutesComponent {
     /** Whether there are more routes than the list shows, see {@link MAX_ROUTES_IN_LIST} */
     public readonly hasTooManyRoutes = computed(() =>
         this.poiGeoJsonData().features.length > PublicRoutesComponent.MAX_ROUTES_IN_LIST);
+
+    /**
+     * Whether a route is selected that the list does not show, as when fitting the map to a long route
+     * brought too many routes into view or zoomed out of the routes tiles, so its card is shown on top.
+     */
+    public readonly isSelectedRouteUnlisted = computed(() => {
+        const selectedId = this.selectedRouteId();
+        return selectedId != null && (this.hasTooManyRoutes() || this.isZoomedOut() ||
+            !this.poiGeoJsonData().features.some(f => f.properties.poiId === selectedId));
+    });
 
     /** Whether any filter is set to something other than what the screen starts with */
     public readonly isFiltered = computed(() => {
@@ -124,9 +148,23 @@ export class PublicRoutesComponent {
     private readonly router = inject(Router);
     private readonly runningContextSerivce = inject(RunningContextService);
     private readonly translationService = inject(TranslationService);
+    private readonly routesFactory = inject(RoutesFactory);
 
     private readonly zoom = this.store.selectSignal((s: ApplicationState) => s.locationState.zoom);
     private readonly filters = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
+
+    /** The lines the map draws are those of the routes the filters leave in the list */
+    public readonly routeLinesFilter = computed(() => this.poiService.getPublicRoutesFilterExpression(this.filters()));
+    public readonly hikingLinesFilter = computed(() => this.getCategoryLinesFilter("Hiking"));
+    public readonly bicycleLinesFilter = computed(() => this.getCategoryLinesFilter("Bicycle"));
+    public readonly fourByFourLinesFilter = computed(() => this.getCategoryLinesFilter("4x4"));
+    public readonly cursorStyle = signal("");
+    /**
+     * Whether the selected marker is where the route starts. A route picked by a line whose trail head
+     * is out of view only learns where it starts once it is loaded, and a marker at the click would
+     * point at the middle of the route.
+     */
+    public readonly isAtTrailHead = signal(true);
     private readonly searchResult = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesSearchResult);
 
     constructor() {
@@ -246,27 +284,108 @@ export class PublicRoutesComponent {
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         this.showMap.set(true);
         this.selectedRoutePoint.set(feature);
+        this.isAtTrailHead.set(true);
         this.hoverFeature.set(null);
+        const color = this.getRouteColor(feature);
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
         if (this.selectedRoutePoint() !== feature) {
             return;
         }
-        this.selectedRouteGeoJson.set({
-            type: "FeatureCollection",
-            features: [fullFeature]
-        });
+        feature = this.moveToTrailHead(feature, fullFeature);
+        this.selectedRouteGeoJson.set(this.createSelectedRouteGeoJson(fullFeature, color));
         if (feature.properties.poiSource === "OSM") {
             await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
             if (this.selectedRoutePoint() !== feature) {
                 return;
             }
-            this.selectedRouteGeoJson.set({
-                type: "FeatureCollection",
-                features: [fullFeature]
-            });
+            this.selectedRouteGeoJson.set(this.createSelectedRouteGeoJson(fullFeature, color));
         }
         const bounds = SpatialHelper.getBoundsForFeature(fullFeature);
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
+    }
+
+    /**
+     * Selects the route of a line clicked on the map. Its trail head can be out of view, and then the
+     * route is not among the points of the tiles, so it is made of the line's attributes and its marker
+     * waits for {@link moveToFeature} to load where the trail head is.
+     */
+    public onRouteLineClick(event: MapLayerMouseEvent) {
+        const line = event.features[0];
+        const trailHead = this.routesFromTiles.find(f => f.properties.poiId === line.properties.poiId);
+        const route = trailHead ?? {
+            type: "Feature",
+            properties: {
+                ...line.properties,
+                identifier: this.poiService.osmTileFeatureToPoiIdentifier(line)
+            } as PoiProperties,
+            geometry: {
+                type: "Point",
+                coordinates: [event.lngLat.lng, event.lngLat.lat]
+            }
+        };
+        this.onStartPointClick(route, event.originalEvent);
+        if (trailHead == null) {
+            this.isAtTrailHead.set(false);
+        }
+    }
+
+    private getCategoryLinesFilter(category: CategoryType): FilterSpecification {
+        return [...this.routeLinesFilter() as unknown[], ["==", ["get", "poiCategory"], category]] as FilterSpecification;
+    }
+
+    /** Puts the marker of the selected route where its full feature has the trail head, see {@link onRouteLineClick} */
+    private moveToTrailHead(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>,
+        fullFeature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Point, PoiProperties> {
+        const trailHead = fullFeature.properties.poiGeolocation as LatLngAltTime;
+        if (trailHead == null) {
+            return feature;
+        }
+        const moved: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
+            ...feature,
+            geometry: { type: "Point", coordinates: [trailHead.lng, trailHead.lat] }
+        };
+        this.selectedRoutePoint.set(moved);
+        this.isAtTrailHead.set(true);
+        return moved;
+    }
+
+    /**
+     * The color the tiles give the route's lines, read while they are in view, or the one of its tags
+     * when the map draws none of them, as when the list was picked from while the map was hidden.
+     */
+    private getRouteColor(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>): string {
+        const lines = this.mapService.getFeaturesFromTiles(["==", ["get", "poiId"], feature.properties.poiId],
+            [this.routeLinesLayer]);
+        return lines[0]?.properties.color ?? GeoJSONUtils.getFeatureColor(feature) ?? PublicRoutesComponent.DEFAULT_ROUTE_COLOR;
+    }
+
+    /**
+     * The route as {@link RoutesPathComponent} draws a planned one, in its color with a point at its start
+     * and at its end. It is not made a route of, as a relation's lines are pieces that one route would join.
+     */
+    private createSelectedRouteGeoJson(fullFeature: GeoJSON.Feature, color: string): GeoJSON.FeatureCollection {
+        const geometry = fullFeature.geometry;
+        const lines = geometry.type === "LineString" ? [geometry.coordinates]
+            : geometry.type === "MultiLineString" ? geometry.coordinates : [];
+        const { weight, opacity } = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
+        const features: GeoJSON.Feature[] = [{
+            ...fullFeature,
+            properties: {
+                color,
+                weight,
+                opacity,
+                iconColor: this.routesFactory.invertColorToBW(color),
+                iconSize: weight < 10 ? 0.5 : 0.5 * weight / 10.0
+            }
+        }];
+        if (lines.length > 0) {
+            const lastLine = lines[lines.length - 1];
+            features.push(
+                { type: "Feature", properties: { color: START_COLOR, strokeColor: "white" }, geometry: { type: "Point", coordinates: lines[0][0] } },
+                { type: "Feature", properties: { color: END_COLOR, strokeColor: "white" }, geometry: { type: "Point", coordinates: lastLine[lastLine.length - 1] } }
+            );
+        }
+        return { type: "FeatureCollection", features };
     }
 
     public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>) {

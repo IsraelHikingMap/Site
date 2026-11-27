@@ -289,8 +289,7 @@ export class PoiService {
                 features: []
             };
         }
-        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
-        const factor = units === "metric" ? 1000.0 : 1609.344;
+        const factor = this.getLengthFilterFactor();
         let features = this.filterFeatures(pois, filters.categories);
         features = features.filter(feature => {
             if (feature.properties.poiDifficulty && !filters.difficulty.includes(feature.properties.poiDifficulty)) {
@@ -312,6 +311,33 @@ export class PoiService {
             type: "FeatureCollection",
             features
         };
+    }
+
+    /**
+     * The same filter as {@link getPublicRoutes} for the map to apply to the lines of the routes, so the
+     * lines it draws are those of the routes the list shows.
+     */
+    public getPublicRoutesFilterExpression(filters: Immutable<PublicRoutesFilter>): FilterSpecification {
+        const factor = this.getLengthFilterFactor();
+        const length = ["get", "poiLength"];
+        const conditions: unknown[] = [
+            ["in", ["get", "poiCategory"], ["literal", filters.categories]],
+            ["any", ["!", ["has", "poiDifficulty"]], ["in", ["get", "poiDifficulty"], ["literal", filters.difficulty]]],
+            ["any", ["!", ["has", "poiLength"]], [">=", length, filters.lengthRange[0] * factor]]
+        ];
+        if (filters.lengthRange[1] < 50) {
+            conditions.push(["any", ["!", ["has", "poiLength"]], ["<=", length, filters.lengthRange[1] * factor]]);
+        }
+        if (filters.userId) {
+            conditions.push(["==", ["get", "poiUserId"], filters.userId]);
+        }
+        return ["all", ...conditions] as FilterSpecification;
+    }
+
+    /** How many meters a unit of the length filter is, a kilometer or a mile */
+    private getLengthFilterFactor(): number {
+        const units = this.store.selectSnapshot((s: ApplicationState) => s.configuration).units;
+        return units === "metric" ? 1000.0 : 1609.344;
     }
 
     public async getBasicInfo(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {

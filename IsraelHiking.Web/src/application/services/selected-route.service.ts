@@ -51,8 +51,8 @@ export type RouteViewProperties = {
 
 export const SEGMENT = "_segment_";
 export const SEGMENT_POINT = "_segmentpoint_";
-const START_COLOR = "#43a047";
-const END_COLOR = "red";
+export const START_COLOR = "#43a047";
+export const END_COLOR = "red";
 
 @Service()
 export class SelectedRouteService {

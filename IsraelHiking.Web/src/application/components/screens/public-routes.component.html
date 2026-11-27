@@ -17,7 +17,7 @@
         <div class="pointer-events-none absolute w-full top-0 magrin-top-with-toolbar z-10 hidden max-md:block">
             <public-routes-filter></public-routes-filter>
         </div>
-        <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" (mapLoad)="mapLoaded($event)">
+        <mgl-map [mapStyle]="mapStyle" [attributionControl]="false" [cursorStyle]="cursorStyle()" (mapLoad)="mapLoaded($event)">
             <layers [allowOffline]="false"></layers>
             <map-overlay>
                 <div class="absolute inset-0 magrin-top-with-toolbar pb-safe px-safe" [dir]="resources.direction">
@@ -41,6 +41,46 @@
             <mgl-layer [id]="resources.globalPointsExternalLayer" [source]="routesSrouceId" type="circle"
                 sourceLayer="external" [paint]="{'circle-color': 'transparent'}"
                 [before]="resources.endOfBaseLayer"></mgl-layer>
+            <mgl-layer [id]="routeLinesLayer" [source]="routesSrouceId" type="line" [sourceLayer]="routesSourceLayer"
+                [filter]="routeLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [layout]="{
+                'line-cap': 'round',
+                'line-join': 'round'
+            }" [paint]="{
+                'line-color': ['match', ['get', 'color'], ['yellow', 'white', 'gold'], '#333333', 'white'],
+                'line-width': ['match', ['get', 'poiCategory'], '4x4', 9, 7],
+                'line-opacity': 0.85
+            }"></mgl-layer>
+            <mgl-layer id="public-routes-lines-bicycle" [source]="routesSrouceId" type="line" [sourceLayer]="routesSourceLayer"
+                [filter]="bicycleLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [paint]="{
+                'line-color': ['get', 'color'],
+                'line-width': 3
+            }"></mgl-layer>
+            <mgl-layer id="public-routes-lines-hiking" [source]="routesSrouceId" type="line" [sourceLayer]="routesSourceLayer"
+                [filter]="hikingLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [paint]="{
+                'line-color': ['get', 'color'],
+                'line-width': 3,
+                'line-dasharray': [2, 1.5]
+            }"></mgl-layer>
+            <mgl-layer id="public-routes-lines-4x4-left" [source]="routesSrouceId" type="line" [sourceLayer]="routesSourceLayer"
+                [filter]="fourByFourLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [paint]="{
+                'line-color': ['get', 'color'],
+                'line-width': 2,
+                'line-offset': -2,
+                'line-dasharray': [3, 2]
+            }"></mgl-layer>
+            <mgl-layer id="public-routes-lines-4x4-right" [source]="routesSrouceId" type="line" [sourceLayer]="routesSourceLayer"
+                [filter]="fourByFourLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [paint]="{
+                'line-color': ['get', 'color'],
+                'line-width': 2,
+                'line-offset': 2,
+                'line-dasharray': [3, 2]
+            }"></mgl-layer>
+            <mgl-layer id="public-routes-lines-hit-area" [source]="routesSrouceId" type="line"
+                [sourceLayer]="routesSourceLayer" [filter]="routeLinesFilter()" [before]="resources.endOfRoutesDrapedLayers" [paint]="{
+                'line-color': 'transparent',
+                'line-width': 16
+            }" (layerClick)="onRouteLineClick($event)" (layerMouseEnter)="cursorStyle.set('pointer')"
+                (layerMouseLeave)="cursorStyle.set('')"></mgl-layer>
             <mgl-geojson-source #routesClusterSource [id]="routesClusterSourceId" [data]="poiGeoJsonData()"
                 [cluster]="true" [clusterMaxZoom]="11" [clusterRadius]="100"></mgl-geojson-source>
             <mgl-markers-for-clusters [source]="routesClusterSourceId">
@@ -69,7 +109,7 @@
                 </span>
             </mgl-marker>
             }
-            @if (selectedRoutePoint()) {
+            @if (selectedRoutePoint() && isAtTrailHead()) {
             <mgl-marker [lngLat]="selectedRoutePoint().geometry.coordinates" anchor="bottom" className="z-10">
                 <span class="fa-stack fa-2x block cursor-pointer" (click)="onStartPointClick(selectedRoutePoint(), $event)">
                     <i class="fa icon-map-marker-rect fa-stack-2x"
@@ -79,32 +119,7 @@
                 </span>
             </mgl-marker>
             }
-            <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson()"></mgl-geojson-source>
-            <mgl-layer id="selected-route-left" type="line" source="selected-route" [paint]="{
-                'line-color': 'magenta',
-                'line-offset': -5,
-                'line-opacity': 0.5,
-                'line-width': 2
-            }">
-            </mgl-layer>
-            <mgl-layer id="selected-route-right" type="line" source="selected-route" [paint]="{
-                'line-color': 'magenta',
-                'line-offset': 5,
-                'line-opacity': 0.5,
-                'line-width': 2
-            }">
-            </mgl-layer>
-            <mgl-layer id="selected-route-arrows" type="symbol" source="selected-route" [layout]="{
-                'symbol-placement': 'line',
-                'symbol-spacing': 40,
-                'icon-image': 'arrow',
-                'icon-size': 0.75,
-                'icon-allow-overlap': true,
-                'icon-ignore-placement': true
-            }" [paint]="{
-                'icon-color': 'magenta'
-            }">
-            </mgl-layer>
+            <routes-path [routesGeoJson]="selectedRouteGeoJson()"></routes-path>
             @if (hoverFeature()) {
             <mgl-popup [lngLat]="hoverFeature().geometry.coordinates" [closeButton]="false" [offset]="[0, -30]"
                 class="text-right">
@@ -120,38 +135,9 @@
                     <i class="fa fa-action icon-close"></i>
                 </button>
             </div>
-            @switch (selectedRoutePoint().properties.poiDifficulty) {
-            @case ("Easy") {
-            <span class="rounded-full bg-green-500 p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
-                {{resources.easy}}
-            </span>
-            }
-            @case ("Moderate") {
-            <span class="rounded-full bg-yellow-500 p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
-                {{resources.legendModerate}}
-            </span>
-            }
-            @case ("Hard") {
-            <span class="rounded-full bg-red-500 p-2 text-white">
-                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
-                {{resources.legendAdvanced}}
-            </span>
-            }
-            @case ("Very Hard") {
-            <span class="rounded-full bg-black p-2 text-white">
-                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
-                {{resources.veryHard}}
-            </span>
-            }
-            @default {
-            <span class="rounded-full bg-unknown p-2">
-                <i class="fa {{getIconFromType(selectedRoutePoint())}}"></i>
-            </span>
-            }
-            }
-            <span class="mx-2">{{selectedRoutePoint().properties.poiLength | distance}}</span>
+            <div class="px-2">
+                <ng-container *ngTemplateOutlet="routeDetails; context: { $implicit: selectedRoutePoint() }"></ng-container>
+            </div>
             <div class="flex flex-row">
                 <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint())" analyticsOn="click"
                     analyticsCategory="Public routes" analyticsLabel="Add to routes">
@@ -223,7 +209,7 @@
                     @if (selectedRoutePoint().properties.image) {
                     <img class="w-full object-contain img-center" [src]="selectedRoutePoint().properties.image" alt="">
                     } @else {
-                    <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
+                    <ng-lottie class="block size-full" [options]="lottieScenery"></ng-lottie>
                     }
                 </div>
             </div>
@@ -238,30 +224,110 @@
         }
     </div>
     <div [ngClass]="{'max-md:hidden': showMap(), 'max-md:w-full': !showMap()}"
-        class="overflow-y-auto z-10 w-1/3 shrink-0 magrin-top-with-toolbar pb-safe-w-button md:min-w-[400px]">
+        class="overflow-y-auto z-10 w-1/3 shrink-0 magrin-top-with-toolbar pb-safe-w-button md:min-w-[400px] md:max-w-[480px]">
         <div class="sticky top-0 z-10 bg-surface">
             <public-routes-filter></public-routes-filter>
         </div>
+        @if (isSelectedRouteUnlisted()) {
+        <ng-container *ngTemplateOutlet="routeCard; context: { $implicit: selectedRoutePoint() }"></ng-container>
+        }
         @if (hasTooManyRoutes()) {
         <div class="flex flex-row m-10">
             {{resources.tooManyRoutesFoundZoomInOrChangeTheFilters}} ({{poiGeoJsonData().features.length}})
         </div>
         } @else {
         @for (route of poiGeoJsonData().features; track route.properties.poiId) {
-        <div (mouseenter)="hover(route)" (mouseleave)="hover(null)" id="route-{{route.properties.poiId}}">
-            <div class="flex flex-row mx-10 max-md:mx-2">
-                @if (route.properties.website) {
-                <h3 class="font-normal">
-                    <a class="w-full" [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
+        <ng-container *ngTemplateOutlet="routeCard; context: { $implicit: route }"></ng-container>
+        }
+        @empty {
+        <div class="flex flex-row m-10">
+            @if (isZoomedOut()) {
+            {{resources.zoomInToSeeRoutes}}
+            } @else if (isFiltered()) {
+            {{resources.noRoutesFoundChangeTheFilters}}
+            } @else {
+            {{resources.noRoutesFoundInThisArea}}
+            }
+        </div>
+        }
+        }
+    </div>
+</div>
+<ng-template #routeDetails let-route>
+    <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
+        @switch (route.properties.poiDifficulty) {
+        @case ("Easy") {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-green-500/20">
+            <i class="fa {{getIconFromType(route)}}"></i>
+            {{resources.easy}}
+        </span>
+        }
+        @case ("Moderate") {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-yellow-500/25">
+            <i class="fa {{getIconFromType(route)}}"></i>
+            {{resources.legendModerate}}
+        </span>
+        }
+        @case ("Hard") {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-red-500/20">
+            <i class="fa {{getIconFromType(route)}}"></i>
+            {{resources.legendAdvanced}}
+        </span>
+        }
+        @case ("Very Hard") {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface text-surface">
+            <i class="fa {{getIconFromType(route)}}"></i>
+            {{resources.veryHard}}
+        </span>
+        }
+        @default {
+        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface/10">
+            <i class="fa {{getIconFromType(route)}}"></i>
+        </span>
+        }
+        }
+        @if (route.properties.poiLength) {
+        <span class="inline-flex items-center gap-1.5 opacity-80">
+            <i class="fa icon-measure"></i>
+            {{route.properties.poiLength | distance}}
+        </span>
+        }
+    </div>
+</ng-template>
+<ng-template #routeCard let-route>
+    <mat-card appearance="outlined" id="route-{{route.properties.poiId}}" class="mx-4 my-3 overflow-hidden"
+        [ngClass]="route.properties.poiId === selectedRouteId() ? 'ring-[3px] ring-brand bg-brand-tonal!' : 'hover:ring-1 hover:ring-brand/50'"
+        (mouseenter)="hover(route)" (mouseleave)="hover(null)">
+        <div class="h-44 w-full overflow-hidden bg-on-surface/5">
+            @defer (on viewport) {
+            @if (route.properties.image) {
+            <img class="size-full object-cover" [src]="route.properties.image" alt="" loading="lazy">
+            } @else {
+            <ng-lottie class="block size-full" [options]="lottieScenery"></ng-lottie>
+            }
+            } @placeholder {
+            <div class="size-full"></div>
+            }
+        </div>
+        @defer (on viewport) {
+        <image-attribution class="block px-4 pt-2" [imageUrl]="route.properties.image"
+            [allowFiltering]="true"></image-attribution>
+        } @placeholder {
+        <div></div>
+        }
+        <div class="flex flex-col gap-2 p-4">
+            <div class="flex flex-row items-start gap-2">
+                <h3 class="m-0 flex-1 text-lg font-medium">
+                    @if (route.properties.website) {
+                    <a [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
+                    } @else {
+                    {{getTitle(route)}}
+                    }
                 </h3>
-                } @else {
-                <h3 class="w-full font-normal">{{getTitle(route)}}</h3>
-                }
-            </div>
-            <div class="flex flex-row mx-10 max-md:mx-2 items-center">
-                <button mat-button [matMenuTriggerFor]="routeMenu" analyticsOn="click" analyticsCategory="Public routes"
+                <button mat-icon-button class="-me-2 -mt-2" [matMenuTriggerFor]="routeMenu"
+                    [attr.aria-label]="resources.more" analyticsOn="click" analyticsCategory="Public routes"
                     analyticsLabel="Open route menu from list">
-                    <i class="fa fa-action icon-ellipsis-v"></i>
+                    <i class="fa icon-ellipsis-v"></i>
                 </button>
                 <mat-menu #routeMenu="matMenu">
                     <button mat-menu-item (click)="moveToFeature(route)" analyticsOn="click"
@@ -294,75 +360,13 @@
                     </button>
                     }
                 </mat-menu>
-                @switch (route.properties.poiDifficulty) {
-                @case ("Easy") {
-                <span class="rounded-full bg-green-500 p-2">
-                    <i class="fa {{getIconFromType(route)}}"></i>
-                    {{resources.easy}}
-                </span>
-                }
-                @case ("Moderate") {
-                <span class="rounded-full bg-yellow-500 p-2">
-                    <i class="fa {{getIconFromType(route)}}"></i>
-                    {{resources.legendModerate}}
-                </span>
-                }
-                @case ("Hard") {
-                <span class="rounded-full bg-red-500 p-2 text-white">
-                    <i class="fa {{getIconFromType(route)}}"></i>
-                    {{resources.legendAdvanced}}
-                </span>
-                }
-                @case ("Very Hard") {
-                <span class="rounded-full bg-black p-2 text-white">
-                    <i class="fa {{getIconFromType(route)}}"></i>
-                    {{resources.veryHard}}
-                </span>
-                }
-                @default {
-                <span class="rounded-full bg-unknown p-2">
-                    <i class="fa {{getIconFromType(route)}}"></i>
-                </span>
-                }
-                }
-                <span class="mx-2">{{resources.length}}: {{route.properties.poiLength | distance}}</span>
             </div>
-            <div class="flex flex-row mx-10 max-md:mx-2">
-                <div class="relative w-full h-[200px] overflow-hidden">
-                    @defer (on viewport) {
-                    @if (route.properties.image) {
-                    <img class="w-full object-contain img-center" [src]="route.properties.image" alt="" loading="lazy">
-                    } @else {
-                    <ng-lottie class="max-w-full img-center" [options]="lottieScenery"></ng-lottie>
-                    }
-                    } @placeholder {
-                    <div class="h-full"></div>
-                    }
-                </div>
-            </div>
+            <ng-container *ngTemplateOutlet="routeDetails; context: { $implicit: route }"></ng-container>
             @defer (on viewport) {
-            <div class="flex flex-row" class="text-center text-sm">
-                <image-attribution [imageUrl]="route.properties.image" [allowFiltering]="true"></image-attribution>
-            </div>
-            <div class="mx-10 max-md:mx-2 mb-2">
-                <description [feature]="route" [isEditable]="false"></description>
-            </div>
+            <description [feature]="route" [isEditable]="false"></description>
             } @placeholder {
             <div></div>
             }
         </div>
-        }
-        @empty {
-        <div class="flex flex-row m-10">
-            @if (isZoomedOut()) {
-            {{resources.zoomInToSeeRoutes}}
-            } @else if (isFiltered()) {
-            {{resources.noRoutesFoundChangeTheFilters}}
-            } @else {
-            {{resources.noRoutesFoundInThisArea}}
-            }
-        </div>
-        }
-        }
-    </div>
-</div>
+    </mat-card>
+</ng-template>

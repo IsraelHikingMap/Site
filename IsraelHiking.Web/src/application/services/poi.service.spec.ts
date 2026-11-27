@@ -474,6 +474,29 @@ describe("Poi Service", () => {
         }
     ));
 
+    it("Should filter route lines on the map by category, difficulty and minimal length", inject([PoiService, Store],
+        (poiService: PoiService, store: Store) => {
+            store.reset({ configuration: { units: "metric" } });
+            const expression = poiService.getPublicRoutesFilterExpression(
+                { categories: ["Hiking"], lengthRange: [2, 50], difficulty: ["Easy"], userId: "" });
+            expect(expression).toEqual(["all",
+                ["in", ["get", "poiCategory"], ["literal", ["Hiking"]]],
+                ["any", ["!", ["has", "poiDifficulty"]], ["in", ["get", "poiDifficulty"], ["literal", ["Easy"]]]],
+                ["any", ["!", ["has", "poiLength"]], [">=", ["get", "poiLength"], 2000]]
+            ]);
+        }
+    ));
+
+    it("Should filter route lines on the map by maximal length in miles and by user", inject([PoiService, Store],
+        (poiService: PoiService, store: Store) => {
+            store.reset({ configuration: { units: "imperial" } });
+            const expression = poiService.getPublicRoutesFilterExpression(
+                { categories: ["Hiking"], lengthRange: [0, 10], difficulty: ["Easy"], userId: "42" }) as unknown[];
+            expect(expression).toContainEqual(["any", ["!", ["has", "poiLength"]], ["<=", ["get", "poiLength"], 16093.44]]);
+            expect(expression).toContainEqual(["==", ["get", "poiUserId"], "42"]);
+        }
+    ));
+
     it("Should clear offline queue if feature is not in database", inject([PoiService, Store, DatabaseService],
         async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
             store.reset({

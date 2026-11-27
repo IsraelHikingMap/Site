@@ -65,7 +65,7 @@
 }
 @if (selectedPoiFeature()) {
 <mgl-marker [lngLat]="selectedPoiFeature().geometry.coordinates" anchor="bottom">
-  <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature(), $event)"
+  <span class="fa-stack fa-2x cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature(), $event)"
     (mouseover)="setHoverFeature(selectedPoiFeature())" (mouseout)="hoverFeature.set(null)">
     @if (hasExtraData(selectedPoiFeature())) {
     <span class="has-extra-data" [style.background]="selectedPoiFeature().properties.poiIconColor"></span>

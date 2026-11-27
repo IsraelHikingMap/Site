@@ -1,7 +1,7 @@
 import { describe, beforeEach, vi, it, expect } from "vitest";
 import { TestBed, inject } from "@angular/core/testing";
 import { provideStore, Store } from "@ngxs/store";
-import type { ErrorEvent, LayerSpecification, Map, SourceSpecification } from "maplibre-gl";
+import type { ErrorEvent, FilterSpecification, LayerSpecification, Map, SourceSpecification } from "maplibre-gl";
 
 import { MapService } from "./map.service";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
@@ -283,6 +283,30 @@ describe("MapService", () => {
             isMoving: () => true
         } as unknown as Map);
         expect(service.isMoving()).toEqual(true);
+    }));
+
+    it("should get no features from tiles when one of the layers is not on the map", inject([MapService], (service: MapService) => {
+        service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: () => { },
+            getLayer: (id: string) => id === "points" ? {} : undefined
+        } as unknown as Map);
+        expect(service.getFeaturesFromTiles(undefined, ["points", "lines"])).toEqual([]);
+    }));
+
+    it("should get the features of the given layers from tiles", inject([MapService], (service: MapService) => {
+        const queryRenderedFeatures = vi.fn().mockReturnValue([{ id: "42" }]);
+        service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: () => { },
+            getLayer: () => ({}),
+            queryRenderedFeatures
+        } as unknown as Map);
+        const filter = ["==", ["get", "poiId"], "42"] as FilterSpecification;
+        expect(service.getFeaturesFromTiles(filter, ["lines"])).toEqual([{ id: "42" }]);
+        expect(queryRenderedFeatures).toHaveBeenCalledWith({ layers: ["lines"], filter });
     }));
 
     it("should resolve wait for idle right away when the map is idle with its tiles loaded", inject([MapService], async (service: MapService) => {

@@ -229,23 +229,22 @@ export class MapService {
     }
 
     /**
-     * The points the map currently draws from the tiles.
+     * The features the map currently draws from the tiles, the points unless other layers are given.
      * @param filter limits the features to those that match it, which is done by the map itself and is
      * far cheaper than reading every point of the tile only to throw most of them away - a tile of a
      * dense area holds tens of thousands of points of which a caller usually wants a fraction.
+     * @param layers the layers to read, all of which have to be on the map
      */
-    public getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
+    public getFeaturesFromTiles(filter?: FilterSpecification,
+        layers = [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer]): GeoJSONFeature[] {
         if (this.currentMap == null) {
             // Map is not ready yet
             return [];
         }
-        if (!this.currentMap.getLayer(this.resourcesService.globalPointsExternalLayer)) {
+        if (layers.some(layer => !this.currentMap.getLayer(layer))) {
             return [];
         }
-        return this.currentMap.queryRenderedFeatures({
-            layers: [this.resourcesService.globalPointsExternalLayer, this.resourcesService.globalPointsLayer],
-            filter
-        });
+        return this.currentMap.queryRenderedFeatures({ layers, filter });
     }
 
     public isMoving(): boolean {
