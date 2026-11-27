@@ -127,7 +127,7 @@ public class FilesController : ControllerBase
             _logger.LogInformation($"Unable to get the list of offline files for user: {User.Identity?.Name} since the user is not entitled, date: {lastModified}");
             return Forbid();
         }
-        _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
+        _logger.LogInformation($"Getting the list of offline files of {(tileX.HasValue && tileY.HasValue ? $"tile {tileX}-{tileY}" : "root")} for user: {User.Identity?.Name}, date: {lastModified}");
         return Ok(await _offlineFilesService.GetUpdatedFilesList(lastModified, tileX, tileY, routingTile));
     }
 
