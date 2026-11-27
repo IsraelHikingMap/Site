@@ -2,7 +2,7 @@ import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
-import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective } from "@maplibre/ngx-maplibre-gl";
+import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import { MatButton } from "@angular/material/button";
@@ -13,7 +13,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
-import { skip } from "rxjs";
+import { filter, skip } from "rxjs";
 import { AnimationOptions, LottieComponent } from "ngx-lottie";
 import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification } from "maplibre-gl";
 
@@ -39,14 +39,15 @@ import { GeoJSONUtils } from "../../services/geojson-utils";
 import { PoiProperties } from "../../services/osm-tags.service";
 import { RouteStrings } from "../../services/hash.service";
 import { initialState } from "../../reducers/initial-state";
+import { SetPublicRoutesSearchResultAction } from "../../reducers/in-memory.reducer";
 import { Urls } from "../../urls";
-import type { ApplicationState } from "../../models";
+import type { ApplicationState, SearchResultsPointOfInterest } from "../../models";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent]
 })
 export class PublicRoutesComponent {
     public readonly lottieScenery: AnimationOptions = {
@@ -84,6 +85,9 @@ export class PublicRoutesComponent {
         features: []
     });
     public readonly selectedRoutePoint = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>>(null);
+
+    /** The place picked in the search, marked on the map once the map got there and found it is not a route */
+    public readonly searchedPlace = signal<SearchResultsPointOfInterest>(null);
 
     /**
      * The routes the map holds, kept since a small screen shows either the map or the list, and a map
@@ -123,6 +127,7 @@ export class PublicRoutesComponent {
 
     private readonly zoom = this.store.selectSignal((s: ApplicationState) => s.locationState.zoom);
     private readonly filters = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
+    private readonly searchResult = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesSearchResult);
 
     constructor() {
         this.mapStyle = this.defaultStyleService.getStyleWithPlaceholders();
@@ -139,8 +144,12 @@ export class PublicRoutesComponent {
             .pipe(takeUntilDestroyed(this.destroyRef), skip(1)).subscribe(() => {
                 this.runFilter();
             });
+        this.store.select((state: ApplicationState) => state.inMemoryState.publicRoutesSearchResult)
+            .pipe(takeUntilDestroyed(this.destroyRef), filter(searchResult => searchResult != null))
+            .subscribe(searchResult => this.onSearchResult(searchResult));
         this.destroyRef.onDestroy(() => {
             this.mapService.unsetMap();
+            this.store.dispatch(new SetPublicRoutesSearchResultAction(null));
         });
     }
 
@@ -172,32 +181,85 @@ export class PublicRoutesComponent {
         });
     }
 
+    /**
+     * Selects the place picked in the search when it is a route and marks it on the map otherwise, which
+     * is only known once the map is idle there, at least at {@link minZoom}, with its tiles read. A map
+     * hidden behind the list only gets its size once shown, hence the wait before flying.
+     */
+    private async onSearchResult(searchResult: SearchResultsPointOfInterest) {
+        this.searchedPlace.set(null);
+        if (!this.showMap()) {
+            this.showMap.set(true);
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        await this.mapService.flyTo(searchResult.location, Math.max(this.zoom(), this.minZoom));
+        await this.mapService.waitForIdle();
+        this.runFilter();
+        if (!this.selectSearchedRoute() && this.searchResult() === searchResult) {
+            this.searchedPlace.set(searchResult);
+        }
+    }
+
+    /**
+     * Reads the search result from the state rather than taking it, so that a fly that was overtaken
+     * by a newer search does not select the result of the older one.
+     */
+    private selectSearchedRoute(): boolean {
+        const searchResult = this.searchResult();
+        if (searchResult == null) {
+            return false;
+        }
+        const route = this.routesFromTiles.find(f =>
+            f.properties.poiSource === searchResult.source && f.properties.identifier === searchResult.id);
+        if (route == null) {
+            return false;
+        }
+        this.store.dispatch(new SetPublicRoutesSearchResultAction(null));
+        this.moveToFeature(route);
+        return true;
+    }
+
     public async onStartPointClick(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>, event: MouseEvent) {
         event.stopPropagation();
         if (this.selectedRoutePoint()?.properties.poiId === feature.properties.poiId) {
-            this.selectedRoutePoint.set(null);
-            this.selectedRouteGeoJson.set({
-                type: "FeatureCollection",
-                features: []
-            });
-            this.hoverFeature.set(null);
+            this.clearSelectedRoute();
             return;
         }
         ScrollToDirective.scrollTo(`route-${feature.properties.poiId}`, 60);
         this.moveToFeature(feature);
     }
 
+    /** Unselects the route, its marker and its line on the map together, so neither outlives the other */
+    public clearSelectedRoute() {
+        this.selectedRoutePoint.set(null);
+        this.selectedRouteGeoJson.set({
+            type: "FeatureCollection",
+            features: []
+        });
+        this.hoverFeature.set(null);
+    }
+
+    /**
+     * Selects the route and draws its line once it is loaded, unless the route was unselected or another
+     * one was selected meanwhile, which would leave a line on the map with no marker or sheet for it.
+     */
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         this.showMap.set(true);
         this.selectedRoutePoint.set(feature);
         this.hoverFeature.set(null);
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
+        if (this.selectedRoutePoint() !== feature) {
+            return;
+        }
         this.selectedRouteGeoJson.set({
             type: "FeatureCollection",
             features: [fullFeature]
         });
         if (feature.properties.poiSource === "OSM") {
             await this.poiService.updateExtendedInfo(fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+            if (this.selectedRoutePoint() !== feature) {
+                return;
+            }
             this.selectedRouteGeoJson.set({
                 type: "FeatureCollection",
                 features: [fullFeature]

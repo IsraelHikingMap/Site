@@ -13,11 +13,10 @@ import { Store } from "@ngxs/store";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { ToastService } from "../services/toast.service";
-import { MapService } from "../services/map.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { isTypingInTextField, isCtrlOrMeta, SHORTCUT_ANALYTICS_CATEGORY } from "../services/keyboard-shortcuts";
 import { AnalyticsService } from "../services/analytics.service";
-import { SetSearchTermAction } from "../reducers/in-memory.reducer";
+import { SetPublicRoutesSearchResultAction, SetSearchTermAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState, SearchResultsPointOfInterest } from "../models";
 
 @Component({
@@ -44,7 +43,6 @@ export class SearchComponent {
     private readonly toastService = inject(ToastService);
     private readonly router = inject(Router);
     private readonly store = inject(Store);
-    private readonly mapService = inject(MapService);
     private readonly document = inject(DOCUMENT);
     private readonly analyticsService = inject(AnalyticsService);
 
@@ -161,7 +159,7 @@ export class SearchComponent {
 
     public moveToResults(searchResults: SearchResultsPointOfInterest) {
         if (this.router.url === RouteStrings.ROUTE_PUBLIC_ROUTES) {
-            this.mapService.flyTo(searchResults.location);
+            this.store.dispatch(new SetPublicRoutesSearchResultAction(searchResults));
             return;
         }
 

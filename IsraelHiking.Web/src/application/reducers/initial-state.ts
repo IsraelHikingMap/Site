@@ -260,7 +260,8 @@ export const initialState =
                 categories: ["Bicycle", "Hiking", "4x4"],
                 difficulty: ["Easy", "Moderate", "Hard", "Very Hard"],
                 lengthRange: [0, 50]
-            }
+            },
+            publicRoutesSearchResult: null
         },
         gpsState: {
             tracking: "disabled",

@@ -62,6 +62,23 @@
                     </div>
                 </ng-template>
             </mgl-markers-for-clusters>
+            @if (searchedPlace()) {
+            <mgl-marker [lngLat]="searchedPlace().location" className="pointer-events-none">
+                <span class="flex size-9 items-center justify-center rounded-full border-2 border-outline-variant bg-white shadow-md">
+                    <i class="fa fa-lg {{searchedPlace().icon}}" [style.color]="searchedPlace().iconColor"></i>
+                </span>
+            </mgl-marker>
+            }
+            @if (selectedRoutePoint()) {
+            <mgl-marker [lngLat]="selectedRoutePoint().geometry.coordinates" anchor="bottom" className="z-10">
+                <span class="fa-stack fa-2x block cursor-pointer" (click)="onStartPointClick(selectedRoutePoint(), $event)">
+                    <i class="fa icon-map-marker-rect fa-stack-2x"
+                        style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                    <i class="fa {{selectedRoutePoint().properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large"
+                        [style.color]="selectedRoutePoint().properties.poiIconColor"></i>
+                </span>
+            </mgl-marker>
+            }
             <mgl-geojson-source id="selected-route" [data]="selectedRouteGeoJson()"></mgl-geojson-source>
             <mgl-layer id="selected-route-left" type="line" source="selected-route" [paint]="{
                 'line-color': 'magenta',
@@ -96,10 +113,10 @@
             }
         </mgl-map>
         @if (selectedRoutePoint()) {
-        <bottom-sheet class="md:hidden" (closed)="selectedRoutePoint.set(null)">
+        <bottom-sheet class="md:hidden" [minimizable]="true" (closed)="clearSelectedRoute()">
             <div class="sticky top-0 z-10 mb-2 flex flex-row items-center justify-center bg-surface px-2">
                 <div class="flex-1 text-center text-xl">{{getTitle(selectedRoutePoint())}}</div>
-                <button mat-button class="w-1/6" type="button" (click)="selectedRoutePoint.set(null)" tabindex="-1">
+                <button mat-button class="w-1/6" type="button" (click)="clearSelectedRoute()" tabindex="-1">
                     <i class="fa fa-action icon-close"></i>
                 </button>
             </div>

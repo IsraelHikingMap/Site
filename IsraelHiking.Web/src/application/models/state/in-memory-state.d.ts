@@ -1,4 +1,4 @@
-﻿import type { ShareUrl, PublicRoutesFilter, Theme, DownloadedArea } from "..";
+﻿import type { ShareUrl, PublicRoutesFilter, Theme, DownloadedArea, SearchResultsPointOfInterest } from "..";
 
 /**
  * this state should be clean every time the app starts
@@ -23,4 +23,9 @@ export type InMemoryState = {
     searchTerm: string;
     currentUrl: string;
     publicRoutesFilter: PublicRoutesFilter;
+    /**
+     * The search result picked on the public routes screen, which the screen selects once its map holds
+     * it as a route, and marks on the map for as long as it does not.
+     */
+    publicRoutesSearchResult: SearchResultsPointOfInterest;
 };

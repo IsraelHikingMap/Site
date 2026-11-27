@@ -285,6 +285,34 @@ describe("MapService", () => {
         expect(service.isMoving()).toEqual(true);
     }));
 
+    it("should resolve wait for idle right away when the map is idle with its tiles loaded", inject([MapService], async (service: MapService) => {
+        const once = vi.fn();
+        service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: () => { },
+            once,
+            isMoving: () => false,
+            areTilesLoaded: () => true
+        } as unknown as Map);
+        await service.waitForIdle();
+        expect(once).not.toHaveBeenCalled();
+    }));
+
+    it("should wait for the idle event when the map is moving", inject([MapService], async (service: MapService) => {
+        const once = vi.fn().mockResolvedValue({});
+        service.setMap({
+            setTransformRequest: () => { },
+            setMissingStyleImageResolver: () => { },
+            on: () => { },
+            once,
+            isMoving: () => true,
+            areTilesLoaded: () => true
+        } as unknown as Map);
+        await service.waitForIdle();
+        expect(once).toHaveBeenCalledWith("idle");
+    }));
+
     it("Should fit bounds with default value when not passed", inject([MapService],
         async (service: MapService) => {
             const spy = vi.fn();

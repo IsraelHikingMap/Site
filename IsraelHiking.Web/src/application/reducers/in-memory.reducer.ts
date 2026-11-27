@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 
 import { initialState } from "./initial-state";
-import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, DownloadedArea } from "../models";
+import type { ShareUrl, InMemoryState, PublicRoutesFilter, Theme, DownloadedArea, SearchResultsPointOfInterest } from "../models";
 
 export class ToggleDistanceAction {
     public static readonly type = "[In Memory] ToggleDistanceAction";
@@ -42,6 +42,11 @@ export class SetUrlAction {
 export class SetPublicRoutesFilterAction {
     public static readonly type = "[In Memory] SetPublicRoutesFilterAction";
     constructor(public readonly filters: PublicRoutesFilter) { }
+}
+
+export class SetPublicRoutesSearchResultAction {
+    public static readonly type = "[In Memory] SetPublicRoutesSearchResultAction";
+    constructor(public readonly searchResult: SearchResultsPointOfInterest) { }
 }
 
 export class SetEffectiveThemeAction {
@@ -122,6 +127,14 @@ export class InMemoryReducer {
     public setPublicRoutesFilter(ctx: StateContext<InMemoryState>, action: SetPublicRoutesFilterAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.publicRoutesFilter = action.filters;
+            return lastState;
+        }));
+    }
+
+    @Action(SetPublicRoutesSearchResultAction)
+    public setPublicRoutesSearchResult(ctx: StateContext<InMemoryState>, action: SetPublicRoutesSearchResultAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.publicRoutesSearchResult = action.searchResult;
             return lastState;
         }));
     }

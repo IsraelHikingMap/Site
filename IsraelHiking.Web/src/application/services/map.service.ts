@@ -252,6 +252,17 @@ export class MapService {
         return this.currentMap?.isMoving() ?? false;
     }
 
+    /**
+     * Resolves once the map has stopped moving and holds the tiles of what it shows, which is when
+     * {@link getFeaturesFromTiles} has what a move brought into view.
+     */
+    public async waitForIdle() {
+        await this.initializationPromise;
+        if (this.currentMap.isMoving() || !this.currentMap.areTilesLoaded()) {
+            await this.currentMap.once("idle");
+        }
+    }
+
     public async fitBounds(bounds: Bounds, padding = 50, smallScreenPadding?: PaddingOptions) {
         await this.initializationPromise;
         const maxZoom = Math.max(this.currentMap.getZoom(), 16);
