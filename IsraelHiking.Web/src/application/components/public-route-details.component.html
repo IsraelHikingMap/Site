@@ -1,0 +1,39 @@
+<div class="flex flex-row flex-wrap items-center gap-2 text-sm">
+    @switch (route().properties.poiDifficulty) {
+    @case ("Easy") {
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-green-500/20">
+        <i class="fa {{categoryIcon()}}"></i>
+        {{resources.easy}}
+    </span>
+    }
+    @case ("Moderate") {
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-yellow-500/25">
+        <i class="fa {{categoryIcon()}}"></i>
+        {{resources.legendModerate}}
+    </span>
+    }
+    @case ("Hard") {
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-red-500/20">
+        <i class="fa {{categoryIcon()}}"></i>
+        {{resources.legendAdvanced}}
+    </span>
+    }
+    @case ("Very Hard") {
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface text-surface">
+        <i class="fa {{categoryIcon()}}"></i>
+        {{resources.veryHard}}
+    </span>
+    }
+    @default {
+    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface/10">
+        <i class="fa {{categoryIcon()}}"></i>
+    </span>
+    }
+    }
+    @if (route().properties.poiLength) {
+    <span class="inline-flex items-center gap-1.5 opacity-80">
+        <i class="fa icon-measure"></i>
+        {{route().properties.poiLength | distance}}
+    </span>
+    }
+</div>

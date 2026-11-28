@@ -1,0 +1,8 @@
+<button mat-button class="h-auto! w-full min-w-0 rounded-2xl! px-1! py-2! text-on-surface!" [disabled]="disabled()"
+    [matMenuTriggerFor]="menu()" (click)="pressed.emit()">
+    <span class="flex flex-col items-center gap-1">
+        <span class="flex size-10 items-center justify-center rounded-full" [class.bg-brand]="primary()"
+            [class.bg-brand-tonal]="!primary()"><i class="fa fa-lg {{icon()}}"></i></span>
+        <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{label()}}</span>
+    </span>
+</button>

@@ -2,9 +2,9 @@ import { Component, inject, OnDestroy, ViewEncapsulation, signal, computed } fro
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dir } from "@angular/cdk/bidi";
 import { NgClass } from "@angular/common";
-import { MatButton, MatAnchor, MatIconButton } from "@angular/material/button";
+import { MatIconButton } from "@angular/material/button";
 import { MatTooltip } from "@angular/material/tooltip";
-import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatMenu, MatMenuItem } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatDivider } from "@angular/material/divider";
@@ -18,6 +18,7 @@ import { Store } from "@ngxs/store";
 import { PublicPointOfInterestEditComponent } from "./public-poi-edit.component";
 import { ImageScrollerComponent } from "./image-scroller.component";
 import { DescriptionComponent } from "../../description.component";
+import { ActionButtonComponent } from "../../action-button.component";
 import { AnalyticsDirective } from "../../../directives/analytics.directive";
 import { DistancePipe } from "../../../pipes/distance.pipe";
 import { ResourcesService } from "../../../services/resources.service";
@@ -68,7 +69,7 @@ const SOURCE_IMAGE_URL_BY_DOMAIN = [
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
-    imports: [Dir, MatButton, MatIconButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, MatAnchor, CdkCopyToClipboard, MatMenuTrigger, MatProgressSpinner, PublicPointOfInterestEditComponent, FormsModule, NgClass, MatDivider, ImageScrollerComponent, DistancePipe, DescriptionComponent, MatNavList, MatListItem, MatListItemAvatar, MatListItemTitle, MatListItemMeta]
+    imports: [Dir, MatIconButton, AnalyticsDirective, MatTooltip, MatMenu, MatMenuItem, CdkCopyToClipboard, MatProgressSpinner, PublicPointOfInterestEditComponent, FormsModule, NgClass, MatDivider, ImageScrollerComponent, DistancePipe, DescriptionComponent, MatNavList, MatListItem, MatListItemAvatar, MatListItemTitle, MatListItemMeta, ActionButtonComponent]
 })
 export class PublicPoiSidebarComponent implements OnDestroy {
     public readonly isLoading = signal(true);

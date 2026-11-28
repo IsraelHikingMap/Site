@@ -136,38 +136,8 @@
                 </button>
             </div>
             <div class="px-2">
-                <ng-container *ngTemplateOutlet="routeDetails; context: { $implicit: selectedRoutePoint() }"></ng-container>
+                <public-route-details [route]="selectedRoutePoint()"></public-route-details>
             </div>
-            <div class="flex flex-row">
-                <button class="mt-2" mat-button (click)="convertToRoute(selectedRoutePoint())" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Add to routes">
-                    <i class="fa fa-lg icon-plus"></i>
-                    {{resources.addToRoutes}}
-                </button>
-            </div>
-            <div class="flex flex-row">
-                <button class="mt-2" mat-button [matMenuTriggerFor]="shareMenu" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Open share menu">
-                    <i class="fa fa-lg icon-share-alt"></i>
-                    {{resources.share}}
-                </button>
-            </div>
-            <div class="flex flex-row">
-                <button class="mt-2" mat-button (click)="navigateToPoi(selectedRoutePoint())" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore">
-                    <i class="fa fa-lg icon-external-link-square"></i>
-                    {{resources.openInPlanAndExplore}}
-                </button>
-            </div>
-            @if (isFromOsm(selectedRoutePoint())) {
-            <div class="flex flex-row">
-                <button class="mt-2" mat-button (click)="navigateToEditPoi(selectedRoutePoint())" analyticsOn="click"
-                    analyticsCategory="Public routes" analyticsLabel="Edit OSM route">
-                    <i class="fa fa-lg icon-pencil"></i>
-                    {{resources.editProperties}}
-                </button>
-            </div>
-            }
             <mat-menu #shareMenu="matMenu">
                 <a mat-menu-item [href]="getShareLinks(selectedRoutePoint()).waze" [target]="'_blank'"
                     analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Navigate with waze">
@@ -217,6 +187,21 @@
                 <image-attribution [imageUrl]="selectedRoutePoint().properties.image"
                     [allowFiltering]="true"></image-attribution>
             </div>
+            <div class="flex flex-row items-start gap-1 px-2 py-2"
+                [attr.lang]="resources.getCurrentLanguageCodeSimplified()">
+                <action-button icon="icon-plus" [label]="resources.addToRoutes" [primary]="true"
+                    (pressed)="convertToRoute(selectedRoutePoint())" analyticsOn="click" analyticsCategory="Public routes"
+                    analyticsLabel="Add to routes"></action-button>
+                <action-button icon="icon-share-alt" [label]="resources.share" [menu]="shareMenu" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Open share menu"></action-button>
+                <action-button icon="icon-external-link-square" [label]="resources.openInPlanAndExplore"
+                    (pressed)="navigateToPoi(selectedRoutePoint())" analyticsOn="click" analyticsCategory="Public routes"
+                    analyticsLabel="Open OSM route in plan and explore"></action-button>
+                @if (isFromOsm(selectedRoutePoint())) {
+                <action-button icon="icon-pencil" [label]="resources.edit" (pressed)="navigateToEditPoi(selectedRoutePoint())"
+                    analyticsOn="click" analyticsCategory="Public routes" analyticsLabel="Edit OSM route"></action-button>
+                }
+            </div>
             <div class="mx-2">
                 <description [feature]="selectedRoutePoint()" [isEditable]="false"></description>
             </div>
@@ -229,15 +214,18 @@
             <public-routes-filter></public-routes-filter>
         </div>
         @if (isSelectedRouteUnlisted()) {
-        <ng-container *ngTemplateOutlet="routeCard; context: { $implicit: selectedRoutePoint() }"></ng-container>
+        <public-route-card [route]="selectedRoutePoint()" [selected]="true"
+            (moveTo)="moveToFeature(selectedRoutePoint())" (convertToRoute)="convertToRoute(selectedRoutePoint())"></public-route-card>
         }
         @if (hasTooManyRoutes()) {
         <div class="flex flex-row m-10">
-            {{resources.tooManyRoutesFoundZoomInOrChangeTheFilters}} ({{poiGeoJsonData().features.length}})
+            {{resources.tooManyRoutesFoundZoomInOrChangeTheFilters}} ({{listedRoutes().length}})
         </div>
         } @else {
-        @for (route of poiGeoJsonData().features; track route.properties.poiId) {
-        <ng-container *ngTemplateOutlet="routeCard; context: { $implicit: route }"></ng-container>
+        @for (route of listedRoutes(); track route.properties.poiId) {
+        <public-route-card [route]="route" [selected]="route.properties.poiId === selectedRouteId()"
+            (moveTo)="moveToFeature(route)" (convertToRoute)="convertToRoute(route)" (mouseenter)="hover(route)"
+            (mouseleave)="hover(null)"></public-route-card>
         }
         @empty {
         <div class="flex flex-row m-10">
@@ -253,120 +241,3 @@
         }
     </div>
 </div>
-<ng-template #routeDetails let-route>
-    <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
-        @switch (route.properties.poiDifficulty) {
-        @case ("Easy") {
-        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-green-500/20">
-            <i class="fa {{getIconFromType(route)}}"></i>
-            {{resources.easy}}
-        </span>
-        }
-        @case ("Moderate") {
-        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-yellow-500/25">
-            <i class="fa {{getIconFromType(route)}}"></i>
-            {{resources.legendModerate}}
-        </span>
-        }
-        @case ("Hard") {
-        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-red-500/20">
-            <i class="fa {{getIconFromType(route)}}"></i>
-            {{resources.legendAdvanced}}
-        </span>
-        }
-        @case ("Very Hard") {
-        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface text-surface">
-            <i class="fa {{getIconFromType(route)}}"></i>
-            {{resources.veryHard}}
-        </span>
-        }
-        @default {
-        <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-on-surface/10">
-            <i class="fa {{getIconFromType(route)}}"></i>
-        </span>
-        }
-        }
-        @if (route.properties.poiLength) {
-        <span class="inline-flex items-center gap-1.5 opacity-80">
-            <i class="fa icon-measure"></i>
-            {{route.properties.poiLength | distance}}
-        </span>
-        }
-    </div>
-</ng-template>
-<ng-template #routeCard let-route>
-    <mat-card appearance="outlined" id="route-{{route.properties.poiId}}" class="mx-4 my-3 overflow-hidden"
-        [ngClass]="route.properties.poiId === selectedRouteId() ? 'ring-[3px] ring-brand bg-brand-tonal!' : 'hover:ring-1 hover:ring-brand/50'"
-        (mouseenter)="hover(route)" (mouseleave)="hover(null)">
-        <div class="h-44 w-full overflow-hidden bg-on-surface/5">
-            @defer (on viewport) {
-            @if (route.properties.image) {
-            <img class="size-full object-cover" [src]="route.properties.image" alt="" loading="lazy">
-            } @else {
-            <ng-lottie class="block size-full" [options]="lottieScenery"></ng-lottie>
-            }
-            } @placeholder {
-            <div class="size-full"></div>
-            }
-        </div>
-        @defer (on viewport) {
-        <image-attribution class="block px-4 pt-2" [imageUrl]="route.properties.image"
-            [allowFiltering]="true"></image-attribution>
-        } @placeholder {
-        <div></div>
-        }
-        <div class="flex flex-col gap-2 p-4">
-            <div class="flex flex-row items-start gap-2">
-                <h3 class="m-0 flex-1 text-lg font-medium">
-                    @if (route.properties.website) {
-                    <a [href]="route.properties.website" target="_blank">{{getTitle(route)}}</a>
-                    } @else {
-                    {{getTitle(route)}}
-                    }
-                </h3>
-                <button mat-icon-button class="-me-2 -mt-2" [matMenuTriggerFor]="routeMenu"
-                    [attr.aria-label]="resources.more" analyticsOn="click" analyticsCategory="Public routes"
-                    analyticsLabel="Open route menu from list">
-                    <i class="fa icon-ellipsis-v"></i>
-                </button>
-                <mat-menu #routeMenu="matMenu">
-                    <button mat-menu-item (click)="moveToFeature(route)" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Move to route from list">
-                        <i class="fa icon-crosshairs"></i>
-                        {{resources.moveToRoute}}
-                    </button>
-                    <button mat-menu-item (click)="convertToRoute(route)" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Add to routes from list">
-                        <i class="fa icon-plus"></i>
-                        {{resources.addToRoutes}}
-                    </button>
-                    <button mat-menu-item (click)="navigateToPoi(route)" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore from list">
-                        <i class="fa icon-external-link-square"></i>
-                        {{resources.openInPlanAndExplore}}
-                    </button>
-                    @if (isFromOsm(route)) {
-                    <button mat-menu-item (click)="navigateToEditPoi(route)" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Edit OSM route from list">
-                        <i class="fa icon-pencil"></i>
-                        {{resources.editProperties}}
-                    </button>
-                    }
-                    @if (!isApp()) {
-                    <button mat-menu-item [cdkCopyToClipboard]="getShareLinks(route).poiLink" analyticsOn="click"
-                        analyticsCategory="Public routes" analyticsLabel="Share copy to clipboard route">
-                        <i class="fa icon-clipboard"></i>
-                        {{resources.share}} - {{resources.copyToClipboard}}
-                    </button>
-                    }
-                </mat-menu>
-            </div>
-            <ng-container *ngTemplateOutlet="routeDetails; context: { $implicit: route }"></ng-container>
-            @defer (on viewport) {
-            <description [feature]="route" [isEditable]="false"></description>
-            } @placeholder {
-            <div></div>
-            }
-        </div>
-    </mat-card>
-</ng-template>

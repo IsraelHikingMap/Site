@@ -32,37 +32,14 @@
     }
     <description [feature]="fullFeature()" [isEditable]="isEditable()"></description>
     <div class="sticky bottom-0 z-10 -mx-4 mt-4 flex bg-surface px-4 py-2 flex-row items-start gap-1" [attr.lang]="resources.getCurrentLanguageCodeSimplified()">
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="navigateHere()" [disabled]="!fullFeature()" analyticsOn="click"
-        analyticsCategory="POI" analyticsLabel="Navigate here">
-        <span class="flex flex-col items-center gap-1">
-          <span class="flex size-10 items-center justify-center rounded-full bg-brand"><i class="fa fa-lg icon-recordings"></i></span>
-          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.planRouteHere}}</span>
-        </span>
-      </button>
+      <action-button icon="icon-recordings" [label]="resources.planRouteHere" [primary]="true" (pressed)="navigateHere()" [disabled]="!fullFeature()" analyticsOn="click" analyticsCategory="POI" analyticsLabel="Navigate here"></action-button>
       @if (isRoute()) {
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="convertToRoute()" analyticsOn="click"
-        analyticsCategory="POI" analyticsLabel="Convert POI to route">
-        <span class="flex flex-col items-center gap-1">
-          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
-          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.convertToRoute}}</span>
-        </span>
-      </button>
+      <action-button icon="icon-plus" [label]="resources.convertToRoute" (pressed)="convertToRoute()" analyticsOn="click" analyticsCategory="POI" analyticsLabel="Convert POI to route"></action-button>
       } @else {
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="addPointToRoute()" [disabled]="!fullFeature()" analyticsOn="click"
-        analyticsCategory="POI" analyticsLabel="Convert POI to point">
-        <span class="flex flex-col items-center gap-1">
-          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-plus"></i></span>
-          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.addPointToRoute}}</span>
-        </span>
-      </button>
+      <action-button icon="icon-plus" [label]="resources.addPointToRoute" (pressed)="addPointToRoute()" [disabled]="!fullFeature()" analyticsOn="click" analyticsCategory="POI" analyticsLabel="Convert POI to point"></action-button>
       }
       @if (shareLinks().poiLink) {
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" [matMenuTriggerFor]="shareMenu">
-        <span class="flex flex-col items-center gap-1">
-          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-share-alt"></i></span>
-          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.share}}</span>
-        </span>
-      </button>
+      <action-button icon="icon-share-alt" [label]="resources.share" [menu]="shareMenu"></action-button>
       <mat-menu #shareMenu="matMenu">
         <a mat-menu-item [href]="shareLinks().waze" [target]="'_blank'" analyticsOn="click" analyticsCategory="Share"
           analyticsLabel="Navigate with waze">
@@ -101,13 +78,7 @@
       </mat-menu>
       }
       @if (!isHideEditMode()) {
-      <button mat-button class="h-auto! min-w-0 flex-1 rounded-2xl! px-1! py-2! text-on-surface!" (click)="setEditMode()" analyticsOn="click"
-        analyticsCategory="POI" analyticsLabel="Edit POI">
-        <span class="flex flex-col items-center gap-1">
-          <span class="flex size-10 items-center justify-center rounded-full bg-brand-tonal"><i class="fa fa-lg icon-pencil"></i></span>
-          <span class="text-xs leading-tight hyphens-auto wrap-break-word">{{resources.edit}}</span>
-        </span>
-      </button>
+      <action-button icon="icon-pencil" [label]="resources.edit" (pressed)="setEditMode()" analyticsOn="click" analyticsCategory="POI" analyticsLabel="Edit POI"></action-button>
       }
     </div>
     @if (isShowSeeAlso()) {

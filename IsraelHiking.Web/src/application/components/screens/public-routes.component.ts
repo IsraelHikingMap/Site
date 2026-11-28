@@ -1,21 +1,20 @@
 import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgClass } from "@angular/common";
 import { Dir } from "@angular/cdk/bidi";
 import { GeoJSONSourceComponent, MapComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective } from "@maplibre/ngx-maplibre-gl";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
-import { MatButton, MatIconButton } from "@angular/material/button";
-import { MatCard } from "@angular/material/card";
+import { MatButton } from "@angular/material/button";
 import { FormsModule } from "@angular/forms";
 import { MatButtonToggle, MatButtonToggleGroup } from "@angular/material/button-toggle";
 import { AnalyticsDirective } from "../../directives/analytics.directive";
-import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatMenu, MatMenuItem } from "@angular/material/menu";
 import { CdkCopyToClipboard } from "@angular/cdk/clipboard";
 import { Share } from "@capacitor/share";
 import { orderBy } from "lodash-es";
 import { filter, skip } from "rxjs";
-import { AnimationOptions, LottieComponent } from "ngx-lottie";
+import { LottieComponent } from "ngx-lottie";
 import type { StyleSpecification, Map, MapSourceDataEvent, FilterSpecification, MapLayerMouseEvent } from "maplibre-gl";
 
 import { ImageAttributionComponent } from "../image-attribution.component";
@@ -25,8 +24,10 @@ import { OsmAttributionComponent } from "../osm-attribution.component";
 import { PublicRoutesFilterComponent } from "../public-routes-filter.component";
 import { DescriptionComponent } from "../description.component";
 import { BottomSheetComponent } from "../bottom-sheet.component";
+import { ActionButtonComponent } from "../action-button.component";
+import { LOTTIE_SCENERY, PublicRouteCardComponent } from "../public-route-card.component";
+import { PublicRouteDetailsComponent } from "../public-route-details.component";
 import { RoutesPathComponent } from "../map/routes-path.component";
-import { DistancePipe } from "../../pipes/distance.pipe";
 import { ScrollToDirective } from "../../directives/scroll-to.directive";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { LayersComponent } from "../map/layers.component";
@@ -44,20 +45,18 @@ import { RouteStrings } from "../../services/hash.service";
 import { initialState } from "../../reducers/initial-state";
 import { SetPublicRoutesSearchResultAction } from "../../reducers/in-memory.reducer";
 import { Urls } from "../../urls";
-import type { ApplicationState, CategoryType, LatLngAltTime, SearchResultsPointOfInterest } from "../../models";
+import type { Immutable } from "immer";
+import type { ApplicationState, CategoryType, LatLngAltTime, PublicRoutesFilter, SearchResultsPointOfInterest } from "../../models";
 
 @Component({
     selector: "public-routes",
     templateUrl: "./public-routes.component.html",
     styleUrls: ["./public-routes.component.scss"],
-    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuTrigger, MatMenuItem, MatMenu, DistancePipe, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent, RoutesPathComponent, MatCard, MatIconButton, NgTemplateOutlet]
+    imports: [Dir, MapComponent, LayersComponent, VectorSourceComponent, LayerComponent, PopupComponent, MarkerComponent, MarkersForClustersComponent, PointDirective, ClusterPointDirective, MatButton, FormsModule, MatButtonToggleGroup, MatButtonToggle, AnalyticsDirective, NgClass, MatMenuItem, MatMenu, GeoJSONSourceComponent, LayerComponent, CdkCopyToClipboard, ImageAttributionComponent, ZoomComponent, OsmAttributionComponent, MapOverlayComponent, PublicRoutesFilterComponent, DescriptionComponent, LottieComponent, BottomSheetComponent, RoutesPathComponent, ActionButtonComponent, PublicRouteCardComponent, PublicRouteDetailsComponent]
 })
 export class PublicRoutesComponent {
     /** Covers the frame of the image it stands in for, cropping the empty ground at its bottom to keep the sky and the birds */
-    public readonly lottieScenery: AnimationOptions = {
-        path: "content/lottie/placeholder-scenery.json",
-        rendererSettings: { preserveAspectRatio: "xMidYMin slice" }
-    };
+    public readonly lottieScenery = LOTTIE_SCENERY;
     public readonly mapStyle: StyleSpecification;
     public readonly showMap = signal(true);
     public readonly routesSrouceId = "routes-of-interest";
@@ -109,6 +108,15 @@ export class PublicRoutesComponent {
      */
     private routesFromTiles: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] = [];
 
+    /**
+     * The routes whose lines cross the map while their trail heads are out of view. They are listed but
+     * get no marker on the map, as all that is known of where they are is a point on the line.
+     */
+    private routesPassingThrough: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] = [];
+
+    /** The routes the list shows, those with a trail head on the map followed by those passing through it */
+    public readonly listedRoutes = signal<GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]>([]);
+
     public readonly resources = inject(ResourcesService);
 
     /** Whether the map is too far out for the routes tiles, which is why the screen shows nothing */
@@ -116,7 +124,7 @@ export class PublicRoutesComponent {
 
     /** Whether there are more routes than the list shows, see {@link MAX_ROUTES_IN_LIST} */
     public readonly hasTooManyRoutes = computed(() =>
-        this.poiGeoJsonData().features.length > PublicRoutesComponent.MAX_ROUTES_IN_LIST);
+        this.listedRoutes().length > PublicRoutesComponent.MAX_ROUTES_IN_LIST);
 
     /**
      * Whether a route is selected that the list does not show, as when fitting the map to a long route
@@ -125,7 +133,7 @@ export class PublicRoutesComponent {
     public readonly isSelectedRouteUnlisted = computed(() => {
         const selectedId = this.selectedRouteId();
         return selectedId != null && (this.hasTooManyRoutes() || this.isZoomedOut() ||
-            !this.poiGeoJsonData().features.some(f => f.properties.poiId === selectedId));
+            !this.listedRoutes().some(f => f.properties.poiId === selectedId));
     });
 
     /** Whether any filter is set to something other than what the screen starts with */
@@ -160,9 +168,8 @@ export class PublicRoutesComponent {
     public readonly fourByFourLinesFilter = computed(() => this.getCategoryLinesFilter("4x4"));
     public readonly cursorStyle = signal("");
     /**
-     * Whether the selected marker is where the route starts. A route picked by a line whose trail head
-     * is out of view only learns where it starts once it is loaded, and a marker at the click would
-     * point at the middle of the route.
+     * Whether the selected marker is where the route starts. A route passing through the map only
+     * learns where it starts once it is loaded, and a marker before that would point at the middle of it.
      */
     public readonly isAtTrailHead = signal(true);
     private readonly searchResult = this.store.selectSignal((s: ApplicationState) => s.inMemoryState.publicRoutesSearchResult);
@@ -208,15 +215,17 @@ export class PublicRoutesComponent {
     public runFilter() {
         if (this.showMap()) {
             this.routesFromTiles = this.poiService.getPoisFromTiles(PublicRoutesComponent.ROUTE_CATEGORIES_FILTER);
+            const trailHeadIds = new Set(this.routesFromTiles.map(f => f.properties.poiId));
+            this.routesPassingThrough = this.poiService.getPoisFromTiles(undefined, [this.routeLinesLayer])
+                .filter(f => !trailHeadIds.has(f.properties.poiId));
         }
         const filters = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState.publicRoutesFilter);
-        let features = this.poiService.getPublicRoutes(filters, this.routesFromTiles).features;
-        const sortBy = [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength];
-        features = orderBy(features, sortBy, ["desc"]);
+        const features = this.getSortedPublicRoutes(filters, this.routesFromTiles);
         this.poiGeoJsonData.set({
             type: "FeatureCollection",
             features
         });
+        this.listedRoutes.set([...features, ...this.getSortedPublicRoutes(filters, this.routesPassingThrough)]);
     }
 
     /**
@@ -247,7 +256,7 @@ export class PublicRoutesComponent {
         if (searchResult == null) {
             return false;
         }
-        const route = this.routesFromTiles.find(f =>
+        const route = this.findRoute(f =>
             f.properties.poiSource === searchResult.source && f.properties.identifier === searchResult.id);
         if (route == null) {
             return false;
@@ -284,7 +293,7 @@ export class PublicRoutesComponent {
     public async moveToFeature(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         this.showMap.set(true);
         this.selectedRoutePoint.set(feature);
-        this.isAtTrailHead.set(true);
+        this.isAtTrailHead.set(!this.routesPassingThrough.includes(feature));
         this.hoverFeature.set(null);
         const color = this.getRouteColor(feature);
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());
@@ -304,36 +313,27 @@ export class PublicRoutesComponent {
         this.mapService.fitBounds(bounds, 100, { top: 100, left: 50, bottom: window.innerHeight / 2, right: 50 });
     }
 
-    /**
-     * Selects the route of a line clicked on the map. Its trail head can be out of view, and then the
-     * route is not among the points of the tiles, so it is made of the line's attributes and its marker
-     * waits for {@link moveToFeature} to load where the trail head is.
-     */
+    private getSortedPublicRoutes(filters: Immutable<PublicRoutesFilter>, routes: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]) {
+        const features = this.poiService.getPublicRoutes(filters, routes).features;
+        return orderBy(features, [(f: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => f.properties.poiLength], ["desc"]);
+    }
+
     public onRouteLineClick(event: MapLayerMouseEvent) {
-        const line = event.features[0];
-        const trailHead = this.routesFromTiles.find(f => f.properties.poiId === line.properties.poiId);
-        const route = trailHead ?? {
-            type: "Feature",
-            properties: {
-                ...line.properties,
-                identifier: this.poiService.osmTileFeatureToPoiIdentifier(line)
-            } as PoiProperties,
-            geometry: {
-                type: "Point",
-                coordinates: [event.lngLat.lng, event.lngLat.lat]
-            }
-        };
-        this.onStartPointClick(route, event.originalEvent);
-        if (trailHead == null) {
-            this.isAtTrailHead.set(false);
+        const route = this.findRoute(f => f.properties.poiId === event.features[0].properties.poiId);
+        if (route != null) {
+            this.onStartPointClick(route, event.originalEvent);
         }
+    }
+
+    private findRoute(predicate: (route: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) => boolean) {
+        return this.routesFromTiles.find(predicate) ?? this.routesPassingThrough.find(predicate);
     }
 
     private getCategoryLinesFilter(category: CategoryType): FilterSpecification {
         return [...this.routeLinesFilter() as unknown[], ["==", ["get", "poiCategory"], category]] as FilterSpecification;
     }
 
-    /** Puts the marker of the selected route where its full feature has the trail head, see {@link onRouteLineClick} */
+    /** Puts the marker of the selected route where its full feature has the trail head, see {@link routesPassingThrough} */
     private moveToTrailHead(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>,
         fullFeature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Point, PoiProperties> {
         const trailHead = fullFeature.properties.poiGeolocation as LatLngAltTime;
@@ -409,20 +409,6 @@ export class PublicRoutesComponent {
         this.runFilter();
     }
 
-
-    public getIconFromType(feature: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
-        switch (feature.properties.poiCategory) {
-            case "Hiking":
-                return "icon-hike";
-            case "Bicycle":
-                return "icon-bike";
-            case "4x4":
-                return "icon-four-by-four";
-            case "Unknown":
-            default:
-                return "icon-question";
-        }
-    }
 
     public async convertToRoute(feature: GeoJSON.Feature<GeoJSON.Point>) {
         const fullFeature = await this.poiService.getBasicInfo(feature.properties.identifier, feature.properties.poiSource, this.resources.getCurrentLanguageCodeSimplified());

@@ -180,17 +180,19 @@ export class PoiService {
         }
     }
 
-    private getFeaturesFromTiles(filter?: FilterSpecification): GeoJSONFeature[] {
-        return this.mapService.getFeaturesFromTiles(filter);
+    private getFeaturesFromTiles(filter?: FilterSpecification, layers?: string[]): GeoJSONFeature[] {
+        return this.mapService.getFeaturesFromTiles(filter, layers);
     }
 
     /**
      * Gets the POIs the map holds for the part of the world it currently shows. A map that is not
      * displayed renders nothing, so a caller that outlives the map on screen needs to keep the result.
      * @param filter limits the points to those the map itself matches, see {@link MapService.getFeaturesFromTiles}
+     * @param layers the layers to read, the points layers when not given, or a lines layer whose POIs are
+     * then placed on their line where the map shows it
      */
-    public getPoisFromTiles(filter?: FilterSpecification): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
-        const features = this.getFeaturesFromTiles(filter);
+    public getPoisFromTiles(filter?: FilterSpecification, layers?: string[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
+        const features = this.getFeaturesFromTiles(filter, layers);
         const hashSet = new Set();
         let pois = features.map(feature => {
             const poi = this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature));

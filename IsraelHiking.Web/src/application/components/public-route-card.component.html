@@ -1,0 +1,73 @@
+<mat-card appearance="outlined" class="mx-4 my-3 overflow-hidden"
+    [ngClass]="selected() ? 'ring-[3px] ring-brand bg-brand-tonal!' : 'hover:ring-1 hover:ring-brand/50'">
+    <div class="h-44 w-full overflow-hidden bg-on-surface/5">
+        @defer (on viewport) {
+        @if (route().properties.image) {
+        <img class="size-full object-cover" [src]="route().properties.image" alt="" loading="lazy">
+        } @else {
+        <ng-lottie class="block size-full" [options]="lottieScenery"></ng-lottie>
+        }
+        } @placeholder {
+        <div class="size-full"></div>
+        }
+    </div>
+    @defer (on viewport) {
+    <image-attribution class="block px-4 pt-2" [imageUrl]="route().properties.image"
+        [allowFiltering]="true"></image-attribution>
+    } @placeholder {
+    <div></div>
+    }
+    <div class="flex flex-col gap-2 p-4">
+        <div class="flex flex-row items-start gap-2">
+            <h3 class="m-0 flex-1 text-lg font-medium">
+                @if (route().properties.website) {
+                <a [href]="route().properties.website" target="_blank">{{title()}}</a>
+                } @else {
+                {{title()}}
+                }
+            </h3>
+            <button mat-icon-button class="-me-2 -mt-2" [matMenuTriggerFor]="routeMenu"
+                [attr.aria-label]="resources.more" analyticsOn="click" analyticsCategory="Public routes"
+                analyticsLabel="Open route menu from list">
+                <i class="fa icon-ellipsis-v"></i>
+            </button>
+            <mat-menu #routeMenu="matMenu">
+                <button mat-menu-item (click)="moveTo.emit()" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Move to route from list">
+                    <i class="fa icon-crosshairs"></i>
+                    {{resources.moveToRoute}}
+                </button>
+                <button mat-menu-item (click)="convertToRoute.emit()" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Add to routes from list">
+                    <i class="fa icon-plus"></i>
+                    {{resources.addToRoutes}}
+                </button>
+                <button mat-menu-item (click)="navigateToPoi()" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Open OSM route in plan and explore from list">
+                    <i class="fa icon-external-link-square"></i>
+                    {{resources.openInPlanAndExplore}}
+                </button>
+                @if (isFromOsm()) {
+                <button mat-menu-item (click)="navigateToEditPoi()" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Edit OSM route from list">
+                    <i class="fa icon-pencil"></i>
+                    {{resources.editProperties}}
+                </button>
+                }
+                @if (!isApp) {
+                <button mat-menu-item [cdkCopyToClipboard]="poiLink()" analyticsOn="click"
+                    analyticsCategory="Public routes" analyticsLabel="Share copy to clipboard route">
+                    <i class="fa icon-clipboard"></i>
+                    {{resources.share}} - {{resources.copyToClipboard}}
+                </button>
+                }
+            </mat-menu>
+        </div>
+        <public-route-details [route]="route()"></public-route-details>
+        @defer (on viewport) {
+        <description [feature]="route()" [isEditable]="false"></description>
+        } @placeholder {
+        <div></div>
+        }
+    </div>
+</mat-card>
